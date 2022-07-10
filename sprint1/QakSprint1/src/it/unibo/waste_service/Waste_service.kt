@@ -18,6 +18,7 @@ class Waste_service ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( na
 				state("s0") { //this:State
 					action { //it:State
 						discardMessages = true
+						emit("update_led", "update_led(off)" ) 
 					}
 				}	 
 			}

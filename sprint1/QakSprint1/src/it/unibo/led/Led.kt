@@ -14,6 +14,7 @@ class Led ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scope 
 		return "s0"
 	}
 	override fun getBody() : (ActorBasicFsm.() -> Unit){
+		 lateinit var newState : String  
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
@@ -23,20 +24,21 @@ class Led ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scope 
 				}	 
 				state("handle_update") { //this:State
 					action { //it:State
-						if( checkMsgContent( Term.createTerm("update_led(STATE)"), Term.createTerm("update_led(on)"), 
+						if( checkMsgContent( Term.createTerm("update_led(STATE)"), Term.createTerm("update_led(ARG)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
-								println("update_led(${payloadArg(0)})")
+								 newState = payloadArg(0)  
+								println("update_led(${newState})")
+								forward("noMsg", "noMsg(_)" ,"led" ) 
 						}
 					}
+					 transition(edgeName="toOff1",targetState="off",cond=whenDispatchGuarded("noMsg",{ newState=="off"  
+					}))
 				}	 
 				state("off") { //this:State
 					action { //it:State
-						if( checkMsgContent( Term.createTerm("update_led(STATE)"), Term.createTerm("update_led(off)"), 
-						                        currentMsg.msgContent()) ) { //set msgArgList
-								println("s2:msg1:msg1(${payloadArg(0)})")
-								delay(1000) 
-						}
+						println("Led off")
 					}
+					 transition(edgeName="t02",targetState="handle_update",cond=whenEvent("update_led"))
 				}	 
 			}
 		}
