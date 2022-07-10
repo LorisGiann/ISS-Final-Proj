@@ -4,7 +4,8 @@ System demo0
 //mqttBroker "localhost" : 1883 eventTopic "demo0/events"
 //mqttBroker "broker.hivemq.com" : 1883 eventTopic "demo0/events"
   
-Event update_led : update_led(STATE)
+Event update_led : update_led(STATE) //STATE = on | off | blink
+
 Dispatch noMsg : noMsg(_)
  
 Context ctxRPI ip [host="localhost" port=8095]
@@ -15,6 +16,10 @@ QActor waste_service context ctxRPI{
 		discardMsg On
 		//[# sysUtil.logMsgs=true #]
 		emit update_led : update_led(off)
+		delay 2000
+		emit update_led : update_led(on)
+		delay 2000
+		emit update_led : update_led(blink)
  	}
  	
  
@@ -36,12 +41,31 @@ QActor led context ctxRPI{
  			forward led -m noMsg : noMsg(_)
  		}
  	}
- 	Transition toOff whenMsg noMsg and [# newState=="off" #] -> off
+ 	Transition toNewState whenMsg noMsg and [# newState=="off" #] -> off
+ 					whenMsg noMsg and [# newState=="on" #] -> on
+ 					whenMsg noMsg and [# newState=="blink" #] -> blink_on
  	
  	State off {
  		println("Led off")
  	}
  	Transition t0 whenEvent update_led -> handle_update
  	
+ 	State on {
+ 		println("Led on")
+ 	}
+ 	Transition t0 whenEvent update_led -> handle_update
+ 	
+ 	State blink_on {
+ 		println("Blinking on")
+ 	}
+ 	Transition t0 whenTime 500 -> blink_off
+ 					whenEvent update_led -> handle_update
+ 					
+ 	State blink_off {
+ 		println("Blinking off")
+ 	}
+ 	Transition t0 whenTime 500 -> blink_on
+ 					whenEvent update_led -> handle_update
+ 					
 }
    

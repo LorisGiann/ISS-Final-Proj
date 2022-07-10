@@ -19,6 +19,10 @@ class Waste_service ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( na
 					action { //it:State
 						discardMessages = true
 						emit("update_led", "update_led(off)" ) 
+						delay(2000) 
+						emit("update_led", "update_led(on)" ) 
+						delay(2000) 
+						emit("update_led", "update_led(blink)" ) 
 					}
 				}	 
 			}
