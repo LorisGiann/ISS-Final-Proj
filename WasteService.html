@@ -1,0 +1,334 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+    <!--
+<link rel="stylesheet" type="text/css" href="../css/issStyle1.css">
+<script type="text/javascript" src="../css/issStyle.js"></script>
+-->
+<style type="text/css">
+body
+{
+    margin-left:  30px;
+    margin-right: 30px;
+};
+
+P
+{
+    font-family: Tahoma;
+    font-size: 10pt;
+};
+
+a, a:visited, a:active, a:link, a:hover {
+    text-decoration: underline;
+    color: #545454;
+    background-color: transparent;
+	font-size: 93%;
+}
+
+a:hover {
+    background-color: #cccccc;
+}
+
+
+hr {
+    clear: both;
+    height: 1px;
+    color: #242424;
+    background-color: transparent;
+}
+
+h1, h2, h3 {
+    color: #242424;
+    clear: left;
+    font: 100% Tahoma, Helvetica, Arial, sans-serif;
+    margin-bottom: 0.5em;
+    padding-top: 0.5em;
+	border-radius: 10px;
+	padding: 5px;
+}
+
+top {
+	width: 100%;
+}
+
+
+#i {
+    color: #ff1010;
+}
+tt{
+	font-family: "Arial";
+    font-size: 90%;
+	color: #006600;
+}
+em{
+	font-family: "Arial";
+    font-size: 80%;
+	font-weight: bold;
+	border-style:solid;
+	border-color: #abe876;
+    color: #1632cc;
+}
+bc{
+	font-family: "Arial";
+	font-size: 90%;
+	font-weight: bold;
+    color: #990000;
+	background-color: #fcf8c7;
+}
+ks{
+	font-family: "Arial";
+	font-weight: bold;
+    color: #0000CD	;
+	font-size: 90%;
+}
+kc{
+	font-family: "Arial";
+	font-weight: bold;
+    color: #008000	;
+	font-size: 90%;
+}
+pre{
+	font-family: "Consolas";
+	font-size: 85%;
+	background-color: #f5f5f5;
+	border: 1.5px solid silver;
+	padding: 5px;
+}
+m{
+	font-family: "Helvetica";
+	line-height: 100%;
+ 	font-size: 75%;
+}
+div.body{
+	 
+    font-size: 18px;
+}
+k{
+    color: #990000;
+	font-weight: bold;
+	font-size: 90%;
+}
+h1 {
+    font-size: 150%;
+    background-color: #b2c0ff;
+	padding: 10px;
+}
+
+h2 {
+    background-color: #9ed8ff;
+    font-size: 130%;
+}
+
+h3 {
+	background-color: #e6ccff;
+    font-size: 100%;
+}
+h4 {
+    background-color: #ccffcc;
+    font-size: 100%;
+	width: 95%;
+	border-radius: 5px;
+	padding: 2px;
+}
+h5 {
+    background-color: #d5ffb0;
+    font-size: 100%;
+
+}
+div.req{
+	background-color: #d9ffb3;
+    font-size: 18px;
+	width: 700px;
+    border: 3px solid green;
+    padding: 15px;
+    margin: 10px;
+}
+div.remark{
+	background-color: #E3F2FD;
+    border: 1.5px solid #d5f2ed;
+    padding: 15px;
+    margin: 10px;
+	border-radius: 25px;
+}
+table, th, td {
+  border: 1px solid black;
+  border-collapse: collapse;
+}
+
+ol, ul, li {
+  margin: 0;
+  margin-left: 10px;
+  padding: 0;
+  padding-bottom: 5px;
+}
+
+table, th, td {
+	border: 1px solid black;
+}
+
+img {
+	border: 1.5px solid #d5f2ed
+
+}
+
+a, a:visited, a:active, a:link, a:hover {
+    text-decoration: underline;
+    color: #545454;
+    background-color: transparent;
+}
+
+div.wrapdesc{
+	width: 90%;
+	margin: auto;
+}
+
+div.imagedesc{
+	width: 85%;
+	margin: auto;
+}
+</style>
+    
+<head>
+   
+<title>WasteService</title></head>
+    
+<body>
+<div id="top">
+<h1>ISS FINAL PROJECT <font size="5"></font> </h1>
+</div>  
+
+<div class="body"> 
+<h2>Introduction</h2>
+ <p>Final Iss Project</p>
+ 
+<h2>Requirements</h2>
+<a href="docs/TemaFinale22.html">Requisiti</a>
+
+<h3>Requisiti scaturiti da ulteriori colloqui con committente:</h3>
+<ul>
+    <lI>Può esserci solo un camion alla volta in INDOOR? SI</lI>
+    <li>Il Waste truck deve essere liberato non appena il materiale viene scaricato? SI</li>
+    <li>La GUI deve mostrare le coordine del robot o basta l'area nella quale si trova attualmente? basta l'area nella quale si trova attualmetne</li>
+</ul>
+ 
+
+<h2>Requirement analysis</h2>
+
+<h3>Dizionario</h3>
+<ul>
+    <li><b>WasteService:</b> servizio che si occupa del coordinamento delle attività di raccolta e smistamento dei rifiuti 
+    <br> NOTA: fare il QAK con l'attore WasteService
+    (LoadAccepted, LoadRejected)
+    </li>
+    <li><b>Service area:</b> la superfice rettangolare nella quale il robot può muoversi. L'area è, piana, priva di ostacoli e nella quale sono presenti:<br>
+        <ul>
+            <lI>una porta <b>INDOOR:</b> area adibita alla raccolta del <b>Waste-load</b> dal <b>Waste truck</b> al <b>transport trolley</b> </lI>
+            <lI>un countainer <b>PlasticBox:</b> area adibita al deposito di materiale plastico, con capienza massima pari a <b>MAXPB</b> Kg</lI>
+            <lI>un container <b>GlassBox:</b> area adibita al deposito di materiale vetroso, con capienza massima pari a <b>MAXGB</b> Kg</lI>
+        </ul>
+    </li>
+    <li><b>HOME:</b> area nella quale risiede il robot quando non deve svolgere alcuna attività</li>
+    <li><b>Transport trolley:</b> entità robotica astratta che riceve la destinazione 
+        <br> NOTA: fare il QAK con l'attore WasteService (stati del trolley: ...)</li>
+    <li><b>DDR Robot concreto:</b> robot fisico </li>
+    <li><b>DDR Robot:</b> </li>
+    <li><b>deposit action:</b> sequenza di azioni che consiste nelle fasi di:<br>
+        <ol>
+            <lI>azione di raccolta di <b>Waste-load</b> dal <b>Waste truck</b> che avviene in <b>INDOOR:</b> </lI>
+            <lI>azione di trasporto del materiale da <b>INDOOR:</b> a <b>PlasticBox:</b> o <b>GlassBox:</b> in base al tipo di materiale caricato </lI>
+            <lI>azione di deposito del materiale nel <b>PlasticBox:</b> o <b>GlassBox:</b> in base al tipo di materiale caricato</lI>
+        </ol>
+    </li>
+    <li><b>Waste truck:</b>entità che si presenta in <b>INDOOR</b>, e richiede lo scarico del materiale che trasporta</li>
+    <li><b>Waste-load:</b> misura in Kg del carico di materiale inizialmente presente sul Waste truck</li>
+    <li><b>SmartDevice:</b> bispositivo attraverso il quale il Waste truck comunica al <b>WasteService</b>:
+        <ul>
+            <lI>Il tipo di materiale trasportato: 
+                <ul>
+                    <lI>PLASTIC</lI>
+                    <lI>GLASS</lI>
+                </ul>
+            </lI>
+            <lI><b>Waste-load</b> (Kg di materiale)</lI>
+        </ul>
+        E riceve dal <b>WasteService</b> l'esito, che può essere <i>LoadAccepted</i> o <i>LoadRejected</i>
+    </li>
+    <li><b>Service-manager:</b> operatore che supervisiona lo stato dell'area di servizio usando una <b>WasteServiceStatusGUI</b> <br> NOTA: fare il QAK con l'attore WasteServiceObserver</li>
+    <li><b>WasteServiceStatusGUI:</b> pannello di controllo che permette al <b>Service-manager</b> di verificare in tempo reale lo stato del sistema. In particolare deve essree mostrato:
+        <ul>
+            <lI>la poszione (area nella quale si trova attualmente) del <b>Transport trolley:</b> </lI>
+            <lI>lo stato del <b>Transport trolley:</b></lI>
+            <lI>il peso corrente del materiale contenuto in <b>PlasticBox:</b> e in <b>GlassBox:</b></lI>
+            <lI>lo stato del <b>LED</b></lI>
+        </ul>
+    </li>
+    <li><b>LED concreto:</b> dispositivo di output connesso al RaspberryPI presente sul <b>DDR Robot</b></li>
+    <li><b>LED:</b> entità astratta che rappresenta il <b>LED concreto:</b>, che può assumere tre stati:
+        <ul>
+            <lI><b>Led Off:</b> quando il <b>Transport trolley:</b> è in <b>HOME</b> </lI>
+            <lI><b>Led On:</b> quando il <b>Transport trolley:</b> è fermo (quando &lt DLIMIT)</lI>
+            <lI><b>Led Blink:</b> quando il <b>Transport trolley:</b> è in movimento, o scaricando/caricando materiale</lI>
+        </ul>
+        <br> NOTA: fare il QAK con l'attore LED</li>
+    </li>
+    <li><b>sonar concreto:</b> dispositivo di input connesso al RaspberryPI presente sul <b>DDR Robot</b></li>
+    <li><b>sonar:</b> entità astratta che rappresenta il <b>sonar concreto</b>
+        <br> NOTA: fare il QAK con l'attore sonar (che essenzialmente si occuperà di emettere eventi)</li>
+    </li>
+    <li><b>DLIMT:</b> misura in CM della distanza limite. Se la distanza attualmente misurata dal sonar è ≤ DLIMT, il robot deve essere nello stato stopped. Qunando la distanza misurata &gt DLIMIT il robot può muoversi</li>
+
+</ul>
+
+
+</div>
+
+<h2>Problem analysis</h2>
+
+<h3><b>DDR robot</b> vs <b>Transport trolley</b></h3>
+<p>Possibile una separazione dei due concetti: <br>
+il <b>DDR robot</b> concepita come una entità di basso livello che riceve comandi:
+    <ul>
+        <li>Request step : step()</li>
+        <li>Dispatch left : left()</li>
+        <li>Dispatch right : right()</li>
+    </ul>
+il <b>Transport trolley</b> concepita come entità astratta che si occpura di ricevere la 
+</p>
+
+<h3><b>Stati del Transport trolley</b></h3>
+<p>stopped</p>
+ 
+
+<h2>Test plans</h2> 
+
+
+<h2>Project</h2> 
+ 
+</div>
+
+<h2>Testing</h2> 
+ 
+
+<h2>Deployment</h2> 
+
+ 
+<h2>Maintenance</h2> 
+ 
+<!-- USEFUL
+<table style="width:100%" border="1">
+<tr>
+<td style="width:50%">
+</td>
+<td></td>
+</tr>
+</table>
+-->
+	      	
+<br/><br/> 	
+</div>  
+
+<div style="background-color:rgba(86, 56, 253, 0.9); width:60%;text-align:left;color:white">
+By studentName email: student@studio.unibo.it  
+<img src="./img/emiglio.png" alt="mbot" width="15%" height="15%">
+</div> 
+</body>
+</html>
