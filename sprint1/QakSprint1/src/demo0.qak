@@ -6,12 +6,14 @@ System demo0
   
 
 //richiesta al wasteservice
+//MATERIAL = plastic | glass
+//TRUCKLOAD =  integer number
 Request depositrequest : depositrequest(MATERIAL, TRUCKLOAD)
 Reply loadaccept       : loadaccept(MATERIAL, TRUCKLOAD)
 Reply loadrejected     : loadrejected(MATERIAL, TRUCKLOAD)
 
 //richiesta al trolley
-//RESULT OK | ERROR
+//RESULT =  OK | ERROR
 Request pickup         : pickup(_)
 Reply   pickupanswer   : pickupanswer(RESULT)
 Request dropout        : dropout(_)
@@ -26,24 +28,37 @@ Dispatch noMsg : noMsg(_)
 Context ctxRPI ip [host="localhost" port=8095]
 
   
-QActor waste_service context ctxRPI{
-	[# fun checkdepositpossible(MATERIAL:String,LOAD:String) : Boolean {
- 				return (MATERIAL=="plastic" && LOAD.toInt()+contPB<=MAXPB) 
- 				 || (MATERIAL=="glass" && LOAD.toInt()+contGB<=MAXGB);
- 			} 
- 			
-		const val MAXPB = 10
-		const val MAXGB = 10
-		lateinit var contPB : String 
-		lateinit var contGB : String
+QActor wasteservice context ctxRPI{
+	[# 
+		val MAXPB = 10
+		val MAXGB = 10
+		var contPB = 0
+		var contGB = 0
 		lateinit var Material  : String
 		lateinit var TruckLoad : String
-		lateint var RES : String
+		lateinit var RES : String
+		
+		fun checkdepositpossible(MATERIAL:String,LOAD:String) : Boolean {
+ 				return (MATERIAL=="plastic" && LOAD.toInt()+contPB<=MAXPB) 
+ 				 || (MATERIAL=="glass" && LOAD.toInt()+contGB<=MAXGB);
+ 		}
+ 				 
+ 		fun updateDeposit(MATERIAL:String,LOAD:String) : Unit {
+ 				when(MATERIAL){
+				    "plastic" -> contPB+=LOAD.toInt()
+				    "glass" -> contGB+=LOAD.toInt()
+				    else -> {
+				        print("ERRORE MATERIALE")
+					}
+ 				}
+ 		}
 	#]
 	
 	
-	State wait initial { 	    
+	State wait initial {
+		printCurrentMessage	    
 		discardMsg Off
+		println("Waiting for requests")
 		//[# sysUtil.logMsgs=true #]
  	}
  	Transition t0 whenRequest depositrequest -> handle_req
@@ -55,14 +70,19 @@ QActor waste_service context ctxRPI{
 				 Material 	= payloadArg(0) ;
 				 TruckLoad 	= payloadArg(1) ;
 			#]
+			println("arrived $TruckLoad Kg of $Material")
 			if[# checkdepositpossible( Material, TruckLoad ) #]{
-				request transporttrolley -m move : move("INDOOR")
+				[# updateDeposit( Material, TruckLoad ) #]
+				request transporttrolley -m move : move(INDOOR)
 			} else{  
 				replyTo depositrequest with loadrejected : loadrejected($Material,$TruckLoad)
+				forward wasteservice -m noMsg : noMsg(_)
 			}		
 		}
  	}
  	Transition t0 whenReply moveanswer -> handle_move_indoor
+ 				whenMsg noMsg -> wait
+ 			
  	
  	State handle_move_indoor {
 		printCurrentMessage
@@ -70,26 +90,39 @@ QActor waste_service context ctxRPI{
 			[# RES = payloadArg(0); #]
 			if[# RES == "OK" #]{
 				request transporttrolley -m pickup : pickup(_)
+			}else{
+				forward wasteservice -m noMsg : noMsg(_)
 			}
-			forward waste_service -m noMsg : noMsg(_)
 		}
  	}
- 	Transition t0 whenMsg noMsg and [# RES=="OK" #] -> handle_pickup_answer
- 					whenMsg noMsg and [# RES!="OK" #] -> error
+ 	Transition t0 whenReply pickupanswer -> handle_pickup_answer
+ 					whenMsg noMsg -> error
+ 	//Goto handle_pickup_answer if [# RES=="OK" #] else error
  	
  	State handle_pickup_answer{
  		printCurrentMessage
  		onMsg(pickupanswer : pickupanswer(RESULT)) {
 			[# RES = payloadArg(0); #]
 			if[# RES == "OK" #]{
-				request transporttrolley -m move : move($Material)
+				[# 
+					lateinit var Position : String
+					when(Material){
+				    "plastic" -> Position = "PLASTICBOX"
+				    "glass" -> Position = "GLASSBOX"
+				    else -> { // Note the block
+				        print("ERRORE POSIZIONE")
+				    }
+				} #]
+				request transporttrolley -m move : move($Position)
 				replyTo depositrequest with loadaccept : loadaccept($Material,$TruckLoad)
+			}else{
+				forward wasteservice -m noMsg : noMsg(_)
 			}
-			forward waste_service -m noMsg : noMsg(_)
 		}
  	}
- 	Transition t0 whenMsg noMsg and [# RES=="OK" #] -> handle_move_container
- 					whenMsg noMsg and [# RES!="OK" #] -> error
+ 	Transition t0 whenReply moveanswer -> handle_move_container
+ 					whenMsg noMsg -> error
+ 	//Goto handle_move_container if [# RES=="OK" #] else error
  					
  	State handle_move_container{
  		printCurrentMessage
@@ -97,19 +130,22 @@ QActor waste_service context ctxRPI{
 			[# RES = payloadArg(0); #]
 			if[# RES == "OK" #]{
 				request transporttrolley -m dropout : dropout(_)
+			}else{
+				forward wasteservice -m noMsg : noMsg(_)
 			}
-			forward waste_service -m noMsg : noMsg(_)
 		}
  	}
- 	Transition t0 whenMsg noMsg and [# RES=="OK" #] -> handle_dropout_answer
- 					whenMsg noMsg and [# RES!="OK" #] -> error
+ 	Transition t0 whenReply dropoutanswer -> handle_dropout_answer
+ 					whenMsg noMsg -> error
+ 	//Goto handle_dropout_answer if [# RES=="OK" #] else error
+ 	
  					
  	State handle_dropout_answer {
  		printCurrentMessage
  		onMsg(dropoutanswer : dropoutanswer(RESULT)) {
 			[# RES = payloadArg(0); #]
 			if[# RES != "OK" #]{
-				forward waste_service -m noMsg : noMsg(_)
+				forward wasteservice -m noMsg : noMsg(_)
 			}
 		}
  	}
@@ -125,10 +161,10 @@ QActor waste_service context ctxRPI{
 				 TruckLoad 	= payloadArg(1) ;
 			#]
 			if[# checkdepositpossible( Material, TruckLoad ) #]{
-				request transporttrolley -m move : move("INDOOR")
+				request transporttrolley -m move : move(INDOOR)
 			} else{  
 				replyTo depositrequest with loadrejected : loadrejected($Material,$TruckLoad)
-				forward waste_service -m noMsg : noMsg(_)
+				forward wasteservice -m noMsg : noMsg(_)
 			}		
 		}
  	}
@@ -136,7 +172,8 @@ QActor waste_service context ctxRPI{
  				whenMsg noMsg -> handle_move_home
  	
  	State handle_move_home{
- 		request transporttrolley -m move : move("HOME")
+ 		printCurrentMessage
+ 		request transporttrolley -m move : move(HOME)
  	}
  	Goto handle_move_home_answer
  	
@@ -147,7 +184,7 @@ QActor waste_service context ctxRPI{
 			if[# RES == "OK" #]{
 				request transporttrolley -m dropout : dropout(_)
 			}else{
-				forward waste_service -m noMsg : noMsg(_)
+				forward wasteservice -m noMsg : noMsg(_)
 			}
 		}
  	}
@@ -161,13 +198,13 @@ QActor waste_service context ctxRPI{
  	}
 }
 
-QActor transporttrolley context ctxRPI{
+/*QActor transporttrolley context ctxRPI{
 	State s0 initial { 	    
 		discardMsg On
 		//[# sysUtil.logMsgs=true #]
  	}
  	
-}
+}*/
    
 QActor led context ctxRPI{
 	[# lateinit var newState : String #]
@@ -185,6 +222,7 @@ QActor led context ctxRPI{
  			forward led -m noMsg : noMsg(_)
  		}
  	}
+ 	//Transition to else Goto off
  	Transition toNewState whenMsg noMsg and [# newState=="off" #] -> off
  					whenMsg noMsg and [# newState=="on" #] -> on
  					whenMsg noMsg and [# newState=="blink" #] -> blink_on
@@ -218,11 +256,11 @@ QActor led context ctxRPI{
    
    
    
+
    
    
-   
-   
-/*QActor testLed context ctxRPI{
+//led TESTER
+/*QActor test_led context ctxRPI{
 	State s0 initial { 	    
 		discardMsg On
 		//[# sysUtil.logMsgs=true #]
@@ -233,3 +271,139 @@ QActor led context ctxRPI{
 		emit update_led : update_led(blink)
  	}
 }*/
+
+
+//wasteservice TESTER
+//TEST VETRO RIGETTATO E PLASTICA ACCETTATA, RICHIESTE SEQUENZIALE
+/*QActor testwasteservice context ctxRPI{
+	State s0 initial { 	    
+		discardMsg On
+		//[# sysUtil.logMsgs=true #]
+		request wasteservice -m depositrequest : depositrequest(glass,11)
+ 	}
+ 	Transition t0 whenReply loadaccept -> error
+ 					whenReply loadrejected -> s1
+ 	
+ 	State s1 {
+ 		println("load rejected successfully")
+ 		request wasteservice -m depositrequest : depositrequest(plastic,3)
+ 	}
+ 	Transition t0 whenReply loadaccept -> s2
+ 					whenReply loadrejected -> error
+ 	
+ 	State s2 {
+ 		println("load accepted successfully")
+ 	}
+ 	
+ 	State error {
+ 		println("errore")
+ 	}
+}*/
+
+//TEST PLASTICA ACCETTATA, PLASTICA RIGETTATA, SEQUENZIALI
+QActor testwasteservice context ctxRPI{
+	State s0 initial { 	    
+		discardMsg On
+		//[# sysUtil.logMsgs=true #]
+		request wasteservice -m depositrequest : depositrequest(plastic,9)
+ 	}
+ 	Transition t0 whenReply loadaccept -> s1
+ 					whenReply loadrejected -> error
+ 	
+ 	State s1 {
+ 		println("load accepted successfully")
+ 		request wasteservice -m depositrequest : depositrequest(plastic,2)
+ 	}
+ 	Transition t0 whenReply loadaccept -> error
+ 					whenReply loadrejected -> s2
+ 	
+ 	State s2 {
+ 		println("load rejected successfully")
+ 	}
+ 	
+ 	State error {
+ 		println("errore")
+ 	}
+}
+
+//MOCK transport trolley
+QActor transporttrolley context ctxRPI{
+	[# lateinit var tmp : String #]
+	
+	State s0 initial { 	    
+		discardMsg On
+		[# sysUtil.logMsgs=true #]
+ 	}
+ 	Transition t0 whenRequest move -> handle_cmd
+ 	
+ 	State handle_cmd {
+		onMsg( move:move(ARG) ){
+			[# tmp = payloadArg(0) #]
+ 			println("move(${tmp})")
+ 			forward transporttrolley -m noMsg : noMsg(_)
+ 		}
+ 	}
+ 	Transition toNewState whenMsg noMsg and [# tmp=="HOME" #] -> moving_home
+ 						whenMsg noMsg and [# tmp=="INDOOR" #] -> moving_indoor
+ 						whenMsg noMsg and [# tmp=="PLASTICBOX" #] -> moving_plasticbox
+ 						whenMsg noMsg and [# tmp=="GLASSBOX" #] -> moving_glassbox
+ 	
+ 	State moving_home {
+ 	}
+ 	Transition t0 whenTime 1000 -> moved_home    //per il momento simulo lo spostamento con un delay
+ 					whenRequest move -> handle_cmd
+ 	State moved_home {
+ 		replyTo move with moveanswer : moveanswer(OK)
+ 		println("robot reached HOME")
+ 	}
+ 	Transition t0 whenRequest move -> handle_cmd
+ 	
+ 	State moving_indoor {
+ 	}
+ 	Transition t0 whenTime 1000 -> moved_indoor    //per il momento simulo lo spostamento con un delay
+ 					whenRequest move -> handle_cmd
+ 	State moved_indoor {
+ 		replyTo move with moveanswer : moveanswer(OK)
+ 		println("robot reached INDOOR")
+ 	}
+ 	Transition t0 whenRequest move -> handle_cmd
+					whenRequest pickup -> pickUp
+ 					
+ 	State moving_plasticbox {
+ 	}
+ 	Transition t0 whenTime 1000 -> moved_plasticbox    //per il momento simulo lo spostamento con un delay
+ 					whenRequest move -> handle_cmd
+ 	State moved_plasticbox {
+ 		replyTo move with moveanswer : moveanswer(OK)
+ 		println("robot reached PLASTICBOX")
+ 	}
+ 	Transition t0 whenRequest move -> handle_cmd
+ 					whenRequest dropout -> dropOut
+ 	
+ 	State moving_glassbox {
+ 	}
+ 	Transition t0 whenTime 1000 -> moved_glassbox    //per il momento simulo lo spostamento con un delay
+ 					whenRequest move -> handle_cmd
+ 	State moved_glassbox {
+ 		replyTo move with moveanswer : moveanswer(OK)
+ 		println("robot reached GLASSBOX")
+ 	}
+ 	Transition t0 whenRequest move -> handle_cmd
+ 					whenRequest dropout -> dropOut
+ 					
+ 	State pickUp {
+ 		delay 1000
+ 		replyTo pickup with pickupanswer : pickupanswer(OK)
+ 		println("robot pickedUp")
+ 	}
+ 	Transition t0 whenRequest move -> handle_cmd
+ 	
+ 	State dropOut {
+ 		delay 1000
+ 		replyTo dropout with dropoutanswer : dropoutanswer(OK)
+ 		println("robot droppedOut")
+ 	}
+ 	Transition t0 whenRequest move -> handle_cmd
+}
+
+
