@@ -4,6 +4,21 @@ System demo0
 //mqttBroker "localhost" : 1883 eventTopic "demo0/events"
 //mqttBroker "broker.hivemq.com" : 1883 eventTopic "demo0/events"
   
+
+//richiesta al wasteservice
+Request depositrequest : depositrequest(MATERIAL, TRUCKLOAD)
+Reply loadaccept       : loadaccept(MATERIAL, TRUCKLOAD)
+Reply loadrejected     : loadrejected(MATERIAL, TRUCKLOAD)
+
+//richiesta al trolley
+//RESULT OK | ERROR
+Request pickup         : pickup(_)
+Reply   pickupanswer   : pickupanswer(RESULT)
+Request dropout        : dropout(_)
+Reply   dropoutanswer  : dropoutanswer(RESULT)
+Request move           : move(POSITION)    //INDOOR | PLASTICBOX | GLASSBOX | HOME
+Reply   moveanswer     : moveanswer(RESULT)
+
 Event update_led : update_led(STATE) //STATE = on | off | blink
 
 Dispatch noMsg : noMsg(_)
@@ -12,18 +27,147 @@ Context ctxRPI ip [host="localhost" port=8095]
 
   
 QActor waste_service context ctxRPI{
+	[# fun checkdepositpossible(MATERIAL:String,LOAD:String) : Boolean {
+ 				return (MATERIAL=="plastic" && LOAD.toInt()+contPB<=MAXPB) 
+ 				 || (MATERIAL=="glass" && LOAD.toInt()+contGB<=MAXGB);
+ 			} 
+ 			
+		const val MAXPB = 10
+		const val MAXGB = 10
+		lateinit var contPB : String 
+		lateinit var contGB : String
+		lateinit var Material  : String
+		lateinit var TruckLoad : String
+		lateint var RES : String
+	#]
+	
+	
+	State wait initial { 	    
+		discardMsg Off
+		//[# sysUtil.logMsgs=true #]
+ 	}
+ 	Transition t0 whenRequest depositrequest -> handle_req
+ 	
+ 	State handle_req {
+		printCurrentMessage
+		onMsg(depositrequest : depositrequest(MATERIAL, TRUCKLOAD)) {
+			[#
+				 Material 	= payloadArg(0) ;
+				 TruckLoad 	= payloadArg(1) ;
+			#]
+			if[# checkdepositpossible( Material, TruckLoad ) #]{
+				request transporttrolley -m move : move("INDOOR")
+			} else{  
+				replyTo depositrequest with loadrejected : loadrejected($Material,$TruckLoad)
+			}		
+		}
+ 	}
+ 	Transition t0 whenReply moveanswer -> handle_move_indoor
+ 	
+ 	State handle_move_indoor {
+		printCurrentMessage
+		onMsg(moveanswer : moveanswer(RESULT)) {
+			[# RES = payloadArg(0); #]
+			if[# RES == "OK" #]{
+				request transporttrolley -m pickup : pickup(_)
+			}
+			forward waste_service -m noMsg : noMsg(_)
+		}
+ 	}
+ 	Transition t0 whenMsg noMsg and [# RES=="OK" #] -> handle_pickup_answer
+ 					whenMsg noMsg and [# RES!="OK" #] -> error
+ 	
+ 	State handle_pickup_answer{
+ 		printCurrentMessage
+ 		onMsg(pickupanswer : pickupanswer(RESULT)) {
+			[# RES = payloadArg(0); #]
+			if[# RES == "OK" #]{
+				request transporttrolley -m move : move($Material)
+				replyTo depositrequest with loadaccept : loadaccept($Material,$TruckLoad)
+			}
+			forward waste_service -m noMsg : noMsg(_)
+		}
+ 	}
+ 	Transition t0 whenMsg noMsg and [# RES=="OK" #] -> handle_move_container
+ 					whenMsg noMsg and [# RES!="OK" #] -> error
+ 					
+ 	State handle_move_container{
+ 		printCurrentMessage
+ 		onMsg(moveanswer : moveanswer(RESULT)) {
+			[# RES = payloadArg(0); #]
+			if[# RES == "OK" #]{
+				request transporttrolley -m dropout : dropout(_)
+			}
+			forward waste_service -m noMsg : noMsg(_)
+		}
+ 	}
+ 	Transition t0 whenMsg noMsg and [# RES=="OK" #] -> handle_dropout_answer
+ 					whenMsg noMsg and [# RES!="OK" #] -> error
+ 					
+ 	State handle_dropout_answer {
+ 		printCurrentMessage
+ 		onMsg(dropoutanswer : dropoutanswer(RESULT)) {
+			[# RES = payloadArg(0); #]
+			if[# RES != "OK" #]{
+				forward waste_service -m noMsg : noMsg(_)
+			}
+		}
+ 	}
+ 	Transition t0 whenTime 10 -> handle_move_home
+ 					whenMsg noMsg and [# RES!="OK" #] -> error
+ 					whenRequest depositrequest -> handle_new_request
+ 	
+ 	State handle_new_request{ //simile ad handle_request, ma qui dobbiamo fare andare il robot a casa in caso di loadReqjected
+		printCurrentMessage
+		onMsg(depositrequest : depositrequest(MATERIAL, TRUCKLOAD)) {
+			[#
+				 Material 	= payloadArg(0) ;
+				 TruckLoad 	= payloadArg(1) ;
+			#]
+			if[# checkdepositpossible( Material, TruckLoad ) #]{
+				request transporttrolley -m move : move("INDOOR")
+			} else{  
+				replyTo depositrequest with loadrejected : loadrejected($Material,$TruckLoad)
+				forward waste_service -m noMsg : noMsg(_)
+			}		
+		}
+ 	}
+ 	Transition t0 whenReply moveanswer -> handle_move_indoor
+ 				whenMsg noMsg -> handle_move_home
+ 	
+ 	State handle_move_home{
+ 		request transporttrolley -m move : move("HOME")
+ 	}
+ 	Goto handle_move_home_answer
+ 	
+ 	State handle_move_home_answer{
+ 		printCurrentMessage
+ 		onMsg(moveanswer : moveanswer(RESULT)) {
+			[# RES = payloadArg(0); #]
+			if[# RES == "OK" #]{
+				request transporttrolley -m dropout : dropout(_)
+			}else{
+				forward waste_service -m noMsg : noMsg(_)
+			}
+		}
+ 	}
+ 	Transition t0 	whenRequest depositrequest -> handle_req //gestisci immediatamente nuova richiesta
+ 					whenMsg noMsg and [# RES!="OK" #] -> error
+ 					whenReply moveanswer -> wait
+ 	
+ 	State error {
+ 		println("error")
+ 		printCurrentMessage
+ 	}
+}
+
+QActor transporttrolley context ctxRPI{
 	State s0 initial { 	    
 		discardMsg On
 		//[# sysUtil.logMsgs=true #]
-		emit update_led : update_led(off)
-		delay 2000
-		emit update_led : update_led(on)
-		delay 2000
-		emit update_led : update_led(blink)
  	}
  	
- 
-}    
+}
    
 QActor led context ctxRPI{
 	[# lateinit var newState : String #]
@@ -68,4 +212,24 @@ QActor led context ctxRPI{
  					whenEvent update_led -> handle_update
  					
 }
+
+
    
+   
+   
+   
+   
+   
+   
+   
+/*QActor testLed context ctxRPI{
+	State s0 initial { 	    
+		discardMsg On
+		//[# sysUtil.logMsgs=true #]
+		emit update_led : update_led(off)
+		delay 2000
+		emit update_led : update_led(on)
+		delay 2000
+		emit update_led : update_led(blink)
+ 	}
+}*/
