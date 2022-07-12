@@ -22,8 +22,14 @@ Request move           : move(POSITION)    //INDOOR | PLASTICBOX | GLASSBOX | HO
 Reply   moveanswer     : moveanswer(RESULT)
 
 Event update_led : update_led(STATE) //STATE = on | off | blink
+Event update_sonar : update_led(DISTANCE)
+Event update_position : update_position(POSITION)
+Event update_container : update_container(MATERIAL, QUANTITA)
 
 Dispatch noMsg : noMsg(_)
+
+Dispatch stop  : stop(_) 
+Dispatch resume : resume (_)
  
 Context ctxRPI ip [host="localhost" port=8095]
 
@@ -72,7 +78,8 @@ QActor wasteservice context ctxRPI{
 			#]
 			println("arrived $TruckLoad Kg of $Material")
 			if[# checkdepositpossible( Material, TruckLoad ) #]{
-				[# updateDeposit( Material, TruckLoad ) #]
+				[# updateDeposit( Material, TruckLoad ) 
+					#]
 				request transporttrolley -m move : move(INDOOR)
 			} else{  
 				replyTo depositrequest with loadrejected : loadrejected($Material,$TruckLoad)
@@ -112,6 +119,7 @@ QActor wasteservice context ctxRPI{
 				    else -> { // Note the block
 				        print("ERRORE POSIZIONE")
 				    }
+				    emit container_position : container_position(Material,TruckLoad)
 				} #]
 				request transporttrolley -m move : move($Position)
 				replyTo depositrequest with loadaccept : loadaccept($Material,$TruckLoad)
@@ -205,6 +213,44 @@ QActor wasteservice context ctxRPI{
  	}
  	
 }*/
+QActor sonar context ctxRPI{
+	[# lateinit var distance : int 
+		val DLIMIT = 10
+		#]
+	
+	State wait initial {
+		discardMsg On
+	}
+	Transition t0 whenEvent update_sonar -> handle_update_moving
+	
+	State handle_update_moving {
+		onMsg( update_sonar:update_sonar(DISTANCE) ){
+			[# distance = payloadArg(0) #]
+ 			println("update_sonar(${newState})")
+ 			if [#distance<DLIMIT#] {
+ 				println("Stop robot")
+ 				forward transporttrolley -m stop : stop(_)
+ 			}
+ 		}
+ 	}
+ 	Goto wait if [#distance>=DLIMIT#] else stop
+ 	
+ 	State stop {}
+ 	Transition t0 whenEvent  update_sonar -> update_sonar_resuming 
+ 	
+ 	State update_sonar_resuming {
+		onMsg( update_sonar:update_sonar(DISTANCE) ){
+			[# distance = payloadArg(0) #]
+ 			println("update_sonar(${newState})")
+ 			if [#distance>=DLIMIT#] {
+ 				println("Resume robot")
+ 				forward transporttrolley -m resume : resume(_)
+ 			}
+ 		}
+ 	}
+ 	Goto wait if [#distance>=DLIMIT#] else stop
+	
+}
    
 QActor led context ctxRPI{
 	[# lateinit var newState : String #]
@@ -253,7 +299,57 @@ QActor led context ctxRPI{
 
 
    
-   
+QActor gui context ctxRPI {
+	[#
+		var LedStatus = "off"
+		var ContainerGlass = 0
+		var ContainerPaper = 0
+		var Position = "HOME"
+	#]
+	
+	State init initial {
+	}
+	Transition t0 whenEvent update_position ->  handlePosition
+				  whenEvent update_led ->  handleLed
+				  whenEvent update_container ->  handleContainer
+	
+	State handleLed {
+		onMsg(update_led : update_led(STATO)){
+			[# LedStatus = payloadArg(0) #]
+		}
+		println("LedStatus: $LedStatus")
+		println("ContainerGlass: $CContainerGlass")
+		println("ContainerPaper: $ContainerPaper")
+		println("Position: $Position")
+	}
+	Goto init
+	
+	State handlePosition {
+		onMsg(update_position : update_position(POSITION)){
+			[# Position = payloadArg(0) #]
+		}
+		println("LedStatus: $LedStatus")
+		println("ContainerGlass: $CContainerGlass")
+		println("ContainerPaper: $ContainerPaper")
+		println("Position: $Position")
+	}
+	Goto init
+	
+	State handleContainer {
+		onMsg(update_container : update_container(MATERIAL, TRUCKLOAD)){
+			if [# payloadArg(0) == "glass" #]{
+				[# CurrentGlass = payloadArg(1).toInt()+contGB #]
+			} else {
+				[# CurrentPaper = payloadArg(1).toInt()+contPB #]
+			}
+		}
+		println("LedStatus: $LedStatus")
+		println("Position: $Position")
+		println("CurrentGlass: $CurrentGlass")
+		println("CurrentPaper: $CurrentPaper")
+	}
+	Goto init
+}  
    
    
 
@@ -332,6 +428,7 @@ QActor transporttrolley context ctxRPI{
 	
 	State s0 initial { 	    
 		discardMsg On
+		emit update_position : update_position(HOME)
 		[# sysUtil.logMsgs=true #]
  	}
  	Transition t0 whenRequest move -> handle_cmd
@@ -349,47 +446,84 @@ QActor transporttrolley context ctxRPI{
  						whenMsg noMsg and [# tmp=="GLASSBOX" #] -> moving_glassbox
  	
  	State moving_home {
+ 		emit update_position : update_position(ROOM)
  	}
  	Transition t0 whenTime 1000 -> moved_home    //per il momento simulo lo spostamento con un delay
  					whenRequest move -> handle_cmd
+ 					whenMsg stop -> stop_home
+ 					
  	State moved_home {
  		replyTo move with moveanswer : moveanswer(OK)
+ 		emit update_position : update_position(HOME)
  		println("robot reached HOME")
  	}
  	Transition t0 whenRequest move -> handle_cmd
  	
+ 	State stop_home{
+ 		println("robot stop moving HOME")
+ 	}
+ 	Transition t0 whenMsg resume -> moving_home
+ 	
  	State moving_indoor {
+ 		emit update_position : update_position(ROOM)
  	}
  	Transition t0 whenTime 1000 -> moved_indoor    //per il momento simulo lo spostamento con un delay
  					whenRequest move -> handle_cmd
  	State moved_indoor {
  		replyTo move with moveanswer : moveanswer(OK)
+ 		emit update_position : update_position(INDOOR)
  		println("robot reached INDOOR")
  	}
  	Transition t0 whenRequest move -> handle_cmd
 					whenRequest pickup -> pickUp
+					whenMsg stop -> stop_indoor
+					
+	State stop_indoor{
+ 		println("robot stop moving INDOOR")
+ 	}
+ 	Transition t0 whenMsg resume -> moving_indoor
+ 	
  					
  	State moving_plasticbox {
+ 		emit update_position : update_position(ROOM)
  	}
  	Transition t0 whenTime 1000 -> moved_plasticbox    //per il momento simulo lo spostamento con un delay
  					whenRequest move -> handle_cmd
+ 					whenMsg stop -> stop_plasticbox
+ 					
  	State moved_plasticbox {
  		replyTo move with moveanswer : moveanswer(OK)
+ 		emit update_position : update_position(PLASTICBOX)
  		println("robot reached PLASTICBOX")
  	}
  	Transition t0 whenRequest move -> handle_cmd
  					whenRequest dropout -> dropOut
+ 					
+ 	State stop_plasticbox{
+ 		println("robot stop moving PLASTICBOX")
+ 	}
+ 	Transition t0 whenMsg resume -> moving_plasticbox
+ 	
  	
  	State moving_glassbox {
+ 		emit update_position : update_position(ROOM)
  	}
  	Transition t0 whenTime 1000 -> moved_glassbox    //per il momento simulo lo spostamento con un delay
  					whenRequest move -> handle_cmd
+ 					whenMsg stop -> stop_glassbox
+ 					
  	State moved_glassbox {
  		replyTo move with moveanswer : moveanswer(OK)
+ 		emit update_position : update_position(GLASSBOX)
  		println("robot reached GLASSBOX")
  	}
  	Transition t0 whenRequest move -> handle_cmd
  					whenRequest dropout -> dropOut
+ 					
+ 	State stop_glassbox{
+ 		println("robot stop moving GLASSBOX")
+ 	}
+ 	Transition t0 whenMsg resume -> moving_glassbox
  					
  	State pickUp {
  		delay 1000

@@ -56,7 +56,7 @@ class Wasteservice ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 												 TruckLoad 	= payloadArg(1) ;
 								println("arrived $TruckLoad Kg of $Material")
 								if(  checkdepositpossible( Material, TruckLoad )  
-								 ){ updateDeposit( Material, TruckLoad )  
+								 ){ updateDeposit( Material, TruckLoad ) 
 								request("move", "move(INDOOR)" ,"transporttrolley" )  
 								}
 								else
@@ -100,6 +100,7 @@ class Wasteservice ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 												    else -> { // Note the block
 												        print("ERRORE POSIZIONE")
 												    }
+												    emit container_position : container_position(Material,TruckLoad)
 												}  
 								request("move", "move($Position)" ,"transporttrolley" )  
 								answer("depositrequest", "loadaccept", "loadaccept($Material,$TruckLoad)"   )  
