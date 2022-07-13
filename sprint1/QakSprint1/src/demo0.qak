@@ -6,10 +6,10 @@ System demo0
   
 
 //richiesta al wasteservice
-//MATERIAL = plastic | glass
+//MATERIAL = PLASTIC | GLASS
 //TRUCKLOAD =  integer number
 Request depositrequest : depositrequest(MATERIAL, TRUCKLOAD)
-Reply loadaccept       : loadaccept(MATERIAL, TRUCKLOAD)
+Reply loadaccepted     : loadaccepted(MATERIAL, TRUCKLOAD)
 Reply loadrejected     : loadrejected(MATERIAL, TRUCKLOAD)
 
 //richiesta al trolley
@@ -22,7 +22,7 @@ Request move           : move(POSITION)    //INDOOR | PLASTICBOX | GLASSBOX | HO
 Reply   moveanswer     : moveanswer(RESULT)
 
 Event update_led : update_led(STATE) //STATE = on | off | blink
-Event update_sonar : update_led(DISTANCE)
+Event update_sonar : update_sonar(DISTANCE)
 Event update_position : update_position(POSITION)
 Event update_container : update_container(MATERIAL, QUANTITA)
 
@@ -45,14 +45,14 @@ QActor wasteservice context ctxRPI{
 		lateinit var RES : String
 		
 		fun checkdepositpossible(MATERIAL:String,LOAD:String) : Boolean {
- 				return (MATERIAL=="plastic" && LOAD.toInt()+contPB<=MAXPB) 
- 				 || (MATERIAL=="glass" && LOAD.toInt()+contGB<=MAXGB);
+ 				return (MATERIAL=="PLASTIC" && LOAD.toInt()+contPB<=MAXPB) 
+ 				 || (MATERIAL=="GLASS" && LOAD.toInt()+contGB<=MAXGB);
  		}
  				 
  		fun updateDeposit(MATERIAL:String,LOAD:String) : Unit {
  				when(MATERIAL){
-				    "plastic" -> contPB+=LOAD.toInt()
-				    "glass" -> contGB+=LOAD.toInt()
+				    "PLASTIC" -> contPB+=LOAD.toInt()
+				    "GLASS" -> contGB+=LOAD.toInt()
 				    else -> {
 				        print("ERRORE MATERIALE")
 					}
@@ -114,15 +114,15 @@ QActor wasteservice context ctxRPI{
 				[# 
 					lateinit var Position : String
 					when(Material){
-				    "plastic" -> Position = "PLASTICBOX"
-				    "glass" -> Position = "GLASSBOX"
+				    "PLASTIC" -> Position = "PLASTICBOX"
+				    "GLASS" -> Position = "GLASSBOX"
 				    else -> { // Note the block
 				        print("ERRORE POSIZIONE")
 				    }
 				    emit container_position : container_position(Material,TruckLoad)
 				} #]
 				request transporttrolley -m move : move($Position)
-				replyTo depositrequest with loadaccept : loadaccept($Material,$TruckLoad)
+				replyTo depositrequest with loadaccepted : loadaccepted($Material,$TruckLoad)
 			}else{
 				forward wasteservice -m noMsg : noMsg(_)
 			}
@@ -157,11 +157,11 @@ QActor wasteservice context ctxRPI{
 			}
 		}
  	}
- 	Transition t0 whenTime 10 -> handle_move_home
+ 	Transition t0 whenTime 10 -> move_home
  					whenMsg noMsg and [# RES!="OK" #] -> error
- 					whenRequest depositrequest -> handle_new_request
+ 					whenRequest depositrequest -> handle_new_req
  	
- 	State handle_new_request{ //simile ad handle_request, ma qui dobbiamo fare andare il robot a casa in caso di loadReqjected
+ 	State handle_new_req{ //simile ad handle_request, ma qui dobbiamo fare andare il robot a casa in caso di loadReqjected
 		printCurrentMessage
 		onMsg(depositrequest : depositrequest(MATERIAL, TRUCKLOAD)) {
 			[#
@@ -177,15 +177,15 @@ QActor wasteservice context ctxRPI{
 		}
  	}
  	Transition t0 whenReply moveanswer -> handle_move_indoor
- 				whenMsg noMsg -> handle_move_home
+ 				whenMsg noMsg -> move_home
  	
- 	State handle_move_home{
+ 	State move_home{
  		printCurrentMessage
  		request transporttrolley -m move : move(HOME)
  	}
- 	Goto handle_move_home_answer
+ 	Goto handle_move_home
  	
- 	State handle_move_home_answer{
+ 	State handle_move_home{
  		printCurrentMessage
  		onMsg(moveanswer : moveanswer(RESULT)) {
 			[# RES = payloadArg(0); #]
@@ -337,7 +337,7 @@ QActor gui context ctxRPI {
 	
 	State handleContainer {
 		onMsg(update_container : update_container(MATERIAL, TRUCKLOAD)){
-			if [# payloadArg(0) == "glass" #]{
+			if [# payloadArg(0) == "GLASS" #]{
 				[# CurrentGlass = payloadArg(1).toInt()+contGB #]
 			} else {
 				[# CurrentPaper = payloadArg(1).toInt()+contPB #]
@@ -375,16 +375,16 @@ QActor gui context ctxRPI {
 	State s0 initial { 	    
 		discardMsg On
 		//[# sysUtil.logMsgs=true #]
-		request wasteservice -m depositrequest : depositrequest(glass,11)
+		request wasteservice -m depositrequest : depositrequest(GLASS,11)
  	}
- 	Transition t0 whenReply loadaccept -> error
+ 	Transition t0 whenReply loadaccepted -> error
  					whenReply loadrejected -> s1
  	
  	State s1 {
  		println("load rejected successfully")
- 		request wasteservice -m depositrequest : depositrequest(plastic,3)
+ 		request wasteservice -m depositrequest : depositrequest(PLASTIC,3)
  	}
- 	Transition t0 whenReply loadaccept -> s2
+ 	Transition t0 whenReply loadaccepted -> s2
  					whenReply loadrejected -> error
  	
  	State s2 {
@@ -401,16 +401,16 @@ QActor testwasteservice context ctxRPI{
 	State s0 initial { 	    
 		discardMsg On
 		//[# sysUtil.logMsgs=true #]
-		request wasteservice -m depositrequest : depositrequest(plastic,9)
+		request wasteservice -m depositrequest : depositrequest(PLASTIC,9)
  	}
- 	Transition t0 whenReply loadaccept -> s1
+ 	Transition t0 whenReply loadaccepted -> s1
  					whenReply loadrejected -> error
  	
  	State s1 {
  		println("load accepted successfully")
- 		request wasteservice -m depositrequest : depositrequest(plastic,2)
+ 		request wasteservice -m depositrequest : depositrequest(PLASTIC,2)
  	}
- 	Transition t0 whenReply loadaccept -> error
+ 	Transition t0 whenReply loadaccepted -> error
  					whenReply loadrejected -> s2
  	
  	State s2 {

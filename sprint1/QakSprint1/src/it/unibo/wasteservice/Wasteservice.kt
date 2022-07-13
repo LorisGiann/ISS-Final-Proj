@@ -24,14 +24,14 @@ class Wasteservice ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 				lateinit var RES : String
 				
 				fun checkdepositpossible(MATERIAL:String,LOAD:String) : Boolean {
-		 				return (MATERIAL=="plastic" && LOAD.toInt()+contPB<=MAXPB) 
-		 				 || (MATERIAL=="glass" && LOAD.toInt()+contGB<=MAXGB);
+		 				return (MATERIAL=="PLASTIC" && LOAD.toInt()+contPB<=MAXPB) 
+		 				 || (MATERIAL=="GLASS" && LOAD.toInt()+contGB<=MAXGB);
 		 		}
 		 				 
 		 		fun updateDeposit(MATERIAL:String,LOAD:String) : Unit {
 		 				when(MATERIAL){
-						    "plastic" -> contPB+=LOAD.toInt()
-						    "glass" -> contGB+=LOAD.toInt()
+						    "PLASTIC" -> contPB+=LOAD.toInt()
+						    "GLASS" -> contGB+=LOAD.toInt()
 						    else -> {
 						        print("ERRORE MATERIALE")
 							}
@@ -56,7 +56,7 @@ class Wasteservice ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 												 TruckLoad 	= payloadArg(1) ;
 								println("arrived $TruckLoad Kg of $Material")
 								if(  checkdepositpossible( Material, TruckLoad )  
-								 ){ updateDeposit( Material, TruckLoad )  
+								 ){ updateDeposit( Material, TruckLoad ) 
 								request("move", "move(INDOOR)" ,"transporttrolley" )  
 								}
 								else
@@ -95,14 +95,15 @@ class Wasteservice ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 								 ){ 
 													lateinit var Position : String
 													when(Material){
-												    "plastic" -> Position = "PLASTICBOX"
-												    "glass" -> Position = "GLASSBOX"
+												    "PLASTIC" -> Position = "PLASTICBOX"
+												    "GLASS" -> Position = "GLASSBOX"
 												    else -> { // Note the block
 												        print("ERRORE POSIZIONE")
 												    }
+												    emit container_position : container_position(Material,TruckLoad)
 												}  
 								request("move", "move($Position)" ,"transporttrolley" )  
-								answer("depositrequest", "loadaccept", "loadaccept($Material,$TruckLoad)"   )  
+								answer("depositrequest", "loadaccepted", "loadaccepted($Material,$TruckLoad)"   )  
 								}
 								else
 								 {forward("noMsg", "noMsg(_)" ,"wasteservice" ) 
@@ -142,12 +143,12 @@ class Wasteservice ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 						stateTimer = TimerActor("timer_handle_dropout_answer", 
 							scope, context!!, "local_tout_wasteservice_handle_dropout_answer", 10.toLong() )
 					}
-					 transition(edgeName="t09",targetState="handle_move_home",cond=whenTimeout("local_tout_wasteservice_handle_dropout_answer"))   
+					 transition(edgeName="t09",targetState="move_home",cond=whenTimeout("local_tout_wasteservice_handle_dropout_answer"))   
 					transition(edgeName="t010",targetState="error",cond=whenDispatchGuarded("noMsg",{ RES!="OK"  
 					}))
-					transition(edgeName="t011",targetState="handle_new_request",cond=whenRequest("depositrequest"))
+					transition(edgeName="t011",targetState="handle_new_req",cond=whenRequest("depositrequest"))
 				}	 
-				state("handle_new_request") { //this:State
+				state("handle_new_req") { //this:State
 					action { //it:State
 						println("$name in ${currentState.stateName} | $currentMsg")
 						if( checkMsgContent( Term.createTerm("depositrequest(MATERIAL,TRUCKLOAD)"), Term.createTerm("depositrequest(MATERIAL,TRUCKLOAD)"), 
@@ -165,16 +166,16 @@ class Wasteservice ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 						}
 					}
 					 transition(edgeName="t012",targetState="handle_move_indoor",cond=whenReply("moveanswer"))
-					transition(edgeName="t013",targetState="handle_move_home",cond=whenDispatch("noMsg"))
+					transition(edgeName="t013",targetState="move_home",cond=whenDispatch("noMsg"))
 				}	 
-				state("handle_move_home") { //this:State
+				state("move_home") { //this:State
 					action { //it:State
 						println("$name in ${currentState.stateName} | $currentMsg")
 						request("move", "move(HOME)" ,"transporttrolley" )  
 					}
-					 transition( edgeName="goto",targetState="handle_move_home_answer", cond=doswitch() )
+					 transition( edgeName="goto",targetState="handle_move_home", cond=doswitch() )
 				}	 
-				state("handle_move_home_answer") { //this:State
+				state("handle_move_home") { //this:State
 					action { //it:State
 						println("$name in ${currentState.stateName} | $currentMsg")
 						if( checkMsgContent( Term.createTerm("moveanswer(RESULT)"), Term.createTerm("moveanswer(RESULT)"), 
