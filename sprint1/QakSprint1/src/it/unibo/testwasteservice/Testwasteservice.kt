@@ -18,22 +18,22 @@ class Testwasteservice ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 				state("s0") { //this:State
 					action { //it:State
 						discardMessages = true
-						request("depositrequest", "depositrequest(PLASTIC,9)" ,"wasteservice" )  
+						request("depositrequest", "depositrequest(GLASS,11)" ,"wasteservice" )  
 					}
-					 transition(edgeName="t032",targetState="s1",cond=whenReply("loadaccepted"))
-					transition(edgeName="t033",targetState="error",cond=whenReply("loadrejected"))
+					 transition(edgeName="t027",targetState="error",cond=whenReply("loadaccepted"))
+					transition(edgeName="t028",targetState="s1",cond=whenReply("loadrejected"))
 				}	 
 				state("s1") { //this:State
 					action { //it:State
-						println("load accepted successfully")
-						request("depositrequest", "depositrequest(PLASTIC,2)" ,"wasteservice" )  
+						println("load rejected successfully")
+						request("depositrequest", "depositrequest(PLASTIC,3)" ,"wasteservice" )  
 					}
-					 transition(edgeName="t034",targetState="error",cond=whenReply("loadaccepted"))
-					transition(edgeName="t035",targetState="s2",cond=whenReply("loadrejected"))
+					 transition(edgeName="t029",targetState="s2",cond=whenReply("loadaccepted"))
+					transition(edgeName="t030",targetState="error",cond=whenReply("loadrejected"))
 				}	 
 				state("s2") { //this:State
 					action { //it:State
-						println("load rejected successfully")
+						println("load accepted successfully")
 					}
 				}	 
 				state("error") { //this:State

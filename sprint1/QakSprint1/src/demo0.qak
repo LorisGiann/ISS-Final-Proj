@@ -119,7 +119,7 @@ QActor wasteservice context ctxRPI{
 				    else -> { // Note the block
 				        print("ERRORE POSIZIONE")
 				    }
-				    emit container_position : container_position(Material,TruckLoad)
+				    //emit container_position : container_position(Material,TruckLoad)    ??
 				} #]
 				request transporttrolley -m move : move($Position)
 				replyTo depositrequest with loadaccepted : loadaccepted($Material,$TruckLoad)
@@ -213,10 +213,12 @@ QActor wasteservice context ctxRPI{
  	}
  	
 }*/
+
+/*
 QActor sonar context ctxRPI{
-	[# lateinit var distance : int 
+	[# var distance : Int = 0
 		val DLIMIT = 10
-		#]
+	#]
 	
 	State wait initial {
 		discardMsg On
@@ -225,8 +227,8 @@ QActor sonar context ctxRPI{
 	
 	State handle_update_moving {
 		onMsg( update_sonar:update_sonar(DISTANCE) ){
-			[# distance = payloadArg(0) #]
- 			println("update_sonar(${newState})")
+			[# distance = payloadArg(0).toInt() #]
+ 			println("update_sonar(${distance})")
  			if [#distance<DLIMIT#] {
  				println("Stop robot")
  				forward transporttrolley -m stop : stop(_)
@@ -240,8 +242,8 @@ QActor sonar context ctxRPI{
  	
  	State update_sonar_resuming {
 		onMsg( update_sonar:update_sonar(DISTANCE) ){
-			[# distance = payloadArg(0) #]
- 			println("update_sonar(${newState})")
+			[# distance = payloadArg(0).toInt() #]
+ 			println("update_sonar(${distance})")
  			if [#distance>=DLIMIT#] {
  				println("Resume robot")
  				forward transporttrolley -m resume : resume(_)
@@ -251,6 +253,7 @@ QActor sonar context ctxRPI{
  	Goto wait if [#distance>=DLIMIT#] else stop
 	
 }
+*/
    
 QActor led context ctxRPI{
 	[# lateinit var newState : String #]
@@ -298,7 +301,7 @@ QActor led context ctxRPI{
 }
 
 
-   
+/*
 QActor gui context ctxRPI {
 	[#
 		var LedStatus = "off"
@@ -318,7 +321,7 @@ QActor gui context ctxRPI {
 			[# LedStatus = payloadArg(0) #]
 		}
 		println("LedStatus: $LedStatus")
-		println("ContainerGlass: $CContainerGlass")
+		println("ContainerGlass: $ContainerGlass")
 		println("ContainerPaper: $ContainerPaper")
 		println("Position: $Position")
 	}
@@ -329,7 +332,7 @@ QActor gui context ctxRPI {
 			[# Position = payloadArg(0) #]
 		}
 		println("LedStatus: $LedStatus")
-		println("ContainerGlass: $CContainerGlass")
+		println("ContainerGlass: $ContainerGlass")
 		println("ContainerPaper: $ContainerPaper")
 		println("Position: $Position")
 	}
@@ -350,8 +353,8 @@ QActor gui context ctxRPI {
 	}
 	Goto init
 }  
-   
-   
+*/
+
 
    
    
@@ -371,7 +374,7 @@ QActor gui context ctxRPI {
 
 //wasteservice TESTER
 //TEST VETRO RIGETTATO E PLASTICA ACCETTATA, RICHIESTE SEQUENZIALE
-/*QActor testwasteservice context ctxRPI{
+QActor testwasteservice context ctxRPI{
 	State s0 initial { 	    
 		discardMsg On
 		//[# sysUtil.logMsgs=true #]
@@ -394,10 +397,10 @@ QActor gui context ctxRPI {
  	State error {
  		println("errore")
  	}
-}*/
+}
 
 //TEST PLASTICA ACCETTATA, PLASTICA RIGETTATA, SEQUENZIALI
-QActor testwasteservice context ctxRPI{
+/*QActor testwasteservice context ctxRPI{
 	State s0 initial { 	    
 		discardMsg On
 		//[# sysUtil.logMsgs=true #]
@@ -420,7 +423,7 @@ QActor testwasteservice context ctxRPI{
  	State error {
  		println("errore")
  	}
-}
+}*/
 
 //MOCK transport trolley
 QActor transporttrolley context ctxRPI{
