@@ -190,6 +190,21 @@ div.imagedesc{
 code>pre { 
     font-family: monospace;
 }
+dd{
+    margin-bottom: 7px;
+}
+.todo{
+    color: orange
+}
+.centerimg{
+    display: block;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 90%;
+    max-width: 800px;
+}
 </style>
 <head>
    
@@ -205,155 +220,230 @@ code>pre {
  <p>Final Iss Project</p>
  
 <h2>Requirements</h2>
-<a href="docs/TemaFinale22.html">Requisiti</a>
-
-<h3>Requisiti scaturiti da ulteriori colloqui con committente:</h3>
-<ul>
-    <lI>Può esserci solo un camion alla volta in INDOOR? SI</lI>
-    <li>Il Waste-truck deve essere liberato non appena il materiale viene scaricato? SI</li>
-    <li>La GUI deve mostrare le coordine del robot o basta l'area nella quale si trova attualmente? basta l'area nella quale si trova attualmetne</li>
-</ul>
- 
+<div class="remark">
+    <a href="docs/TemaFinale22.html">Requisiti</a>
+    <br>
+    <p>Ulteriori requisiti scaturiti da ulteriori colloqui con committente:</p>
+    <ul>
+        <lI>Può esserci solo un camion alla volta in INDOOR? SI</lI>
+        <li>Il Waste-truck deve essere liberato non appena il materiale viene scaricato? SI</li>
+        <li>La GUI deve mostrare le coordine del robot o basta l'area nella quale si trova attualmente? basta l'area nella quale si trova attualmetne</li>
+    </ul>
+</div>
 
 <h2>Requirement analysis</h2>
 
+<h3>Modello QAK</h3>
+<a href="sprint1/QakSprint1/src/demo0.qak">Metamodello eseguibile QAK</a>
+
 <h3>Dizionario</h3>
-<dl>
-    <dt><b>WasteService:</b></dt> 
-    <dd>Servizio che si occupa del coordinamento delle attività di raccolta e smistamento dei rifiuti. Contiene buona parte della business logic del sistema. 
-        E' il componente che riceve e risponde alle richieste <i>depositrequest</i> con <i>loadaccepted</i> o <i>loadrejected</i> in base al carico dei <b>Waste-truck</b> e allo spazio ancora disponibile in <b>PLASTICBOX</b> o <b>GLASSBOX</b>:
-        <br>    
-        <code><pre>
-            //MATERIAL = PLASTIC | GLASS
-            //TRUCKLOAD =  integer number
-            Request depositrequest : depositrequest(MATERIAL, TRUCKLOAD)
-            Reply loadaccepted     : loadaccepted(MATERIAL, TRUCKLOAD)
-            Reply loadrejected     : loadrejected(MATERIAL, TRUCKLOAD)</pre>
-        </code>
-        Il componente invia comandi al transport trolley per svolgere le azioni necessarie
-    </dd>
-    <dt><b>Service area:</b></dt>
-    <dd>Superfice rettangolare nella quale il robot può muoversi. L'area è, piana, priva di ostacoli e nella quale sono presenti le aree denominate <b>INDOOR</b>, <b>PLASTICBOX</b>, <b>GLASSBOX</b>, <b>HOME</b>; </dd>
-    <dt><b>INDOOR:</b></dt>
-    <dd>Porta di ingresso adibita alla raccolta del <b>Waste-load</b> dal <b>Waste-truck</b> al <b>Transport trolley</b> </dd>
-    <dt><b>PLASTICBOX:</b></dt>
-    <dd>Container adibito al deposito di materiale plastico, con capienza attuale <b>contPB</b> e capienza massima pari a <b>MAXPB</b> Kg. <br> Il termine viene anche usato per indicare l'area nella quale il robot deve trovarsi per effettuare le operazioni di scarico</dd>
-    <dt><b>GLASSBOX:</b></dt> 
-    <dd>Container adibito al deposito di materiale vetroso, con capienza attuale <b>contGB</b> e capienza massima pari a <b>MAXGB</b> Kg. <br> Il termine viene anche usato per indicare l'area nella quale il robot deve trovarsi per effettuare le operazioni di scarico</dd>
-    <dt><b>HOME:</b></dt> 
-    <dd>Area nella quale risiede il robot quando non deve svolgere alcuna attività</dd>
-    <dt><b>Transport trolley:</b></dt>
-    <dd>Entità robotica attiva e astratta che riceve i comandi relativi alla prossima destinazione che si deve raggiungere: <br>
-        <code><pre>
-            move(<b>INDOOR</b>|<b>PLASTICBOX</b>|<b>GLASSBOX</b>|<b>HOME</b>)</pre>
-        </code>
-    Esso riceve anche i comandi relativi allo scarico e carico del materiale: 
-        <br>
-        <code><pre>
-            //RESULT =  OK | ERROR
-            Request pickup         : pickup(_)
-            Reply   pickupanswer   : pickupanswer(RESULT)
-            Request dropout        : dropout(_)
-            Reply   dropoutanswer  : dropoutanswer(RESULT)</pre>
-        </code>
-    </dd>
-    
-    <dt><b>DDR Robot concreto:</b></dt> <dd>con questo termine ci si riferisce al robot vero e proprio (fisico o simulato virtualmente)</dd>
-    <dt><b>DDR Robot:</b></dt> <dd>il servizio che riceve ed esegue i comandi di basso livello di spostamento del robot (avanti,indietro,destra,sinistra): <br>
-        <code><pre>
-            //MOVE =  w | a | s | d | h
-            cmd(MOVE)</pre>
-        </code>
-        <b>TODO: da definire ancora bene se tali comandi fanno uno step o se si muovono fino a che non viene incotnrata una parete</b>
-    </dd>
+<div class="remark">
+    <dl>
+        <dt><b>WasteService:</b></dt> 
+        <dd>Servizio che si occupa del coordinamento delle attività di raccolta e smistamento dei rifiuti. Contiene buona parte della business logic del sistema. 
+            E' il componente che riceve e risponde alle richieste <i>depositrequest</i> con <i>loadaccepted</i> o <i>loadrejected</i> in base al carico dei <b>Waste-truck</b> e allo spazio ancora disponibile in <b>PLASTICBOX</b> o <b>GLASSBOX</b>:
+            <br>    
+            <code><pre>
+                //MATERIAL = PLASTIC | GLASS
+                //TRUCKLOAD =  integer number
+                Request depositrequest : depositrequest(MATERIAL, TRUCKLOAD)
+                Reply loadaccepted     : loadaccepted(MATERIAL, TRUCKLOAD)
+                Reply loadrejected     : loadrejected(MATERIAL, TRUCKLOAD)</pre>
+            </code>
+            Il componente invia comandi al transport trolley per svolgere le azioni necessarie
+        </dd>
+        <dt><b>Service area:</b></dt>
+        <dd>Superfice rettangolare nella quale il robot può muoversi. L'area è, piana, priva di ostacoli e nella quale sono presenti le aree denominate <b>INDOOR</b>, <b>PLASTICBOX</b>, <b>GLASSBOX</b>, <b>HOME</b>; </dd>
+        <dt><b>INDOOR:</b></dt>
+        <dd>Porta di ingresso adibita alla raccolta del <b>Waste-load</b> dal <b>Waste-truck</b> al <b>Transport trolley</b> </dd>
+        <dt><b>PLASTICBOX:</b></dt>
+        <dd>Container adibito al deposito di materiale plastico, con capienza attuale <b>contPB</b> e capienza massima pari a <b>MAXPB</b> Kg. <br> Il termine viene anche usato per indicare l'area nella quale il robot deve trovarsi per effettuare le operazioni di scarico</dd>
+        <dt><b>GLASSBOX:</b></dt> 
+        <dd>Container adibito al deposito di materiale vetroso, con capienza attuale <b>contGB</b> e capienza massima pari a <b>MAXGB</b> Kg. <br> Il termine viene anche usato per indicare l'area nella quale il robot deve trovarsi per effettuare le operazioni di scarico</dd>
+        <dt><b>HOME:</b></dt> 
+        <dd>Area nella quale risiede il robot quando non deve svolgere alcuna attività</dd>
+        <dt><b>Transport trolley:</b></dt>
+        <dd>Entità robotica attiva e astratta che riceve i comandi relativi alla prossima destinazione che si deve raggiungere: <br>
+            <code><pre>
+                //POSITION = INDOOR | PLASTICBOX | GLASSBOX | HOME
+                //RESULT =  OK | ERROR
+                Request move           : move(POSITION)    
+                Reply   moveanswer     : moveanswer(RESULT)</pre>
+            </code>
+        Nota: il trasport trolley può ricevere una richiesta di nuova posizione prima che abbia raggiunto la destinazione precedente: la navigazione è ora impostata sulla nuova destinazione
+        Esso riceve anche i comandi relativi allo scarico e carico del materiale: 
+            <br>
+            <code><pre>
+                //RESULT =  OK | ERROR
+                Request pickup         : pickup(_)
+                Reply   pickupanswer   : pickupanswer(RESULT)
+                Request dropout        : dropout(_)
+                Reply   dropoutanswer  : dropoutanswer(RESULT)</pre>
+            </code>
+        </dd>
+        
+        <dt><b>DDR Robot concreto:</b></dt> <dd>con questo termine ci si riferisce al robot vero e proprio (fisico o simulato virtualmente)</dd>
+        <dt><b>DDR Robot:</b></dt> <dd>il servizio che riceve ed esegue i comandi di basso livello di spostamento del robot (avanti,indietro,destra,sinistra): <br>
+            <code><pre>
+                //MOVE =  w | a | s | d |      h ?
+                ______ cmd            : cmd(MOVE)</pre>
+            </code>
+            <p class="todo">Da definire ancora bene se tali comandi fanno uno step o se si muovono fino a che non viene incotnrata una parete. in base a questo definire poi il tipo di interazione (dispatch,request...) e se ci va alt o meno</p>
+        </dd>
 
-    <dt><b>Deposit action:</b></dt>
-    <dd>sequenza di azioni di:<br>
-        <ol>
-            <lI>raccolta di <b>Waste-load</b> dal <b>Waste-truck</b> che avviene in <b>INDOOR</b> </lI>
-            <lI>trasporto del materiale da <b>INDOOR</b> a <b>PLASTICBOX</b> o <b>GLASSBOX</b> in base al tipo di materiale </lI>
-            <lI>deposito del materiale nel <b>PLASTICBOX</b> o <b>GLASSBOX</b> in base al tipo di materiale caricato</lI>
-        </ol>
-    </dd>
-    <dt><b>Waste-truck:</b></dt> 
-    <dd>entità che si presenta in <b>INDOOR</b>, e richiede lo scarico del materiale che trasporta attraverso l'uso dello <b>SmartDevice</b></dd>
-    <dt><b>Waste-load:</b></dt> 
-    <dd>materiale inizialmente presente sul <b>Waste-truck:</b></dd>
-    <dt><b>SmartDevice:</b></dt> 
-    <dd>bispositivo attraverso il quale il Waste-truck comunica al <b>WasteService</b>:
-        <ul>
-            <lI>Il tipo di materiale trasportato: 
-                <ul>
-                    <lI>PLASTIC</lI>
-                    <lI>GLASS</lI>
-                </ul>
-            </lI>
-            <lI>Kg di materiale</lI>
-        </ul>
-        E riceve dal <b>WasteService</b> l'esito, che può essere <i>LoadAccepted</i> o <i>LoadRejected</i>
-    </dd>
-    <dt><b>Service-manager:</b></dt>
-    <dd>Operatore che supervisiona lo stato dell'area di servizio usando una <b>WasteServiceStatusGUI</b> <br> NOTA: fare il QAK con l'attore WasteServiceObserver</dd>
-    <dt><b>WasteServiceStatusGUI:</b></dt>
-    <dd>Pannello di controllo che permette al <b>Service-manager</b> di verificare in tempo reale lo stato del sistema. In particolare deve essree mostrato:
-        <ul>
-            <lI>la poszione del <b>Transport trolley:</b> (basta l'area nella quale si trova attualmente, non necessariamente delle coordinate spaziali)</lI>
-            <lI>lo stato attuale del <b>Transport trolley:</b></lI>
-            <lI>il peso corrente del materiale contenuto in <b>PLASTICBOX</b> e in <b>GLASSBOX</b></lI>
-            <lI>lo stato del <b>LED</b></lI>
-        </ul>
-    </dd>
-    <dt><b>LED concreto:</b></dt> 
-    <dd>dispositivo di output connesso al RaspberryPI presente sul <b>DDR Robot</b></dd>
-    <dt><b>LED:</b></dt>
-    <dd>Entità attiva e astratta che rappresenta il <b>LED concreto:</b>, è che può assumere tre stati:
-        <ul>
-            <lI>Led Off: quando il <b>Transport trolley:</b> è in <b>HOME</b> </lI>
-            <lI>Led On: quando il <b>Transport trolley:</b> è fermo (quando distanza rilevata &lt DLIMIT)</lI>
-            <lI>Led Blink: quando il <b>Transport trolley:</b> è in movimento, o scaricando/caricando materiale</lI>
-        </ul>
-        <br>
-        Il led può essre comandato esplicitamente attraverso l'invio dell'evento: <br>
-        <code><pre>
-            //STATE = on | off | blink
-            Event update_led : update_led(STATE)</pre>
-        </code>
-        <b>TODO: ma dovrebbe anche essere comandato indirettamente in base al fatto che il robot si sia fermato per un ostacolo o meno</b>
-    </dd>
-    <dt><b>Sonar concreto:</b></dt> 
-    <dd>Dispositivo di input connesso al RaspberryPI presente sul <b>DDR Robot</b></dd>
-    <dt><b>Sonar:</b></dt> 
-    <dd>Entità astratta che rappresenta il <b>sonar concreto</b>. <br> 
-        <code><pre>
-            //STATE = on | off | blink
-            Event obstacle : obstacle(STATE)</pre>
-        </code>
-        <b>TODO: mettersi daccordo su cosa fa sto sonar</b>
-    </dd>
-    
-    <dt><b>DLIMT:</b></dt>
-    <dd>Misura in CM della distanza limite. Se la distanza attualmente misurata dal sonar è ≤ DLIMT, il robot deve essere nello stato stopped. Qunando la distanza misurata &gt DLIMIT il robot può muoversi</dd>
-</dl>
-
-
+        <dt><b>Deposit action:</b></dt>
+        <dd>sequenza di azioni di:<br>
+            <ol>
+                <lI>raccolta di <b>Waste-load</b> dal <b>Waste-truck</b> che avviene in <b>INDOOR</b> </lI>
+                <lI>trasporto del materiale da <b>INDOOR</b> a <b>PLASTICBOX</b> o <b>GLASSBOX</b> in base al tipo di materiale </lI>
+                <lI>deposito del materiale nel <b>PLASTICBOX</b> o <b>GLASSBOX</b> in base al tipo di materiale caricato</lI>
+            </ol>
+        </dd>
+        <dt><b>Waste-truck:</b></dt> 
+        <dd>entità che si presenta in <b>INDOOR</b>, e richiede lo scarico del materiale che trasporta attraverso l'uso dello <b>SmartDevice</b></dd>
+        <dt><b>Waste-load:</b></dt> 
+        <dd>materiale inizialmente presente sul <b>Waste-truck:</b></dd>
+        <dt><b>SmartDevice:</b></dt> 
+        <dd>bispositivo attraverso il quale il Waste-truck comunica al <b>WasteService</b>:
+            <ul>
+                <lI>Il tipo di materiale trasportato: 
+                    <ul>
+                        <lI>PLASTIC</lI>
+                        <lI>GLASS</lI>
+                    </ul>
+                </lI>
+                <lI>Kg di materiale</lI>
+            </ul>
+            E riceve dal <b>WasteService</b> l'esito, che può essere <i>LoadAccepted</i> o <i>LoadRejected</i>
+        </dd>
+        <dt><b>Service-manager:</b></dt>
+        <dd>Operatore che supervisiona lo stato dell'area di servizio usando una <b>WasteServiceStatusGUI</b> <br> NOTA: fare il QAK con l'attore WasteServiceObserver</dd>
+        <dt><b>WasteServiceStatusGUI:</b></dt>
+        <dd>Pannello di controllo che permette al <b>Service-manager</b> di verificare in tempo reale lo stato del sistema. In particolare deve essree mostrato:
+            <ul>
+                <lI>la poszione del <b>Transport trolley:</b> (basta l'area nella quale si trova attualmente, non necessariamente delle coordinate spaziali)</lI>
+                <lI>lo stato attuale del <b>Transport trolley:</b></lI>
+                <lI>il peso corrente del materiale contenuto in <b>PLASTICBOX</b> e in <b>GLASSBOX</b></lI>
+                <lI>lo stato del <b>LED</b></lI>
+            </ul>
+        </dd>
+        <dt><b>LED concreto:</b></dt> 
+        <dd>dispositivo di output connesso al RaspberryPI presente sul <b>DDR Robot</b></dd>
+        <dt><b>LED:</b></dt>
+        <dd>Entità attiva e astratta che rappresenta il <b>LED concreto:</b>, è che può assumere tre stati:
+            <ul>
+                <lI>Led Off: quando il <b>Transport trolley:</b> è in <b>HOME</b> </lI>
+                <lI>Led On: quando il <b>Transport trolley:</b> è fermo (quando distanza rilevata &lt DLIMIT)</lI>
+                <lI>Led Blink: quando il <b>Transport trolley:</b> è in movimento, o scaricando/caricando materiale</lI>
+            </ul>
+            <br>
+            Il led può essre comandato esplicitamente attraverso l'invio dell'evento: <br>
+            <code><pre>
+                //STATE = on | off | blink
+                Event update_led : update_led(STATE)</pre>
+            </code>
+            <p class="todo"> ma dovrebbe anche essere comandato indirettamente in base al fatto che il robot si sia fermato per un ostacolo o meno</p>
+        </dd>
+        <dt><b>Sonar concreto:</b></dt> 
+        <dd>Dispositivo di input connesso al RaspberryPI presente sul <b>DDR Robot</b></dd>
+        <dt><b>Sonar:</b></dt> 
+        <dd>Entità astratta che rappresenta il <b>sonar concreto</b>. <br> 
+            <code><pre>
+                //STATE = on | off | blink
+                Event obstacle : obstacle(STATE)</pre>
+            </code>
+            <p class="todo"> mettersi daccordo su cosa fa sto sonar</p>
+        </dd>
+        
+        <dt><b>DLIMT:</b></dt>
+        <dd>Misura in CM della distanza limite. Se la distanza attualmente misurata dal sonar è ≤ DLIMT, il robot deve essere nello stato stopped. Qunando la distanza misurata &gt DLIMIT il robot può muoversi</dd>
+    </dl>
 </div>
 
+<!--PROBLEM ANALYSIS-->
 <h2>Problem analysis</h2>
+<div class="remark">
+    <h3><b>Transport trolley</b></h3>
 
-<h3><b>DDR robot</b> vs <b>Transport trolley</b></h3>
-<p>Possibile una separazione dei due concetti: <br>
-il <b>DDR robot</b> concepita come una entità di basso livello che riceve comandi:
+    <h4><b>DDR robot</b> vs <b>Transport trolley</b>:</h4>
+    Possibile una separazione dei due concetti: <br>
+    il <b>DDR robot</b> è concepita come una entità di basso livello che riceve comandi:
+    <code><pre>
+        //MOVE =  w | a | s | d | h
+        cmd(MOVE)</pre>
+    </code>
+    Mentre il <b>Transport trolley</b> è concepita come entità astratta che si occpura di ricevere la destinazione generica<br>
+    <code><pre>
+        move(<b>INDOOR</b>|<b>PLASTICBOX</b>|<b>GLASSBOX</b>|<b>HOME</b>)</pre>
+    </code>
+    <b>Transport trolley</b> invierà quindi una serie di comandi elementari a <b>DDR robot</b> per raggiungere la nuova posizione
+
+    <h4>Stati del transport trolley:</h4>
+    <p class="todo">Anche questa è una cosa che dipende molto dal fatto se dobbiamo fare step (usando la griglia) o meno</p>
     <ul>
-        <li>Request step : step()</li>
-        <li>Dispatch left : left()</li>
-        <li>Dispatch right : right()</li>
+        <lI>stopped</lI>
+        <li>moving ? </li>
     </ul>
-il <b>Transport trolley</b> concepita come entità astratta che si occpura di ricevere la 
-</p>
 
-<h3><b>Stati del Transport trolley</b></h3>
-<p>stopped</p>
- 
+    <h4>transport trolley non gestisce autonomamente carico/scarico:</h4>
+    <p>Per questioni di flessibilità, abbiamo tenuto separate le gestioni di operazioni di carico e scarico e movimento: se un domani si deve modificare il comportamento di quello che deve fare il robot, basta modificare i comandi che vengono impartiti ad esso dal wasteservice</p>
+
+    <hr>
+
+    <h3>Impostazione di una prima architettura logica</h3>
+    <ul>
+        <li>Possiamo pensare il <b>WasteService</b> come il componente controller, ossia quello che contiene la business logic del sistema</li>
+        <li>È ragionevole pesare <b>Transport trolley</b> come un'entità proattiva e situata, in grado di gestire il proprio stato e modificarlo in base alle direttive di alto livello 
+            che gli arrivano dal <b>WasteService</b>. Il <b>Transport trolley</b> è anche situato, nel senso che è in grado autonomamente di fermarsi e riprendere le proprie attività 
+            qualora venga incontrato un'ostacolo</li>
+        <li>Lo stato del led dipende unicamente dallo stato contenuto nel <b>Transport trolley</b></li>
+        <li>I requisiti che del sistema fanno intendere che <b>LED concreto</b>, <b>Sonar concreto</b>, e <b>DDR Robot concreto</b> sono tutti fisicamente vicini tra di loro. <br>
+            È quindi sensato porre i componenti <b>LED</b>, <b>Sonar</b>, e <b>DDR Robot</b> all'interno dello stesso nodo computazionale (RapberryPi presente sul DDRRobot concreto stesso), 
+            e quindi all'interno dello stesso contesto contenitore. In tale contesto collochiamo anche <b>Transport trolley</b>, dal momento che esso interagisce con tutti i componenti 
+            prima citati. <br>
+            Per quanto riguarda il WasteService, solo momentaneamente lo inseriamo nello stesso contesto. Rimandiamo la decisione finale agli sprint successivi, in quanto potrebbe avere 
+            senso collocarlo su un nodo computazionale che potrebbe rendersi utile in seguito all'analisi di altri requisiti </li>
+    </ul>
+    Alla luce delle osservazioni fatte, un primo modello di architettura logica del sistema potrebbe essere il seguente:
+    <img class="centerimg" src="docs/_images/logic_architecure_1.png" style="width: 500px;"/>
+
+    <hr>
+
+    <h3><b>WasteService</b></h3>
+    <p>Possiamo pensare il <b>WasteService</b> come il componente controller, ossia quello che contiene la business logic del sistema.<br>
+        Abbiamo analizzato le funzionalità che il servizio <b>WasteService</b> deve offrire, e abbiamo quindi formalizzato tale entità con il modello qak. Il diagramma degli stati di questo 
+        attore viene qui riassunto con il seguente schema per una migliore comprensione: </p>
+    <img class="centerimg" src="docs/_images/wasteservice_actor_state_diagram_1.png"/>
+    <p style="color: red">Possibile BUG! Se si riceve una depositrequest, ed essa è poi rifiutata, si ha un messaggio moveanswer che viene accodato e utilizzato impropriamente quando 
+        si gestirà nuovamente una nuova richiest. Necessario autoanello su wait per consumare il messaggio.</p>
+
+    <hr>
+
+    <h3>Led</h3>
+    <ul>
+        <li>Le interazioni con il LED possono avvenire per mezzo di eventi (NOTA: si suppone che se anche un messaggio venga perso, e che quindi il led non cambi di stato, non sia un problema: il malfunzionamento risulterà infatti temporaneo, e comunque non si compromette la funzionalità primaria del sistema)</li>
+	    <li class="todo">È bene che LED risponda anche a richieste dello stato attuale (la GUI dovrà inizialmente conoscere lo stato del led)??</li>
+        <li class="todo">È bene che il LED rimanga in ascolto di eventi provenienti dal sonar per aggiornare autonomamente il proprio stato??</li>
+    </ul>
+    <code><pre>
+        //STATE = on | off | blink
+        Event update_led : update_led(STATE)</pre>
+    </code>
+
+    <hr>
+
+    <h3>Sonar</h3>
+    <img class="centerimg" src="docs/_images/sonarpipenano.png"/>
+
+    <hr>
+
+
+    
+    
+</div>
+    
+
+</div>
 
 <h2>Test plans</h2> 
 
@@ -383,11 +473,21 @@ il <b>Transport trolley</b> concepita come entità astratta che si occpura di ri
 <br/><br/> 	
 </div>  
 
-<div style="background-color:rgba(86, 56, 253, 0.9); width:60%;text-align:left;color:white">
-    Loris Giannatempo email: loris.giannatempo@studio.unibo.it  <br>
-    <img src="./img/emiglio.png" alt="mbot" width="15%" height="15%"><br>
-    Davide Guidetti email: davide.guidetti3@studio.unibo.it <br>
-    <img src="./img/emiglio.png" alt="mbot" width="15%" height="15%">
+<div style="background-color:rgba(86, 56, 253, 0.9); width:100%;text-align:left;color:white">
+    <table style="border: 0px solid transparent; margin: 0 auto;">
+        <tr>
+            <th>
+                <p>Loris Giannatempo <br>
+                Email: loris.giannatempo@studio.unibo.it</p>
+                <img class="centerimg" src="docs/_images/lorisgiannatempo.jpg" style="width: 30%; height: 30%; border: 0px">
+            </th>
+            <th>
+                <p>Davide Guidetti <br>
+                Email: davide.guidetti3@studio.unibo.it</p>
+                <img class="centerimg" src="docs/_images/davideguidetti.jpg" style="width: 30%; height: 30%; border: 0px">
+            </th>
+        </tr>
+    </table>
 </div> 
 </body>
 </html>
