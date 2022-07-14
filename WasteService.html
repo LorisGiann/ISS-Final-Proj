@@ -217,13 +217,15 @@ dd{
 
 <div class="body"> 
 <h2>Introduction</h2>
- <p>Final Iss Project</p>
- 
+<div class="remark">
+    <p>Progetto finale di ISS, che consiste in un impianto di smistamento dei rifiuti nel quale un robot deve trasportare il materiale dal camion al relativo container</p>
+</div>
+
 <h2>Requirements</h2>
 <div class="remark">
     <a href="docs/TemaFinale22.html">Requisiti</a>
     <br>
-    <p>Ulteriori requisiti scaturiti da ulteriori colloqui con committente:</p>
+    <p>Ulteriori requisiti scaturiti da colloqui con committente:</p>
     <ul>
         <lI>Può esserci solo un camion alla volta in INDOOR? SI</lI>
         <li>Il Waste-truck deve essere liberato non appena il materiale viene scaricato? SI</li>
@@ -233,15 +235,14 @@ dd{
 
 <h2>Requirement analysis</h2>
 
-<h3>Modello QAK</h3>
-<a href="sprint1/QakSprint1/src/demo0.qak">Metamodello eseguibile QAK</a>
+<h3><a href="sprint1/QakSprint1/src/demo0.qak">Metamodello eseguibile QAK</a></h3>
 
 <h3>Dizionario</h3>
 <div class="remark">
     <dl>
         <dt><b>WasteService:</b></dt> 
         <dd>Servizio che si occupa del coordinamento delle attività di raccolta e smistamento dei rifiuti. Contiene buona parte della business logic del sistema. 
-            E' il componente che riceve e risponde alle richieste <i>depositrequest</i> con <i>loadaccepted</i> o <i>loadrejected</i> in base al carico dei <b>Waste-truck</b> e allo spazio ancora disponibile in <b>PLASTICBOX</b> o <b>GLASSBOX</b>:
+            E' il componente che riceve le <i>depositrequest</i> e risponde con <i>loadaccepted</i> o <i>loadrejected</i> in base al carico dei <b>Waste-truck</b> e allo spazio ancora disponibile in <b>PLASTICBOX</b> o <b>GLASSBOX</b>:
             <br>    
             <code><pre>
                 //MATERIAL = PLASTIC | GLASS
@@ -250,40 +251,35 @@ dd{
                 Reply loadaccepted     : loadaccepted(MATERIAL, TRUCKLOAD)
                 Reply loadrejected     : loadrejected(MATERIAL, TRUCKLOAD)</pre>
             </code>
-            Il componente invia comandi al transport trolley per svolgere le azioni necessarie
+            Il componente invia comandi al <b>Transport trolley</b> per svolgere le azioni necessarie
         </dd>
         <dt><b>Service area:</b></dt>
-        <dd>Superfice rettangolare nella quale il robot può muoversi. L'area è, piana, priva di ostacoli e nella quale sono presenti le aree denominate <b>INDOOR</b>, <b>PLASTICBOX</b>, <b>GLASSBOX</b>, <b>HOME</b>; </dd>
+        <dd>Superfice rettangolare nella quale il robot può muoversi. L'area è, piana, priva di "ostacoli interni" e nella quale sono presenti le aree denominate <b>INDOOR</b>, <b>PLASTICBOX</b>, <b>GLASSBOX</b>, <b>HOME</b>; </dd>
         <dt><b>INDOOR:</b></dt>
-        <dd>Porta di ingresso adibita alla raccolta del <b>Waste-load</b> dal <b>Waste-truck</b> al <b>Transport trolley</b> </dd>
+        <dd>Porta di ingresso adibita alla raccolta del <b>Waste-load</b> che dal <b>Waste-truck</b> va al <b>Transport trolley</b>. <br> Il termine viene anche usato per indicare l'area nella quale il robot deve trovarsi per effettuare l'operazione di carico</dd>
         <dt><b>PLASTICBOX:</b></dt>
-        <dd>Container adibito al deposito di materiale plastico, con capienza attuale <b>contPB</b> e capienza massima pari a <b>MAXPB</b> Kg. <br> Il termine viene anche usato per indicare l'area nella quale il robot deve trovarsi per effettuare le operazioni di scarico</dd>
+        <dd>Container adibito al deposito di materiale plastico, con capienza attuale <b>contPB</b> e capienza massima pari a <b>MAXPB</b> Kg. <br> Il termine viene anche usato per indicare l'area nella quale il robot deve trovarsi per effettuare l'operazione di scarico della plastica</dd>
         <dt><b>GLASSBOX:</b></dt> 
-        <dd>Container adibito al deposito di materiale vetroso, con capienza attuale <b>contGB</b> e capienza massima pari a <b>MAXGB</b> Kg. <br> Il termine viene anche usato per indicare l'area nella quale il robot deve trovarsi per effettuare le operazioni di scarico</dd>
+        <dd>Container adibito al deposito di materiale vetroso, con capienza attuale <b>contGB</b> e capienza massima pari a <b>MAXGB</b> Kg. <br> Il termine viene anche usato per indicare l'area nella quale il robot deve trovarsi per effettuare l'operazione di scarico del vetro</dd>
         <dt><b>HOME:</b></dt> 
         <dd>Area nella quale risiede il robot quando non deve svolgere alcuna attività</dd>
         <dt><b>Transport trolley:</b></dt>
-        <dd>Entità robotica attiva e astratta che riceve i comandi relativi alla prossima destinazione che si deve raggiungere: <br>
+        <dd>Entità robotica attiva e astratta che riceve i comandi relativi alla prossima destinazione che si deve raggiungere. Esso riceve anche i comandi relativi allo scarico e carico del materiale:<br>
             <code><pre>
                 //POSITION = INDOOR | PLASTICBOX | GLASSBOX | HOME
                 //RESULT =  OK | ERROR
                 Request move           : move(POSITION)    
-                Reply   moveanswer     : moveanswer(RESULT)</pre>
-            </code>
-        Nota: il trasport trolley può ricevere una richiesta di nuova posizione prima che abbia raggiunto la destinazione precedente: la navigazione è ora impostata sulla nuova destinazione
-        Esso riceve anche i comandi relativi allo scarico e carico del materiale: 
-            <br>
-            <code><pre>
-                //RESULT =  OK | ERROR
+                Reply   moveanswer     : moveanswer(RESULT)
                 Request pickup         : pickup(_)
                 Reply   pickupanswer   : pickupanswer(RESULT)
                 Request dropout        : dropout(_)
                 Reply   dropoutanswer  : dropoutanswer(RESULT)</pre>
             </code>
+            Nota: il <b>Transport trolley</b> può ricevere una richiesta di nuova posizione prima che abbia raggiunto la destinazione precedente: la navigazione è ora impostata sulla nuova destinazione.
         </dd>
         
-        <dt><b>DDR Robot concreto:</b></dt> <dd>con questo termine ci si riferisce al robot vero e proprio (fisico o simulato virtualmente)</dd>
-        <dt><b>DDR Robot:</b></dt> <dd>il servizio che riceve ed esegue i comandi di basso livello di spostamento del robot (avanti,indietro,destra,sinistra): <br>
+        <dt><b>DDR Robot concreto</b> o "robot":</dt> <dd>Con questo termine ci si riferisce al robot vero e proprio (fisico o simulato virtualmente)</dd>
+        <dt><b>DDR Robot:</b></dt> <dd>Il servizio che riceve ed esegue i comandi di basso livello di spostamento del robot (avanti,indietro,destra,sinistra): <br>
             <code><pre>
                 //MOVE =  w | a | s | d |      h ?
                 ______ cmd            : cmd(MOVE)</pre>
@@ -292,19 +288,19 @@ dd{
         </dd>
 
         <dt><b>Deposit action:</b></dt>
-        <dd>sequenza di azioni di:<br>
+        <dd>Sequenza di azioni di:<br>
             <ol>
-                <lI>raccolta di <b>Waste-load</b> dal <b>Waste-truck</b> che avviene in <b>INDOOR</b> </lI>
+                <lI><b>Pickup:</b> raccolta di <b>Waste-load</b> dal <b>Waste-truck</b> che avviene in <b>INDOOR</b> </lI>
                 <lI>trasporto del materiale da <b>INDOOR</b> a <b>PLASTICBOX</b> o <b>GLASSBOX</b> in base al tipo di materiale </lI>
-                <lI>deposito del materiale nel <b>PLASTICBOX</b> o <b>GLASSBOX</b> in base al tipo di materiale caricato</lI>
+                <lI><b>Dropout:</b> deposito del materiale nel <b>PLASTICBOX</b> o <b>GLASSBOX</b> in base al tipo di materiale caricato</lI>
             </ol>
         </dd>
         <dt><b>Waste-truck:</b></dt> 
-        <dd>entità che si presenta in <b>INDOOR</b>, e richiede lo scarico del materiale che trasporta attraverso l'uso dello <b>SmartDevice</b></dd>
+        <dd>Entità che si presenta in <b>INDOOR</b>, e richiede lo scarico del materiale che trasporta attraverso l'uso dello <b>SmartDevice</b></dd>
         <dt><b>Waste-load:</b></dt> 
-        <dd>materiale inizialmente presente sul <b>Waste-truck:</b></dd>
+        <dd>Materiale inizialmente presente sul <b>Waste-truck</b></dd>
         <dt><b>SmartDevice:</b></dt> 
-        <dd>bispositivo attraverso il quale il Waste-truck comunica al <b>WasteService</b>:
+        <dd>Dispositivo attraverso il quale il <b>Waste-truck</b> comunica al <b>WasteService</b>:
             <ul>
                 <lI>Il tipo di materiale trasportato: 
                     <ul>
@@ -314,27 +310,35 @@ dd{
                 </lI>
                 <lI>Kg di materiale</lI>
             </ul>
-            E riceve dal <b>WasteService</b> l'esito, che può essere <i>LoadAccepted</i> o <i>LoadRejected</i>
+            E riceve dal <b>WasteService</b> l'esito, che può essere <i>LoadAccepted</i> o <i>LoadRejected</i>:
+            <code><pre>
+                //MATERIAL = PLASTIC | GLASS
+                //TRUCKLOAD =  integer number
+                Request depositrequest : depositrequest(MATERIAL, TRUCKLOAD)
+                Reply loadaccepted     : loadaccepted(MATERIAL, TRUCKLOAD)
+                Reply loadrejected     : loadrejected(MATERIAL, TRUCKLOAD)</pre>
+            </code>
         </dd>
         <dt><b>Service-manager:</b></dt>
-        <dd>Operatore che supervisiona lo stato dell'area di servizio usando una <b>WasteServiceStatusGUI</b> <br> NOTA: fare il QAK con l'attore WasteServiceObserver</dd>
+        <dd>Operatore che supervisiona lo stato dell'area di servizio usando una <b>WasteServiceStatusGUI</b> 
+            <p class="todo">Fare il QAK con l'attore WasteServiceObserver</p> </dd>
         <dt><b>WasteServiceStatusGUI:</b></dt>
-        <dd>Pannello di controllo che permette al <b>Service-manager</b> di verificare in tempo reale lo stato del sistema. In particolare deve essree mostrato:
+        <dd>Pannello di controllo che permette al <b>Service-manager</b> di verificare in tempo reale lo stato del sistema. In particolare deve essere mostrato:
             <ul>
-                <lI>la poszione del <b>Transport trolley:</b> (basta l'area nella quale si trova attualmente, non necessariamente delle coordinate spaziali)</lI>
-                <lI>lo stato attuale del <b>Transport trolley:</b></lI>
-                <lI>il peso corrente del materiale contenuto in <b>PLASTICBOX</b> e in <b>GLASSBOX</b></lI>
-                <lI>lo stato del <b>LED</b></lI>
+                <lI>La poszione del <b>Transport trolley</b> (basta l'area nella quale si trova attualmente, non necessariamente delle coordinate spaziali)</lI>
+                <lI>Lo stato attuale del <b>Transport trolley</b></lI>
+                <lI>Il peso corrente <b>contPB</b> e <b>contGB</b> del materiale contenuto in <b>PLASTICBOX</b> e in <b>GLASSBOX</b></lI>
+                <lI>Lo stato del <b>LED</b></lI>
             </ul>
         </dd>
         <dt><b>LED concreto:</b></dt> 
-        <dd>dispositivo di output connesso al RaspberryPI presente sul <b>DDR Robot</b></dd>
+        <dd>Dispositivo di output connesso al RaspberryPI presente sul <b>DDR Robot</b></dd>
         <dt><b>LED:</b></dt>
         <dd>Entità attiva e astratta che rappresenta il <b>LED concreto:</b>, è che può assumere tre stati:
             <ul>
                 <lI>Led Off: quando il <b>Transport trolley:</b> è in <b>HOME</b> </lI>
                 <lI>Led On: quando il <b>Transport trolley:</b> è fermo (quando distanza rilevata &lt DLIMIT)</lI>
-                <lI>Led Blink: quando il <b>Transport trolley:</b> è in movimento, o scaricando/caricando materiale</lI>
+                <lI>Led Blink: quando il <b>Transport trolley:</b> è in movimento, o sta scaricando/caricando materiale</lI>
             </ul>
             <br>
             Il led può essre comandato esplicitamente attraverso l'invio dell'evento: <br>
@@ -366,28 +370,50 @@ dd{
     <h3><b>Transport trolley</b></h3>
 
     <h4><b>DDR robot</b> vs <b>Transport trolley</b>:</h4>
-    Possibile una separazione dei due concetti: <br>
-    il <b>DDR robot</b> è concepita come una entità di basso livello che riceve comandi:
-    <code><pre>
-        //MOVE =  w | a | s | d | h
-        cmd(MOVE)</pre>
-    </code>
-    Mentre il <b>Transport trolley</b> è concepita come entità astratta che si occpura di ricevere la destinazione generica<br>
-    <code><pre>
-        move(<b>INDOOR</b>|<b>PLASTICBOX</b>|<b>GLASSBOX</b>|<b>HOME</b>)</pre>
-    </code>
-    <b>Transport trolley</b> invierà quindi una serie di comandi elementari a <b>DDR robot</b> per raggiungere la nuova posizione
+    <ul>
+        <li>
+            Possibile una separazione dei due concetti: <br>
+            il <b>DDR robot</b> è concepita come una entità di basso livello che riceve comandi:
+            <code><pre>
+                //MOVE =  w | a | s | d |      h ?
+                ______ cmd            : cmd(MOVE)</pre>
+            </code>
+        </li>
+        <li>
+            Mentre il <b>Transport trolley</b> è concepita come entità astratta che si occpura di ricevere la destinazione generica<br>
+            <code><pre>
+                move(<b>INDOOR</b>|<b>PLASTICBOX</b>|<b>GLASSBOX</b>|<b>HOME</b>)</pre>
+            </code>
+        </li>
+    </ul>
+    <b>Transport trolley</b> invierà quindi una serie di comandi elementari a <b>DDR robot</b> per raggiungere la nuova posizione. <br>
+    Questa separazione tra in due layer rende il sistema più resitente ad eventuali future variazioni della tecnologia utilizzata per il robot. 
+    Il <b>WasteService</b> continuerà ad inviare al <b>Transport trolley</b> gli stessi comandi astratti, senza preoccuparsi di "in che modo" o "con quali mezzi" la destinazione viene raggiunta.
 
-    <h4>Stati del transport trolley:</h4>
+    <h4>Stati del <b>Transport trolley</b></h4>
     <p class="todo">Anche questa è una cosa che dipende molto dal fatto se dobbiamo fare step (usando la griglia) o meno</p>
     <ul>
         <lI>stopped</lI>
         <li>moving ? </li>
     </ul>
 
-    <h4>transport trolley non gestisce autonomamente carico/scarico:</h4>
-    <p>Per questioni di flessibilità, abbiamo tenuto separate le gestioni di operazioni di carico e scarico e movimento: se un domani si deve modificare il comportamento di quello che deve fare il robot, basta modificare i comandi che vengono impartiti ad esso dal wasteservice</p>
+    <h4><b>Transport trolley</b> non gestisce autonomamente carico/scarico:</h4>
+    <p>Per questioni di flessibilità, abbiamo tenuto separate le operazioni di carico, scarico e movimento: l'idea è che se un domani si deve modificare il processo di smistamento,
+        basterà modificare la sequenza di comandi che vengono impartiti al <b>Transport trolley</b>, senza bisogno di modificare quest'ultimo.</p>
+    <code><pre>
+        //RESULT =  OK | ERROR
+        Request pickup         : pickup(_)
+        Reply   pickupanswer   : pickupanswer(RESULT)
+        Request dropout        : dropout(_)
+        Reply   dropoutanswer  : dropoutanswer(RESULT)</pre>
+    </code>
 
+    <h4>Interazioni con il <b>Transport trolley</b>:</h4>
+    <p>Si noti come le interazioni con il <b>Transport trolley</b> siano tutte delle request-response. <br>
+        Colui che comanda il <b>Transport trolley</b> (cioè una visione astratta e ad alto livello del robot) si aspetta una interazione sincrona bloccante, e si aspetta una risposta con l'esito dell'operazione.<br>
+        Tuttavia, solo per il comando <i>move(POSITION)</i>, è possibile comandare una nuova destinazione anche se quella precedente non è stata ancora raggiunta. <br>
+        Questo perchè è possibile che arrivi un nuovo <b>Waste-truck</b> mentre il <b>Transport trolley</b> sta tornando a <b>HOME</b>. Con questo comando il carico può essere gestito immediatamente senza aspettare che il <b>Transport trolley</b> raggiunga <b>HOME</b>. 
+        Il nuovo comando annulla di fatto la <i>move</i> precedente, quindi si riceverà solo la risposta relativa all'ultimo comando.</p>
     <hr>
 
     <h3>Impostazione di una prima architettura logica</h3>
@@ -397,7 +423,7 @@ dd{
             che gli arrivano dal <b>WasteService</b>. Il <b>Transport trolley</b> è anche situato, nel senso che è in grado autonomamente di fermarsi e riprendere le proprie attività 
             qualora venga incontrato un'ostacolo</li>
         <li>Lo stato del led dipende unicamente dallo stato contenuto nel <b>Transport trolley</b></li>
-        <li>I requisiti che del sistema fanno intendere che <b>LED concreto</b>, <b>Sonar concreto</b>, e <b>DDR Robot concreto</b> sono tutti fisicamente vicini tra di loro. <br>
+        <li>I requisiti che del sistema fanno intendere che <b>LED concreto</b>, <b>Sonar concreto</b>, e <b>DDR Robot concreto</b> siano tutti fisicamente vicini tra di loro. <br>
             È quindi sensato porre i componenti <b>LED</b>, <b>Sonar</b>, e <b>DDR Robot</b> all'interno dello stesso nodo computazionale (RapberryPi presente sul DDRRobot concreto stesso), 
             e quindi all'interno dello stesso contesto contenitore. In tale contesto collochiamo anche <b>Transport trolley</b>, dal momento che esso interagisce con tutti i componenti 
             prima citati. <br>
@@ -411,8 +437,8 @@ dd{
 
     <h3><b>WasteService</b></h3>
     <p>Possiamo pensare il <b>WasteService</b> come il componente controller, ossia quello che contiene la business logic del sistema.<br>
-        Abbiamo analizzato le funzionalità che il servizio <b>WasteService</b> deve offrire, e abbiamo quindi formalizzato tale entità con il modello qak. Il diagramma degli stati di questo 
-        attore viene qui riassunto con il seguente schema per una migliore comprensione: </p>
+        Abbiamo analizzato le funzionalità che il servizio <b>WasteService</b> deve offrire, e abbiamo quindi formalizzato tale entità con il modello qak. <br>
+        Per una migliore comprensione il diagramma degli stati di questo attore viene qui riassunto con il seguente schema: </p>
     <img class="centerimg" src="docs/_images/wasteservice_actor_state_diagram_1.png"/>
     <p style="color: red">Possibile BUG! Se si riceve una depositrequest, ed essa è poi rifiutata, si ha un messaggio moveanswer che viene accodato e utilizzato impropriamente quando 
         si gestirà nuovamente una nuova richiest. Necessario autoanello su wait per consumare il messaggio.</p>
