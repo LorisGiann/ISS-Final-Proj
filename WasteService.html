@@ -229,21 +229,25 @@ dd{
     <ul>
         <lI>Può esserci solo un camion alla volta in INDOOR? SI</lI>
         <li>Il Waste-truck deve essere liberato non appena il materiale viene scaricato? SI</li>
-        <li>La GUI deve mostrare le coordine del robot o basta l'area nella quale si trova attualmente? basta l'area nella quale si trova attualmetne</li>
+        <li>La GUI deve mostrare le coordine del robot o basta l'area nella quale si trova attualmente? basta l'area nella quale si trova attualmente</li>
+        <li>A cosa serve il sonar se la stanza è priva di ostacoli? Il sonar non è a bordo del robot, è un dispositivo esterno (così come il RPI). Se si mette una mano davanti al dispositivo, il robot si ferma.</li>
+        <li>Ci deve essere il contatto con la parete per il carico/scarico dei materiali? SI (o comunque il più vicino possibile)</li>
+        <li>Supponiamo che il robot si stia dirigendo verso HOME (perché ha scaricato l'ultimo carico di materiale e non ci sono altri Waste truck sull'INDOOR). Se arriva un Waste truck prima che il trolley raggiunga la base, il robot deve cambiare rotta immediatamente o può raggiungere la base e poi dirigersi presso l'Indoor? CAMBIA IMMEDIATAMENTE ROTTA per dirigersi su indoor</li>
+        <li>È il robot a determinare quando avviene la fine di una azione di carico/scarico? In che modo tale evento può essere rilevato dal sistema da noi sviluppato? Modellare l'operazione con un SEMPLICE DELAY di durata fissa</li>
+        <li>Il nodo sul quale la GUI va installata e un nodo fisso? O si tratta forse di palmari posseduti dai Service-manager stessi? Il NODO è FISSO </li>
+        <li>In cosa consiste lo smart device? Quanti sono (viene usato sempre lo stesso dispositivo o ve ne è uno per ogni conducente)? Come si relaziona con il nostro sistema? Un dispositivo per ogni conducente, "alieno" invia un messaggio</li>
+        <li>Committente ha server aziendali disponibili? È possibile usare la RPI come server (nodo sempre attivo mentre il sistema è operativo)? E' possibile usare la raspberry, ma si può anche mettere sul PC che usiamo.</li>
     </ul>
 </div>
 
 <h2>Requirement analysis</h2>
 
-<h3><a href="sprint1/QakSprint1/src/demo0.qak">Metamodello eseguibile QAK</a></h3>
-
 <h3>Dizionario</h3>
 <div class="remark">
     <dl>
         <dt><b>WasteService:</b></dt> 
-        <dd>Servizio che si occupa del coordinamento delle attività di raccolta e smistamento dei rifiuti. Contiene buona parte della business logic del sistema. 
-            E' il componente che riceve le <i>depositrequest</i> e risponde con <i>loadaccepted</i> o <i>loadrejected</i> in base al carico dei <b>Waste-truck</b> e allo spazio ancora disponibile in <b>PLASTICBOX</b> o <b>GLASSBOX</b>:
-            <br>    
+        <dd>Attore che si occupa del coordinamento delle attività di raccolta e smistamento dei rifiuti. Contiene buona parte della business logic del sistema. 
+            Riceve le <i>depositrequest</i> e risponde con <i>loadaccepted</i> o <i>loadrejected</i> in base al carico dei <b>Waste-truck</b> e allo spazio ancora disponibile in <b>PLASTICBOX</b> o <b>GLASSBOX</b>: <br>    
             <code><pre>
                 //MATERIAL = PLASTIC | GLASS
                 //TRUCKLOAD =  integer number
@@ -254,17 +258,20 @@ dd{
             Il componente invia comandi al <b>Transport trolley</b> per svolgere le azioni necessarie
         </dd>
         <dt><b>Service area:</b></dt>
-        <dd>Superfice rettangolare nella quale il robot può muoversi. L'area è, piana, priva di "ostacoli interni" e nella quale sono presenti le aree denominate <b>INDOOR</b>, <b>PLASTICBOX</b>, <b>GLASSBOX</b>, <b>HOME</b>; </dd>
+        <dd>Superfice rettangolare, piana, priva di ostacoli nella quale il robot può muoversi, e nella quale sono presenti le zone <b>INDOOR</b>, <b>PLASTICBOX</b>, <b>GLASSBOX</b>, <b>HOME</b>; </dd>
         <dt><b>INDOOR:</b></dt>
-        <dd>Porta di ingresso adibita alla raccolta del <b>Waste-load</b> che dal <b>Waste-truck</b> va al <b>Transport trolley</b>. <br> Il termine viene anche usato per indicare l'area nella quale il robot deve trovarsi per effettuare l'operazione di carico</dd>
+        <dd>Porta di ingresso adibita alla raccolta del <b>Waste-load</b> che dal <b>Waste-truck</b> va al <b>Transport trolley</b>. <br> 
+            Il termine viene anche usato per indicare la zona nella quale il robot deve trovarsi per effettuare l'operazione di carico</dd>
         <dt><b>PLASTICBOX:</b></dt>
-        <dd>Container adibito al deposito di materiale plastico, con capienza attuale <b>contPB</b> e capienza massima pari a <b>MAXPB</b> Kg. <br> Il termine viene anche usato per indicare l'area nella quale il robot deve trovarsi per effettuare l'operazione di scarico della plastica</dd>
+        <dd>Container adibito al deposito di materiale plastico, con capienza attuale <b>contPB</b> e capienza massima pari a <b>MAXPB</b> Kg. <br> 
+            Il termine viene anche usato per indicare la zona nella quale il robot deve trovarsi per effettuare l'operazione di scarico della plastica</dd>
         <dt><b>GLASSBOX:</b></dt> 
-        <dd>Container adibito al deposito di materiale vetroso, con capienza attuale <b>contGB</b> e capienza massima pari a <b>MAXGB</b> Kg. <br> Il termine viene anche usato per indicare l'area nella quale il robot deve trovarsi per effettuare l'operazione di scarico del vetro</dd>
+        <dd>Container adibito al deposito di materiale vetroso, con capienza attuale <b>contGB</b> e capienza massima pari a <b>MAXGB</b> Kg. <br> 
+            Il termine viene anche usato per indicare la zona nella quale il robot deve trovarsi per effettuare l'operazione di scarico del vetro</dd>
         <dt><b>HOME:</b></dt> 
         <dd>Area nella quale risiede il robot quando non deve svolgere alcuna attività</dd>
         <dt><b>Transport trolley:</b></dt>
-        <dd>Entità robotica attiva e astratta che riceve i comandi relativi alla prossima destinazione che si deve raggiungere. Esso riceve anche i comandi relativi allo scarico e carico del materiale:<br>
+        <dd>Attore rappresentante un'entità robotica astratta che riceve i comandi relativi alla prossima destinazione da raggiungere. Esso riceve anche i comandi relativi allo scarico e carico del materiale:<br>
             <code><pre>
                 //POSITION = INDOOR | PLASTICBOX | GLASSBOX | HOME
                 //RESULT =  OK | ERROR
@@ -277,22 +284,23 @@ dd{
             </code>
             Nota: il <b>Transport trolley</b> può ricevere una richiesta di nuova posizione prima che abbia raggiunto la destinazione precedente: la navigazione è ora impostata sulla nuova destinazione.
         </dd>
-        
-        <dt><b>DDR Robot concreto</b> o "robot":</dt> <dd>Con questo termine ci si riferisce al robot vero e proprio (fisico o simulato virtualmente)</dd>
-        <dt><b>DDR Robot:</b></dt> <dd>Il servizio che riceve ed esegue i comandi di basso livello di spostamento del robot (avanti,indietro,destra,sinistra): <br>
+        <dt><b>DDR Robot concreto</b> o "robot":</dt>
+        <dd>Con questo termine ci si riferisce al robot vero e proprio (fisico o simulato virtualmente). <br>
+            Il committente fornisce già un ambiente di simulazione che implementa un <b>DDR Robot concreto</b> virtuale: <a href="" class="todo">link a Virtualenv</a> </dd>
+        <dt><b>DDR Robot:</b></dt>
+        <dd>Attore che riceve ed esegue i comandi di basso livello di spostamento del robot: <br>
+            Il committente fornisce già un attore che si interfaccia con il <b>DDR Robot concreto</b> di <a href="" class="todo">link a Virtualenv</a>: <a href="" class="todo">link a unibo.wenvUsage22</a> , <a href="" class="todo">link al progetto BasicRobot22</a>
             <code><pre>
-                //MOVE =  w | a | s | d |      h ?
-                ______ cmd            : cmd(MOVE)</pre>
+                //MOVE =  w | a | s | d | h
+                Dispatch cmd           : cmd(MOVE)     
             </code>
-            <p class="todo">Da definire ancora bene se tali comandi fanno uno step o se si muovono fino a che non viene incotnrata una parete. in base a questo definire poi il tipo di interazione (dispatch,request...) e se ci va alt o meno</p>
         </dd>
-
         <dt><b>Deposit action:</b></dt>
         <dd>Sequenza di azioni di:<br>
             <ol>
                 <lI><b>Pickup:</b> raccolta di <b>Waste-load</b> dal <b>Waste-truck</b> che avviene in <b>INDOOR</b> </lI>
-                <lI>trasporto del materiale da <b>INDOOR</b> a <b>PLASTICBOX</b> o <b>GLASSBOX</b> in base al tipo di materiale </lI>
-                <lI><b>Dropout:</b> deposito del materiale nel <b>PLASTICBOX</b> o <b>GLASSBOX</b> in base al tipo di materiale caricato</lI>
+                <lI>Trasporto del materiale da <b>INDOOR</b> a <b>PLASTICBOX</b> o <b>GLASSBOX</b> in base al tipo di materiale</lI>
+                <lI><b>Dropout:</b> deposito del materiale nel <b>PLASTICBOX</b> o <b>GLASSBOX</b> in base al tipo di materiale</lI>
             </ol>
         </dd>
         <dt><b>Waste-truck:</b></dt> 
@@ -320,10 +328,9 @@ dd{
             </code>
         </dd>
         <dt><b>Service-manager:</b></dt>
-        <dd>Operatore che supervisiona lo stato dell'area di servizio usando una <b>WasteServiceStatusGUI</b> 
-            <p class="todo">Fare il QAK con l'attore WasteServiceObserver</p> </dd>
+        <dd>Operatore che supervisiona lo stato dell'area di servizio usando una <b>WasteServiceStatusGUI</b></dd>
         <dt><b>WasteServiceStatusGUI:</b></dt>
-        <dd>Pannello di controllo che permette al <b>Service-manager</b> di verificare in tempo reale lo stato del sistema. In particolare deve essere mostrato:
+        <dd>Pannello di controllo che permette al <b>Service-manager</b> di monitorare:
             <ul>
                 <lI>La poszione del <b>Transport trolley</b> (basta l'area nella quale si trova attualmente, non necessariamente delle coordinate spaziali)</lI>
                 <lI>Lo stato attuale del <b>Transport trolley</b></lI>
@@ -332,9 +339,9 @@ dd{
             </ul>
         </dd>
         <dt><b>LED concreto:</b></dt> 
-        <dd>Dispositivo di output connesso al RaspberryPI presente sul <b>DDR Robot</b></dd>
+        <dd>Dispositivo di output connesso al RaspberryPI (che NON è a bordo del <b>DDR Robot</b>)</dd>
         <dt><b>LED:</b></dt>
-        <dd>Entità attiva e astratta che rappresenta il <b>LED concreto:</b>, è che può assumere tre stati:
+        <dd>Entità attiva e astratta che rappresenta il <b>LED concreto:</b>, è che può essere impostato secondo 3 modalità:
             <ul>
                 <lI>Led Off: quando il <b>Transport trolley:</b> è in <b>HOME</b> </lI>
                 <lI>Led On: quando il <b>Transport trolley:</b> è fermo (quando distanza rilevata &lt DLIMIT)</lI>
@@ -342,25 +349,33 @@ dd{
             </ul>
             <br>
             Il led può essre comandato esplicitamente attraverso l'invio dell'evento: <br>
+            <p class="todo"> comuqnue questo va in uno sprint successivo</p>
             <code><pre>
                 //STATE = on | off | blink
                 Event update_led : update_led(STATE)</pre>
             </code>
-            <p class="todo"> ma dovrebbe anche essere comandato indirettamente in base al fatto che il robot si sia fermato per un ostacolo o meno</p>
+            <p class="todo"> ma dovrebbe anche essere comandato indirettamente dal sonar no?</p>
         </dd>
         <dt><b>Sonar concreto:</b></dt> 
-        <dd>Dispositivo di input connesso al RaspberryPI presente sul <b>DDR Robot</b></dd>
+        <dd>Dispositivo di input connesso al RaspberryPI (che NON è a bordo del <b>DDR Robot</b>)</dd>
         <dt><b>Sonar:</b></dt> 
-        <dd>Entità astratta che rappresenta il <b>sonar concreto</b>. <br> 
+        <dd>Attore che rappresenta il <b>sonar concreto</b>. <br> 
+            <p>Si noti che il committente fornisce già del software relativo al sonar in <a href="" class="todo">link al progetto BasicRobot22</a>, <a href="" class="todo">link a it.unibo.radarSystem22.domain</a>, <a href="" class="todo">link a unibo.sonarqak22</a></p>
+            <p><i>sonarHCSR04SupportActor</i> di <i>BasicRobot22</i> emette eventi del tipo:</p>
             <code><pre>
-                //STATE = on | off | blink
-                Event obstacle : obstacle(STATE)</pre>
+                V = distance int val
+                Event sonar : sonar(V)</pre>
             </code>
-            <p class="todo"> mettersi daccordo su cosa fa sto sonar</p>
+            <p>Ma nel sistema in esame, sarebbero sufficienti eventi:</p> 
+            <code><pre>
+                V = CLOSE | FAR
+                Event sonar : sonar(V)</pre>
+            </code>
+            <p class="todo">Si procederà quindi alla creazione di un ulteriore attore per il filtraggio e adattamento del segnale:</p> 
+            <p class="todo"> mettersi daccordo su cosa è/fa sto sonar, forse è pure necessario poterlo interrogare all'inizio no?</p>
         </dd>
-        
         <dt><b>DLIMT:</b></dt>
-        <dd>Misura in CM della distanza limite. Se la distanza attualmente misurata dal sonar è ≤ DLIMT, il robot deve essere nello stato stopped. Qunando la distanza misurata &gt DLIMIT il robot può muoversi</dd>
+        <dd>Misura in CM della distanza limite. Se la distanza attualmente misurata dal <b>Sonar concreto</b> è ≤ DLIMT, il robot deve essere nello stato stopped. Qunando la distanza misurata &gt DLIMIT il robot può muoversi</dd>
     </dl>
 </div>
 
@@ -375,7 +390,7 @@ dd{
             Possibile una separazione dei due concetti: <br>
             il <b>DDR robot</b> è concepita come una entità di basso livello che riceve comandi:
             <code><pre>
-                //MOVE =  w | a | s | d |      h ?
+                //MOVE =  w | a | s | d | h
                 ______ cmd            : cmd(MOVE)</pre>
             </code>
         </li>
@@ -387,7 +402,7 @@ dd{
         </li>
     </ul>
     <b>Transport trolley</b> invierà quindi una serie di comandi elementari a <b>DDR robot</b> per raggiungere la nuova posizione. <br>
-    Questa separazione tra in due layer rende il sistema più resitente ad eventuali future variazioni della tecnologia utilizzata per il robot. 
+    Questa separazione tra in due layer rende il sistema più resitente ad eventuali future variazioni della tecnologia utilizzata per il robot (movimento a step con coordinate o meno, tipologia di hardware del robot). 
     Il <b>WasteService</b> continuerà ad inviare al <b>Transport trolley</b> gli stessi comandi astratti, senza preoccuparsi di "in che modo" o "con quali mezzi" la destinazione viene raggiunta.
 
     <h4>Stati del <b>Transport trolley</b></h4>
@@ -399,7 +414,9 @@ dd{
 
     <h4><b>Transport trolley</b> non gestisce autonomamente carico/scarico:</h4>
     <p>Per questioni di flessibilità, abbiamo tenuto separate le operazioni di carico, scarico e movimento: l'idea è che se un domani si deve modificare il processo di smistamento,
-        basterà modificare la sequenza di comandi che vengono impartiti al <b>Transport trolley</b>, senza bisogno di modificare quest'ultimo.</p>
+        basterà modificare la sequenza di comandi che vengono impartiti al <b>Transport trolley</b>, senza bisogno di modificare quest'ultimo. <br>
+        Inoltre, anche se il committente ha detto che le operazioni di carico e scarico possono essere modellate come semplici timeout, abbiamo ritenuto concettualmente corretto far 
+        gestire questa operazione all'entità <b>Transport trolley</b> (un domani potrebbe aver bisogno di inviare comandi ad altri componenti per fare vere azioni)</p>
     <code><pre>
         //RESULT =  OK | ERROR
         Request pickup         : pickup(_)
@@ -485,6 +502,8 @@ dd{
 
  
 <h2>Maintenance</h2> 
+
+<h3><a href="sprint1/QakSprint1/src/demo0.qak">Metamodello eseguibile QAK</a></h3>
  
 <!-- USEFUL
 <table style="width:100%" border="1">
