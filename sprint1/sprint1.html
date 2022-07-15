@@ -1,0 +1,505 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+    <!--
+<link rel="stylesheet" type="text/css" href="../css/issStyle1.css">
+<script type="text/javascript" src="../css/issStyle.js"></script>
+-->
+<style type="text/css">
+body
+{
+    margin-left:  30px;
+    margin-right: 30px;
+};
+
+P
+{
+    font-family: Tahoma;
+    font-size: 10pt;
+};
+
+a, a:visited, a:active, a:link, a:hover {
+    text-decoration: underline;
+    color: #545454;
+    background-color: transparent;
+	font-size: 93%;
+}
+
+a:hover {
+    background-color: #cccccc;
+}
+
+
+hr {
+    clear: both;
+    height: 1px;
+    color: #242424;
+    background-color: transparent;
+}
+
+h1, h2, h3 {
+    color: #242424;
+    clear: left;
+    font: 100% Tahoma, Helvetica, Arial, sans-serif;
+    margin-bottom: 0.5em;
+    padding-top: 0.5em;
+	border-radius: 10px;
+	padding: 5px;
+}
+
+top {
+	width: 100%;
+}
+
+
+#i {
+    color: #ff1010;
+}
+tt{
+	font-family: "Arial";
+    font-size: 90%;
+	color: #006600;
+}
+em{
+	font-family: "Arial";
+    font-size: 80%;
+	font-weight: bold;
+	border-style:solid;
+	border-color: #abe876;
+    color: #1632cc;
+}
+bc{
+	font-family: "Arial";
+	font-size: 90%;
+	font-weight: bold;
+    color: #990000;
+	background-color: #fcf8c7;
+}
+ks{
+	font-family: "Arial";
+	font-weight: bold;
+    color: #0000CD	;
+	font-size: 90%;
+}
+kc{
+	font-family: "Arial";
+	font-weight: bold;
+    color: #008000	;
+	font-size: 90%;
+}
+pre{
+	font-family: "Consolas";
+	font-size: 85%;
+	background-color: #f5f5f5;
+	border: 1.5px solid silver;
+	padding: 5px;
+}
+m{
+	font-family: "Helvetica";
+	line-height: 100%;
+ 	font-size: 75%;
+}
+div.body{
+	 
+    font-size: 18px;
+}
+k{
+    color: #990000;
+	font-weight: bold;
+	font-size: 90%;
+}
+h1 {
+    font-size: 150%;
+    background-color: #b2c0ff;
+	padding: 10px;
+}
+
+h2 {
+    background-color: #9ed8ff;
+    font-size: 130%;
+}
+
+h3 {
+	background-color: #e6ccff;
+    font-size: 100%;
+}
+h4 {
+    background-color: #ccffcc;
+    font-size: 100%;
+	width: 95%;
+	border-radius: 5px;
+	padding: 2px;
+}
+h5 {
+    background-color: #d5ffb0;
+    font-size: 100%;
+
+}
+div.req{
+	background-color: #d9ffb3;
+    font-size: 18px;
+	width: 700px;
+    border: 3px solid green;
+    padding: 15px;
+    margin: 10px;
+}
+div.remark{
+	background-color: #E3F2FD;
+    border: 1.5px solid #d5f2ed;
+    padding: 15px;
+    margin: 10px;
+	border-radius: 25px;
+}
+table, th, td {
+  border: 1px solid black;
+  border-collapse: collapse;
+}
+
+ol, ul, li {
+  margin: 0;
+  margin-left: 10px;
+  padding: 0;
+  padding-bottom: 5px;
+}
+
+table, th, td {
+	border: 1px solid black;
+}
+
+img {
+	border: 1.5px solid #d5f2ed
+
+}
+
+a, a:visited, a:active, a:link, a:hover {
+    text-decoration: underline;
+    color: #545454;
+    background-color: transparent;
+}
+
+div.wrapdesc{
+	width: 90%;
+	margin: auto;
+}
+
+div.imagedesc{
+	width: 85%;
+	margin: auto;
+}
+</style>
+<style>
+code>pre { 
+    font-family: monospace;
+}
+dd{
+    margin-bottom: 7px;
+}
+.todo{
+    color: orange
+}
+.centerimg{
+    display: block;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 90%;
+    max-width: 800px;
+}
+p { margin: 4px 0px; }
+dd{ margin-bottom: 8px;}
+</style>
+<head>
+   
+<title>WasteService</title></head>
+    
+<body>
+<div id="top">
+<h1>ISS FINAL PROJECT </h1>
+</div>  
+
+<div class="body"> 
+<h2>Introduction</h2>
+<div class="remark">
+    <p>Progetto finale di ISS, che consiste in un impianto di smistamento dei rifiuti nel quale un robot deve trasportare il materiale dal camion al relativo container</p>
+</div>
+
+<h2>Requirements</h2>
+<div class="remark">
+    <a href="../docs_prof/html/TemaFinale22.html">Requisiti</a>
+    <br>
+    <p>Ulteriori requisiti scaturiti da colloqui con committente:</p>
+    <ul>
+        <lI>Può esserci solo un camion alla volta in INDOOR? SI</lI>
+        <li>Il Waste-truck deve essere liberato non appena il materiale viene scaricato? SI</li>
+        <li>La GUI deve mostrare le coordine del robot o basta l'area nella quale si trova attualmente? basta l'area nella quale si trova attualmente</li>
+        <li>A cosa serve il sonar se la stanza è priva di ostacoli? Il sonar non è a bordo del robot, è un dispositivo esterno (così come il RPI). Se si mette una mano davanti al dispositivo, il robot si ferma.</li>
+        <li>Ci deve essere il contatto con la parete per il carico/scarico dei materiali? SI (o comunque il più vicino possibile)</li>
+        <li>Supponiamo che il robot si stia dirigendo verso HOME (perché ha scaricato l'ultimo carico di materiale e non ci sono altri Waste truck sull'INDOOR). Se arriva un Waste truck prima che il trolley raggiunga la base, il robot deve cambiare rotta immediatamente o può raggiungere la base e poi dirigersi presso l'Indoor? CAMBIA IMMEDIATAMENTE ROTTA per dirigersi su indoor</li>
+        <li>È il robot a determinare quando avviene la fine di una azione di carico/scarico? In che modo tale evento può essere rilevato dal sistema da noi sviluppato? Modellare l'operazione con un SEMPLICE DELAY di durata fissa</li>
+        <li>Il nodo sul quale la GUI va installata e un nodo fisso? O si tratta forse di palmari posseduti dai Service-manager stessi? Il NODO è FISSO </li>
+        <li>In cosa consiste lo smart device? Quanti sono (viene usato sempre lo stesso dispositivo o ve ne è uno per ogni conducente)? Come si relaziona con il nostro sistema? Un dispositivo per ogni conducente, "alieno" invia un messaggio</li>
+        <li>Committente ha server aziendali disponibili? È possibile usare la RPI come server (nodo sempre attivo mentre il sistema è operativo)? E' possibile usare la raspberry, ma si può anche mettere sul PC che usiamo.</li>
+    </ul>
+</div>
+
+<h2>Requirement analysis</h2>
+
+<h3>Dizionario</h3>
+<div class="remark">
+    <dl>
+        <dt><b>WasteService:</b></dt> 
+        <dd>Attore che si occupa del coordinamento delle attività di raccolta e smistamento dei rifiuti. Contiene buona parte della business logic del sistema. 
+            Riceve le <i>depositrequest</i> e risponde con <i>loadaccepted</i> o <i>loadrejected</i> in base al carico dei <b>Waste-truck</b> e allo spazio ancora disponibile in <b>PLASTICBOX</b> o <b>GLASSBOX</b>: <br>    
+            <code><pre>
+                //MATERIAL = PLASTIC | GLASS
+                //TRUCKLOAD =  integer number
+                Request depositrequest : depositrequest(MATERIAL, TRUCKLOAD)
+                Reply loadaccepted     : loadaccepted(MATERIAL, TRUCKLOAD)
+                Reply loadrejected     : loadrejected(MATERIAL, TRUCKLOAD)</pre>
+            </code>
+            Il componente invia comandi al <b>Transport trolley</b> per svolgere le azioni necessarie
+        </dd>
+        <dt><b>Service area:</b></dt>
+        <dd>Superfice rettangolare, piana, priva di ostacoli nella quale il robot può muoversi, e nella quale sono presenti le zone <b>INDOOR</b>, <b>PLASTICBOX</b>, <b>GLASSBOX</b>, <b>HOME</b>; </dd>
+        <dt><b>INDOOR:</b></dt>
+        <dd>Porta di ingresso adibita alla raccolta del <b>Waste-load</b> che dal <b>Waste-truck</b> va al <b>Transport trolley</b>. <br> 
+            Il termine viene anche usato per indicare la zona nella quale il robot deve trovarsi per effettuare l'operazione di carico</dd>
+        <dt><b>PLASTICBOX:</b></dt>
+        <dd>Container adibito al deposito di materiale plastico, con capienza attuale <b>contPB</b> e capienza massima pari a <b>MAXPB</b> Kg. <br> 
+            Il termine viene anche usato per indicare la zona nella quale il robot deve trovarsi per effettuare l'operazione di scarico della plastica</dd>
+        <dt><b>GLASSBOX:</b></dt> 
+        <dd>Container adibito al deposito di materiale vetroso, con capienza attuale <b>contGB</b> e capienza massima pari a <b>MAXGB</b> Kg. <br> 
+            Il termine viene anche usato per indicare la zona nella quale il robot deve trovarsi per effettuare l'operazione di scarico del vetro</dd>
+        <dt><b>HOME:</b></dt> 
+        <dd>Area nella quale risiede il robot quando non deve svolgere alcuna attività</dd>
+        <dt><b>Transport trolley:</b></dt>
+        <dd>Attore rappresentante un'entità robotica astratta che riceve i comandi relativi alla prossima destinazione da raggiungere. Esso riceve anche i comandi relativi allo scarico e carico del materiale:<br>
+            <code><pre>
+                //POSITION = INDOOR | PLASTICBOX | GLASSBOX | HOME
+                //RESULT =  OK | ERROR
+                Request move           : move(POSITION)    
+                Reply   moveanswer     : moveanswer(RESULT)
+                Request pickup         : pickup(_)
+                Reply   pickupanswer   : pickupanswer(RESULT)
+                Request dropout        : dropout(_)
+                Reply   dropoutanswer  : dropoutanswer(RESULT)</pre>
+            </code>
+            Nota: il <b>Transport trolley</b> può ricevere una richiesta di nuova posizione prima che abbia raggiunto la destinazione precedente: la navigazione è ora impostata sulla nuova destinazione.
+        </dd>
+        <dt><b>DDR Robot concreto</b> o "robot":</dt>
+        <dd>Con questo termine ci si riferisce al robot vero e proprio (fisico o simulato virtualmente). <br>
+            Il committente fornisce già un ambiente di simulazione che implementa un <b>DDR Robot concreto</b> virtuale. Documentazione: <a href="../docs_prof/html/VirtualRobot.html#wenv">WEnv</a>, Progetto: <a href="https://github.com/anatali/issLab2022/tree/main/it.unibo.virtualRobot2020">it.unibo.virtualRobot2020</a>. </dd>
+        <dt><b>DDR Robot:</b></dt>
+        <dd>Attore che riceve ed esegue i comandi di basso livello di spostamento del robot: <br>
+            <p>Il committente fornisce già un attore che si interfaccia con il <b>DDR Robot concreto</b> <a href="../docs_prof/html/VirtualRobot.html#wenv">WEnv</a>: <a href="https://github.com/anatali/issLab2022/tree/main/unibo.wenvUsage22">unibo.wenvUsage22</a> , <a href="https://github.com/anatali/issLab2022/tree/main/unibo.basicrobot22">unibo.asicRobot22</a> </p>
+            <p class="todo">Se poi trovi dell'altro SW utile aggiugilo pure...</p>
+            <p>In particolare in <i>basicrobot22</i> esiste un attore <i>basicrobot</i> il quale espone (tra le varie interfacce disponibili) la seguente:</p>
+            <code><pre>
+                //MOVE =  w | a | s | d | h
+                Dispatch cmd           : cmd(MOVE)</pre>
+            </code>
+        </dd>
+        <dt><b>Deposit action:</b></dt>
+        <dd>Sequenza di azioni di:<br>
+            <ol>
+                <lI><b>Pickup:</b> raccolta di <b>Waste-load</b> dal <b>Waste-truck</b> che avviene in <b>INDOOR</b> </lI>
+                <lI>Trasporto del materiale da <b>INDOOR</b> a <b>PLASTICBOX</b> o <b>GLASSBOX</b> in base al tipo di materiale</lI>
+                <lI><b>Dropout:</b> deposito del materiale nel <b>PLASTICBOX</b> o <b>GLASSBOX</b> in base al tipo di materiale</lI>
+            </ol>
+        </dd>
+        <dt><b>Waste-truck:</b></dt> 
+        <dd>Entità che si presenta in <b>INDOOR</b>, e richiede lo scarico del materiale che trasporta attraverso l'uso dello <b>SmartDevice</b></dd>
+        <dt><b>Waste-load:</b></dt> 
+        <dd>Materiale inizialmente presente sul <b>Waste-truck</b></dd>
+        <dt><b>SmartDevice:</b></dt> 
+        <dd>Dispositivo attraverso il quale il <b>Waste-truck</b> comunica al <b>WasteService</b>:
+            <ul>
+                <lI>Il tipo di materiale trasportato: 
+                    <ul>
+                        <lI>PLASTIC</lI>
+                        <lI>GLASS</lI>
+                    </ul>
+                </lI>
+                <lI>Kg di materiale</lI>
+            </ul>
+            E riceve dal <b>WasteService</b> l'esito, che può essere <i>LoadAccepted</i> o <i>LoadRejected</i>:
+            <code><pre>
+                //MATERIAL = PLASTIC | GLASS
+                //TRUCKLOAD =  integer number
+                Request depositrequest : depositrequest(MATERIAL, TRUCKLOAD)
+                Reply loadaccepted     : loadaccepted(MATERIAL, TRUCKLOAD)
+                Reply loadrejected     : loadrejected(MATERIAL, TRUCKLOAD)</pre>
+            </code>
+        </dd>
+        <dt><b>Service-manager:</b></dt>
+        <dd>Operatore che supervisiona lo stato dell'area di servizio usando una <b>WasteServiceStatusGUI</b></dd>
+        <dt><b>WasteServiceStatusGUI:</b></dt>
+        <dd>Pannello di controllo che permette al <b>Service-manager</b> di monitorare:
+            <ul>
+                <lI>La poszione del <b>Transport trolley</b> (basta l'area nella quale si trova attualmente, non necessariamente delle coordinate spaziali)</lI>
+                <lI>Lo stato attuale del <b>Transport trolley</b></lI>
+                <lI>Il peso corrente <b>contPB</b> e <b>contGB</b> del materiale contenuto in <b>PLASTICBOX</b> e in <b>GLASSBOX</b></lI>
+                <lI>Lo stato del <b>LED</b></lI>
+            </ul>
+        </dd>
+        <dt><b>LED concreto:</b></dt> 
+        <dd>Dispositivo di output connesso al RaspberryPI (che NON è a bordo del <b>DDR Robot</b>)</dd>
+        <dt><b>LED:</b></dt>
+        <dd>Entità attiva e astratta che rappresenta il <b>LED concreto:</b>, è che può essere impostato secondo 3 modalità:
+            <ul>
+                <lI>Led Off: quando il <b>Transport trolley:</b> è in <b>HOME</b> </lI>
+                <lI>Led On: quando il <b>Transport trolley:</b> è fermo (quando distanza rilevata &lt DLIMIT)</lI>
+                <lI>Led Blink: quando il <b>Transport trolley:</b> è in movimento, o sta scaricando/caricando materiale</lI>
+            </ul>
+            <p>Il committente fornisce già del software per relativo al led in <a href="https://github.com/anatali/issLab2022/tree/main/it.unibo.radarSystem22.domain">it.unibo.radarSystem22.domain</a></p>
+        </dd>
+        <dt><b>Sonar concreto:</b></dt> 
+        <dd>Dispositivo di input connesso al RaspberryPI (che NON è a bordo del <b>DDR Robot</b>)</dd>
+        <dt><b>Sonar:</b></dt> 
+        <dd>Attore che rappresenta il <b>sonar concreto</b>. <br> 
+            <p>Il committente fornisce già del software relativo al sonar in <a href="https://github.com/anatali/issLab2022/tree/main/unibo.basicrobot22">unibo.basicrobot22</a>, <a href="https://github.com/anatali/issLab2022/tree/main/it.unibo.radarSystem22.domain">it.unibo.radarSystem22.domain</a>, <a href="https://github.com/anatali/issLab2022/tree/main/unibo.sonarqak22">unibo.sonarqak22</a></p>
+            <p>In particolare <i>sonarHCSR04SupportActor</i> di <i>BasicRobot22</i> emette eventi che vengono ridiretti in <a href="../docs_prof/html/QakIntro.html#creazione-di-una-pipe">pipe</a> ad altri attori per successive elaborazioni. <br>
+            Gli eventi che escono da questa pipe sono del tipo:</p>
+            <code><pre>
+                V = distance int val
+                Event  sonar       : sonar(V)</pre>
+            </code>
+        </dd>
+        <dt><b>DLIMT:</b></dt>
+        <dd>Misura in CM della distanza limite. Se la distanza attualmente misurata dal <b>Sonar concreto</b> è ≤ DLIMT, il robot deve essere nello stato stopped. Qunando la distanza misurata &gt DLIMIT il robot può muoversi</dd>
+    </dl>
+</div>
+
+<!--PROBLEM ANALYSIS-->
+<h2>Problem analysis</h2>
+<div class="remark">
+    <h3><b>Coordinate spaziali o no?</b></h3>
+
+
+    <h3><b>Transport trolley</b></h3>
+
+    <h4><b>DDR robot</b> vs <b>Transport trolley</b>:</h4>
+    <ul>
+        <li>
+            Possibile una separazione dei due concetti: <br>
+            il <b>DDR robot</b> è concepita come una entità di basso livello che riceve comandi:
+            <code><pre>
+                //MOVE =  w | a | s | d | h
+                Dispatch cmd           : cmd(MOVE)</pre>
+            </code>
+        </li>
+        <li>
+            Mentre il <b>Transport trolley</b> è concepita come entità astratta che si occpura di ricevere la destinazione generica<br>
+            <code><pre>
+                move(<b>INDOOR</b>|<b>PLASTICBOX</b>|<b>GLASSBOX</b>|<b>HOME</b>)</pre>
+            </code>
+        </li>
+    </ul>
+    <b>Transport trolley</b> invierà quindi una serie di comandi elementari a <b>DDR robot</b> per raggiungere la nuova posizione. <br>
+    La relazione che esiste tra <b>WasteService</b> e <b>Transport trolley</b> è quindi di tipo "use". <br>
+    Questa separazione tra in due layer rende il sistema più resitente ad eventuali future variazioni della tecnologia utilizzata per il robot (movimento a step con coordinate o meno, tipologia di hardware del robot). 
+    Il <b>WasteService</b> continuerà ad inviare al <b>Transport trolley</b> gli stessi comandi astratti, senza preoccuparsi di "in che modo" o "con quali mezzi" la destinazione viene raggiunta.
+
+    <h4><b>Transport trolley</b> non gestisce autonomamente carico/scarico:</h4>
+    <p>Per questioni di flessibilità, abbiamo tenuto separate le operazioni di carico, scarico e movimento: l'idea è che se un domani si deve modificare il processo di smistamento,
+        basterà modificare la sequenza di comandi che vengono impartiti al <b>Transport trolley</b>, senza bisogno di modificare quest'ultimo. <br>
+        Inoltre, anche se il committente ha detto che le operazioni di carico e scarico possono essere modellate come semplici timeout, abbiamo ritenuto concettualmente corretto far 
+        gestire questa operazione all'entità <b>Transport trolley</b> (un domani potrebbe aver bisogno di inviare comandi ad altri componenti per fare vere azioni).</p>
+    <code><pre>
+        //RESULT =  OK | ERROR
+        Request pickup         : pickup(_)
+        Reply   pickupanswer   : pickupanswer(RESULT)
+        Request dropout        : dropout(_)
+        Reply   dropoutanswer  : dropoutanswer(RESULT)</pre>
+    </code>
+
+    <h4>Interazioni con il <b>Transport trolley</b>:</h4>
+    <p>Si noti come le interazioni con il <b>Transport trolley</b> siano tutte delle request-response. <br>
+        Colui che comanda il <b>Transport trolley</b> (cioè una visione astratta e ad alto livello del robot) si aspetta una interazione sincrona bloccante, e si aspetta una risposta con l'esito dell'operazione.<br>
+        Tuttavia, solo per il comando <i>move(POSITION)</i>, è possibile comandare una nuova destinazione anche se quella precedente non è stata ancora raggiunta. <br>
+        Questo perchè è possibile che arrivi un nuovo <b>Waste-truck</b> mentre il <b>Transport trolley</b> sta tornando a <b>HOME</b>. In questo modo è possibile soddisfare il requisito di gesione immediata della nuova richiesta senza aspettare che il <b>Transport trolley</b> raggiunga <b>HOME</b>. 
+        Il nuovo comando annulla di fatto la <i>move</i> precedente, quindi si riceverà solo la risposta relativa all'ultimo comando.</p>
+    <hr>
+
+    <h4>Principio di funzionamento del <b>Transport trolley</b>: <br> sistema a coordinate, o semplice macchina a stati che rileva impatto con i muri?</h4>
+    <p>In questa sezione</p>
+    <p class="todo">Fare vedere le varie possibilità e quella che è stata scelta</p>
+    
+
+    <h3>Impostazione di una prima architettura logica</h3>
+    <ul>
+        <li>Possiamo pensare il <b>WasteService</b> come il componente controller contenente business logic, ossia quello che contiene le azioni da svolgere per realizzare il processo di smistamento (le <b>Deposit action</b>)</li>
+        <li><b>DDR Robot</b> è collocato su un contesto collocato in un nodo a bordo del <b>DDR Robot concreto</b>. <br>
+            Risulta concettualmente sensato porre nello stesso contesto <b>Transport trolley</b>. <b>Transport trolley</b> potrebbe infatti necessitare di cambiamenti nel caso in cui cambi il <b>DDR Robot concreto</b> e la tecnologia di movimento usata. <br>
+            Si noti tuttavia che, qualora tale componente debba fare utilizzo di un planner (che effettua una ricerca nello spazio degli stati), allora si dovrebbe considerare la possibilità 
+            di porre tale attore su un nodo computazionale più potente, dove il consumo di potenza non è un problema (mentre si presume che il robot sia alimentato a batteria)</li>
+        <li><b>LED concreto</b> e <b>Sonar concreto</b> sono collegati al RPI, e sono quindi su un contesto a parte: analizzeremo in sprint successivi tali componenti. Anche la GUI verrà analizzata successivamente</li> 
+    </ul>
+    Alla luce delle osservazioni sinora fatte, un primo modello di architettura logica del sistema è il seguente:
+    <img class="centerimg" src="docs/_images/logic_architecure_1.png" style="width: 500px;"/>
+
+    <hr>
+
+    <h3><b>WasteService</b></h3>
+    <p>Possiamo pensare il <b>WasteService</b> come il componente controller, ossia quello che contiene la business logic del sistema.<br>
+        Abbiamo analizzato le funzionalità che il servizio <b>WasteService</b> deve offrire, e abbiamo quindi formalizzato tale entità con il modello qak. <br>
+        Per una migliore comprensione il diagramma degli stati di questo attore viene qui riassunto con il seguente schema: </p>
+    <img class="centerimg" src="docs/_images/wasteservice_actor_state_diagram_1.png"/>
+    <p style="color: red">Possibile BUG! Se si riceve una depositrequest, ed essa è poi rifiutata, si ha un messaggio moveanswer che viene accodato e utilizzato impropriamente quando 
+        si gestirà nuovamente una nuova richiest. Necessario autoanello su wait per consumare il messaggio.</p>
+
+    <hr>    
+    
+</div>
+    
+
+</div>
+
+<h2>Test plans</h2> 
+
+
+<h2>Project</h2> 
+ 
+</div>
+
+<h2>Testing</h2> 
+ 
+<h2>Work plan</h2>
+<div class="remark">
+    
+
+</div>
+
+<h3><a href="sprint1/QakSprint1/src/demo0.qak">Metamodello eseguibile QAK</a></h3>
+ 
+<!-- USEFUL
+<table style="width:100%" border="1">
+<tr>
+<td style="width:50%">
+</td>
+<td></td>
+</tr>
+</table>
+-->
+	      	
+<br/><br/> 	
+</div>  
+
+<div style="background-color:rgba(86, 56, 253, 0.9); width:100%;text-align:left;color:white">
+    <table style="border: 0px solid transparent; margin: 0 auto;">
+        <tr>
+            <th>
+                <p>Loris Giannatempo <br>
+                Email: loris.giannatempo@studio.unibo.it</p>
+                <img class="centerimg" src="../docs_common/lorisgiannatempo.jpg" style="width: 30%; height: 30%; border: 0px">
+            </th>
+            <th>
+                <p>Davide Guidetti <br>
+                Email: davide.guidetti3@studio.unibo.it</p>
+                <img class="centerimg" src="../docs_common/davideguidetti.jpg" style="width: 30%; height: 30%; border: 0px">
+            </th>
+        </tr>
+    </table>
+</div> 
+</body>
+</html>
