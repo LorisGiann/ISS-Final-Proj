@@ -373,8 +373,6 @@ dd{ margin-bottom: 8px;}
 <!--PROBLEM ANALYSIS-->
 <h2>Problem analysis</h2>
 <div class="remark">
-    <h3><b>Coordinate spaziali o no?</b></h3>
-
 
     <h3><b>Transport trolley</b></h3>
 
@@ -391,7 +389,9 @@ dd{ margin-bottom: 8px;}
         <li>
             Mentre il <b>Transport trolley</b> è concepita come entità astratta che si occpura di ricevere la destinazione generica<br>
             <code><pre>
-                move(<b>INDOOR</b>|<b>PLASTICBOX</b>|<b>GLASSBOX</b>|<b>HOME</b>)</pre>
+                //POSITION =  <b>INDOOR</b>|<b>PLASTICBOX</b>|<b>GLASSBOX</b>|<b>HOME</b>
+                Request move           : move(POSITION)
+                Reply   moveanswer     : moveanswer(RESULT)</pre>
             </code>
         </li>
     </ul>
@@ -418,12 +418,42 @@ dd{ margin-bottom: 8px;}
         Colui che comanda il <b>Transport trolley</b> (cioè una visione astratta e ad alto livello del robot) si aspetta una interazione sincrona bloccante, e si aspetta una risposta con l'esito dell'operazione.<br>
         Tuttavia, solo per il comando <i>move(POSITION)</i>, è possibile comandare una nuova destinazione anche se quella precedente non è stata ancora raggiunta. <br>
         Questo perchè è possibile che arrivi un nuovo <b>Waste-truck</b> mentre il <b>Transport trolley</b> sta tornando a <b>HOME</b>. In questo modo è possibile soddisfare il requisito di gesione immediata della nuova richiesta senza aspettare che il <b>Transport trolley</b> raggiunga <b>HOME</b>. 
-        Il nuovo comando annulla di fatto la <i>move</i> precedente, quindi si riceverà solo la risposta relativa all'ultimo comando.</p>
-    <hr>
+        Il nuovo comando annulla di fatto la <i>move</i> precedente, quindi si riceverà solo la risposta relativa all'ultimo comando.
+    </p>
 
-    <h4>Principio di funzionamento del <b>Transport trolley</b>: <br> sistema a coordinate, o semplice macchina a stati che rileva impatto con i muri?</h4>
-    <p>In questa sezione</p>
-    <p class="todo">Fare vedere le varie possibilità e quella che è stata scelta</p>
+    <h3>Principio di funzionamento del <b>Transport trolley</b>: 
+        <br> Sistema a coordinate, o semplice macchina a stati che rileva impatto con i muri?</h3>
+    <p>La particolare collocazione delle zone <b>INDOOR</b>, <b>PLASTICBOX</b>, <b>GLASSBOX</b>, <b>HOME</b> rende attuabile una soluzione che non richiede l'utilizzo di coordinate: il robot può infatti muoversi all'interno della <b>Service area</b> lungo le pareti, orientandosi semplicemente rilevando le collisioni con le pareti. <br>
+        In questa sezione analizziamo i punti a favore dell'utilizzo un sistema a coordinate e uno senza coordinate:</p>
+    <p>I vantaggi nell'utilizzo di un sistema a coordinate:</p>
+    <ul>
+        <li>Potenziale riuso di moduli che già abbiamo sviluppato (mapper, planner)</li>
+        <li>Maggiore flessibilità (posizione dei siti non è più negli angoli, robot deve seguire un percorso ottimo, ostacoli nel percorso, gestione più semplice del cambio di destinazione mentre il robot è in movimento)</li>
+    </ul>
+    <p>I vantaggi nell'utilizzo di un sistema senza coordinate:</p>
+    <ul>
+        <li>Minor complessità, minor costo</li>
+        <li>Maggior velocità negli spostamenti, e maggior velocità di reazione a comandi di halt</li>
+        <li>Possibile miglior reazione (piuttosto che a singoli step) da parte di robot reali che non fatto uso di sistemi in feedback o altro hardware per controllare meglio la propria posizione</li>
+    </ul>
+    <p>Per la realizzazione del transport trolley sono state analizzate 3 diverso opzioni, che vengono qui descritte.</p>
+
+    <h4>OPZIONE 1</h4>
+    <p>Si tratta di una semplice macchina a stati che è in grado di raggiungere la destinazione facendo fare al robot sempre un giro in senso antiorario. <br>
+        Se viene cambiata la destinazione mentre il robot è in movimento, esso non cambia direzione, perchè comunque per raggiugere ogni altro sito procede in senso antiorario, e quindi il prossimo sito deve comunque essere raggiunto.
+    </p>
+    <img class="centerimg" style="width: 400px;" src="docs/_images/transporttrolley_option1_explaination.png"/>
+    <p>Pro e Contro:</p>
+    <ul>
+        <li>+ semplicità</li>
+        <li>+ possibile estendere la soluzione appena mostrata per attenere l'opzione successiva</li>
+        <li>- poca flessibilità</li>
+        <li>- politica non molto efficiente</li>
+    </ul>
+    <p>La macchina a stati che deve essere implementata all'interno di <b>Transport trolley</b> se si vuole percorrere questa soluzione è la seguente:</p>
+    <img class="centerimg" src="docs/_images/transporttrolley_option1_verbose_state_machine.png"/>
+    <p>Tuttavia è possibile implementarla in maniera più sintetica e compatta nel seguente modo:</p>
+    <img class="centerimg" style="width: 500px;" src="docs/_images/transporttrolley_option1_compact_state_machine.png"/>
     
 
     <h3>Impostazione di una prima architettura logica</h3>
@@ -436,7 +466,8 @@ dd{ margin-bottom: 8px;}
         <li><b>LED concreto</b> e <b>Sonar concreto</b> sono collegati al RPI, e sono quindi su un contesto a parte: analizzeremo in sprint successivi tali componenti. Anche la GUI verrà analizzata successivamente</li> 
     </ul>
     Alla luce delle osservazioni sinora fatte, un primo modello di architettura logica del sistema è il seguente:
-    <img class="centerimg" src="docs/_images/logic_architecure_1.png" style="width: 500px;"/>
+    <img class="centerimg" style="width: 500px;" src="docs/_images/logic_architecure_1.png"/>
+    <p class="todo">Poi qui immagino che ci si dovrà fare un link ad una legenda per questo simbolismo</p>
 
     <hr>
 
