@@ -26,27 +26,28 @@ private CoapConnection conn;
 				MainCtxserverKt.main();
 			}
 		}.start();
+		/*
 		new Thread(){
 			public void run(){
 				MainCtxrobotKt.main();
 			}
 		}.start();
+
+		 */
 		waitForApplStarted();
   	}
 
  	protected void waitForApplStarted(){
 		ActorBasic wasteservice = QakContext.Companion.getActor("wasteservice");
-		ActorBasic transporttrolley = QakContext.Companion.getActor("transporttrolley");
+		//ActorBasic transporttrolley = QakContext.Companion.getActor("transporttrolley");
 		while( wasteservice == null ){
 			ColorsOut.outappl("TestSprint1 waits for appl ... " , ColorsOut.GREEN);
-			CommUtils.delay(200);
+			CommUtils.delay(20);
 			wasteservice = QakContext.Companion.getActor("wasteservice");
+			CommUtils.delay(20);
+			//transporttrolley = QakContext.Companion.getActor("transporttrolley");
 		}
-		while( transporttrolley == null ){
-			ColorsOut.outappl("TestSprint1 waits for appl ... " , ColorsOut.GREEN);
-			CommUtils.delay(200);
-			transporttrolley = QakContext.Companion.getActor("transporttrolley");
-		}
+
 
 	}
 	@After

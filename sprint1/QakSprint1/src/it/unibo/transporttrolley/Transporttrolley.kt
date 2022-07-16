@@ -11,114 +11,105 @@ import kotlinx.coroutines.runBlocking
 class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scope ){
 
 	override fun getInitialState() : String{
-		return "s0"
+		return "init"
 	}
 	override fun getBody() : (ActorBasicFsm.() -> Unit){
-		 lateinit var tmp : String  
+		 lateinit var dest : String
+			   lateinit var currpos : String
+			   var RobotType     = "" 
+			   
+			   fun newPosition(CURRPOS:String) : String {
+		 			if (CURRPOS=="HOME"){
+		 				return "INDOOR";
+		 			}
+		 			if (CURRPOS=="INDOOR"){
+		 				return "PLASTICBOX";
+		 			}
+		 			if (CURRPOS=="PLASTICBOX"){
+		 				return "GLASSBOX";
+		 			}
+		 			if (CURRPOS=="GLASSBOX"){
+		 				return "HOME";
+		 			}
+		 			return "ERRORE";
+		 		} 			
+			   
 		return { //this:ActionBasciFsm
-				state("s0") { //this:State
+				state("init") { //this:State
 					action { //it:State
 						discardMessages = true
-						 sysUtil.logMsgs=true  
-					}
-					 transition(edgeName="t017",targetState="handle_cmd",cond=whenRequest("move"))
-				}	 
-				state("handle_cmd") { //this:State
-					action { //it:State
-						if( checkMsgContent( Term.createTerm("move(POSITION)"), Term.createTerm("move(ARG)"), 
-						                        currentMsg.msgContent()) ) { //set msgArgList
-								 tmp = payloadArg(0)  
-								println("move(${tmp})")
-								forward("noMsg", "noMsg(_)" ,"transporttrolley" ) 
+						 dest = "HOME"
+								   currpos = "HOME"	
+						println("Init trasport trolley")
+						unibo.robot.robotSupport.create(myself ,"basicrobotConfig.json" )
+						 RobotType = unibo.robot.robotSupport.robotKind  
+						delay(1000) 
+						if(  RobotType != "virtual"  
+						 ){ var robotsonar = context!!.hasActor("realsonar")  
+						        	   unibo.robot.robotSupport.createSonarPipe(myself) 
 						}
 					}
-					 transition(edgeName="toNewState18",targetState="moving_home",cond=whenDispatchGuarded("noMsg",{ tmp=="HOME"  
+					 transition( edgeName="goto",targetState="wait", cond=doswitch() )
+				}	 
+				state("wait") { //this:State
+					action { //it:State
+						println("Wait")
+						println("Dest: ${dest} CurrPos: ${currpos}")
+						if(  currpos!=dest  
+						 ){forward("noMsg", "noMsg(_)" ,"transporttrolley" ) 
+						}
+					}
+					 transition(edgeName="toNewState17",targetState="picking_up",cond=whenRequestGuarded("pickup",{ currpos==dest 
 					}))
-					transition(edgeName="toNewState19",targetState="moving_indoor",cond=whenDispatchGuarded("noMsg",{ tmp=="INDOOR"  
+					transition(edgeName="toNewState18",targetState="dropping_down",cond=whenRequestGuarded("dropout",{ currpos==dest 
 					}))
-					transition(edgeName="toNewState20",targetState="moving_plasticbox",cond=whenDispatchGuarded("noMsg",{ tmp=="PLASTICBOX"  
+					transition(edgeName="toNewState19",targetState="set_new_dest",cond=whenRequestGuarded("move",{ currpos==dest 
 					}))
-					transition(edgeName="toNewState21",targetState="moving_glassbox",cond=whenDispatchGuarded("noMsg",{ tmp=="GLASSBOX"  
-					}))
+					transition(edgeName="toNewState20",targetState="forward_robot",cond=whenDispatch("noMsg"))
 				}	 
-				state("moving_home") { //this:State
+				state("picking_up") { //this:State
 					action { //it:State
-						stateTimer = TimerActor("timer_moving_home", 
-							scope, context!!, "local_tout_transporttrolley_moving_home", 1000.toLong() )
-					}
-					 transition(edgeName="t022",targetState="moved_home",cond=whenTimeout("local_tout_transporttrolley_moving_home"))   
-					transition(edgeName="t023",targetState="handle_cmd",cond=whenRequest("move"))
-				}	 
-				state("moved_home") { //this:State
-					action { //it:State
-						answer("move", "moveanswer", "moveanswer(OK)"   )  
-						println("robot reached HOME")
-					}
-					 transition(edgeName="t024",targetState="handle_cmd",cond=whenRequest("move"))
-				}	 
-				state("moving_indoor") { //this:State
-					action { //it:State
-						stateTimer = TimerActor("timer_moving_indoor", 
-							scope, context!!, "local_tout_transporttrolley_moving_indoor", 1000.toLong() )
-					}
-					 transition(edgeName="t025",targetState="moved_indoor",cond=whenTimeout("local_tout_transporttrolley_moving_indoor"))   
-					transition(edgeName="t026",targetState="handle_cmd",cond=whenRequest("move"))
-				}	 
-				state("moved_indoor") { //this:State
-					action { //it:State
-						answer("move", "moveanswer", "moveanswer(OK)"   )  
-						println("robot reached INDOOR")
-					}
-					 transition(edgeName="t027",targetState="handle_cmd",cond=whenRequest("move"))
-					transition(edgeName="t028",targetState="pickUp",cond=whenRequest("pickup"))
-				}	 
-				state("moving_plasticbox") { //this:State
-					action { //it:State
-						stateTimer = TimerActor("timer_moving_plasticbox", 
-							scope, context!!, "local_tout_transporttrolley_moving_plasticbox", 1000.toLong() )
-					}
-					 transition(edgeName="t029",targetState="moved_plasticbox",cond=whenTimeout("local_tout_transporttrolley_moving_plasticbox"))   
-					transition(edgeName="t030",targetState="handle_cmd",cond=whenRequest("move"))
-				}	 
-				state("moved_plasticbox") { //this:State
-					action { //it:State
-						answer("move", "moveanswer", "moveanswer(OK)"   )  
-						println("robot reached PLASTICBOX")
-					}
-					 transition(edgeName="t031",targetState="handle_cmd",cond=whenRequest("move"))
-					transition(edgeName="t032",targetState="dropOut",cond=whenRequest("dropout"))
-				}	 
-				state("moving_glassbox") { //this:State
-					action { //it:State
-						stateTimer = TimerActor("timer_moving_glassbox", 
-							scope, context!!, "local_tout_transporttrolley_moving_glassbox", 1000.toLong() )
-					}
-					 transition(edgeName="t033",targetState="moved_glassbox",cond=whenTimeout("local_tout_transporttrolley_moving_glassbox"))   
-					transition(edgeName="t034",targetState="handle_cmd",cond=whenRequest("move"))
-				}	 
-				state("moved_glassbox") { //this:State
-					action { //it:State
-						answer("move", "moveanswer", "moveanswer(OK)"   )  
-						println("robot reached GLASSBOX")
-					}
-					 transition(edgeName="t035",targetState="handle_cmd",cond=whenRequest("move"))
-					transition(edgeName="t036",targetState="dropOut",cond=whenRequest("dropout"))
-				}	 
-				state("pickUp") { //this:State
-					action { //it:State
+						println("PickUp material from truck")
 						delay(1000) 
 						answer("pickup", "pickupanswer", "pickupanswer(OK)"   )  
-						println("robot pickedUp")
 					}
-					 transition(edgeName="t037",targetState="handle_cmd",cond=whenRequest("move"))
+					 transition( edgeName="goto",targetState="wait", cond=doswitch() )
 				}	 
-				state("dropOut") { //this:State
+				state("dropping_down") { //this:State
 					action { //it:State
+						println("DropOut material in container")
 						delay(1000) 
 						answer("dropout", "dropoutanswer", "dropoutanswer(OK)"   )  
-						println("robot droppedOut")
 					}
-					 transition(edgeName="t038",targetState="handle_cmd",cond=whenRequest("move"))
+					 transition( edgeName="goto",targetState="wait", cond=doswitch() )
+				}	 
+				state("set_new_dest") { //this:State
+					action { //it:State
+						println("Set new destination robot")
+						if( checkMsgContent( Term.createTerm("move(POSITION)"), Term.createTerm("move(ARG)"), 
+						                        currentMsg.msgContent()) ) { //set msgArgList
+								 dest= payloadArg(0)  
+								println("move(${dest})")
+						}
+					}
+					 transition( edgeName="goto",targetState="wait", cond=doswitch() )
+				}	 
+				state("forward_robot") { //this:State
+					action { //it:State
+						println("Forward robot")
+						unibo.robot.robotSupport.move( "w"  )
+					}
+					 transition(edgeName="t121",targetState="turn",cond=whenDispatch("obstacle"))
+				}	 
+				state("turn") { //this:State
+					action { //it:State
+						println("Turn robot")
+						unibo.robot.robotSupport.move( "l"  )
+						delay(350) 
+						currpos=newPosition(currpos)  
+						answer("move", "moveanswer", "moveanswer(OK)"   )  
+					}
+					 transition( edgeName="goto",targetState="wait", cond=doswitch() )
 				}	 
 			}
 		}
