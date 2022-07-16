@@ -269,7 +269,8 @@ dd{
         <dd>Container adibito al deposito di materiale vetroso, con capienza attuale <b>contGB</b> e capienza massima pari a <b>MAXGB</b> Kg. <br> 
             Il termine viene anche usato per indicare la zona nella quale il robot deve trovarsi per effettuare l'operazione di scarico del vetro</dd>
         <dt><b>HOME:</b></dt> 
-        <dd>Area nella quale risiede il robot quando non deve svolgere alcuna attività</dd>
+        <dd>Area nella quale risiede il robot quando non deve svolgere alcuna attività<br>
+        È inoltre l'area dove si trova inizialmente il robot.</dd>
         <dt><b>Transport trolley:</b></dt>
         <dd>Attore rappresentante un'entità robotica astratta che riceve i comandi relativi alla prossima destinazione da raggiungere. Esso riceve anche i comandi relativi allo scarico e carico del materiale:<br>
             <code><pre>
@@ -328,7 +329,7 @@ dd{
             </code>
         </dd>
         <dt><b>Service-manager:</b></dt>
-        <dd>Operatore che supervisiona lo stato dell'area di servizio usando una <b>WasteServiceStatusGUI</b></dd>
+        <dd>Operatore umano che supervisiona lo stato dell'area di servizio usando una <b>WasteServiceStatusGUI</b></dd>
         <dt><b>WasteServiceStatusGUI:</b></dt>
         <dd>Pannello di controllo che permette al <b>Service-manager</b> di monitorare:
             <ul>
