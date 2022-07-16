@@ -20,16 +20,16 @@ class Testwasteservice ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 						discardMessages = true
 						request("depositrequest", "depositrequest(GLASS,11)" ,"wasteservice" )  
 					}
-					 transition(edgeName="t027",targetState="error",cond=whenReply("loadaccepted"))
-					transition(edgeName="t028",targetState="s1",cond=whenReply("loadrejected"))
+					 transition(edgeName="t017",targetState="error",cond=whenReply("loadaccepted"))
+					transition(edgeName="t018",targetState="s1",cond=whenReply("loadrejected"))
 				}	 
 				state("s1") { //this:State
 					action { //it:State
 						println("load rejected successfully")
 						request("depositrequest", "depositrequest(PLASTIC,3)" ,"wasteservice" )  
 					}
-					 transition(edgeName="t029",targetState="s2",cond=whenReply("loadaccepted"))
-					transition(edgeName="t030",targetState="error",cond=whenReply("loadrejected"))
+					 transition(edgeName="t019",targetState="s2",cond=whenReply("loadaccepted"))
+					transition(edgeName="t020",targetState="error",cond=whenReply("loadrejected"))
 				}	 
 				state("s2") { //this:State
 					action { //it:State
