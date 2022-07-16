@@ -33,10 +33,10 @@ Dispatch noMsg : noMsg(_)
 Dispatch stop  : stop(_) 
 Dispatch resume : resume (_)
  
-Context ctxRPI ip [host="localhost" port=8095]
-
+Context ctxserver ip [host="localhost" port=8095]
+Context ctxrobot ip  [host="127.0.0.1" port=8096]
   
-QActor wasteservice context ctxRPI{  
+QActor wasteservice context ctxserver{  
 	[# 
 		val MAXPB = 10
 		val MAXGB = 10
@@ -117,7 +117,7 @@ QActor wasteservice context ctxRPI{
  		printCurrentMessage
  		onMsg(pickupanswer : pickupanswer(RESULT)) {
 			[# RES = payloadArg(0); #]
-			if[# RES == "OK" #]{
+			if[# RES == "OK" #]{ 
 				[# 
 					lateinit var Position : String
 					when(Material){
@@ -385,7 +385,8 @@ QActor gui context ctxRPI {
 
 //wasteservice TESTER
 //TEST VETRO RIGETTATO E PLASTICA ACCETTATA, RICHIESTE SEQUENZIALE
-QActor testwasteservice context ctxRPI{
+/*
+QActor testwasteservice context ctxserver{
 	State s0 initial { 	    
 		discardMsg On
 		//[# sysUtil.logMsgs=true #]
@@ -436,7 +437,7 @@ QActor testwasteservice context ctxRPI{
  	}
 }*/
 
-QActor transporttrolley context ctxRPI{
+QActor transporttrolley context ctxrobot{
 	[# lateinit var tmp : String #]
 	
 	State s0 initial { 	    
