@@ -402,10 +402,10 @@ dd{ margin-bottom: 8px;}
     Il <b>WasteService</b> continuerà ad inviare al <b>Transport trolley</b> gli stessi comandi astratti, senza preoccuparsi di "in che modo" o "con quali mezzi" la destinazione viene raggiunta.
 
     <h4><b>Transport trolley</b> non gestisce autonomamente carico/scarico:</h4>
-    <p>Per questioni di flessibilità, abbiamo tenuto separate le operazioni di carico, scarico e movimento: l'idea è che se un domani si deve modificare il processo di smistamento,
+    <p>Per questioni di flessibilità, abbiamo tenuto separate le operazioni di carico, scarico e movimento: l'idea è che se un domani si dovesse modificare il processo di smistamento,
         basterà modificare la sequenza di comandi che vengono impartiti al <b>Transport trolley</b>, senza bisogno di modificare quest'ultimo. <br>
         Inoltre, anche se il committente ha detto che le operazioni di carico e scarico possono essere modellate come semplici timeout, abbiamo ritenuto concettualmente corretto far 
-        gestire questa operazione all'entità <b>Transport trolley</b> (un domani potrebbe aver bisogno di inviare comandi ad altri componenti per fare vere azioni).</p>
+        gestire questa operazione all'entità <b>Transport trolley</b> (un domani potrebbe aver bisogno di inviare comandi ad altri componenti per fare azioni vere e proprie).</p>
     <code><pre>
         //RESULT =  OK | ERROR
         Request pickup         : pickup(_)
@@ -437,7 +437,8 @@ dd{ margin-bottom: 8px;}
         <li>Maggior velocità negli spostamenti, e maggior velocità di reazione a comandi di halt</li>
         <li>Possibile miglior reazione (piuttosto che a singoli step) da parte di robot reali che non fatto uso di sistemi in feedback o altro hardware per controllare meglio la propria posizione</li>
     </ul>
-    <p>Per la realizzazione del transport trolley sono state analizzate 3 diverso opzioni, che vengono qui descritte.</p>
+    <br>
+    <p>Per la realizzazione del transport trolley sono state analizzate 3 diverso opzioni, che vengono qui descritte: </p>
 
     <h4>OPZIONE 1</h4>
     <p>Si tratta di una semplice macchina a stati che è in grado di raggiungere la destinazione facendo fare al robot sempre un giro in senso antiorario. <br>
@@ -461,7 +462,8 @@ dd{ margin-bottom: 8px;}
     <ul>
         <li>Possiamo pensare il <b>WasteService</b> come il componente controller contenente business logic, ossia quello che contiene le azioni da svolgere per realizzare il processo di smistamento (le <b>Deposit action</b>)</li>
         <li><b>DDR Robot</b> è collocato su un contesto collocato in un nodo a bordo del <b>DDR Robot concreto</b>. <br>
-            Risulta concettualmente sensato porre nello stesso contesto <b>Transport trolley</b>. <b>Transport trolley</b> potrebbe infatti necessitare di cambiamenti nel caso in cui cambi il <b>DDR Robot concreto</b> e la tecnologia di movimento usata. <br>
+            Risulta concettualmente sensato porre nello stesso contesto <b>Transport trolley</b>. <br>
+            <b>Transport trolley</b> potrebbe infatti necessitare di cambiamenti nel caso in cui cambi il <b>DDR Robot concreto</b> e la tecnologia di movimento usata. <br>
             Si noti tuttavia che, qualora tale componente debba fare utilizzo di un planner (che effettua una ricerca nello spazio degli stati), allora si dovrebbe considerare la possibilità 
             di porre tale attore su un nodo computazionale più potente, dove il consumo di potenza non è un problema (mentre si presume che il robot sia alimentato a batteria)</li>
         <li><b>LED concreto</b> e <b>Sonar concreto</b> sono collegati al RPI, e sono quindi su un contesto a parte: analizzeremo in sprint successivi tali componenti. Anche la GUI verrà analizzata successivamente</li> 
