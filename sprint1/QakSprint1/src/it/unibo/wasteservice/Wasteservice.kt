@@ -23,6 +23,8 @@ class Wasteservice ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 				lateinit var TruckLoad : String
 				lateinit var RES : String
 				
+				lateinit var TrolleyPos : String   //gbox,pbox,Home,indoor,other
+				
 				fun checkdepositpossible(MATERIAL:String,LOAD:String) : Boolean {
 		 				return (MATERIAL=="PLASTIC" && LOAD.toInt()+contPB<=MAXPB) 
 		 				 || (MATERIAL=="GLASS" && LOAD.toInt()+contGB<=MAXGB);
@@ -42,6 +44,9 @@ class Wasteservice ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 					action { //it:State
 						println("$name in ${currentState.stateName} | $currentMsg")
 						discardMessages = false
+						 TrolleyPos = "home"  
+						updateResourceRep( "trolleyPos(home)"  
+						)
 						println("Waiting for requests")
 					}
 					 transition(edgeName="t00",targetState="handle_req",cond=whenRequest("depositrequest"))
@@ -75,7 +80,9 @@ class Wasteservice ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 RES = payloadArg(0);  
 								if(  RES == "OK"  
-								 ){request("pickup", "pickup(_)" ,"transporttrolley" )  
+								 ){updateResourceRep( "trolleyPos(indoor)"  
+								)
+								request("pickup", "pickup(_)" ,"transporttrolley" )  
 								}
 								else
 								 {forward("noMsg", "noMsg(_)" ,"wasteservice" ) 
@@ -120,7 +127,15 @@ class Wasteservice ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 RES = payloadArg(0);  
 								if(  RES == "OK"  
-								 ){request("dropout", "dropout(_)" ,"transporttrolley" )  
+								 ){if(  Material == "glass"  
+								 ){updateResourceRep( "trolleyPos(gbox)"  
+								)
+								}
+								else
+								 {updateResourceRep( "trolleyPos(pbox)"  
+								 )
+								 }
+								request("dropout", "dropout(_)" ,"transporttrolley" )  
 								}
 								else
 								 {forward("noMsg", "noMsg(_)" ,"wasteservice" ) 
@@ -182,7 +197,9 @@ class Wasteservice ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 RES = payloadArg(0);  
 								if(  RES == "OK"  
-								 ){request("dropout", "dropout(_)" ,"transporttrolley" )  
+								 ){updateResourceRep( "trolleyPos(home)"  
+								)
+								request("dropout", "dropout(_)" ,"transporttrolley" )  
 								}
 								else
 								 {forward("noMsg", "noMsg(_)" ,"wasteservice" ) 

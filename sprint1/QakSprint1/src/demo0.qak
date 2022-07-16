@@ -46,6 +46,8 @@ QActor wasteservice context ctxRPI{
 		lateinit var TruckLoad : String
 		lateinit var RES : String
 		
+		lateinit var TrolleyPos : String   //gbox,pbox,Home,indoor,other
+		
 		fun checkdepositpossible(MATERIAL:String,LOAD:String) : Boolean {
  				return (MATERIAL=="PLASTIC" && LOAD.toInt()+contPB<=MAXPB) 
  				 || (MATERIAL=="GLASS" && LOAD.toInt()+contGB<=MAXGB);
@@ -66,6 +68,8 @@ QActor wasteservice context ctxRPI{
 	State wait initial {
 		printCurrentMessage	    
 		discardMsg Off
+		[# TrolleyPos = "home" #]
+		updateResource [# "trolleyPos(home)" #]  
 		println("Waiting for requests")
 		//[# sysUtil.logMsgs=true #]
  	}
@@ -87,7 +91,7 @@ QActor wasteservice context ctxRPI{
 				replyTo depositrequest with loadrejected : loadrejected($Material,$TruckLoad)
 				forward wasteservice -m noMsg : noMsg(_)
 			}		
-		}
+		} 
  	}
  	Transition t0 whenReply moveanswer -> handle_move_indoor
  				whenMsg noMsg -> wait
@@ -98,6 +102,7 @@ QActor wasteservice context ctxRPI{
 		onMsg(moveanswer : moveanswer(RESULT)) {
 			[# RES = payloadArg(0); #]
 			if[# RES == "OK" #]{
+				updateResource [# "trolleyPos(indoor)" #]  
 				request transporttrolley -m pickup : pickup(_)
 			}else{
 				forward wasteservice -m noMsg : noMsg(_)
@@ -139,6 +144,8 @@ QActor wasteservice context ctxRPI{
  		onMsg(moveanswer : moveanswer(RESULT)) {
 			[# RES = payloadArg(0); #]
 			if[# RES == "OK" #]{
+				if [# Material == "glass" #]{ updateResource [# "trolleyPos(gbox)" #]
+				}else{ updateResource [# "trolleyPos(pbox)" #] }
 				request transporttrolley -m dropout : dropout(_)
 			}else{
 				forward wasteservice -m noMsg : noMsg(_)
@@ -192,6 +199,7 @@ QActor wasteservice context ctxRPI{
  		onMsg(moveanswer : moveanswer(RESULT)) {
 			[# RES = payloadArg(0); #]
 			if[# RES == "OK" #]{
+				updateResource [# "trolleyPos(home)" #]
 				request transporttrolley -m dropout : dropout(_)
 			}else{
 				forward wasteservice -m noMsg : noMsg(_)
