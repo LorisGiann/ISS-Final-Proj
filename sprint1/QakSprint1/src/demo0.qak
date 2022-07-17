@@ -108,6 +108,7 @@ QActor wasteservice context ctxserver{
 		onMsg(moveanswer : moveanswer(RESULT)) {
 			[# RES = payloadArg(0); #]
 			if[# RES == "OK" #]{
+				println("wateservice - request pickup")
 				updateResource [# "trolleyPos(indoor)" #]  
 				request transporttrolley -m pickup : pickup(_)
 			}else{
@@ -150,6 +151,7 @@ QActor wasteservice context ctxserver{
  		onMsg(moveanswer : moveanswer(RESULT)) {
 			[# RES = payloadArg(0); #]
 			if[# RES == "OK" #]{
+				println("wateservice - request dropout")
 				if [# Material == "glass" #]{ updateResource [# "trolleyPos(gbox)" #]
 				}else{ updateResource [# "trolleyPos(pbox)" #] }
 				request transporttrolley -m dropout : dropout(_)
@@ -255,6 +257,9 @@ QActor transporttrolley context ctxserver{
  	Goto wait 
  	
  	State wait {
+ 		onMsg(cmdanswer: cmdanswer(OK)){
+ 			replyTo move with moveanswer : moveanswer(OK)
+ 		}
  		println("Wait")
  		println("Dest: ${dest} CurrPos: ${currpos}")
  		if [# currpos!=dest #] {

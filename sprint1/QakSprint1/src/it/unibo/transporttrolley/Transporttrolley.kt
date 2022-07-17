@@ -45,6 +45,10 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 				}	 
 				state("wait") { //this:State
 					action { //it:State
+						if( checkMsgContent( Term.createTerm("cmdanswer(RESULT)"), Term.createTerm("cmdanswer(OK)"), 
+						                        currentMsg.msgContent()) ) { //set msgArgList
+								answer("move", "moveanswer", "moveanswer(OK)"   )  
+						}
 						println("Wait")
 						println("Dest: ${dest} CurrPos: ${currpos}")
 						if(  currpos!=dest  

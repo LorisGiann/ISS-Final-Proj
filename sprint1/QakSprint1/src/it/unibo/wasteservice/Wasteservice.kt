@@ -80,7 +80,8 @@ class Wasteservice ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 RES = payloadArg(0);  
 								if(  RES == "OK"  
-								 ){updateResourceRep( "trolleyPos(indoor)"  
+								 ){println("wateservice - request pickup")
+								updateResourceRep( "trolleyPos(indoor)"  
 								)
 								request("pickup", "pickup(_)" ,"transporttrolley" )  
 								}
@@ -127,7 +128,8 @@ class Wasteservice ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 RES = payloadArg(0);  
 								if(  RES == "OK"  
-								 ){if(  Material == "glass"  
+								 ){println("wateservice - request dropout")
+								if(  Material == "glass"  
 								 ){updateResourceRep( "trolleyPos(gbox)"  
 								)
 								}
