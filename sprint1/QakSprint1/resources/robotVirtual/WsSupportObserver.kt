@@ -5,6 +5,7 @@ import org.json.JSONObject
 //import it.unibo.supports.*
 import it.unibo.kactor.*
 import it.unibo.kactor.MsgUtil
+import kotlinx.coroutines.launch
 import unibo.actor22comm.ws.WsConnSysObserver
 import unibo.actor22comm.utils.ColorsOut
 import unibo.actor22comm.SystemData
@@ -30,10 +31,11 @@ class WsSupportObserver( val owner:String) : WsConnSysObserver( owner) {
             println("       &&& WsSupportObserver  | ownerActor null ev=$ev" ) 
 		}
 		if( msgJson.has("target")){
-				runBlocking {
+			(ownerActor!! as ActorBasic).scope.launch{  ownerActor!!.emit("obstacle","obstacle(virtual)") }
+				/*runBlocking {
 					var target = msgJson.getString("target")
 					ownerActor!!.emit("obstacle","obstacle($target)")
-				}
+				}*/
 		}
 	}
 	

@@ -1,0 +1,787 @@
+//https://dl.bintray.com/jetbrains/kotlin/eclipse-plugin/0.8.19/
+
+System demo0    
+//mqttBroker "localhost" : 1883 eventTopic "demo0/events"
+//mqttBroker "broker.hivemq.com" : 1883 eventTopic "demo0/events"
+  
+
+//richiesta al wasteservice
+//MATERIAL = PLASTIC | GLASS
+//TRUCKLOAD =  integer number
+Request depositrequest : depositrequest(MATERIAL, TRUCKLOAD)
+Reply loadaccepted     : loadaccepted(MATERIAL, TRUCKLOAD)
+Reply loadrejected     : loadrejected(MATERIAL, TRUCKLOAD)
+
+//richiesta al trolley
+//RESULT =  OK | ERROR 
+Request pickup         : pickup(_)
+Reply   pickupanswer   : pickupanswer(RESULT)
+Request dropout        : dropout(_)
+Reply   dropoutanswer  : dropoutanswer(RESULT)
+Request move           : move(POSITION)    //INDOOR | PLASTICBOX | GLASSBOX | HOME
+Reply   moveanswer     : moveanswer(RESULT)
+
+Dispatch endMoveKo     : endMoveKo( V )
+Request  cmd 		   : cmd(MOVE)
+Reply    cmdanswer     : cmdanswer(RESULT)
+
+/*
+Event update_led : update_led(STATE) //STATE = on | off | blink
+Event update_sonar : update_sonar(DISTANCE)
+Event update_position : update_position(POSITION)
+Event update_container : update_container(MATERIAL, QUANTITA)
+*/
+
+Dispatch noMsg : noMsg(_)
+
+/* 
+Dispatch stop  : stop(_) 
+Dispatch resume : resume (_)
+*/
+ 
+Context ctxserver ip [host="localhost" port=8095]
+//Context ctxrobot ip  [host="127.0.0.1" port=8096]
+  
+QActor wasteservice context ctxserver{  
+	[# 
+		val MAXPB = 10
+		val MAXGB = 10
+		var contPB = 0
+		var contGB = 0
+		lateinit var Material  : String
+		lateinit var TruckLoad : String
+		lateinit var RES : String
+		
+		lateinit var TrolleyPos : String   //gbox,pbox,Home,indoor,other
+		
+		fun checkdepositpossible(MATERIAL:String,LOAD:String) : Boolean {
+ 				return (MATERIAL=="PLASTIC" && LOAD.toInt()+contPB<=MAXPB) 
+ 				 || (MATERIAL=="GLASS" && LOAD.toInt()+contGB<=MAXGB);
+ 		}
+ 				 
+ 		fun updateDeposit(MATERIAL:String,LOAD:String) : Unit {
+ 				when(MATERIAL){
+				    "PLASTIC" -> contPB+=LOAD.toInt()
+				    "GLASS" -> contGB+=LOAD.toInt()
+				    else -> {
+				        print("ERRORE MATERIALE")
+					}
+ 				}
+ 		}
+	#]
+	
+	
+	State wait initial {
+		printCurrentMessage	    
+		discardMsg Off
+		[# TrolleyPos = "home" #]
+		updateResource [# "trolleyPos(home)" #]  
+		println("Waiting for requests")
+		//[# sysUtil.logMsgs=true #]
+ 	}
+ 	Transition t0 whenRequest depositrequest -> handle_req
+ 	
+ 	State handle_req {
+		printCurrentMessage
+		onMsg(depositrequest : depositrequest(MATERIAL, TRUCKLOAD)) {
+			[#
+				 Material 	= payloadArg(0) ;
+				 TruckLoad 	= payloadArg(1) ;
+			#]
+			println("arrived $TruckLoad Kg of $Material")
+			if[# checkdepositpossible( Material, TruckLoad ) #]{
+				[# updateDeposit( Material, TruckLoad ) 
+					#]
+				request transporttrolley -m move : move(INDOOR)
+			} else{  
+				replyTo depositrequest with loadrejected : loadrejected($Material,$TruckLoad)
+				forward wasteservice -m noMsg : noMsg(_)
+			}		
+		} 
+ 	}
+ 	Transition t0 whenReply moveanswer -> handle_move_indoor
+ 				whenMsg noMsg -> wait
+ 			
+ 	
+ 	State handle_move_indoor {
+		printCurrentMessage
+		onMsg(moveanswer : moveanswer(RESULT)) {
+			[# RES = payloadArg(0); #]
+			if[# RES == "OK" #]{
+				println("wateservice - request pickup")
+				updateResource [# "trolleyPos(indoor)" #]  
+				request transporttrolley -m pickup : pickup(_)
+			}else{
+				forward wasteservice -m noMsg : noMsg(_)
+			}
+		}
+ 	}
+ 	Transition t0 whenReply pickupanswer -> handle_pickup_answer
+ 					whenMsg noMsg -> error
+ 	//Goto handle_pickup_answer if [# RES=="OK" #] else error
+ 	
+ 	State handle_pickup_answer{
+ 		printCurrentMessage
+ 		onMsg(pickupanswer : pickupanswer(RESULT)) {
+			[# RES = payloadArg(0); #]
+			if[# RES == "OK" #]{ 
+				[# 
+					lateinit var Position : String
+					when(Material){
+				    "PLASTIC" -> Position = "PLASTICBOX"
+				    "GLASS" -> Position = "GLASSBOX"
+				    else -> { // Note the block
+				        print("ERRORE POSIZIONE")
+				    }
+				    //emit container_position : container_position(Material,TruckLoad)    ??
+				} #]
+				println("move to ${Position}")
+				request transporttrolley -m move : move($Position)
+				replyTo depositrequest with loadaccepted : loadaccepted($Material,$TruckLoad)
+			}else{
+				forward wasteservice -m noMsg : noMsg(_)
+			}
+		}
+ 	}
+ 	Transition t0 whenReply moveanswer -> handle_move_container
+ 					whenMsg noMsg -> error
+ 	//Goto handle_move_container if [# RES=="OK" #] else error
+ 					
+ 	State handle_move_container{
+ 		printCurrentMessage
+ 		onMsg(moveanswer : moveanswer(RESULT)) {
+			[# RES = payloadArg(0); #]
+			if[# RES == "OK" #]{
+				println("wateservice - request dropout")
+				if [# Material == "glass" #]{ updateResource [# "trolleyPos(gbox)" #]
+				}else{ updateResource [# "trolleyPos(pbox)" #] }
+				request transporttrolley -m dropout : dropout(_)
+			}else{
+				forward wasteservice -m noMsg : noMsg(_)
+			}
+		}
+ 	}
+ 	Transition t0 whenReply dropoutanswer -> handle_dropout_answer
+ 					whenMsg noMsg -> error
+ 	//Goto handle_dropout_answer if [# RES=="OK" #] else error
+ 	
+ 					
+ 	State handle_dropout_answer {
+ 		printCurrentMessage
+ 		onMsg(dropoutanswer : dropoutanswer(RESULT)) {
+			[# RES = payloadArg(0); #]
+			if[# RES != "OK" #]{
+				forward wasteservice -m noMsg : noMsg(_)
+			}
+		}
+ 	} 
+ 	Transition t0 whenTime 10 -> move_home
+ 					whenMsg noMsg and [# RES!="OK" #] -> error
+ 					whenRequest depositrequest -> handle_new_req
+ 	
+ 	State handle_new_req{ //simile ad handle_request, ma qui dobbiamo fare andare il robot a casa in caso di loadReqjected
+		printCurrentMessage
+		onMsg(depositrequest : depositrequest(MATERIAL, TRUCKLOAD)) {
+			[#
+				 Material 	= payloadArg(0) ;
+				 TruckLoad 	= payloadArg(1) ;
+			#]
+			if[# checkdepositpossible( Material, TruckLoad ) #]{
+				request transporttrolley -m move : move(INDOOR)
+			} else{  
+				replyTo depositrequest with loadrejected : loadrejected($Material,$TruckLoad)
+				forward wasteservice -m noMsg : noMsg(_)
+			}		
+		}
+ 	}
+ 	Transition t0 whenReply moveanswer -> handle_move_indoor
+ 				whenMsg noMsg -> move_home
+ 	
+ 	State move_home{
+ 		printCurrentMessage
+ 		request transporttrolley -m move : move(HOME)
+ 	}
+ 	Goto handle_move_home
+ 	
+ 	State handle_move_home{
+ 		printCurrentMessage
+ 		onMsg(moveanswer : moveanswer(RESULT)) {
+			[# RES = payloadArg(0); #]
+			if[# RES == "OK" #]{
+				updateResource [# "trolleyPos(home)" #]
+				request transporttrolley -m dropout : dropout(_)
+			}else{
+				forward wasteservice -m noMsg : noMsg(_)
+			}
+		}
+ 	}
+ 	Transition t0 	whenRequest depositrequest -> handle_req //gestisci immediatamente nuova richiesta
+ 					whenMsg noMsg and [# RES!="OK" #] -> error
+ 					whenReply moveanswer -> wait
+ 	
+ 	State error {
+ 		println("error")
+ 		printCurrentMessage
+ 	}
+}
+
+QActor transporttrolley context ctxserver{
+	[# var dest ="HOME"
+	   var currpos = "HOME"
+	   
+	   fun newPosition(CURRPOS:String) : String {
+ 			if (CURRPOS=="HOME"){
+ 				return "INDOOR";
+ 			}
+ 			if (CURRPOS=="INDOOR"){
+ 				return "PLASTICBOX";
+ 			}
+ 			if (CURRPOS=="PLASTICBOX"){
+ 				return "GLASSBOX";
+ 			}
+ 			if (CURRPOS=="GLASSBOX"){
+ 				return "HOME";
+ 			}
+ 			return "ERRORE";
+ 		} 			
+	   
+	   #]
+	
+	State init initial { 	    
+		discardMsg On
+		[# dest = "HOME"
+		   currpos = "HOME"	
+			#]
+		println("Init trasport trolley")
+		//[# sysUtil.logMsgs=true #]
+ 	}
+ 	Goto wait 
+ 	
+ 	State wait {
+ 		onMsg(cmdanswer: cmdanswer(OK)){
+ 			if [# currpos==dest #] {
+ 				replyTo move with moveanswer : moveanswer(OK)
+ 			}
+ 		}
+ 		println("Wait")
+ 		println("Dest: ${dest} CurrPos: ${currpos}")
+ 		if [# currpos!=dest #] {
+ 			forward transporttrolley -m noMsg : noMsg(_)
+ 		} 
+ 	}
+ 	Transition toNewState whenRequest pickup and [# currpos==dest#]-> picking_up
+ 						  whenRequest dropout and [# currpos==dest#]-> dropping_down
+ 						  whenRequest move and [# currpos==dest#] -> set_new_dest
+ 						  whenMsg noMsg -> forward_robot
+ 						  
+ 	State picking_up {
+ 		println("PickUp material from truck")
+ 		delay 1000
+		replyTo pickup with pickupanswer : pickupanswer(OK)
+ 	}
+ 	Goto wait
+ 	
+ 	State dropping_down {
+ 		println("DropOut material in container")
+ 		delay 1000
+		replyTo dropout with dropoutanswer : dropoutanswer(OK)
+ 	}
+ 	Goto wait
+ 	
+ 	State set_new_dest {
+ 		println("Set new destination robot")
+ 		onMsg( move:move(ARG) ){
+			[# dest= payloadArg(0) #]
+ 			println("move(${dest})")
+ 		}
+ 	}
+ 	Goto wait
+ 	
+ 	State forward_robot {
+ 		println("Forward robot")
+ 		request ddrrobot -m cmd : cmd(w) 
+ 	}
+ 	Transition t1 whenReply cmdanswer -> turn
+ 	
+ 	State turn {
+ 		println("Turn robot")
+ 		request ddrrobot -m cmd : cmd(l) 
+ 		[#currpos=newPosition(currpos) #]
+ 	}
+ 	Transition t1 whenReply cmdanswer -> wait
+ 	
+}
+
+QActor ddrrobot context ctxserver{
+	[#lateinit var move : String
+	   var RobotType     = "" 
+	   var robotMoveObserver : unibo.actor22comm.interfaces.IObserver
+	   lateinit  var conn    : unibo.actor22comm.interfaces.Interaction2021  #]
+	
+	State init initial { 	    
+		discardMsg On
+		println("Init ddrrobot")
+		[#  conn=unibo.Robots.common.RobotUtils.connectWithVirtualRobot(getName())#]
+		//[# sysUtil.logMsgs=true #]
+ 	}
+ 	Goto wait
+	
+	State wait {
+		discardMsg On
+	}
+	Transition t0 whenRequest cmd -> handle_moving
+	
+	State handle_moving {
+		onMsg( cmd:cmd(MOVE) ){
+			[# move = payloadArg(0) #]
+ 			
+ 			if [#move=="w"#]{
+ 				println("cmd move(${move})")
+ 				[# unibo.Robots.common.VRobotMoves.moveForward(getName(), conn ,10000) #] //STEP all along the room
+ 			}
+ 			if [#move=="l"#]{
+ 				println("cmd move(${move})")
+ 				[# unibo.Robots.common.VRobotMoves.turnLeft(getName(), conn) #] //STEP all along the room
+ 				delay 450
+ 				forward ddrrobot -m noMsg : noMsg(_)
+ 			} 
+ 		}
+ 	}
+ 	Transition t1 whenMsg endMoveKo -> handle_answer
+ 				  whenMsg noMsg    -> handle_answer
+ 	
+ 	
+ 	State handle_answer{
+ 		println("Handle cmd answer")
+ 		replyTo cmd with cmdanswer : cmdanswer(OK)
+ 	}
+ 	Goto wait
+ 	
+
+}
+
+/*QActor transporttrolley context ctxRPI{
+	State s0 initial { 	    
+		discardMsg On
+		//[# sysUtil.logMsgs=true #]
+ 	}
+ 	
+}*/
+
+/*
+QActor sonar context ctxRPI{
+	[# var distance : Int = 0
+		val DLIMIT = 10
+	#]
+	
+	State wait initial {
+		discardMsg On
+	}
+	Transition t0 whenEvent update_sonar -> handle_update_moving
+	
+	State handle_update_moving {
+		onMsg( update_sonar:update_sonar(DISTANCE) ){
+			[# distance = payloadArg(0).toInt() #]
+ 			println("update_sonar(${distance})")
+ 			if [#distance<DLIMIT#] {
+ 				println("Stop robot")
+ 				forward transporttrolley -m stop : stop(_)
+ 			}
+ 		}
+ 	}
+ 	Goto wait if [#distance>=DLIMIT#] else stop
+ 	
+ 	State stop {}
+ 	Transition t0 whenEvent  update_sonar -> update_sonar_resuming 
+ 	
+ 	State update_sonar_resuming {
+		onMsg( update_sonar:update_sonar(DISTANCE) ){
+			[# distance = payloadArg(0).toInt() #]
+ 			println("update_sonar(${distance})")
+ 			if [#distance>=DLIMIT#] {
+ 				println("Resume robot")
+ 				forward transporttrolley -m resume : resume(_)
+ 			}
+ 		}
+ 	}
+ 	Goto wait if [#distance>=DLIMIT#] else stop
+	
+}
+*/
+  
+/*   
+QActor led context ctxRPI{
+	[# lateinit var newState : String #]
+	
+	State s0 initial { 	    
+		discardMsg On
+		//[# sysUtil.logMsgs=true #]
+ 	}
+ 	Transition t0 whenEvent update_led -> handle_update
+ 	
+ 	State handle_update {
+		onMsg( update_led:update_led(ARG) ){
+			[# newState = payloadArg(0) #]
+ 			println("update_led(${newState})")
+ 			forward led -m noMsg : noMsg(_)
+ 		}
+ 	}
+ 	//Transition to else Goto off
+ 	Transition toNewState whenMsg noMsg and [# newState=="off" #] -> off
+ 					whenMsg noMsg and [# newState=="on" #] -> on
+ 					whenMsg noMsg and [# newState=="blink" #] -> blink_on
+ 	
+ 	State off {
+ 		println("Led off")
+ 	}
+ 	Transition t0 whenEvent update_led -> handle_update
+ 	
+ 	State on {
+ 		println("Led on")
+ 	}
+ 	Transition t0 whenEvent update_led -> handle_update
+ 	
+ 	State blink_on {
+ 		println("Blinking on")
+ 	}
+ 	Transition t0 whenTime 500 -> blink_off
+ 					whenEvent update_led -> handle_update
+ 					
+ 	State blink_off {
+ 		println("Blinking off")
+ 	}
+ 	Transition t0 whenTime 500 -> blink_on
+ 					whenEvent update_led -> handle_update
+ 					
+}
+*/
+
+/*
+QActor gui context ctxRPI {
+	[#
+		var LedStatus = "off"
+		var ContainerGlass = 0
+		var ContainerPaper = 0
+		var Position = "HOME"
+	#]
+	
+	State init initial {
+	}
+	Transition t0 whenEvent update_position ->  handlePosition
+				  whenEvent update_led ->  handleLed
+				  whenEvent update_container ->  handleContainer
+	
+	State handleLed {
+		onMsg(update_led : update_led(STATO)){
+			[# LedStatus = payloadArg(0) #]
+		}
+		println("LedStatus: $LedStatus")
+		println("ContainerGlass: $ContainerGlass")
+		println("ContainerPaper: $ContainerPaper")
+		println("Position: $Position")
+	}
+	Goto init
+	
+	State handlePosition {
+		onMsg(update_position : update_position(POSITION)){
+			[# Position = payloadArg(0) #]
+		}
+		println("LedStatus: $LedStatus")
+		println("ContainerGlass: $ContainerGlass")
+		println("ContainerPaper: $ContainerPaper")
+		println("Position: $Position")
+	}
+	Goto init
+	
+	State handleContainer {
+		onMsg(update_container : update_container(MATERIAL, TRUCKLOAD)){
+			if [# payloadArg(0) == "GLASS" #]{
+				[# CurrentGlass = payloadArg(1).toInt()+contGB #]
+			} else {
+				[# CurrentPaper = payloadArg(1).toInt()+contPB #]
+			}
+		}
+		println("LedStatus: $LedStatus")
+		println("Position: $Position")
+		println("CurrentGlass: $CurrentGlass")
+		println("CurrentPaper: $CurrentPaper")
+	}
+	Goto init
+}  
+*/
+
+
+   
+   
+//led TESTER
+/*QActor test_led context ctxRPI{
+	State s0 initial { 	    
+		discardMsg On
+		//[# sysUtil.logMsgs=true #]
+		emit update_led : update_led(off)
+		delay 2000
+		emit update_led : update_led(on)
+		delay 2000
+		emit update_led : update_led(blink)
+ 	}
+}*/
+
+
+//wasteservice TESTER
+//TEST VETRO RIGETTATO E PLASTICA ACCETTATA, RICHIESTE SEQUENZIALE
+/*
+QActor testwasteservice context ctxserver{
+	State s0 initial { 	    
+		discardMsg On
+		//[# sysUtil.logMsgs=true #]
+		request wasteservice -m depositrequest : depositrequest(GLASS,11)
+ 	}
+ 	Transition t0 whenReply loadaccepted -> error
+ 					whenReply loadrejected -> s1
+ 	
+ 	State s1 {
+ 		println("load rejected successfully")
+ 		request wasteservice -m depositrequest : depositrequest(PLASTIC,3)
+ 	}
+ 	Transition t0 whenReply loadaccepted -> s2
+ 					whenReply loadrejected -> error
+ 	
+ 	State s2 {
+ 		println("load accepted successfully")
+ 	}
+ 	
+ 	State error {
+ 		println("errore")
+ 	}
+}
+
+//TEST PLASTICA ACCETTATA, PLASTICA RIGETTATA, SEQUENZIALI
+/*QActor testwasteservice context ctxRPI{
+	State s0 initial { 	    
+		discardMsg On
+		//[# sysUtil.logMsgs=true #]
+		request wasteservice -m depositrequest : depositrequest(PLASTIC,9)
+ 	}
+ 	Transition t0 whenReply loadaccepted -> s1
+ 					whenReply loadrejected -> error
+ 	
+ 	State s1 {
+ 		println("load accepted successfully")
+ 		request wasteservice -m depositrequest : depositrequest(PLASTIC,2)
+ 	}
+ 	Transition t0 whenReply loadaccepted -> error
+ 					whenReply loadrejected -> s2
+ 	
+ 	State s2 {
+ 		println("load rejected successfully")
+ 	}
+ 	
+ 	State error {
+ 		println("errore")
+ 	}
+}*/
+
+/*
+QActor transporttrolley context ctxrobot{
+	[# lateinit var tmp : String #]
+	
+	State s0 initial { 	    
+		discardMsg On
+		[# sysUtil.logMsgs=true #]
+ 	}
+ 	Transition t0 whenRequest move -> handle_cmd
+ 	
+ 	State handle_cmd {
+		onMsg( move:move(ARG) ){
+			[# tmp = payloadArg(0) #]
+ 			println("move(${tmp})")
+ 			forward transporttrolley -m noMsg : noMsg(_)
+ 		}
+ 	}
+ 	Transition toNewState whenMsg noMsg and [# tmp=="HOME" #] -> moving_home
+ 						whenMsg noMsg and [# tmp=="INDOOR" #] -> moving_indoor
+ 						whenMsg noMsg and [# tmp=="PLASTICBOX" #] -> moving_plasticbox
+ 						whenMsg noMsg and [# tmp=="GLASSBOX" #] -> moving_glassbox
+ 	
+ 	State moving_home {
+ 	}
+ 	Transition t0 whenTime 1000 -> moved_home    //per il momento simulo lo spostamento con un delay
+ 					whenRequest move -> handle_cmd
+ 					
+ 	State moved_home {
+ 		replyTo move with moveanswer : moveanswer(OK)
+ 		println("robot reached HOME")
+ 	}
+ 	Transition t0 whenRequest move -> handle_cmd
+ 	
+ 	State moving_indoor {
+ 	}
+ 	Transition t0 whenTime 1000 -> moved_indoor    //per il momento simulo lo spostamento con un delay
+ 					whenRequest move -> handle_cmd
+ 	
+ 	State moved_indoor {
+ 		replyTo move with moveanswer : moveanswer(OK)
+ 		println("robot reached INDOOR")
+ 	}
+ 	Transition t0 whenRequest move -> handle_cmd
+					whenRequest pickup -> pickUp 	
+ 					
+ 	State moving_plasticbox {
+ 	}
+ 	Transition t0 whenTime 1000 -> moved_plasticbox    //per il momento simulo lo spostamento con un delay
+ 					whenRequest move -> handle_cmd
+ 					
+ 	State moved_plasticbox {
+ 		replyTo move with moveanswer : moveanswer(OK)
+ 		println("robot reached PLASTICBOX")
+ 	}
+ 	Transition t0 whenRequest move -> handle_cmd
+ 					whenRequest dropout -> dropOut 	
+ 	
+ 	State moving_glassbox {
+ 	}
+ 	Transition t0 whenTime 1000 -> moved_glassbox    //per il momento simulo lo spostamento con un delay
+ 					whenRequest move -> handle_cmd
+ 					
+ 	State moved_glassbox {
+ 		replyTo move with moveanswer : moveanswer(OK)
+ 		println("robot reached GLASSBOX")
+ 	}
+ 	Transition t0 whenRequest move -> handle_cmd
+ 					whenRequest dropout -> dropOut
+ 					
+ 	State pickUp {
+ 		delay 1000
+ 		replyTo pickup with pickupanswer : pickupanswer(OK)
+ 		println("robot pickedUp")
+ 	}
+ 	Transition t0 whenRequest move -> handle_cmd
+ 	
+ 	State dropOut {
+ 		delay 1000
+ 		replyTo dropout with dropoutanswer : dropoutanswer(OK)
+ 		println("robot droppedOut")
+ 	}
+ 	Transition t0 whenRequest move -> handle_cmd
+}
+*/
+//MOCK transport trolley
+/*
+QActor transporttrolley context ctxRPI{
+	[# lateinit var tmp : String #]
+	
+	State s0 initial { 	    
+		discardMsg On
+		emit update_position : update_position(HOME)
+		[# sysUtil.logMsgs=true #]
+ 	}
+ 	Transition t0 whenRequest move -> handle_cmd
+ 	
+ 	State handle_cmd {
+		onMsg( move:move(ARG) ){
+			[# tmp = payloadArg(0) #]
+ 			println("move(${tmp})")
+ 			forward transporttrolley -m noMsg : noMsg(_)
+ 		}
+ 	}
+ 	Transition toNewState whenMsg noMsg and [# tmp=="HOME" #] -> moving_home
+ 						whenMsg noMsg and [# tmp=="INDOOR" #] -> moving_indoor
+ 						whenMsg noMsg and [# tmp=="PLASTICBOX" #] -> moving_plasticbox
+ 						whenMsg noMsg and [# tmp=="GLASSBOX" #] -> moving_glassbox
+ 	
+ 	State moving_home {
+ 		emit update_position : update_position(ROOM)
+ 	}
+ 	Transition t0 whenTime 1000 -> moved_home    //per il momento simulo lo spostamento con un delay
+ 					whenRequest move -> handle_cmd
+ 					whenMsg stop -> stop_home
+ 					
+ 	State moved_home {
+ 		replyTo move with moveanswer : moveanswer(OK)
+ 		emit update_position : update_position(HOME)
+ 		println("robot reached HOME")
+ 	}
+ 	Transition t0 whenRequest move -> handle_cmd
+ 	
+ 	State stop_home{
+ 		println("robot stop moving HOME")
+ 	}
+ 	Transition t0 whenMsg resume -> moving_home
+ 	
+ 	State moving_indoor {
+ 		emit update_position : update_position(ROOM)
+ 	}
+ 	Transition t0 whenTime 1000 -> moved_indoor    //per il momento simulo lo spostamento con un delay
+ 					whenRequest move -> handle_cmd
+ 	State moved_indoor {
+ 		replyTo move with moveanswer : moveanswer(OK)
+ 		emit update_position : update_position(INDOOR)
+ 		println("robot reached INDOOR")
+ 	}
+ 	Transition t0 whenRequest move -> handle_cmd
+					whenRequest pickup -> pickUp
+					whenMsg stop -> stop_indoor
+					
+	State stop_indoor{
+ 		println("robot stop moving INDOOR")
+ 	}
+ 	Transition t0 whenMsg resume -> moving_indoor
+ 	
+ 					
+ 	State moving_plasticbox {
+ 		emit update_position : update_position(ROOM)
+ 	}
+ 	Transition t0 whenTime 1000 -> moved_plasticbox    //per il momento simulo lo spostamento con un delay
+ 					whenRequest move -> handle_cmd
+ 					whenMsg stop -> stop_plasticbox
+ 					
+ 	State moved_plasticbox {
+ 		replyTo move with moveanswer : moveanswer(OK)
+ 		emit update_position : update_position(PLASTICBOX)
+ 		println("robot reached PLASTICBOX")
+ 	}
+ 	Transition t0 whenRequest move -> handle_cmd
+ 					whenRequest dropout -> dropOut
+ 					
+ 	State stop_plasticbox{
+ 		println("robot stop moving PLASTICBOX")
+ 	}
+ 	Transition t0 whenMsg resume -> moving_plasticbox
+ 	
+ 	
+ 	State moving_glassbox {
+ 		emit update_position : update_position(ROOM)
+ 	}
+ 	Transition t0 whenTime 1000 -> moved_glassbox    //per il momento simulo lo spostamento con un delay
+ 					whenRequest move -> handle_cmd
+ 					whenMsg stop -> stop_glassbox
+ 					
+ 	State moved_glassbox {
+ 		replyTo move with moveanswer : moveanswer(OK)
+ 		emit update_position : update_position(GLASSBOX)
+ 		println("robot reached GLASSBOX")
+ 	}
+ 	Transition t0 whenRequest move -> handle_cmd
+ 					whenRequest dropout -> dropOut
+ 					
+ 	State stop_glassbox{
+ 		println("robot stop moving GLASSBOX")
+ 	}
+ 	Transition t0 whenMsg resume -> moving_glassbox
+ 					
+ 	State pickUp {
+ 		delay 1000
+ 		replyTo pickup with pickupanswer : pickupanswer(OK)
+ 		println("robot pickedUp")
+ 	}
+ 	Transition t0 whenRequest move -> handle_cmd
+ 	
+ 	State dropOut {
+ 		delay 1000
+ 		replyTo dropout with dropoutanswer : dropoutanswer(OK)
+ 		println("robot droppedOut")
+ 	}
+ 	Transition t0 whenRequest move -> handle_cmd
+}
+*/
+

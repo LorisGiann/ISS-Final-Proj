@@ -39,20 +39,12 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 						discardMessages = true
 						 dest = "HOME"
 								   currpos = "HOME"	
-						println("Init trasport trolley")
 					}
 					 transition( edgeName="goto",targetState="wait", cond=doswitch() )
 				}	 
 				state("wait") { //this:State
 					action { //it:State
-						if( checkMsgContent( Term.createTerm("cmdanswer(RESULT)"), Term.createTerm("cmdanswer(OK)"), 
-						                        currentMsg.msgContent()) ) { //set msgArgList
-								if(  currpos==dest  
-								 ){answer("move", "moveanswer", "moveanswer(OK)"   )  
-								}
-						}
-						println("Wait")
-						println("Dest: ${dest} CurrPos: ${currpos}")
+						println("transporttrolley | Wait (Dest: ${dest} CurrPos: ${currpos})")
 						if(  currpos!=dest  
 						 ){forward("noMsg", "noMsg(_)" ,"transporttrolley" ) 
 						}
@@ -67,7 +59,7 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 				}	 
 				state("picking_up") { //this:State
 					action { //it:State
-						println("PickUp material from truck")
+						println("transporttrolley | PickUp material from truck")
 						delay(1000) 
 						answer("pickup", "pickupanswer", "pickupanswer(OK)"   )  
 					}
@@ -75,7 +67,7 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 				}	 
 				state("dropping_down") { //this:State
 					action { //it:State
-						println("DropOut material in container")
+						println("transporttrolley | DropOut material in container")
 						delay(1000) 
 						answer("dropout", "dropoutanswer", "dropoutanswer(OK)"   )  
 					}
@@ -83,29 +75,31 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 				}	 
 				state("set_new_dest") { //this:State
 					action { //it:State
-						println("Set new destination robot")
 						if( checkMsgContent( Term.createTerm("move(POSITION)"), Term.createTerm("move(ARG)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
-								 dest= payloadArg(0)  
-								println("move(${dest})")
+								 dest=payloadArg(0)  
+								println("transporttrolley | New robot destination: ${dest}")
 						}
 					}
 					 transition( edgeName="goto",targetState="wait", cond=doswitch() )
 				}	 
 				state("forward_robot") { //this:State
 					action { //it:State
-						println("Forward robot")
-						request("cmd", "cmd(w)" ,"ddrrobot" )  
+						forward("cmd", "cmd(w)" ,"basicrobot" ) 
 					}
-					 transition(edgeName="t121",targetState="turn",cond=whenReply("cmdanswer"))
+					 transition(edgeName="t121",targetState="turn",cond=whenEvent("info"))
 				}	 
 				state("turn") { //this:State
 					action { //it:State
-						println("Turn robot")
-						request("cmd", "cmd(l)" ,"ddrrobot" )  
+						forward("cmd", "cmd(l)" ,"basicrobot" ) 
+						delay(350) 
 						currpos=newPosition(currpos)  
+						if(  currpos==dest  
+						 ){println("transporttrolley | Robot arrived at $currpos")
+						answer("move", "moveanswer", "moveanswer(OK)"   )  
+						}
 					}
-					 transition(edgeName="t122",targetState="wait",cond=whenReply("cmdanswer"))
+					 transition( edgeName="goto",targetState="wait", cond=doswitch() )
 				}	 
 			}
 		}
