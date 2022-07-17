@@ -16,7 +16,6 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 	override fun getBody() : (ActorBasicFsm.() -> Unit){
 		 lateinit var dest : String
 			   lateinit var currpos : String
-			   var RobotType     = "" 
 			   
 			   fun newPosition(CURRPOS:String) : String {
 		 			if (CURRPOS=="HOME"){
@@ -41,20 +40,12 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 						 dest = "HOME"
 								   currpos = "HOME"	
 						println("Init trasport trolley")
-						unibo.robot.robotSupport.create(myself ,"basicrobotConfig.json" )
-						 RobotType = unibo.robot.robotSupport.robotKind  
-						delay(1000) 
-						if(  RobotType != "virtual"  
-						 ){ var robotsonar = context!!.hasActor("realsonar")  
-						        	   unibo.robot.robotSupport.createSonarPipe(myself) 
-						}
 					}
 					 transition( edgeName="goto",targetState="wait", cond=doswitch() )
 				}	 
 				state("wait") { //this:State
 					action { //it:State
 						println("Wait")
-						println("Dest: ${dest} CurrPos: ${currpos}")
 						if(  currpos!=dest  
 						 ){forward("noMsg", "noMsg(_)" ,"transporttrolley" ) 
 						}
@@ -97,19 +88,17 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 				state("forward_robot") { //this:State
 					action { //it:State
 						println("Forward robot")
-						unibo.robot.robotSupport.move( "w"  )
+						request("cmd", "cmd(w)" ,"ddrrobot" )  
 					}
-					 transition(edgeName="t121",targetState="turn",cond=whenDispatch("obstacle"))
+					 transition(edgeName="t121",targetState="turn",cond=whenReply("cmdanswer"))
 				}	 
 				state("turn") { //this:State
 					action { //it:State
 						println("Turn robot")
-						unibo.robot.robotSupport.move( "l"  )
-						delay(350) 
+						request("cmd", "cmd(l)" ,"ddrrobot" )  
 						currpos=newPosition(currpos)  
-						answer("move", "moveanswer", "moveanswer(OK)"   )  
 					}
-					 transition( edgeName="goto",targetState="wait", cond=doswitch() )
+					 transition(edgeName="t122",targetState="wait",cond=whenReply("cmdanswer"))
 				}	 
 			}
 		}
