@@ -262,7 +262,6 @@ QActor transporttrolley context ctxserver{
  			if [# currpos==dest #] {
  				replyTo move with moveanswer : moveanswer(OK)
  			}
- 		
  		}
  		println("Wait")
  		println("Dest: ${dest} CurrPos: ${currpos}")

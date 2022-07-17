@@ -64,8 +64,11 @@ private CoapConnection conn;
 			ConnTcp connTcp   = new ConnTcp("localhost", 8095);
 			String answer     = connTcp.request(truckRequestStr);
  			ColorsOut.outappl("testLoadok answer=" + answer , ColorsOut.GREEN);
-
-
+			assertTrue(answer.contains("loadaccept"));
+			CommUtils.delay(10000);
+			truckRequestStr = "msg(depositrequest, request,python,wasteservice,depositrequest(PLASTIC,5),1)";
+			answer     = connTcp.request(truckRequestStr);
+			ColorsOut.outappl("testLoadok answer=" + answer , ColorsOut.GREEN);
 			assertTrue(answer.contains("loadaccept"));
 			CommUtils.delay(10000);
 			connTcp.close();
