@@ -49,7 +49,7 @@ class Basicrobot ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 						if( checkMsgContent( Term.createTerm("cmd(MOVE)"), Term.createTerm("cmd(MOVE)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 val Move = payloadArg(0)  
-								println("basicrobot | executing "${Move}"")
+								println("basicrobot | executing '${Move}'")
 								unibo.robot.robotSupport.move( Move  )
 								updateResourceRep( "moveactivated(Move)"  
 								)

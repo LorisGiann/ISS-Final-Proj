@@ -409,7 +409,7 @@ QActor basicrobot context ctxserver{
 		onMsg( cmd : cmd(MOVE) ){
   			//activate the motors
   			[# val Move = payloadArg(0) #]
-  			println("basicrobot | executing \"${Move}\"")
+  			println("basicrobot | executing '${Move}'")
 			run unibo.robot.robotSupport.move( Move )
 			updateResource [# "moveactivated(Move)" #]
 		}

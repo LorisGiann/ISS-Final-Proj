@@ -292,12 +292,24 @@ dd{ margin-bottom: 8px;}
             Il committente fornisce già un ambiente di simulazione che implementa un <b>DDR Robot concreto</b> virtuale. Documentazione: <a href="../docs_prof/html/VirtualRobot.html#wenv">WEnv</a>, Progetto: <a href="https://github.com/anatali/issLab2022/tree/main/it.unibo.virtualRobot2020">it.unibo.virtualRobot2020</a>. </dd>
         <dt><b>DDR Robot:</b></dt>
         <dd>Attore che riceve ed esegue i comandi di basso livello di spostamento del robot: <br>
-            <p>Il committente fornisce già un attore che si interfaccia con il <b>DDR Robot concreto</b> <a href="../docs_prof/html/VirtualRobot.html#wenv">WEnv</a>: <a href="https://github.com/anatali/issLab2022/tree/main/unibo.wenvUsage22">unibo.wenvUsage22</a> , <a href="https://github.com/anatali/issLab2022/tree/main/unibo.basicrobot22">unibo.asicRobot22</a> </p>
-            <p class="todo">Se poi trovi dell'altro SW utile aggiugilo pure...</p>
-            <p>In particolare in <i>basicrobot22</i> esiste un attore <i>basicrobot</i> il quale espone (tra le varie interfacce disponibili) la seguente:</p>
+            <p>Il committente fornisce già un attore che si interfaccia con il <b>DDR Robot concreto</b> <a href="../docs_prof/html/VirtualRobot.html#wenv">WEnv</a>: <a href="https://github.com/anatali/issLab2022/tree/main/unibo.wenvUsage22">unibo.wenvUsage22</a>, <a href="https://github.com/anatali/issLab2022/tree/main/unibo.basicrobot22">unibo.asicRobot22</a>, <a href="https://github.com/anatali/issLab2022/tree/main/unibo.boundaryQak22">unibo.boundaryQak22</a> </p>
+            <p>In particolare in <i>basicrobot22</i> esiste un attore <i>basicrobot</i> che si interfaccia sia con il WEnv, che con altri robot reali.
+            <p>Esso può ricevere i messaggi:</p>
             <code><pre>
                 //MOVE =  w | a | s | d | h
                 Dispatch cmd           : cmd(MOVE)</pre>
+            </code>
+            <p>Nel caso del robot virtuale, i comandi "w" e "s" sono inviati tramite una websocket in maniera asicrona. Tali comandi sono infatti concepiti per far muovere il robot finchè non verrà rilevata una collisione con una parete. <br> 
+                Quando vi è una collisione viene emesso un evento del tipo:</p>
+            <code><pre>
+                Event   info           : info( ARG )</pre>
+            </code>
+            <p>Gli altri comandi sono invece sincroni bloccanti, e vegnono infatti inviati sulla connessione tcp.</p>
+            <p>Grazie a questi comandi elementari, <i>basicrobot22</i> è anche in grado di far fare degli step al robot:</p>
+            <code><pre>
+                Request step       : step( TIME )	
+                Reply   stepdone   : stepdone(V)  
+                Reply   stepfail   : stepfail(DURATION, CAUSE)</pre>
             </code>
         </dd>
         <dt><b>Deposit action:</b></dt>
@@ -473,6 +485,22 @@ dd{ margin-bottom: 8px;}
 
     <hr>
 
+    <h4>OPZIONE 3</h4>
+    <p>Il modulo, data la posizione corrente e l'orientamento del robot, fa un certo numero di step per raggiungere le coordinate di destinazione.</p>
+    <img class="centerimg" style="width: 400px;" src="docs/_images/transporttrolley_option3_explaination.png"/>
+    <p>Pro e Contro:</p>
+    <ul>
+        <li>+ flessibilità</li>
+        <li>+ esiste sw per mappare le dimensioni della stanza (<a href="https://github.com/anatali/issLab2022/tree/main/unibo.mapperQak22">unibo.mapperQak22</a>) e per trovare path (<a href="https://github.com/anatali/issLab2022/tree/main/unibo.planner22">unibo.planner22</a>)</li>
+        <li>- rischiesto mapping iniziale della servicearea</li>
+        <li>- le dimensioni della servicearea potrebbero non essere multiple di RD. È dunque necessaria una logica che (una volta raggiunte le coordinate di destinazione) faccia andare il robot a contatto con la porta, per poter effettuare le operazioni di carico/scarico.</li>
+    </ul>
+         
+    <h4>Scelta: OPZIONE 1</h4>
+    <p>Scegliamo la prima soluzione perché è la più semplice e quindi economica, fermo restando che a partire da questa è possibile estenderla per ottenere la seconda versione.<br>
+        Inoltre se un giorno nuovi requisiti dovessero imporre l'utilizzo di un sistema di coordinate, verrebbe modificato soltanto il componente "transporttrolley".</p>
+    <hr>
+
     <h3><b>WasteService</b></h3>
     <p>Possiamo pensare il <b>WasteService</b> come il componente controller, ossia quello che contiene la business logic del sistema.<br>
         Abbiamo analizzato le funzionalità che il servizio <b>WasteService</b> deve offrire, e abbiamo quindi formalizzato tale entità con il modello qak. <br>
@@ -518,7 +546,7 @@ dd{ margin-bottom: 8px;}
 
 </div>
 
-<h3><a href="sprint1/QakSprint1/src/demo0.qak">Metamodello eseguibile QAK</a></h3>
+<h3><a href="QakSprint1/src/demo0.qak">Metamodello eseguibile QAK</a></h3>
  
 <!-- USEFUL
 <table style="width:100%" border="1">
