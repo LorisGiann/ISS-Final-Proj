@@ -64,8 +64,12 @@ private CoapConnection conn;
 			ConnTcp connTcp   = new ConnTcp("localhost", 8095);
 			String answer     = connTcp.request(truckRequestStr);
  			ColorsOut.outappl("testLoadok answer=" + answer , ColorsOut.GREEN);
-			connTcp.close();
+
+
 			assertTrue(answer.contains("loadaccept"));
+			CommUtils.delay(10000);
+			connTcp.close();
+
 			//TODO: problema dei tempi
 			//assertTrue( coapCheck("indoor") );
 			//CommUtils.delay(1000);

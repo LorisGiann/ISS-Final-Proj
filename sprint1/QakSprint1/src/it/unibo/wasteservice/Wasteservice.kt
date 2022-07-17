@@ -110,6 +110,7 @@ class Wasteservice ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 												    }
 												    //emit container_position : container_position(Material,TruckLoad)    ??
 												}  
+								println("move to ${Position}")
 								request("move", "move($Position)" ,"transporttrolley" )  
 								answer("depositrequest", "loadaccepted", "loadaccepted($Material,$TruckLoad)"   )  
 								}

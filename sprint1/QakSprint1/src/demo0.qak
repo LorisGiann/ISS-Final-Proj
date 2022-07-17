@@ -135,6 +135,7 @@ QActor wasteservice context ctxserver{
 				    }
 				    //emit container_position : container_position(Material,TruckLoad)    ??
 				} #]
+				println("move to ${Position}")
 				request transporttrolley -m move : move($Position)
 				replyTo depositrequest with loadaccepted : loadaccepted($Material,$TruckLoad)
 			}else{
@@ -258,7 +259,10 @@ QActor transporttrolley context ctxserver{
  	
  	State wait {
  		onMsg(cmdanswer: cmdanswer(OK)){
- 			replyTo move with moveanswer : moveanswer(OK)
+ 			if [# currpos==dest #] {
+ 				replyTo move with moveanswer : moveanswer(OK)
+ 			}
+ 		
  		}
  		println("Wait")
  		println("Dest: ${dest} CurrPos: ${currpos}")
@@ -339,7 +343,7 @@ QActor ddrrobot context ctxserver{
  			if [#move=="l"#]{
  				println("cmd move(${move})")
  				[# unibo.Robots.common.VRobotMoves.turnLeft(getName(), conn) #] //STEP all along the room
- 				delay 350
+ 				delay 450
  				forward ddrrobot -m noMsg : noMsg(_)
  			} 
  		}

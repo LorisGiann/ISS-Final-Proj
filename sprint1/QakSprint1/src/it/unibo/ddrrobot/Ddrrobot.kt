@@ -45,7 +45,7 @@ class Ddrrobot ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, s
 								if( move=="l" 
 								 ){println("cmd move(${move})")
 								 unibo.Robots.common.VRobotMoves.turnLeft(getName(), conn)  
-								delay(350) 
+								delay(450) 
 								forward("noMsg", "noMsg(_)" ,"ddrrobot" ) 
 								}
 						}
