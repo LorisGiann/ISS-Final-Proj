@@ -14,8 +14,8 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 		return "init"
 	}
 	override fun getBody() : (ActorBasicFsm.() -> Unit){
-		 lateinit var dest : String
-			   lateinit var currpos : String
+		 var dest ="HOME"
+			   var currpos = "HOME"
 			   
 			   fun newPosition(CURRPOS:String) : String {
 		 			if (CURRPOS=="HOME"){
@@ -46,6 +46,7 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 				state("wait") { //this:State
 					action { //it:State
 						println("Wait")
+						println("Dest: ${dest} CurrPos: ${currpos}")
 						if(  currpos!=dest  
 						 ){forward("noMsg", "noMsg(_)" ,"transporttrolley" ) 
 						}

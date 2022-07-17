@@ -56,6 +56,7 @@ private CoapConnection conn;
 
 	@Test
 	public void testLoadok() {
+		CommUtils.delay(100);
 		ColorsOut.outappl("testLoadok STARTS" , ColorsOut.BLUE);
 		//assertTrue( coapCheck("home") );
 		String truckRequestStr = "msg(depositrequest, request,python,wasteservice,depositrequest(GLASS,2),1)";

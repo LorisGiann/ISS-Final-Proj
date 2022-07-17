@@ -15,19 +15,15 @@ class Ddrrobot ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, s
 	}
 	override fun getBody() : (ActorBasicFsm.() -> Unit){
 		lateinit var move : String
-			   var RobotType     = ""  
+			   var RobotType     = "" 
+			   var robotMoveObserver : unibo.actor22comm.interfaces.IObserver
+			   lateinit  var conn    : unibo.actor22comm.interfaces.Interaction2021   
 		return { //this:ActionBasciFsm
 				state("init") { //this:State
 					action { //it:State
 						discardMessages = true
 						println("Init ddrrobot")
-						unibo.robot.robotSupport.create(myself ,"basicrobotConfig.json" )
-						 RobotType = unibo.robot.robotSupport.robotKind  
-						delay(1000) 
-						if(  RobotType != "virtual"  
-						 ){ var robotsonar = context!!.hasActor("realsonar")  
-						        	   unibo.robot.robotSupport.createSonarPipe(myself) 
-						}
+						  conn=unibo.Robots.common.RobotUtils.connectWithVirtualRobot(getName()) 
 					}
 					 transition( edgeName="goto",targetState="wait", cond=doswitch() )
 				}	 
@@ -44,22 +40,22 @@ class Ddrrobot ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, s
 								 move = payloadArg(0)  
 								if( move=="w" 
 								 ){println("cmd move(${move})")
-								unibo.robot.robotSupport.move( "w"  )
+								 unibo.Robots.common.VRobotMoves.moveForward(getName(), conn ,10000)  
 								}
 								if( move=="l" 
 								 ){println("cmd move(${move})")
-								unibo.robot.robotSupport.move( "l"  )
+								 unibo.Robots.common.VRobotMoves.turnLeft(getName(), conn)  
 								delay(350) 
 								forward("noMsg", "noMsg(_)" ,"ddrrobot" ) 
 								}
 						}
 					}
-					 transition(edgeName="t124",targetState="handle_answer",cond=whenDispatch("obstacle"))
+					 transition(edgeName="t124",targetState="handle_answer",cond=whenDispatch("endMoveKo"))
 					transition(edgeName="t125",targetState="handle_answer",cond=whenDispatch("noMsg"))
 				}	 
 				state("handle_answer") { //this:State
 					action { //it:State
-						unibo.robot.robotSupport.move( "h"  )
+						println("Handle cmd answer")
 						answer("cmd", "cmdanswer", "cmdanswer(OK)"   )  
 					}
 					 transition( edgeName="goto",targetState="wait", cond=doswitch() )

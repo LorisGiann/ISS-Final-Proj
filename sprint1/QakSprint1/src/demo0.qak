@@ -21,7 +21,7 @@ Reply   dropoutanswer  : dropoutanswer(RESULT)
 Request move           : move(POSITION)    //INDOOR | PLASTICBOX | GLASSBOX | HOME
 Reply   moveanswer     : moveanswer(RESULT)
 
-Dispatch obstacle      : obstacle( ARG ) 	 
+Dispatch endMoveKo     : endMoveKo( V )
 Request  cmd 		   : cmd(MOVE)
 Reply    cmdanswer     : cmdanswer(RESULT)
 
@@ -223,8 +223,8 @@ QActor wasteservice context ctxserver{
 }
 
 QActor transporttrolley context ctxserver{
-	[# lateinit var dest : String
-	   lateinit var currpos : String
+	[# var dest ="HOME"
+	   var currpos = "HOME"
 	   
 	   fun newPosition(CURRPOS:String) : String {
  			if (CURRPOS=="HOME"){
@@ -256,7 +256,7 @@ QActor transporttrolley context ctxserver{
  	
  	State wait {
  		println("Wait")
- 		//println("Dest: ${dest} CurrPos: ${currpos}")
+ 		println("Dest: ${dest} CurrPos: ${currpos}")
  		if [# currpos!=dest #] {
  			forward transporttrolley -m noMsg : noMsg(_)
  		} 
@@ -306,19 +306,14 @@ QActor transporttrolley context ctxserver{
 
 QActor ddrrobot context ctxserver{
 	[#lateinit var move : String
-	   var RobotType     = "" #]
+	   var RobotType     = "" 
+	   var robotMoveObserver : unibo.actor22comm.interfaces.IObserver
+	   lateinit  var conn    : unibo.actor22comm.interfaces.Interaction2021  #]
 	
 	State init initial { 	    
 		discardMsg On
 		println("Init ddrrobot")
-		qrun unibo.robot.robotSupport.create(myself,"basicrobotConfig.json")	
- 		[# RobotType = unibo.robot.robotSupport.robotKind #]
- 		delay 1000
-        if[# RobotType != "virtual" #]{
-        	[# var robotsonar = context!!.hasActor("realsonar")  
-        	   unibo.robot.robotSupport.createSonarPipe(myself) 
-        	#]
-  		}
+		[#  conn=unibo.Robots.common.RobotUtils.connectWithVirtualRobot(getName())#]
 		//[# sysUtil.logMsgs=true #]
  	}
  	Goto wait
@@ -334,22 +329,22 @@ QActor ddrrobot context ctxserver{
  			
  			if [#move=="w"#]{
  				println("cmd move(${move})")
- 				run unibo.robot.robotSupport.move("w")
+ 				[# unibo.Robots.common.VRobotMoves.moveForward(getName(), conn ,10000) #] //STEP all along the room
  			}
  			if [#move=="l"#]{
  				println("cmd move(${move})")
- 				run unibo.robot.robotSupport.move("l")
+ 				[# unibo.Robots.common.VRobotMoves.turnLeft(getName(), conn) #] //STEP all along the room
  				delay 350
  				forward ddrrobot -m noMsg : noMsg(_)
  			} 
  		}
  	}
- 	Transition t1 whenMsg obstacle -> handle_answer
+ 	Transition t1 whenMsg endMoveKo -> handle_answer
  				  whenMsg noMsg    -> handle_answer
  	
  	
  	State handle_answer{
- 		run unibo.robot.robotSupport.move( "h" )
+ 		println("Handle cmd answer")
  		replyTo cmd with cmdanswer : cmdanswer(OK)
  	}
  	Goto wait
