@@ -305,7 +305,7 @@ QActor transporttrolley context ctxserver{
  	
  	State turn {
  		forward basicrobot -m cmd : cmd(l)
- 		delay 350
+ 		delay 450
  		[#currpos=newPosition(currpos) #]
  		if [# currpos==dest #] {
  			println("transporttrolley | Robot arrived at $currpos")
@@ -388,8 +388,8 @@ QActor basicrobot context ctxserver{
         	#] 
   		}//The Virtual robot sonar is created in virtualrobotSupport2021*/
  
-  		run unibo.robot.robotSupport.move( "l" )    //synch
- 		run unibo.robot.robotSupport.move( "r" )	//synch
+  		//run unibo.robot.robotSupport.move( "l" )    //synch
+ 		//run unibo.robot.robotSupport.move( "r" )	//synch
     		//run unibo.robot.robotSupport.move( "w" )    //asynch
  		updateResource [# "basicrobot(start)" #]
  	} 

@@ -92,7 +92,7 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 				state("turn") { //this:State
 					action { //it:State
 						forward("cmd", "cmd(l)" ,"basicrobot" ) 
-						delay(350) 
+						delay(450) 
 						currpos=newPosition(currpos)  
 						if(  currpos==dest  
 						 ){println("transporttrolley | Robot arrived at $currpos")
