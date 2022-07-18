@@ -14,12 +14,14 @@ import unibo.comm22.utils.CommUtils;
 
 
 public class TestSprint1 {
-private CoapConnection connTransportTrolley, connWasteService;
+	private CoapConnection connTransportTrolley, connWasteService;
+	private TestObserver to;
 
 	@Before
 	public void up() {
+		to=new TestObserver();
 		CommSystemConfig.tracing=false;
-		startObserverCoap("localhost", new TestObserver());
+		startObserverCoap("localhost", to);
 		new Thread(){
 			public void run(){
 				MainCtxserverKt.main();
@@ -59,21 +61,50 @@ private CoapConnection connTransportTrolley, connWasteService;
 	public void testLoadok() {
 		ColorsOut.outappl("testLoadok STARTS" , ColorsOut.BLUE);
 		String truckRequestStr = "msg(depositrequest, request,python,wasteservice,depositrequest(GLASS,2),1)";
-		assertTrue( coapCheckWasteService("home") );
+		//assertTrue( coapCheckWasteService("home") );
 		try{
 			ConnTcp connTcp   = new ConnTcp("localhost", 8095);
 			String answer     = connTcp.request(truckRequestStr);
  			ColorsOut.outappl("testLoadok answer=" + answer , ColorsOut.GREEN);
 			assertTrue(answer.contains("loadaccept"));
-			assertTrue( coapCheckWasteService("indoor"));
+			//assertTrue( coapCheckWasteService("indoor"));
 			CommUtils.delay(10000);
+			assertTrue(to.getHistory().contains("trolleyPos(home)"));
+			assertTrue(to.getIndexHistoryPosition(0).equalsIgnoreCase("trolleyPos(home)"));
+			assertTrue(to.getHistory().contains("trolleyPos(indoor)"));
+			assertTrue(to.getIndexHistoryPosition(1).equalsIgnoreCase("trolleyPos(indoor)"));
+			assertTrue(to.getHistory().contains("pickup()"));
+			assertTrue(to.getHistory().contains("trolleyPos(gbox)"));
+			assertTrue(to.getIndexHistoryPosition(2).equalsIgnoreCase("trolleyPos(gbox)"));
+			assertTrue(to.getHistory().contains("dropdown()"));
+			assertTrue(to.getHistory().contains("trolleyPos(home)"));
+			assertTrue(to.getIndexHistoryPosition(3).equalsIgnoreCase("trolleyPos(home)"));
 			connTcp.close();
 		}catch(Exception e){
 			ColorsOut.outerr("testLoadok ERROR:" + e.getMessage());
-
 		}
 
  	}
+
+	@Test
+	public void testLoadKo() {
+		ColorsOut.outappl("testLoadKo STARTS" , ColorsOut.BLUE);
+		String truckRequestStr = "msg(depositrequest, request,python,wasteservice,depositrequest(GLASS,11),1)";
+		//assertTrue( coapCheckWasteService("home") );
+		try{
+			ConnTcp connTcp   = new ConnTcp("localhost", 8095);
+			String answer     = connTcp.request(truckRequestStr);
+			ColorsOut.outappl("testLoadKo answer=" + answer , ColorsOut.GREEN);
+			assertTrue(answer.contains("loadrejected"));
+			//assertTrue( coapCheckWasteService("indoor"));
+			CommUtils.delay(2000);
+			connTcp.close();
+		}catch(Exception e){
+			ColorsOut.outerr("testLoadok ERROR:" + e.getMessage());
+		}
+
+	}
+
 
 	 @Test
 	 public void testMultiRequest(){
@@ -82,28 +113,64 @@ private CoapConnection connTransportTrolley, connWasteService;
 		 //assertTrue( coapCheck("home") );
 		 String truckRequestStr = "msg(depositrequest, request,python,wasteservice,depositrequest(GLASS,2),1)";
 		 try{
+			 //FIRST REQUEST
 			 ConnTcp connTcp   = new ConnTcp("localhost", 8095);
 			 String answer     = connTcp.request(truckRequestStr);
 			 ColorsOut.outappl("testFirstRequest answer=" + answer , ColorsOut.GREEN);
 			 assertTrue(answer.contains("loadaccept"));
-			 CommUtils.delay(10000);
-			 truckRequestStr = "msg(depositrequest, request,python,wasteservice,depositrequest(PLASTIC,5),1)";
+			 CommUtils.delay(5000);
+			 //SECONDO REQUEST
+			 truckRequestStr = "msg(depositrequest, request,python,wasteservice,depositrequest(GLASS,7),1)";
 			 answer     = connTcp.request(truckRequestStr);
 			 ColorsOut.outappl("testSecondRequest answer=" + answer , ColorsOut.GREEN);
 			 assertTrue(answer.contains("loadaccept"));
+			 CommUtils.delay(10000);
+			 assertTrue(to.getHistory().contains("trolleyPos(home)"));
+			 assertTrue(to.getHistory().contains("trolleyPos(indoor)"));
+			 assertTrue(to.getHistory().contains("pickup()"));
+			 assertTrue(to.getHistory().contains("trolleyPos(gbox)"));
+			 assertTrue(to.getHistory().contains("dropdown()"));
+			 assertTrue(to.getHistory().contains("trolleyPos(home)"));
+			 //ColorsOut.outappl("HistoryPosition =" + to.getHistoryPosition() , ColorsOut.GREEN);
+			 assertTrue(to.getIndexHistoryPosition(0).equalsIgnoreCase("trolleyPos(home)"));
+			 assertTrue(to.getIndexHistoryPosition(1).equalsIgnoreCase("trolleyPos(indoor)"));
+			 assertTrue(to.getIndexHistoryPosition(2).equalsIgnoreCase("trolleyPos(gbox)"));
+			 assertTrue(to.getIndexHistoryPosition(3).equalsIgnoreCase("trolleyPos(indoor)"));
+			 assertTrue(to.getIndexHistoryPosition(4).equalsIgnoreCase("trolleyPos(gbox)"));
+			 assertTrue(to.getIndexHistoryPosition(5).equalsIgnoreCase("trolleyPos(home)"));
 			 connTcp.close();
-
-			 //TODO: problema dei tempi
-			 //assertTrue( coapCheck("indoor") );
-			 //CommUtils.delay(1000);
-			 //assertTrue( coapCheck("gbox") );
-			 //TODO: controllare la history
-			 //CommUtils.delay(3000);
 		 }catch(Exception e){
 			 ColorsOut.outerr("testMultiRequestSTARTS ERROR:" + e.getMessage());
 
 		 }
 	 }
+
+	@Test
+	 public void testMultiRequestOkKo(){
+		CommUtils.delay(100);
+		ColorsOut.outappl("testMultiRequestSTARTS" , ColorsOut.BLUE);
+		//assertTrue( coapCheck("home") );
+		String truckRequestStr = "msg(depositrequest, request,python,wasteservice,depositrequest(GLASS,2),1)";
+		try{
+			//FIRST REQUEST
+			ConnTcp connTcp   = new ConnTcp("localhost", 8095);
+			String answer     = connTcp.request(truckRequestStr);
+			ColorsOut.outappl("testFirstRequest answer=" + answer , ColorsOut.GREEN);
+			assertTrue(answer.contains("loadaccept"));
+			CommUtils.delay(5000);
+			//SECONDO REQUEST
+			truckRequestStr = "msg(depositrequest, request,python,wasteservice,depositrequest(GLASS,9),1)";
+			answer     = connTcp.request(truckRequestStr);
+			ColorsOut.outappl("testSecondRequest answer=" + answer , ColorsOut.GREEN);
+			assertTrue(answer.contains("loadrejected"));
+			CommUtils.delay(5000);
+			connTcp.close();
+		}catch(Exception e){
+			ColorsOut.outerr("testMultiRequestSTARTS ERROR:" + e.getMessage());
+
+		}
+	}
+
 
 
 

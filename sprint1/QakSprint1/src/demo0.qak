@@ -11,7 +11,7 @@ Request depositrequest : depositrequest(MATERIAL, TRUCKLOAD)
 Reply loadaccepted     : loadaccepted(MATERIAL, TRUCKLOAD)
 Reply loadrejected     : loadrejected(MATERIAL, TRUCKLOAD)
 // ------------------------------------------------------
-
+ 
 // ------------ transporttrolley msgs -------------------
 //RESULT =  OK | ERROR 
 Request pickup         : pickup(_)
@@ -104,6 +104,7 @@ QActor wasteservice context ctxserver{
 			if[# checkdepositpossible( Material, TruckLoad ) #]{
 				[# updateDeposit( Material, TruckLoad ) 
 					#]
+				println("PB capacity: ${contPB}, GB capacity: ${contGB}")	
 				request transporttrolley -m move : move(INDOOR)
 			} else{  
 				replyTo depositrequest with loadrejected : loadrejected($Material,$TruckLoad)
@@ -161,8 +162,8 @@ QActor wasteservice context ctxserver{
  		onMsg(moveanswer : moveanswer(RESULT)) {
 			[# RES = payloadArg(0); #]
 			if[# RES == "OK" #]{
-				println("wateservice - request dropout")
-				if [# Material == "glass" #]{ updateResource [# "trolleyPos(gbox)" #]
+				println("wateservice - request dropout ${Material}")
+				if [# Material == "GLASS" #]{ updateResource [# "trolleyPos(gbox)" #]
 				}else{ updateResource [# "trolleyPos(pbox)" #] }
 				request transporttrolley -m dropout : dropout(_)
 			}else{
@@ -194,6 +195,9 @@ QActor wasteservice context ctxserver{
 				 TruckLoad 	= payloadArg(1) ;
 			#]
 			if[# checkdepositpossible( Material, TruckLoad ) #]{
+				[# updateDeposit( Material, TruckLoad ) 
+					#]
+				println("PB capacity: ${contPB}, GB capacity: ${contGB}")	
 				request transporttrolley -m move : move(INDOOR)
 			} else{  
 				replyTo depositrequest with loadrejected : loadrejected($Material,$TruckLoad)
@@ -345,7 +349,7 @@ QActor basicrobot context ctxserver{
  
   		//run unibo.robot.robotSupport.move( "l" )    //synch
  		//run unibo.robot.robotSupport.move( "r" )	//synch
-    		//run unibo.robot.robotSupport.move( "w" )    //asynch
+    		//run unibo.robot.robotSupport.move( "w" )    //asynch 
  		updateResource [# "basicrobot(start)" #]
  	} 
 	Goto work

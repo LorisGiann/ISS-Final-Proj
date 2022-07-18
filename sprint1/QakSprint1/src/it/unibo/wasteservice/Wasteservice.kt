@@ -62,6 +62,7 @@ class Wasteservice ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 								println("arrived $TruckLoad Kg of $Material")
 								if(  checkdepositpossible( Material, TruckLoad )  
 								 ){ updateDeposit( Material, TruckLoad ) 
+								println("PB capacity: ${contPB}, GB capacity: ${contGB}")
 								request("move", "move(INDOOR)" ,"transporttrolley" )  
 								}
 								else
@@ -129,8 +130,8 @@ class Wasteservice ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 RES = payloadArg(0);  
 								if(  RES == "OK"  
-								 ){println("wateservice - request dropout")
-								if(  Material == "glass"  
+								 ){println("wateservice - request dropout ${Material}")
+								if(  Material == "GLASS"  
 								 ){updateResourceRep( "trolleyPos(gbox)"  
 								)
 								}
@@ -175,7 +176,9 @@ class Wasteservice ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 												 Material 	= payloadArg(0) ;
 												 TruckLoad 	= payloadArg(1) ;
 								if(  checkdepositpossible( Material, TruckLoad )  
-								 ){request("move", "move(INDOOR)" ,"transporttrolley" )  
+								 ){ updateDeposit( Material, TruckLoad ) 
+								println("PB capacity: ${contPB}, GB capacity: ${contGB}")
+								request("move", "move(INDOOR)" ,"transporttrolley" )  
 								}
 								else
 								 {answer("depositrequest", "loadrejected", "loadrejected($Material,$TruckLoad)"   )  
