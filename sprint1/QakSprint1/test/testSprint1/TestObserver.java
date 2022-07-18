@@ -4,11 +4,15 @@ import org.eclipse.californium.core.CoapHandler;
 import org.eclipse.californium.core.CoapResponse;
 import unibo.comm22.utils.ColorsOut;
 
-public class TrolleyPosObserver implements CoapHandler{
-protected String history = "";
+import java.util.ArrayList;
+import java.util.List;
+
+public class TestObserver implements CoapHandler{
+protected List<String> history = new ArrayList<String>();
+
     @Override
-    public void onLoad(CoapResponse response) {
-        history += response.getResponseText();
+    public synchronized void onLoad(CoapResponse response) {
+        history.add(response.getResponseText());
         ColorsOut.outappl("TrolleyPosObserver history=" + history, ColorsOut.MAGENTA);
     }
 

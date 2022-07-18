@@ -48,6 +48,8 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 						if(  currpos!=dest  
 						 ){forward("noMsg", "noMsg(_)" ,"transporttrolley" ) 
 						}
+						updateResourceRep( "wait($currpos,$dest)"  
+						)
 					}
 					 transition(edgeName="toNewState17",targetState="picking_up",cond=whenRequestGuarded("pickup",{ currpos==dest 
 					}))
@@ -60,6 +62,8 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 				state("picking_up") { //this:State
 					action { //it:State
 						println("transporttrolley | PickUp material from truck")
+						updateResourceRep( "pickup()"  
+						)
 						delay(1000) 
 						answer("pickup", "pickupanswer", "pickupanswer(OK)"   )  
 					}
@@ -68,6 +72,8 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 				state("dropping_down") { //this:State
 					action { //it:State
 						println("transporttrolley | DropOut material in container")
+						updateResourceRep( "dropdown()"  
+						)
 						delay(1000) 
 						answer("dropout", "dropoutanswer", "dropoutanswer(OK)"   )  
 					}

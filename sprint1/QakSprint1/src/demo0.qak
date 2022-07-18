@@ -268,7 +268,8 @@ QActor transporttrolley context ctxserver{
  		println("transporttrolley | Wait (Dest: ${dest} CurrPos: ${currpos})")
  		if [# currpos!=dest #] {
  			forward transporttrolley -m noMsg : noMsg(_)
- 		} 
+ 		}
+ 		updateResource [# "wait($currpos,$dest)" #]
  	}
  	Transition toNewState whenRequest pickup and [# currpos==dest#]-> picking_up
  						  whenRequest dropout and [# currpos==dest#]-> dropping_down
@@ -277,6 +278,7 @@ QActor transporttrolley context ctxserver{
  						  
  	State picking_up {
  		println("transporttrolley | PickUp material from truck")
+ 		updateResource [# "pickup()" #]
  		delay 1000
 		replyTo pickup with pickupanswer : pickupanswer(OK)
  	}
@@ -284,6 +286,7 @@ QActor transporttrolley context ctxserver{
  	
  	State dropping_down {
  		println("transporttrolley | DropOut material in container")
+ 		updateResource [# "dropdown()" #]
  		delay 1000
 		replyTo dropout with dropoutanswer : dropoutanswer(OK)
  	}
@@ -317,54 +320,6 @@ QActor transporttrolley context ctxserver{
  	Goto wait
  	
 }
-
-
-/*QActor ddrrobot context ctxserver{
-	[#lateinit var move : String
-	   var RobotType     = "" 
-	   var robotMoveObserver : unibo.actor22comm.interfaces.IObserver
-	   lateinit  var conn    : unibo.actor22comm.interfaces.Interaction2021  #]
-	
-	State init initial { 	    
-		discardMsg On
-		println("Init ddrrobot")
-		[#  conn=unibo.Robots.common.RobotUtils.connectWithVirtualRobot(getName())#]
-		//[# sysUtil.logMsgs=true #]
- 	}
- 	Goto wait
-	
-	State wait {
-		discardMsg On
-	}
-	Transition t0 whenRequest cmd -> handle_moving
-	
-	State handle_moving {
-		onMsg( cmd:cmd(MOVE) ){
-			[# move = payloadArg(0) #]
- 			
- 			if [#move=="w"#]{
- 				println("cmd move(${move})")
- 				[# unibo.Robots.common.VRobotMoves.moveForward(getName(), conn ,10000) #] //STEP all along the room
- 			}
- 			if [#move=="l"#]{
- 				println("cmd move(${move})")
- 				[# unibo.Robots.common.VRobotMoves.turnLeft(getName(), conn) #] //STEP all along the room
- 				delay 450
- 				forward ddrrobot -m noMsg : noMsg(_)
- 			} 
- 		}
- 	}
- 	Transition t1 whenMsg endMoveKo -> handle_answer
- 				  whenMsg noMsg    -> handle_answer
- 	
- 	
- 	State handle_answer{
- 		println("Handle cmd answer")
- 		replyTo cmd with cmdanswer : cmdanswer(OK)
- 	}
- 	Goto wait
-
-}*/
 
 
 
