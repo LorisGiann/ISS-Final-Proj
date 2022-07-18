@@ -1,5 +1,6 @@
 package testSprint1;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import it.unibo.ctxserver.MainCtxserverKt;
@@ -71,14 +72,32 @@ public class TestSprint1 {
 				CommUtils.delay(1000);
 			}
 			connTcp.close();
-			System.out.println(to.checkNextContent("transporttrolley\\(forward_robot,.*"));
-			System.out.println(to.checkNextContent("transporttrolley\\(wait,HOME,HOME\\)"));
+			ColorsOut.outappl(to.getHistory().toString(), ColorsOut.MAGENTA);
+			assertTrue(to.checkNextContents(new String[]{"wasteservice(wait,0,0)", "transporttrolley(wait,HOME,HOME)"}) > 0);
+			/*assertTrue(to.checkNextContent("wasteservice(handle_req,0,0)") > 0);
+			assertTrue(to.checkNextContent("transporttrolley(wait,HOME,INDOOR)") > 0);
+			assertTrue(to.checkNextContent("transporttrolley(wait,INDOOR,INDOOR)") > 0);
+			assertTrue(to.checkNextContent("transporttrolley(picking_up,INDOOR,INDOOR)") > 0);
+			assertTrue(to.checkNextContent("transporttrolley(wait,INDOOR,GLASSBOX)") > 0);*/
+			assertTrue(to.checkNextSequence(new String[]{
+					"wasteservice(handle_req,0,0)",
+					"transporttrolley(wait,HOME,INDOOR)",
+					"transporttrolley(wait,INDOOR,INDOOR)",
+					"transporttrolley(picking_up,INDOOR,INDOOR)"
+			}));
+			assertTrue(to.checkNextContents(new String[]{"wasteservice(handle_pickup_answer,0,2)", "transporttrolley(wait,INDOOR,GLASSBOX)"}) > 0); //check container load update. (handle_pickup_answer also moves the robot to the container)
+			assertTrue(to.checkNextSequence(new String[]{
+					"transporttrolley(wait,PLASTICBOX,GLASSBOX)",
+					"transporttrolley(wait,GLASSBOX,GLASSBOX)",
+					"transporttrolley(dropping_down,GLASSBOX,GLASSBOX)"
+			}));
+			assertTrue(to.checkNextContents(new String[]{"wasteservice(handle_move_home,0,2)", "transporttrolley(wait,GLASSBOX,HOME)"}) > 0);
+			assertTrue(to.checkNextContents(new String[]{"wasteservice(wait,0,2)", "transporttrolley(wait,HOME,HOME)"}) > 0);
 			to.setStartPosition(0);
-;			System.out.println(to.checkNextContents(new String[]{"transporttrolley\\(forward_robot,.*", "transporttrolley\\(wait,HOME,HOME\\)"}));
+;			//System.out.println(to.checkNextContents(new String[]{"transporttrolley\\(forward_robot,.*", "transporttrolley\\(wait,HOME,HOME\\)"}));
 		}catch(Exception e){
 			ColorsOut.outerr("testLoadok ERROR:" + e.getMessage());
 		}
-
  	}
 
 	@Test

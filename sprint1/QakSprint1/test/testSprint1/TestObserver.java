@@ -15,7 +15,7 @@ public class TestObserver implements CoapHandler{
     @Override
     public synchronized void onLoad(CoapResponse response) {
         history.add(response.getResponseText());
-        ColorsOut.outappl("TrolleyPosObserver history=" + history, ColorsOut.MAGENTA);
+        ColorsOut.outappl("history=" + history, ColorsOut.MAGENTA);
     }
 
     public List<String> getHistory(){
@@ -46,6 +46,7 @@ public class TestObserver implements CoapHandler{
     @Return the index of the found occurrence, -1 if no occurrence is found
      */
     public int checkNextContent(String patternstr){
+        patternstr = patternstr.replace("(","\\(").replace(")","\\)").replace("*",".*");
         Pattern pattern = Pattern.compile(patternstr);
         int i = nextCheckIndex;
         while(i < history.size()){
@@ -59,16 +60,34 @@ public class TestObserver implements CoapHandler{
     }
 
     /**
+     * calls repeatedly checkNextContent() to see if the sequence is respected
+     * @Return true if is respected, false if not
+     */
+    public boolean checkNextSequence(String[] patternstr){
+        for(String s : patternstr){
+            if(checkNextContent(s) < 0){
+                ColorsOut.outappl("Element \"" + s + "\" not found!", ColorsOut.RED);
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
      * check for the presence of all the specified patterns at once. Return the index of the last pattern that still was to be found
      * The order between the elements is not relevant
      * @param patternstr
      * @return
      */
-    public int checkNextContents(String[] patternstr){
+    public int checkNextContents(String[] patternstr) {
         List<Pattern> patterns = new ArrayList<Pattern>(patternstr.length);
-        for(int i=0; i<patternstr.length; i++){
-            patterns.add(Pattern.compile(patternstr[i]));
+        for (int i = 0; i < patternstr.length; i++) {
+            String single_patternstr = patternstr[i].replace("(", "\\(").replace(")", "\\)").replace("*", ".*");
+            patterns.add(Pattern.compile(single_patternstr));
         }
+        return checkNextContents(patterns);
+    }
+    public int checkNextContents(List<Pattern> patterns){
         int i = nextCheckIndex;
         while(i < history.size()){
             boolean found = false;
@@ -101,5 +120,9 @@ public class TestObserver implements CoapHandler{
         ColorsOut.outerr("CoapObserver observe error!");
     }
 
+    /*System.out.println(to.checkNextContent("transporttrolley\\(forward_robot,.*"));
+    System.out.println(to.checkNextContent("transporttrolley\\(wait,HOME,HOME\\)"));
+    to.setStartPosition(0);
+    System.out.println(to.checkNextContents(new String[]{"transporttrolley\\(forward_robot,.*", "transporttrolley\\(wait,HOME,HOME\\)"}));*/
 
 }
