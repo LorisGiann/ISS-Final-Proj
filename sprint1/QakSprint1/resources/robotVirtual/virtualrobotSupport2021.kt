@@ -32,8 +32,8 @@ object virtualrobotSupport2021 {
 	private lateinit var hostName : String 	
 	private lateinit var support21   : Interaction2021 	 
 	private lateinit var support21ws : Interaction2021 	 
-    private val forwardlongtimeMsg  = "{\"robotmove\":\"moveForward\", \"time\": 1000}"
-    private val backwardlongtimeMsg = "{\"robotmove\":\"moveBackward\", \"time\": 1000}"
+    private val forwardlongtimeMsg  = "{\"robotmove\":\"moveForward\", \"time\": 5000}"
+    private val backwardlongtimeMsg = "{\"robotmove\":\"moveBackward\", \"time\": 5000}"
 
 	var traceOn = false
 	

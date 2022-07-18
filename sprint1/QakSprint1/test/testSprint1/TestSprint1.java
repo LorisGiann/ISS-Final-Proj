@@ -34,6 +34,7 @@ private CoapConnection conn;
 
 		 */
 		waitForApplStarted();
+		CommUtils.delay(2000);
   	}
 
  	protected void waitForApplStarted(){
@@ -56,35 +57,56 @@ private CoapConnection conn;
 
 	@Test
 	public void testLoadok() {
-		CommUtils.delay(100);
 		ColorsOut.outappl("testLoadok STARTS" , ColorsOut.BLUE);
-		//assertTrue( coapCheck("home") );
 		String truckRequestStr = "msg(depositrequest, request,python,wasteservice,depositrequest(GLASS,2),1)";
+		assertTrue( coapCheck("home") );
 		try{
 			ConnTcp connTcp   = new ConnTcp("localhost", 8095);
 			String answer     = connTcp.request(truckRequestStr);
  			ColorsOut.outappl("testLoadok answer=" + answer , ColorsOut.GREEN);
 			assertTrue(answer.contains("loadaccept"));
+			assertTrue( coapCheck("indoor"));
 			CommUtils.delay(10000);
-			truckRequestStr = "msg(depositrequest, request,python,wasteservice,depositrequest(PLASTIC,5),1)";
-			answer     = connTcp.request(truckRequestStr);
-			ColorsOut.outappl("testLoadok answer=" + answer , ColorsOut.GREEN);
-			assertTrue(answer.contains("loadaccept"));
-			CommUtils.delay(10000);
+			assertTrue( coapCheck("pbox") );
 			connTcp.close();
-
-			//TODO: problema dei tempi
-			//assertTrue( coapCheck("indoor") );
-			//CommUtils.delay(1000);
-			//assertTrue( coapCheck("gbox") );
-			//TODO: controllare la history
-			//CommUtils.delay(3000);
 		}catch(Exception e){
 			ColorsOut.outerr("testLoadok ERROR:" + e.getMessage());
 
 		}
 
  	}
+
+	 @Test
+	 public void testMultiRequest(){
+		 CommUtils.delay(100);
+		 ColorsOut.outappl("testMultiRequestSTARTS" , ColorsOut.BLUE);
+		 //assertTrue( coapCheck("home") );
+		 String truckRequestStr = "msg(depositrequest, request,python,wasteservice,depositrequest(GLASS,2),1)";
+		 try{
+			 ConnTcp connTcp   = new ConnTcp("localhost", 8095);
+			 String answer     = connTcp.request(truckRequestStr);
+			 ColorsOut.outappl("testFirstRequest answer=" + answer , ColorsOut.GREEN);
+			 assertTrue(answer.contains("loadaccept"));
+			 CommUtils.delay(10000);
+			 truckRequestStr = "msg(depositrequest, request,python,wasteservice,depositrequest(PLASTIC,5),1)";
+			 answer     = connTcp.request(truckRequestStr);
+			 ColorsOut.outappl("testSecondRequest answer=" + answer , ColorsOut.GREEN);
+			 assertTrue(answer.contains("loadaccept"));
+			 connTcp.close();
+
+			 //TODO: problema dei tempi
+			 //assertTrue( coapCheck("indoor") );
+			 //CommUtils.delay(1000);
+			 //assertTrue( coapCheck("gbox") );
+			 //TODO: controllare la history
+			 //CommUtils.delay(3000);
+		 }catch(Exception e){
+			 ColorsOut.outerr("testMultiRequestSTARTS ERROR:" + e.getMessage());
+
+		 }
+	 }
+
+
 
 //---------------------------------------------------
 
@@ -97,7 +119,7 @@ protected void startObserverCoap(String addr, CoapHandler handler){
 		new Thread(){
 			public void run(){
 				try {
-					String ctxqakdest       = "serverctx";
+					String ctxqakdest       = "ctxserver";
 					String qakdestination 	= "wasteservice";
 					String applPort         = "8095";
 					String path             = ctxqakdest+"/"+qakdestination;
