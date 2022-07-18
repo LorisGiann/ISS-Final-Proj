@@ -14,12 +14,12 @@ import unibo.comm22.utils.CommUtils;
 
 
 public class TestSprint1 {
-private CoapConnection conn;
+private CoapConnection connTransportTrolley, connWasteService;
 
 	@Before
 	public void up() {
 		CommSystemConfig.tracing=false;
-		startObserverCoap("localhost", new TrolleyPosObserver());
+		startObserverCoap("localhost", new TestObserver());
 		new Thread(){
 			public void run(){
 				MainCtxserverKt.main();
@@ -34,7 +34,7 @@ private CoapConnection conn;
 
 		 */
 		waitForApplStarted();
-		CommUtils.delay(2000);
+		CommUtils.delay(2500);
   	}
 
  	protected void waitForApplStarted(){
@@ -59,15 +59,14 @@ private CoapConnection conn;
 	public void testLoadok() {
 		ColorsOut.outappl("testLoadok STARTS" , ColorsOut.BLUE);
 		String truckRequestStr = "msg(depositrequest, request,python,wasteservice,depositrequest(GLASS,2),1)";
-		assertTrue( coapCheck("home") );
+		assertTrue( coapCheckWasteService("home") );
 		try{
 			ConnTcp connTcp   = new ConnTcp("localhost", 8095);
 			String answer     = connTcp.request(truckRequestStr);
  			ColorsOut.outappl("testLoadok answer=" + answer , ColorsOut.GREEN);
 			assertTrue(answer.contains("loadaccept"));
-			assertTrue( coapCheck("indoor"));
+			assertTrue( coapCheckWasteService("indoor"));
 			CommUtils.delay(10000);
-			assertTrue( coapCheck("pbox") );
 			connTcp.close();
 		}catch(Exception e){
 			ColorsOut.outerr("testLoadok ERROR:" + e.getMessage());
@@ -110,8 +109,13 @@ private CoapConnection conn;
 
 //---------------------------------------------------
 
-protected boolean coapCheck(String check){
-	String answer = conn.request("");
+protected boolean coapCheckWasteService(String check){
+	String answer = connWasteService.request("");
+	ColorsOut.outappl("coapCheck answer=" + answer, ColorsOut.CYAN);
+	return answer.contains(check);
+}
+protected boolean coapCheckconnTransportTrolley(String check){
+	String answer = connTransportTrolley.request("");
 	ColorsOut.outappl("coapCheck answer=" + answer, ColorsOut.CYAN);
 	return answer.contains(check);
 }
@@ -119,13 +123,16 @@ protected void startObserverCoap(String addr, CoapHandler handler){
 		new Thread(){
 			public void run(){
 				try {
+					String qakdestination1 	= "wasteservice";
+					String qakdestination2 	= "transporttrolley";
 					String ctxqakdest       = "ctxserver";
-					String qakdestination 	= "wasteservice";
 					String applPort         = "8095";
-					String path             = ctxqakdest+"/"+qakdestination;
-					conn                    = new CoapConnection(addr+":"+applPort, path);
-					conn.observeResource( handler );
-					ColorsOut.outappl("connected via Coap conn:" + conn , ColorsOut.CYAN);
+					connWasteService        = new CoapConnection(addr+":"+applPort, ctxqakdest+"/"+qakdestination1);
+					connTransportTrolley    = new CoapConnection(addr+":"+applPort, ctxqakdest+"/"+qakdestination2);
+					connWasteService.observeResource( handler );
+					connTransportTrolley.observeResource( handler );
+					ColorsOut.outappl("connected via Coap conn:" + connWasteService , ColorsOut.CYAN);
+					ColorsOut.outappl("connected via Coap conn:" + connTransportTrolley , ColorsOut.CYAN);
 				}catch(Exception e){
 					ColorsOut.outerr("connectUsingCoap ERROR:"+e.getMessage());
 				}
