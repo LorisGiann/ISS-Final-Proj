@@ -6,34 +6,94 @@ import unibo.comm22.utils.ColorsOut;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class TestObserver implements CoapHandler{
     protected List<String> history = new ArrayList<String>();
-    protected List<String> historyPosition = new ArrayList<>();
 
     @Override
     public synchronized void onLoad(CoapResponse response) {
-        if (response.getResponseText().contains("trolleyPos")){
-            historyPosition.add(response.getResponseText());
-        }
         history.add(response.getResponseText());
         ColorsOut.outappl("TrolleyPosObserver history=" + history, ColorsOut.MAGENTA);
     }
 
-    public String getHistory(){
-        return history.toString();
+    public List<String> getHistory(){
+        return history;
     }
 
     public String getIndexHistory(int i){
         return history.get(i);
     }
 
-    public String getHistoryPosition(){
-        return historyPosition.toString();
+    /*
+    Check wether or not the content of the history list at index i matches the specified pattern
+     */
+    public boolean checkContentAtIndex(int index, String pattern){
+        return checkContentAtIndex(index, Pattern.compile(pattern));
+    }
+    public boolean checkContentAtIndex(int index, Pattern pattern){
+        Matcher matcher = pattern.matcher(history.get(index));
+        return matcher.matches();
     }
 
-    public String getIndexHistoryPosition(int i){
-        return historyPosition.get(i);
+
+
+    private int nextCheckIndex = 0;
+    /**
+    Sequentially check the presence of events in the hystory
+    The presence of the specified pattern is checked only on the events following the last found one.
+    @Return the index of the found occurrence, -1 if no occurrence is found
+     */
+    public int checkNextContent(String patternstr){
+        Pattern pattern = Pattern.compile(patternstr);
+        int i = nextCheckIndex;
+        while(i < history.size()){
+            if(checkContentAtIndex(i, pattern)){
+                nextCheckIndex = i+1;
+                return i;
+            }
+            i++;
+        }
+        return -1;
+    }
+
+    /**
+     * check for the presence of all the specified patterns at once. Return the index of the last pattern that still was to be found
+     * The order between the elements is not relevant
+     * @param patternstr
+     * @return
+     */
+    public int checkNextContents(String[] patternstr){
+        List<Pattern> patterns = new ArrayList<Pattern>(patternstr.length);
+        for(int i=0; i<patternstr.length; i++){
+            patterns.add(Pattern.compile(patternstr[i]));
+        }
+        int i = nextCheckIndex;
+        while(i < history.size()){
+            boolean found = false;
+            Pattern foundPattern = null;
+            for(Pattern pattern : patterns){
+                if(checkContentAtIndex(i, pattern)){
+                    found=true;
+                    foundPattern = pattern;
+                    continue;
+                }
+            }
+            if(found) patterns.remove(foundPattern);
+            if(patterns.size()==0){
+                nextCheckIndex = i+1;
+                return i;
+            }
+            i++;
+        }
+        return -1;
+    }
+    /***
+     * set the starting search point for checkNextContent() (set to zero to start from the beginning)
+     */
+    public void setStartPosition(int val){
+        nextCheckIndex = val;
     }
 
     @Override

@@ -42,17 +42,19 @@ class Wasteservice ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 		return { //this:ActionBasciFsm
 				state("wait") { //this:State
 					action { //it:State
+						updateResourceRep( "wasteservice(wait,$contPB,$contGB)"  
+						)
 						println("$name in ${currentState.stateName} | $currentMsg")
 						discardMessages = false
 						 TrolleyPos = "home"  
-						updateResourceRep( "trolleyPos(home)"  
-						)
 						println("Waiting for requests")
 					}
 					 transition(edgeName="t00",targetState="handle_req",cond=whenRequest("depositrequest"))
 				}	 
 				state("handle_req") { //this:State
 					action { //it:State
+						updateResourceRep( "wasteservice(handle_req,$contPB,$contGB)"  
+						)
 						println("$name in ${currentState.stateName} | $currentMsg")
 						if( checkMsgContent( Term.createTerm("depositrequest(MATERIAL,TRUCKLOAD)"), Term.createTerm("depositrequest(MATERIAL,TRUCKLOAD)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
@@ -76,14 +78,14 @@ class Wasteservice ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 				}	 
 				state("handle_move_indoor") { //this:State
 					action { //it:State
+						updateResourceRep( "wasteservice(handle_move_indoor,$contPB,$contGB)"  
+						)
 						println("$name in ${currentState.stateName} | $currentMsg")
 						if( checkMsgContent( Term.createTerm("moveanswer(RESULT)"), Term.createTerm("moveanswer(RESULT)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 RES = payloadArg(0);  
 								if(  RES == "OK"  
 								 ){println("wateservice - request pickup")
-								updateResourceRep( "trolleyPos(indoor)"  
-								)
 								request("pickup", "pickup(_)" ,"transporttrolley" )  
 								}
 								else
@@ -96,6 +98,8 @@ class Wasteservice ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 				}	 
 				state("handle_pickup_answer") { //this:State
 					action { //it:State
+						updateResourceRep( "wasteservice(handle_pickup_answer,$contPB,$contGB)"  
+						)
 						println("$name in ${currentState.stateName} | $currentMsg")
 						if( checkMsgContent( Term.createTerm("pickupanswer(RESULT)"), Term.createTerm("pickupanswer(RESULT)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
@@ -125,20 +129,14 @@ class Wasteservice ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 				}	 
 				state("handle_move_container") { //this:State
 					action { //it:State
+						updateResourceRep( "wasteservice(handle_move_container,$contPB,$contGB)"  
+						)
 						println("$name in ${currentState.stateName} | $currentMsg")
 						if( checkMsgContent( Term.createTerm("moveanswer(RESULT)"), Term.createTerm("moveanswer(RESULT)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 RES = payloadArg(0);  
 								if(  RES == "OK"  
 								 ){println("wateservice - request dropout ${Material}")
-								if(  Material == "GLASS"  
-								 ){updateResourceRep( "trolleyPos(gbox)"  
-								)
-								}
-								else
-								 {updateResourceRep( "trolleyPos(pbox)"  
-								 )
-								 }
 								request("dropout", "dropout(_)" ,"transporttrolley" )  
 								}
 								else
@@ -151,6 +149,8 @@ class Wasteservice ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 				}	 
 				state("handle_dropout_answer") { //this:State
 					action { //it:State
+						updateResourceRep( "wasteservice(handle_dropout_answer,$contPB,$contGB)"  
+						)
 						println("$name in ${currentState.stateName} | $currentMsg")
 						if( checkMsgContent( Term.createTerm("dropoutanswer(RESULT)"), Term.createTerm("dropoutanswer(RESULT)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
@@ -169,6 +169,8 @@ class Wasteservice ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 				}	 
 				state("handle_new_req") { //this:State
 					action { //it:State
+						updateResourceRep( "wasteservice(handle_new_req,$contPB,$contGB)"  
+						)
 						println("$name in ${currentState.stateName} | $currentMsg")
 						if( checkMsgContent( Term.createTerm("depositrequest(MATERIAL,TRUCKLOAD)"), Term.createTerm("depositrequest(MATERIAL,TRUCKLOAD)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
@@ -191,6 +193,8 @@ class Wasteservice ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 				}	 
 				state("move_home") { //this:State
 					action { //it:State
+						updateResourceRep( "wasteservice(move_home,$contPB,$contGB)"  
+						)
 						println("$name in ${currentState.stateName} | $currentMsg")
 						request("move", "move(HOME)" ,"transporttrolley" )  
 					}
@@ -198,14 +202,14 @@ class Wasteservice ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 				}	 
 				state("handle_move_home") { //this:State
 					action { //it:State
+						updateResourceRep( "wasteservice(handle_move_home,$contPB,$contGB)"  
+						)
 						println("$name in ${currentState.stateName} | $currentMsg")
 						if( checkMsgContent( Term.createTerm("moveanswer(RESULT)"), Term.createTerm("moveanswer(RESULT)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 RES = payloadArg(0);  
 								if(  RES == "OK"  
-								 ){updateResourceRep( "trolleyPos(home)"  
-								)
-								request("dropout", "dropout(_)" ,"transporttrolley" )  
+								 ){request("dropout", "dropout(_)" ,"transporttrolley" )  
 								}
 								else
 								 {forward("noMsg", "noMsg(_)" ,"wasteservice" ) 
@@ -219,6 +223,8 @@ class Wasteservice ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 				}	 
 				state("error") { //this:State
 					action { //it:State
+						updateResourceRep( "wasteservice(error,$contPB,$contGB)"  
+						)
 						println("error")
 						println("$name in ${currentState.stateName} | $currentMsg")
 					}

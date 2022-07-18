@@ -67,19 +67,14 @@ public class TestSprint1 {
 			String answer     = connTcp.request(truckRequestStr);
  			ColorsOut.outappl("testLoadok answer=" + answer , ColorsOut.GREEN);
 			assertTrue(answer.contains("loadaccept"));
-			//assertTrue( coapCheckWasteService("indoor"));
-			CommUtils.delay(10000);
-			assertTrue(to.getHistory().contains("trolleyPos(home)"));
-			assertTrue(to.getIndexHistoryPosition(0).equalsIgnoreCase("trolleyPos(home)"));
-			assertTrue(to.getHistory().contains("trolleyPos(indoor)"));
-			assertTrue(to.getIndexHistoryPosition(1).equalsIgnoreCase("trolleyPos(indoor)"));
-			assertTrue(to.getHistory().contains("pickup()"));
-			assertTrue(to.getHistory().contains("trolleyPos(gbox)"));
-			assertTrue(to.getIndexHistoryPosition(2).equalsIgnoreCase("trolleyPos(gbox)"));
-			assertTrue(to.getHistory().contains("dropdown()"));
-			assertTrue(to.getHistory().contains("trolleyPos(home)"));
-			assertTrue(to.getIndexHistoryPosition(3).equalsIgnoreCase("trolleyPos(home)"));
+			while(!coapCheckWasteService("wait")){
+				CommUtils.delay(1000);
+			}
 			connTcp.close();
+			System.out.println(to.checkNextContent("transporttrolley\\(forward_robot,.*"));
+			System.out.println(to.checkNextContent("transporttrolley\\(wait,HOME,HOME\\)"));
+			to.setStartPosition(0);
+;			System.out.println(to.checkNextContents(new String[]{"transporttrolley\\(forward_robot,.*", "transporttrolley\\(wait,HOME,HOME\\)"}));
 		}catch(Exception e){
 			ColorsOut.outerr("testLoadok ERROR:" + e.getMessage());
 		}
@@ -125,19 +120,7 @@ public class TestSprint1 {
 			 ColorsOut.outappl("testSecondRequest answer=" + answer , ColorsOut.GREEN);
 			 assertTrue(answer.contains("loadaccept"));
 			 CommUtils.delay(10000);
-			 assertTrue(to.getHistory().contains("trolleyPos(home)"));
-			 assertTrue(to.getHistory().contains("trolleyPos(indoor)"));
-			 assertTrue(to.getHistory().contains("pickup()"));
-			 assertTrue(to.getHistory().contains("trolleyPos(gbox)"));
-			 assertTrue(to.getHistory().contains("dropdown()"));
-			 assertTrue(to.getHistory().contains("trolleyPos(home)"));
-			 //ColorsOut.outappl("HistoryPosition =" + to.getHistoryPosition() , ColorsOut.GREEN);
-			 assertTrue(to.getIndexHistoryPosition(0).equalsIgnoreCase("trolleyPos(home)"));
-			 assertTrue(to.getIndexHistoryPosition(1).equalsIgnoreCase("trolleyPos(indoor)"));
-			 assertTrue(to.getIndexHistoryPosition(2).equalsIgnoreCase("trolleyPos(gbox)"));
-			 assertTrue(to.getIndexHistoryPosition(3).equalsIgnoreCase("trolleyPos(indoor)"));
-			 assertTrue(to.getIndexHistoryPosition(4).equalsIgnoreCase("trolleyPos(gbox)"));
-			 assertTrue(to.getIndexHistoryPosition(5).equalsIgnoreCase("trolleyPos(home)"));
+
 			 connTcp.close();
 		 }catch(Exception e){
 			 ColorsOut.outerr("testMultiRequestSTARTS ERROR:" + e.getMessage());

@@ -44,12 +44,12 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 				}	 
 				state("wait") { //this:State
 					action { //it:State
+						updateResourceRep( "transporttrolley(wait,$currpos,$dest)"  
+						)
 						println("transporttrolley | Wait (Dest: ${dest} CurrPos: ${currpos})")
 						if(  currpos!=dest  
 						 ){forward("noMsg", "noMsg(_)" ,"transporttrolley" ) 
 						}
-						updateResourceRep( "wait($currpos,$dest)"  
-						)
 					}
 					 transition(edgeName="toNewState17",targetState="picking_up",cond=whenRequestGuarded("pickup",{ currpos==dest 
 					}))
@@ -61,9 +61,9 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 				}	 
 				state("picking_up") { //this:State
 					action { //it:State
-						println("transporttrolley | PickUp material from truck")
-						updateResourceRep( "pickup()"  
+						updateResourceRep( "transporttrolley(picking_up,$currpos,$dest)"  
 						)
+						println("transporttrolley | PickUp material from truck")
 						delay(1000) 
 						answer("pickup", "pickupanswer", "pickupanswer(OK)"   )  
 					}
@@ -71,9 +71,9 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 				}	 
 				state("dropping_down") { //this:State
 					action { //it:State
-						println("transporttrolley | DropOut material in container")
-						updateResourceRep( "dropdown()"  
+						updateResourceRep( "transporttrolley(dropping_down,$currpos,$dest)"  
 						)
+						println("transporttrolley | DropOut material in container")
 						delay(1000) 
 						answer("dropout", "dropoutanswer", "dropoutanswer(OK)"   )  
 					}
@@ -81,6 +81,8 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 				}	 
 				state("set_new_dest") { //this:State
 					action { //it:State
+						updateResourceRep( "transporttrolley(set_new_dest,$currpos,$dest)"  
+						)
 						if( checkMsgContent( Term.createTerm("move(POSITION)"), Term.createTerm("move(ARG)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 dest=payloadArg(0)  
@@ -91,12 +93,16 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 				}	 
 				state("forward_robot") { //this:State
 					action { //it:State
+						updateResourceRep( "transporttrolley(forward_robot,$currpos,$dest)"  
+						)
 						forward("cmd", "cmd(w)" ,"basicrobot" ) 
 					}
 					 transition(edgeName="t121",targetState="turn",cond=whenEvent("info"))
 				}	 
 				state("turn") { //this:State
 					action { //it:State
+						updateResourceRep( "transporttrolley(turn,$currpos,$dest)"  
+						)
 						forward("cmd", "cmd(l)" ,"basicrobot" ) 
 						delay(450) 
 						currpos=newPosition(currpos)  

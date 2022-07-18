@@ -27,8 +27,6 @@ class Basicrobot ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 						println("basicrobot | START")
 						unibo.robot.robotSupport.create(myself ,"basicrobotConfig.json" )
 						 RobotType = unibo.robot.robotSupport.robotKind  
-						unibo.robot.robotSupport.move( "l"  )
-						unibo.robot.robotSupport.move( "r"  )
 						updateResourceRep( "basicrobot(start)"  
 						)
 					}
