@@ -59,14 +59,14 @@ public class TestSprint1 {
 	}
 
 	@Test
-	public void testLoadok() {
+	public void test_accepted() {
 		ColorsOut.outappl("testLoadok STARTS" , ColorsOut.BLUE);
 		String truckRequestStr = "msg(depositrequest, request,python,wasteservice,depositrequest(GLASS,2),1)";
 		//assertTrue( coapCheckWasteService("home") );
 		try{
 			ConnTcp connTcp   = new ConnTcp("localhost", 8095);
 			String answer     = connTcp.request(truckRequestStr);
- 			ColorsOut.outappl("testLoadok answer=" + answer , ColorsOut.GREEN);
+ 			ColorsOut.outappl("test_accepted answer=" + answer , ColorsOut.GREEN);
 			assertTrue(answer.contains("loadaccept"));
 			while(!coapCheckWasteService("wait")){
 				CommUtils.delay(1000);
@@ -74,11 +74,6 @@ public class TestSprint1 {
 			connTcp.close();
 			ColorsOut.outappl(to.getHistory().toString(), ColorsOut.MAGENTA);
 			assertTrue(to.checkNextContents(new String[]{"wasteservice(wait,0,0)", "transporttrolley(wait,HOME,HOME)"}) > 0);
-			/*assertTrue(to.checkNextContent("wasteservice(handle_req,0,0)") > 0);
-			assertTrue(to.checkNextContent("transporttrolley(wait,HOME,INDOOR)") > 0);
-			assertTrue(to.checkNextContent("transporttrolley(wait,INDOOR,INDOOR)") > 0);
-			assertTrue(to.checkNextContent("transporttrolley(picking_up,INDOOR,INDOOR)") > 0);
-			assertTrue(to.checkNextContent("transporttrolley(wait,INDOOR,GLASSBOX)") > 0);*/
 			assertTrue(to.checkNextSequence(new String[]{
 					"wasteservice(handle_req,0,0)",
 					"transporttrolley(wait,HOME,INDOOR)",
@@ -93,65 +88,70 @@ public class TestSprint1 {
 			}));
 			assertTrue(to.checkNextContents(new String[]{"wasteservice(handle_move_home,0,2)", "transporttrolley(wait,GLASSBOX,HOME)"}) > 0);
 			assertTrue(to.checkNextContents(new String[]{"wasteservice(wait,0,2)", "transporttrolley(wait,HOME,HOME)"}) > 0);
-			to.setStartPosition(0);
-;			//System.out.println(to.checkNextContents(new String[]{"transporttrolley\\(forward_robot,.*", "transporttrolley\\(wait,HOME,HOME\\)"}));
+			//to.setStartPosition(0);
 		}catch(Exception e){
-			ColorsOut.outerr("testLoadok ERROR:" + e.getMessage());
+			ColorsOut.outerr("test_accepted ERROR:" + e.getMessage());
 		}
  	}
 
 	@Test
-	public void testLoadKo() {
+	public void test_rejected() {
 		ColorsOut.outappl("testLoadKo STARTS" , ColorsOut.BLUE);
 		String truckRequestStr = "msg(depositrequest, request,python,wasteservice,depositrequest(GLASS,11),1)";
 		//assertTrue( coapCheckWasteService("home") );
 		try{
 			ConnTcp connTcp   = new ConnTcp("localhost", 8095);
 			String answer     = connTcp.request(truckRequestStr);
-			ColorsOut.outappl("testLoadKo answer=" + answer , ColorsOut.GREEN);
+			ColorsOut.outappl("test_rejected answer=" + answer , ColorsOut.GREEN);
 			assertTrue(answer.contains("loadrejected"));
-			//assertTrue( coapCheckWasteService("indoor"));
-			CommUtils.delay(2000);
+			while(!coapCheckWasteService("wait")){
+				CommUtils.delay(1000);
+			}
 			connTcp.close();
+			ColorsOut.outappl(to.getHistory().toString(), ColorsOut.MAGENTA);
+			assertTrue(to.checkNextContents(new String[]{"wasteservice(wait,0,0)", "transporttrolley(wait,HOME,HOME)"}) > 0);
+			assertTrue(to.checkNextSequence(new String[]{
+					"wasteservice(handle_req,0,0)",
+					"wasteservice(wait,0,0)"
+			}));
 		}catch(Exception e){
-			ColorsOut.outerr("testLoadok ERROR:" + e.getMessage());
+			ColorsOut.outerr("test_rejected ERROR:" + e.getMessage());
 		}
 
 	}
 
 
 	 @Test
-	 public void testMultiRequest(){
+	 public void test_2_accepted(){
 		 CommUtils.delay(100);
-		 ColorsOut.outappl("testMultiRequestSTARTS" , ColorsOut.BLUE);
-		 //assertTrue( coapCheck("home") );
 		 String truckRequestStr = "msg(depositrequest, request,python,wasteservice,depositrequest(GLASS,2),1)";
 		 try{
 			 //FIRST REQUEST
 			 ConnTcp connTcp   = new ConnTcp("localhost", 8095);
 			 String answer     = connTcp.request(truckRequestStr);
-			 ColorsOut.outappl("testFirstRequest answer=" + answer , ColorsOut.GREEN);
+			 ColorsOut.outappl("test_2_accepted answer=" + answer , ColorsOut.GREEN);
 			 assertTrue(answer.contains("loadaccept"));
-			 CommUtils.delay(5000);
+			 while(!coapCheckWasteService("wait")){
+				 CommUtils.delay(1000);
+			 }
 			 //SECONDO REQUEST
 			 truckRequestStr = "msg(depositrequest, request,python,wasteservice,depositrequest(GLASS,7),1)";
 			 answer     = connTcp.request(truckRequestStr);
 			 ColorsOut.outappl("testSecondRequest answer=" + answer , ColorsOut.GREEN);
 			 assertTrue(answer.contains("loadaccept"));
-			 CommUtils.delay(10000);
-
+			 while(!coapCheckWasteService("wait")){
+				 CommUtils.delay(1000);
+			 }
 			 connTcp.close();
 		 }catch(Exception e){
-			 ColorsOut.outerr("testMultiRequestSTARTS ERROR:" + e.getMessage());
+			 ColorsOut.outerr("test_2_accepted ERROR:" + e.getMessage());
 
 		 }
 	 }
 
 	@Test
-	 public void testMultiRequestOkKo(){
+	 public void test_1_accepted_1_rejected(){
 		CommUtils.delay(100);
-		ColorsOut.outappl("testMultiRequestSTARTS" , ColorsOut.BLUE);
-		//assertTrue( coapCheck("home") );
 		String truckRequestStr = "msg(depositrequest, request,python,wasteservice,depositrequest(GLASS,2),1)";
 		try{
 			//FIRST REQUEST
@@ -159,21 +159,199 @@ public class TestSprint1 {
 			String answer     = connTcp.request(truckRequestStr);
 			ColorsOut.outappl("testFirstRequest answer=" + answer , ColorsOut.GREEN);
 			assertTrue(answer.contains("loadaccept"));
-			CommUtils.delay(5000);
+			while(!coapCheckWasteService("wait")){
+				CommUtils.delay(1000);
+			}
 			//SECONDO REQUEST
 			truckRequestStr = "msg(depositrequest, request,python,wasteservice,depositrequest(GLASS,9),1)";
 			answer     = connTcp.request(truckRequestStr);
 			ColorsOut.outappl("testSecondRequest answer=" + answer , ColorsOut.GREEN);
 			assertTrue(answer.contains("loadrejected"));
-			CommUtils.delay(5000);
+			while(!coapCheckWasteService("wait")){
+				CommUtils.delay(1000);
+			}
 			connTcp.close();
 		}catch(Exception e){
-			ColorsOut.outerr("testMultiRequestSTARTS ERROR:" + e.getMessage());
+			ColorsOut.outerr("test_1_accepted_1_rejected ERROR:" + e.getMessage());
 
 		}
 	}
 
+	@Test
+	public void test_2_accepted_while_in_operation(){ //the second request is made while the robot is still in operation, while still dropping down material
+		CommUtils.delay(100);
+		String truckRequestStr = "msg(depositrequest, request,python,wasteservice,depositrequest(PLASTIC,2),1)";
+		try{
+			//FIRST REQUEST
+			ConnTcp connTcp   = new ConnTcp("localhost", 8095);
+			String answer     = connTcp.request(truckRequestStr);
+			ColorsOut.outappl("testFirstRequest answer=" + answer , ColorsOut.GREEN);
+			assertTrue(answer.contains("loadaccept"));
+			while(!coapCheckWasteService("handle_move_container")){
+				CommUtils.delay(800);
+			}
+			CommUtils.delay(100);
+			//SECONDO REQUEST
+			truckRequestStr = "msg(depositrequest, request,python,wasteservice,depositrequest(GLASS,7),1)";
+			answer     = connTcp.request(truckRequestStr);
+			ColorsOut.outappl("testSecondRequest answer=" + answer , ColorsOut.GREEN);
+			assertTrue(answer.contains("loadaccept"));
+			while(!coapCheckWasteService("wait")){
+				CommUtils.delay(1000);
+			}
+			connTcp.close();
+			assertTrue(to.checkNextContents(new String[]{"wasteservice(wait,0,0)", "transporttrolley(wait,HOME,HOME)"}) > 0);
+			assertTrue(to.checkNextSequence(new String[]{
+					"wasteservice(handle_req,0,0)",
+					"transporttrolley(wait,HOME,INDOOR)",
+					"transporttrolley(wait,INDOOR,INDOOR)",
+					"transporttrolley(picking_up,INDOOR,INDOOR)"
+			}));
+			assertTrue(to.checkNextContents(new String[]{"wasteservice(handle_pickup_answer,2,0)", "transporttrolley(wait,INDOOR,PLASTICBOX)"}) > 0); //check container load update. (handle_pickup_answer also moves the robot to the container)
+			assertTrue(to.checkNextSequence(new String[]{
+					"transporttrolley(wait,PLASTICBOX,PLASTICBOX)",
+					"transporttrolley(dropping_down,PLASTICBOX,PLASTICBOX)"
+			}));
+			assertTrue(to.checkNextContents(new String[]{"wasteservice(handle_new_req,2,0)", "transporttrolley(wait,PLASTICBOX,INDOOR)"}) > 0);
+			assertTrue(to.checkNextContent("wasteservice(handle_move_indoor,2,7)") > 0);
+			//second request management...
+			assertTrue(to.checkNextContent("wasteservice(wait,2,7)") > 0);
+		}catch(Exception e){
+			ColorsOut.outerr("test_2_accepted_while_in_operation ERROR:" + e.getMessage());
+		}
+	}
 
+	@Test
+	public void test_1_accepted_1_rejected_while_in_operation(){ //the second request is made while the robot is still in operation, while still dropping down material
+		CommUtils.delay(100);
+		String truckRequestStr = "msg(depositrequest, request,python,wasteservice,depositrequest(PLASTIC,2),1)";
+		try{
+			//FIRST REQUEST
+			ConnTcp connTcp   = new ConnTcp("localhost", 8095);
+			String answer     = connTcp.request(truckRequestStr);
+			ColorsOut.outappl("testFirstRequest answer=" + answer , ColorsOut.GREEN);
+			assertTrue(answer.contains("loadaccept"));
+			while(!coapCheckWasteService("handle_move_container")){
+				CommUtils.delay(800);
+			}
+			CommUtils.delay(100);
+			//SECONDO REQUEST
+			truckRequestStr = "msg(depositrequest, request,python,wasteservice,depositrequest(GLASS,11),1)";
+			answer     = connTcp.request(truckRequestStr);
+			ColorsOut.outappl("testSecondRequest answer=" + answer , ColorsOut.GREEN);
+			assertTrue(answer.contains("loadrejected"));
+			while(!coapCheckWasteService("wait")){
+				CommUtils.delay(1000);
+			}
+			connTcp.close();
+			assertTrue(to.checkNextContents(new String[]{"wasteservice(wait,0,0)", "transporttrolley(wait,HOME,HOME)"}) > 0);
+			assertTrue(to.checkNextSequence(new String[]{
+					"wasteservice(handle_req,0,0)",
+					"transporttrolley(wait,HOME,INDOOR)",
+					"transporttrolley(wait,INDOOR,INDOOR)",
+					"transporttrolley(picking_up,INDOOR,INDOOR)"
+			}));
+			assertTrue(to.checkNextContents(new String[]{"wasteservice(handle_pickup_answer,2,0)", "transporttrolley(wait,INDOOR,PLASTICBOX)"}) > 0); //check container load update. (handle_pickup_answer also moves the robot to the container)
+			assertTrue(to.checkNextSequence(new String[]{
+					"transporttrolley(wait,PLASTICBOX,PLASTICBOX)",
+					"transporttrolley(dropping_down,PLASTICBOX,PLASTICBOX)"
+			}));
+			assertTrue(to.checkNextContents(new String[]{"wasteservice(handle_new_req,2,0)", "transporttrolley(wait,PLASTICBOX,HOME)", "wasteservice(handle_move_home,2,0)"}) > 0);
+			//robot moves towards home
+			assertTrue(to.checkNextContent("wasteservice(wait,2,0)") > 0);
+		}catch(Exception e){
+			ColorsOut.outerr("test_1_accepted_1_rejected_while_in_operation ERROR:" + e.getMessage());
+		}
+	}
+
+	@Test
+	public void test_2_accepted_while_returning_home(){ //the second request is made while the robot is still in operation, while returning to home
+		CommUtils.delay(100);
+		String truckRequestStr = "msg(depositrequest, request,python,wasteservice,depositrequest(PLASTIC,2),1)";
+		try{
+			//FIRST REQUEST
+			ConnTcp connTcp   = new ConnTcp("localhost", 8095);
+			String answer     = connTcp.request(truckRequestStr);
+			ColorsOut.outappl("testFirstRequest answer=" + answer , ColorsOut.GREEN);
+			assertTrue(answer.contains("loadaccept"));
+			while(!coapCheckWasteService("handle_move_home")){
+				CommUtils.delay(800);
+			}
+			CommUtils.delay(100);
+			//SECONDO REQUEST
+			truckRequestStr = "msg(depositrequest, request,python,wasteservice,depositrequest(GLASS,7),1)";
+			answer     = connTcp.request(truckRequestStr);
+			ColorsOut.outappl("testSecondRequest answer=" + answer , ColorsOut.GREEN);
+			assertTrue(answer.contains("loadaccept"));
+			while(!coapCheckWasteService("wait")){
+				CommUtils.delay(1000);
+			}
+			connTcp.close();
+			assertTrue(to.checkNextContents(new String[]{"wasteservice(wait,0,0)", "transporttrolley(wait,HOME,HOME)"}) > 0);
+			assertTrue(to.checkNextSequence(new String[]{
+					"wasteservice(handle_req,0,0)",
+					"transporttrolley(wait,HOME,INDOOR)",
+					"transporttrolley(wait,INDOOR,INDOOR)",
+					"transporttrolley(picking_up,INDOOR,INDOOR)"
+			}));
+			assertTrue(to.checkNextContents(new String[]{"wasteservice(handle_pickup_answer,2,0)", "transporttrolley(wait,INDOOR,PLASTICBOX)"}) > 0); //check container load update. (handle_pickup_answer also moves the robot to the container)
+			assertTrue(to.checkNextSequence(new String[]{
+					"transporttrolley(wait,PLASTICBOX,PLASTICBOX)",
+					"transporttrolley(dropping_down,PLASTICBOX,PLASTICBOX)"
+			}));
+			assertTrue(to.checkNextContents(new String[]{"wasteservice(handle_move_home,2,0)", "transporttrolley(wait,PLASTICBOX,HOME)"}) > 0);
+			assertTrue(to.checkNextContent("wasteservice(home,2,0)") < 0); //wasteservice shouldnt pass through wait...
+			assertTrue(to.checkNextContent("wasteservice(handle_req,2,0)") > 0); //...it should go directly to handle_req
+			//second request management...
+			assertTrue(to.checkNextContent("wasteservice(wait,2,7)") > 0);
+		}catch(Exception e){
+			ColorsOut.outerr("test_2_accepted_while_returning_home ERROR:" + e.getMessage());
+		}
+	}
+	@Test
+	public void test_1_accepted_1_rejected_while_returning_home(){ //the second request is made while the robot is still in operation, while returning home
+		CommUtils.delay(100);
+		String truckRequestStr = "msg(depositrequest, request,python,wasteservice,depositrequest(PLASTIC,2),1)";
+		try{
+			//FIRST REQUEST
+			ConnTcp connTcp   = new ConnTcp("localhost", 8095);
+			String answer     = connTcp.request(truckRequestStr);
+			ColorsOut.outappl("testFirstRequest answer=" + answer , ColorsOut.GREEN);
+			assertTrue(answer.contains("loadaccept"));
+			while(!coapCheckWasteService("handle_move_home")){
+				CommUtils.delay(800);
+			}
+			CommUtils.delay(100);
+			//SECONDO REQUEST
+			truckRequestStr = "msg(depositrequest, request,python,wasteservice,depositrequest(GLASS,11),1)";
+			answer     = connTcp.request(truckRequestStr);
+			ColorsOut.outappl("testSecondRequest answer=" + answer , ColorsOut.GREEN);
+			assertTrue(answer.contains("loadrejected"));
+			while(!coapCheckWasteService("wait")){
+				CommUtils.delay(1000);
+			}
+			CommUtils.delay(8000);//this is a special case: we are in wait even if the robot is still moving towards home. Gire the robot some extra more time
+			connTcp.close();
+			assertTrue(to.checkNextContents(new String[]{"wasteservice(wait,0,0)", "transporttrolley(wait,HOME,HOME)"}) > 0);
+			assertTrue(to.checkNextSequence(new String[]{
+					"wasteservice(handle_req,0,0)",
+					"transporttrolley(wait,HOME,INDOOR)",
+					"transporttrolley(wait,INDOOR,INDOOR)",
+					"transporttrolley(picking_up,INDOOR,INDOOR)"
+			}));
+			assertTrue(to.checkNextContents(new String[]{"wasteservice(handle_pickup_answer,2,0)", "transporttrolley(wait,INDOOR,PLASTICBOX)"}) > 0); //check container load update. (handle_pickup_answer also moves the robot to the container)
+			assertTrue(to.checkNextSequence(new String[]{
+					"transporttrolley(wait,PLASTICBOX,PLASTICBOX)",
+					"transporttrolley(dropping_down,PLASTICBOX,PLASTICBOX)"
+			}));
+			assertTrue(to.checkNextContents(new String[]{"wasteservice(handle_move_home,2,0)", "transporttrolley(wait,PLASTICBOX,HOME)"}) > 0);
+			//assertTrue(to.checkNextContent("wasteservice(home,2,0)") < 0); //wasteservice shouldnt pass through wait...
+			assertTrue(to.checkNextContent("wasteservice(handle_req,2,0)") > 0); //...it should go directly to handle_req
+			assertTrue(to.checkNextContent("wasteservice(wait,2,0)") > 0); //then it goes into wait, since request is rejected
+		}catch(Exception e){
+			ColorsOut.outerr("test_1_accepted_1_rejected_while_returning_home ERROR:" + e.getMessage());
+		}
+	}
 
 
 //---------------------------------------------------
