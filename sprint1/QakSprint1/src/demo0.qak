@@ -46,7 +46,7 @@ Dispatch noMsg : noMsg(_)
 // ------------------ CONTEXTS -------------------
 //REMEMBER TO PUT datacleaner AND distancefilter IN THE SAME CONTEXT OF basicrobot
 Context ctxserver ip [host="localhost" port=8095]
-//Context ctxrobot ip  [host="127.0.0.1" port=8096]
+Context ctxrobot ip  [host="127.0.0.1" port=8096]
 // ------------------------------------------------
 
 
@@ -241,7 +241,7 @@ QActor wasteservice context ctxserver{
  	}
 }
 
-QActor transporttrolley context ctxserver{
+QActor transporttrolley context ctxrobot{
 	[# var dest ="HOME"
 	   var currpos = "HOME"
 	   
@@ -335,7 +335,7 @@ QActor transporttrolley context ctxserver{
 
 
 
-QActor basicrobot context ctxserver{
+QActor basicrobot context ctxrobot{
 [#
   var StepTime      = 0L
   var StartTime     = 0L     

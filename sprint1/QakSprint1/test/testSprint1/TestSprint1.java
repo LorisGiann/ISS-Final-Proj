@@ -13,18 +13,26 @@ import unibo.comm22.utils.ColorsOut;
 import unibo.comm22.utils.CommSystemConfig;
 import unibo.comm22.utils.CommUtils;
 
+import java.io.IOException;
+
 
 public class TestSprint1 {
 	private CoapConnection connTransportTrolley, connWasteService;
 	private TestObserver to;
+	private ProcessHandle processHandle;
+
+	private Process prServer,prRobot;
+	private Runtime rtServer,rtRobot;
 
 	@Before
 	public void up() {
 		to=new TestObserver();
 		CommSystemConfig.tracing=false;
 		startObserverCoap("localhost", to);
+
 		new Thread(){
 			public void run(){
+				ColorsOut.outappl("launch context server", ColorsOut.ANSI_PURPLE);
 				MainCtxserverKt.main();
 			}
 		}.start();
@@ -36,7 +44,24 @@ public class TestSprint1 {
 		}.start();
 
 		 */
-		waitForApplStarted();
+		try {
+			/*
+			rtServer = Runtime.getRuntime();
+			prServer = rtServer.exec("gradle -PmainClass=it.unibo.ctxserver.MainCtxserverKt execute");
+			if (prServer.isAlive()) {
+				ColorsOut.outappl("launch context server", ColorsOut.ANSI_PURPLE);
+			}
+			*/
+			rtRobot = Runtime.getRuntime();
+			prRobot = rtRobot.exec("gradle -PmainClass=it.unibo.ctxrobot.MainCtxrobotKt execute");
+			processHandle = prRobot.toHandle();
+			if (prRobot.isAlive()) {
+				ColorsOut.outappl("launch context robot", ColorsOut.ANSI_PURPLE);
+			}
+		}catch(IOException e){
+			ColorsOut.outappl("Errore launch " , ColorsOut.RED);
+		}
+		//waitForApplStarted();
 		CommUtils.delay(2500);
   	}
 
@@ -44,18 +69,23 @@ public class TestSprint1 {
 		ActorBasic wasteservice = QakContext.Companion.getActor("wasteservice");
 		//ActorBasic transporttrolley = QakContext.Companion.getActor("transporttrolley");
 		while( wasteservice == null ){
-			ColorsOut.outappl("TestSprint1 waits for appl ... " , ColorsOut.GREEN);
+			//ColorsOut.outappl("TestSprint1 waits for appl ... " , ColorsOut.GREEN);
 			CommUtils.delay(20);
 			wasteservice = QakContext.Companion.getActor("wasteservice");
 			CommUtils.delay(20);
 			//transporttrolley = QakContext.Companion.getActor("transporttrolley");
 		}
-
+		ColorsOut.outappl("TestSprint1 waited for appl  " , ColorsOut.GREEN);
 
 	}
 	@After
 	public void down() {
 		ColorsOut.outappl("TestSprint1 ENDS" , ColorsOut.BLUE);
+		//rtServer.exit(0);
+		processHandle.destroy();
+		rtRobot.exit(0);
+		//prServer.destroy();
+		prRobot.destroy();
 	}
 
 	@Test
@@ -372,10 +402,12 @@ protected void startObserverCoap(String addr, CoapHandler handler){
 				try {
 					String qakdestination1 	= "wasteservice";
 					String qakdestination2 	= "transporttrolley";
-					String ctxqakdest       = "ctxserver";
-					String applPort         = "8095";
-					connWasteService        = new CoapConnection(addr+":"+applPort, ctxqakdest+"/"+qakdestination1);
-					connTransportTrolley    = new CoapConnection(addr+":"+applPort, ctxqakdest+"/"+qakdestination2);
+					String ctxqakdest1       = "ctxserver";
+					String ctxqakdest2       = "ctxrobot";
+					String applPort1         = "8095";
+					String applPort2         = "8096";
+					connWasteService        = new CoapConnection(addr+":"+applPort1, ctxqakdest1+"/"+qakdestination1);
+					connTransportTrolley    = new CoapConnection(addr+":"+applPort2, ctxqakdest2+"/"+qakdestination2);
 					connWasteService.observeResource( handler );
 					connTransportTrolley.observeResource( handler );
 					ColorsOut.outappl("connected via Coap conn:" + connWasteService , ColorsOut.CYAN);
