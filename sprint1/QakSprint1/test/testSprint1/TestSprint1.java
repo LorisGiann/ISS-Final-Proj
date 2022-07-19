@@ -1,11 +1,9 @@
 package testSprint1;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 import it.unibo.ctxserver.MainCtxserverKt;
 import it.unibo.kactor.ActorBasic;
 import it.unibo.kactor.QakContext;
+import jdk.jfr.Enabled;
 import org.eclipse.californium.core.CoapHandler;
 import org.junit.*;
 import unibo.comm22.coap.CoapConnection;
@@ -13,7 +11,12 @@ import unibo.comm22.utils.ColorsOut;
 import unibo.comm22.utils.CommSystemConfig;
 import unibo.comm22.utils.CommUtils;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+
+import static org.junit.Assert.*;
 
 
 public class TestSprint1 {
@@ -26,13 +29,31 @@ public class TestSprint1 {
 
 	@Before
 	public void up() {
-		to=new TestObserver();
 		CommSystemConfig.tracing=false;
-		startObserverCoap("localhost", to);
+
+		try {
+			rtRobot = Runtime.getRuntime();
+			prRobot = rtRobot.exec("gradle -PmainClass=it.unibo.ctxrobot.MainCtxrobotKt execute");
+			processHandle = prRobot.toHandle();
+			if (prRobot.isAlive()) {
+				ColorsOut.outappl("launch context robot", ColorsOut.ANSI_PURPLE);
+			}
+			InputStream is = prRobot.getInputStream();
+			InputStreamReader isr = new InputStreamReader(is);
+			BufferedReader br = new BufferedReader(isr);
+			String line;
+			while ((line = br.readLine()) != null) {
+				System.out.println(line);
+				if(line.contains("WAIT/RETRY TO SET PROXY TO")) break;
+			}
+			br.close();
+		}catch(IOException e){
+			ColorsOut.outappl("Errore launch " , ColorsOut.RED);
+			System.exit(1);
+		}
 
 		new Thread(){
 			public void run(){
-				ColorsOut.outappl("launch context server", ColorsOut.ANSI_PURPLE);
 				MainCtxserverKt.main();
 			}
 		}.start();
@@ -42,50 +63,35 @@ public class TestSprint1 {
 				MainCtxrobotKt.main();
 			}
 		}.start();
+		*/
 
-		 */
-		try {
-			/*
-			rtServer = Runtime.getRuntime();
-			prServer = rtServer.exec("gradle -PmainClass=it.unibo.ctxserver.MainCtxserverKt execute");
-			if (prServer.isAlive()) {
-				ColorsOut.outappl("launch context server", ColorsOut.ANSI_PURPLE);
-			}
-			*/
-			rtRobot = Runtime.getRuntime();
-			prRobot = rtRobot.exec("gradle -PmainClass=it.unibo.ctxrobot.MainCtxrobotKt execute");
-			processHandle = prRobot.toHandle();
-			if (prRobot.isAlive()) {
-				ColorsOut.outappl("launch context robot", ColorsOut.ANSI_PURPLE);
-			}
-		}catch(IOException e){
-			ColorsOut.outappl("Errore launch " , ColorsOut.RED);
-		}
-		//waitForApplStarted();
-		CommUtils.delay(2500);
+		waitForApplStarted();
+
+		to=new TestObserver();
+		startObserverCoap("localhost", to);
   	}
 
- 	protected void waitForApplStarted(){
+	protected void waitForApplStarted(){
 		ActorBasic wasteservice = QakContext.Companion.getActor("wasteservice");
 		//ActorBasic transporttrolley = QakContext.Companion.getActor("transporttrolley");
 		while( wasteservice == null ){
-			//ColorsOut.outappl("TestSprint1 waits for appl ... " , ColorsOut.GREEN);
-			CommUtils.delay(20);
+			ColorsOut.outappl("TestSprint1 waits for appl ... " , ColorsOut.GREEN);
+			CommUtils.delay(200);
 			wasteservice = QakContext.Companion.getActor("wasteservice");
-			CommUtils.delay(20);
-			//transporttrolley = QakContext.Companion.getActor("transporttrolley");
 		}
-		ColorsOut.outappl("TestSprint1 waited for appl  " , ColorsOut.GREEN);
-
+		CommUtils.delay(100);
 	}
+
 	@After
 	public void down() {
-		ColorsOut.outappl("TestSprint1 ENDS" , ColorsOut.BLUE);
-		//rtServer.exit(0);
 		processHandle.destroy();
-		rtRobot.exit(0);
-		//prServer.destroy();
 		prRobot.destroy();
+		ColorsOut.outappl("TestSprint1 ENDS" , ColorsOut.BLUE);
+	}
+
+	@Test
+	public void dummy() {
+		assertTrue(true);
 	}
 
 	@Test
@@ -103,7 +109,7 @@ public class TestSprint1 {
 			}
 			connTcp.close();
 			ColorsOut.outappl(to.getHistory().toString(), ColorsOut.MAGENTA);
-			assertTrue(to.checkNextContents(new String[]{"wasteservice(wait,0,0)", "transporttrolley(wait,HOME,HOME)"}) > 0);
+			//assertTrue(to.checkNextContents(new String[]{"wasteservice(wait,0,0)", "transporttrolley(wait,HOME,HOME)"}) > 0);
 			assertTrue(to.checkNextSequence(new String[]{
 					"wasteservice(handle_req,0,0)",
 					"transporttrolley(wait,HOME,INDOOR)",
@@ -118,9 +124,9 @@ public class TestSprint1 {
 			}));
 			assertTrue(to.checkNextContents(new String[]{"wasteservice(handle_move_home,0,2)", "transporttrolley(wait,GLASSBOX,HOME)"}) > 0);
 			assertTrue(to.checkNextContents(new String[]{"wasteservice(wait,0,2)", "transporttrolley(wait,HOME,HOME)"}) > 0);
-			//to.setStartPosition(0);
+			//to.setStartPosition(0);*/
 		}catch(Exception e){
-			ColorsOut.outerr("test_accepted ERROR:" + e.getMessage());
+			fail("test_accepted ERROR:" + e.getMessage());
 		}
  	}
 
@@ -410,8 +416,16 @@ protected void startObserverCoap(String addr, CoapHandler handler){
 					connTransportTrolley    = new CoapConnection(addr+":"+applPort2, ctxqakdest2+"/"+qakdestination2);
 					connWasteService.observeResource( handler );
 					connTransportTrolley.observeResource( handler );
-					ColorsOut.outappl("connected via Coap conn:" + connWasteService , ColorsOut.CYAN);
-					ColorsOut.outappl("connected via Coap conn:" + connTransportTrolley , ColorsOut.CYAN);
+					ColorsOut.outappl("connecting via Coap conn:" + connWasteService , ColorsOut.CYAN);
+					ColorsOut.outappl("connecting via Coap conn:" + connTransportTrolley , ColorsOut.CYAN);
+					while(connWasteService.request("")=="0"){
+						ColorsOut.outappl("waiting for conn " + connWasteService , ColorsOut.CYAN);
+						CommUtils.delay(500);
+					}
+					while(connTransportTrolley.request("")=="0"){
+						ColorsOut.outappl("waiting for conn " + connTransportTrolley , ColorsOut.CYAN);
+						CommUtils.delay(500);
+					}
 				}catch(Exception e){
 					ColorsOut.outerr("connectUsingCoap ERROR:"+e.getMessage());
 				}
