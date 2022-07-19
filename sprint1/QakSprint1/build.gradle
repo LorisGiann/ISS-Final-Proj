@@ -113,14 +113,32 @@ eclipse {
 
 application {
     // Define the main class for the application.
-    mainClass = 'it.unibo.ctxRPI.MainCtxRPIKt'
+    mainClass = 'it.unibo.ctxserver.MainCtxserverKt'
 }
 
- jar {
-    println("building jar")
+jar {
     from sourceSets.main.allSource
     manifest {
         attributes 'Main-Class': "$mainClassName"
     }
+}
+
+//gradle -PmainClass=it.unibo.ctxserver.MainCtxserverKt execute
+task execute(type:JavaExec) {
+    description = "Run the other context with ExecTask"
+    //main = project.hasProperty("mainClass") ? getProperty("mainClass") : "NULL"   //getProperty("mainClass") doesnt work !!
+    main = project.findProperty('mainClass')
+    classpath = sourceSets.main.runtimeClasspath
+}
+
+/**
+ * Prints value of property "rootProject.name" to stdout.
+ *
+ * Usage: ./gradlew -q print
+ */
+task print {
+  doLast {
+    println(project.findProperty('mainClass').name)
+  }
 }
  
