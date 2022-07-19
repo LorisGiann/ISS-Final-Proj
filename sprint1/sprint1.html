@@ -532,7 +532,25 @@ dd{ margin-bottom: 8px;}
 </div>
 
 <h2>Test plans</h2> 
+<div class="remark">
+    Per il <b>Test plan</b> è stata definita una classe JUnit <b><a href="QakSprint1/test/testSprint1/TestSprint1.java">TestSprint1</a></b><br>
+    Sono stati resi osservabili tramite Coap gli attori WasteService e TrasportTrolley.<br>
+    É stata inoltre creata una classe di utilità <b><a href="QakSprint1/test/testSprint1/TestObserver.java">TestObserver</a></b> in grado di leggere lo storico delle informazioni di WasteService e TrasportTrolley
+    e poterne valutare il corretto funzionamento nei test<br>
 
+    <h4><p>Test effettuati:</p></h4>
+    <ul>
+        <lI>Test singola richiesta accettata</lI>
+        <li>Test singola richiesta rifiutata</li>
+        <li>Test due richieste accettate</li>
+        <li>Test due richieste una accettata e una rifiutata</li>
+        <li>Test due richieste (la seconda inviata mentre la prima richiesta non era ancora conclusa) accettate</li>
+        <li>Test due richieste (la seconda inviata mentre la prima richiesta non era ancora conclusa) una accettata e una rifiutata</li>
+        <li>Test due richieste (la seconda inviata mentre il robot stava tornando a casa dalla prima richiesta) accettate</li>
+        <li>Test due richieste (la seconda inviata mentre il robot stava tornando a casa dalla prima richiesta) una accettata e una rifiutata</li>
+    </ul>
+
+</div>
 
 <h2>Project</h2> 
  
