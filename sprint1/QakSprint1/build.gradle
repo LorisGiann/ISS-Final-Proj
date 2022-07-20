@@ -41,13 +41,12 @@ dependencies {
 
     // Use the Kotlin test library.
     testImplementation 'org.jetbrains.kotlin:kotlin-test'
-
     // Use the Kotlin JUnit integration.
-    testImplementation 'org.jetbrains.kotlin:kotlin-test-junit'
+    testImplementation 'org.jetbrains.kotlin:kotlin-test-junit5'
 
     /* COROUTINES ********************************************************************************************************** */
     // https://mvnrepository.com/artifact/org.jetbrains.kotlinx/kotlinx-coroutines-core
-    implementation group: 'org.jetbrains.kotlinx', name: 'kotlinx-coroutines-core', version: "$kotlinVersion", ext: 'pom'
+    implementation group: 'org.jetbrains.kotlinx', name: 'kotlinx-coroutines-core', version: "$kotlinVersion"//, ext: 'pom'
     // https://mvnrepository.com/artifact/org.jetbrains.kotlinx/kotlinx-coroutines-core-jvm
     implementation group: 'org.jetbrains.kotlinx', name: 'kotlinx-coroutines-core-jvm', version: "$kotlinVersion"
 
@@ -97,6 +96,10 @@ dependencies {
 
 }
 
+test {
+    useJUnitPlatform()
+}
+
 sourceSets {
     main.java.srcDirs += 'src'
     main.java.srcDirs += 'resources'
@@ -116,15 +119,41 @@ application {
     mainClass = 'it.unibo.ctxserver.MainCtxserverKt'
 }
 
-jar {
-    from sourceSets.main.allSource
-    manifest {
-        attributes 'Main-Class': "$mainClassName"
-    }
+test {
+    useJUnitPlatform()
 }
 
+//generate
+//  gradle -PmainClass=it.unibo.ctxrobot.MainCtxrobotKt jar
+//run
+//  java -jar build/libs/it.unibo.ctxrobot.MainCtxrobotKt-1.0.jar
+jar {
+    from sourceSets.main.allSource
+    String main = project.findProperty('mainClass')
+    if (main==null) {
+  		println("NULL")
+  		manifest {
+	        attributes 'Main-Class': "$mainClassName"
+	    }
+	}else{
+		println(main)
+		manifest {
+			attributes 'Main-Class': main
+		}
+		baseName = main
+	    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+	    from (configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }) {
+	        exclude 'META-INF/MANIFEST.MF'
+	        exclude 'META-INF/*.SF'
+	        exclude 'META-INF/*.DSA'
+	        exclude 'META-INF/*.RSA'
+	    }
+	}
+}
+
+
 //task run:
-//	gradle -PmainClass=it.unibo.ctxserver.MainCtxserverKt execute
+//	gradle -PmainClass=it.unibo.ctxrobot.MainCtxrobotKt execute
 //should the process not end, you can free the port by killing it:
 //	sudo kill -9 $( sudo ss -ntlp | grep 8096 | awk -F 'pid=' '{ print $2 }' | cut -d',' -f1 )
 task execute(type:JavaExec) {

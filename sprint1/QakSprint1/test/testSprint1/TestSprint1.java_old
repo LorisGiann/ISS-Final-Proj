@@ -4,6 +4,7 @@ import it.unibo.ctxserver.MainCtxserverKt;
 import it.unibo.kactor.ActorBasic;
 import it.unibo.kactor.QakContext;
 import jdk.jfr.Enabled;
+import kotlin.jvm.JvmStatic;
 import org.eclipse.californium.core.CoapHandler;
 import org.junit.*;
 import unibo.comm22.coap.CoapConnection;
@@ -17,6 +18,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 
 import static org.junit.Assert.*;
+//import org.junit.jupiter.api.BeforeAll;
 
 
 public class TestSprint1 {
@@ -28,22 +30,42 @@ public class TestSprint1 {
 	private Runtime rtServer,rtRobot;
 
 	@Before
-	public void up() {
-		CommSystemConfig.tracing=false;
+	public static void compileMainCtxrobot() throws IOException, InterruptedException { //jar in build/libs/it.unibo.ctxrobot.MainCtxrobotKt-1.0.jar
+		ColorsOut.outappl("Genrating JAR", ColorsOut.BLUE);
+		Runtime rtRobot = Runtime.getRuntime();
+		Process prRobot = rtRobot.exec("gradle -PmainClass=it.unibo.ctxrobot.MainCtxrobotKt jar");
+		ProcessHandle processHandle = prRobot.toHandle();
+		int exitval = prRobot.waitFor(); //wait until the task is done = process exits
+		if(exitval != 0){
+			ColorsOut.outappl("Jar creation failed", ColorsOut.RED);
+			System.exit(1);
+		}
+		processHandle.destroy();
+		prRobot.destroy();
+	}
 
+	@Before
+	public void up() throws IOException, InterruptedException {
+		//compileMainCtxrobot();
+
+		ColorsOut.outappl("lauching JAR", ColorsOut.BLUE);
+		CommSystemConfig.tracing=false;
 		try {
 			rtRobot = Runtime.getRuntime();
-			prRobot = rtRobot.exec("gradle -PmainClass=it.unibo.ctxrobot.MainCtxrobotKt execute");
+			//prRobot = rtRobot.exec("gradle -PmainClass=it.unibo.ctxrobot.MainCtxrobotKt execute");   //problem with this is that every time it recompiles everithing: this takes ages if dome for every single test
+            prRobot = rtRobot.exec("java -jar build/libs/it.unibo.ctxrobot.MainCtxrobotKt-1.0.jar");
 			processHandle = prRobot.toHandle();
-			if (prRobot.isAlive()) {
-				ColorsOut.outappl("launch context robot", ColorsOut.ANSI_PURPLE);
+			CommUtils.delay(200);
+			if (!processHandle.isAlive()) {
+				ColorsOut.outappl("JAR launch failed, exit code " + prRobot.exitValue(), ColorsOut.RED);
+				System.exit(1);
 			}
 			InputStream is = prRobot.getInputStream();
 			InputStreamReader isr = new InputStreamReader(is);
 			BufferedReader br = new BufferedReader(isr);
 			String line;
 			while ((line = br.readLine()) != null) {
-				System.out.println(line);
+				ColorsOut.outappl(line, ColorsOut.YELLOW);
 				if(line.contains("WAIT/RETRY TO SET PROXY TO")) break;
 			}
 			br.close();
@@ -73,7 +95,6 @@ public class TestSprint1 {
 
 	protected void waitForApplStarted(){
 		ActorBasic wasteservice = QakContext.Companion.getActor("wasteservice");
-		//ActorBasic transporttrolley = QakContext.Companion.getActor("transporttrolley");
 		while( wasteservice == null ){
 			ColorsOut.outappl("TestSprint1 waits for appl ... " , ColorsOut.GREEN);
 			CommUtils.delay(200);
@@ -86,7 +107,6 @@ public class TestSprint1 {
 	public void down() {
 		processHandle.destroy();
 		prRobot.destroy();
-		ColorsOut.outappl("TestSprint1 ENDS" , ColorsOut.BLUE);
 	}
 
 	@Test
