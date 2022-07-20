@@ -4,188 +4,7 @@
 <link rel="stylesheet" type="text/css" href="../css/issStyle1.css">
 <script type="text/javascript" src="../css/issStyle.js"></script>
 -->
-<style type="text/css">
-body
-{
-    margin-left:  30px;
-    margin-right: 30px;
-};
-
-P
-{
-    font-family: Tahoma;
-    font-size: 10pt;
-};
-
-a, a:visited, a:active, a:link, a:hover {
-    text-decoration: underline;
-    color: #545454;
-    background-color: transparent;
-	font-size: 93%;
-}
-
-a:hover {
-    background-color: #cccccc;
-}
-
-
-hr {
-    clear: both;
-    height: 1px;
-    color: #242424;
-    background-color: transparent;
-}
-
-h1, h2, h3 {
-    color: #242424;
-    clear: left;
-    font: 100% Tahoma, Helvetica, Arial, sans-serif;
-    margin-bottom: 0.5em;
-    padding-top: 0.5em;
-	border-radius: 10px;
-	padding: 5px;
-}
-
-top {
-	width: 100%;
-}
-
-
-#i {
-    color: #ff1010;
-}
-tt{
-	font-family: "Arial";
-    font-size: 90%;
-	color: #006600;
-}
-em{
-	font-family: "Arial";
-    font-size: 80%;
-	font-weight: bold;
-	border-style:solid;
-	border-color: #abe876;
-    color: #1632cc;
-}
-bc{
-	font-family: "Arial";
-	font-size: 90%;
-	font-weight: bold;
-    color: #990000;
-	background-color: #fcf8c7;
-}
-ks{
-	font-family: "Arial";
-	font-weight: bold;
-    color: #0000CD	;
-	font-size: 90%;
-}
-kc{
-	font-family: "Arial";
-	font-weight: bold;
-    color: #008000	;
-	font-size: 90%;
-}
-pre{
-	font-family: "Consolas";
-	font-size: 85%;
-	background-color: #f5f5f5;
-	border: 1.5px solid silver;
-	padding: 5px;
-}
-m{
-	font-family: "Helvetica";
-	line-height: 100%;
- 	font-size: 75%;
-}
-div.body{
-	 
-    font-size: 18px;
-}
-k{
-    color: #990000;
-	font-weight: bold;
-	font-size: 90%;
-}
-h1 {
-    font-size: 150%;
-    background-color: #b2c0ff;
-	padding: 10px;
-}
-
-h2 {
-    background-color: #9ed8ff;
-    font-size: 130%;
-}
-
-h3 {
-	background-color: #e6ccff;
-    font-size: 100%;
-}
-h4 {
-    background-color: #ccffcc;
-    font-size: 100%;
-	width: 95%;
-	border-radius: 5px;
-	padding: 2px;
-}
-h5 {
-    background-color: #d5ffb0;
-    font-size: 100%;
-
-}
-div.req{
-	background-color: #d9ffb3;
-    font-size: 18px;
-	width: 700px;
-    border: 3px solid green;
-    padding: 15px;
-    margin: 10px;
-}
-div.remark{
-	background-color: #E3F2FD;
-    border: 1.5px solid #d5f2ed;
-    padding: 15px;
-    margin: 10px;
-	border-radius: 25px;
-}
-table, th, td {
-  border: 1px solid black;
-  border-collapse: collapse;
-}
-
-ol, ul, li {
-  margin: 0;
-  margin-left: 10px;
-  padding: 0;
-  padding-bottom: 5px;
-}
-
-table, th, td {
-	border: 1px solid black;
-}
-
-img {
-	border: 1.5px solid #d5f2ed
-
-}
-
-a, a:visited, a:active, a:link, a:hover {
-    text-decoration: underline;
-    color: #545454;
-    background-color: transparent;
-}
-
-div.wrapdesc{
-	width: 90%;
-	margin: auto;
-}
-
-div.imagedesc{
-	width: 85%;
-	margin: auto;
-}
-</style>
+<link rel="stylesheet" type="text/css" href="../docs_common/defaultTemplateStyle.css">
 <style>
 code>pre { 
     font-family: monospace;
@@ -226,7 +45,7 @@ dd{ margin-bottom: 8px;}
 <h2>Requirements</h2>
 <div class="remark">
     <a href="../docs_prof/html/TemaFinale22.html">Requisiti</a>
-    <br>
+    <br><br>
     <p>Ulteriori requisiti scaturiti da colloqui con committente:</p>
     <ul>
         <lI>Può esserci solo un camion alla volta in INDOOR? SI</lI>
@@ -241,6 +60,33 @@ dd{ margin-bottom: 8px;}
         <li>Committente ha server aziendali disponibili? È possibile usare la RPI come server (nodo sempre attivo mentre il sistema è operativo)? E' possibile usare la raspberry, ma si può anche mettere sul PC che usiamo.</li>
     </ul>
 </div>
+
+
+<h2>Scrum Goal and Work Plan</h2>
+<div class="remark">
+    <p>Scrum goal: obiettivo dello SPRINT1 (oltre alla comprensione dei requisiti) è la creazione di una prima demo (su ambiente virtuale) che tenga presente dei soli punti 1 e 2 specificati dal committente (quelli che descrivono le <b>Deposit action</b> e la <b>Service area</b>)</p>
+    <p>Piano di lavoro:</p>
+    <ul>
+        <li>Comprensione dei requisiti del sistema</li>
+        <li>Prima valutazione dell'abstraction gap, anche in relazione al SW già sviluppato (possibile visitare la pagina riassuntiva <a href="../docs_prof/html/Applicazioni22.html">Applicazioni22</a> dei moduli sviluppati)</li>
+        <li>Analisi delle principali problematiche da affrontare nello sviluppo dei componenti di cui è composto il sistema</li>
+        <li>Definire i componenti e le interazioni fra di essi: realizzazione di una prima architettura logica</li>
+        <li>Realizzazione di modelli usando un linguaggio di modellazione che permetta di formalizzare e di creare modelli eseguibili. A tal proposito verrà utilizzato il metamodello <a class="todo">QAK</a>.</li>
+        <li>Realizzazione di un primo test-plan</li>
+    </ul>
+
+    <h4>Perchè QAK:</h4>
+    <p>Il metamodello <a class="todo">QAK</a> viene qui utilizzato sia perchè parte del software disponibile è stato sviluppato uando questo linguaggio, sia perchè introdurre modelli QAK già in fase di analisi può essere molto utile per:</p>
+    <ul>
+        <li>Avere un’interazione più produttiva con il cliente al fine di comprendere meglio i requisiti</li>
+        <li>Definire una archittetura logica di riferimento per il sistema da produrre in seguito in fase di progettazione</li>
+        <li>Definire piano di lavoro e impostare il primi SPRINT, e per definire un insieme significativo di test già espressi in modo formale come programmi</li>
+    </ul>
+    <h3>Documentazione QAK</h3>
+    <a class="todo">Quick notes QAK</a> <br>
+    <a href="../docs_prof/html/QakIntro.html">Full documentation</a>
+</div>
+
 
 <h2>Requirement analysis</h2>
 
@@ -531,13 +377,16 @@ dd{ margin-bottom: 8px;}
 
 </div>
 
+<!--<h2>Project</h2> 
+</div>-->
+
 
 <h2>Test plans</h2> 
 <div class="remark">
     Per il <b>Test plan</b> è stata definita una classe JUnit <b><a href="QakSprint1/test/testSprint1/TestSprint1.java">TestSprint1</a></b><br>
     Sono stati resi osservabili tramite Coap gli attori WasteService e TrasportTrolley.<br>
-    É stata inoltre creata una classe di utilità <b><a href="QakSprint1/test/testSprint1/TestObserver.java">TestObserver</a></b> in grado di leggere lo storico delle informazioni di WasteService e TrasportTrolley
-    e poterne valutare il corretto funzionamento nei test<br>
+    <p class="todo">É stata inoltre creata una classe di utilità <b><a href="QakSprint1/test/testSprint1/TestObserver.java">TestObserver</a></b> in grado di leggere lo storico delle informazioni di WasteService e TrasportTrolley
+    e poterne valutare il corretto funzionamento nei test<br></p>
 
     <h4><p>Test effettuati:</p></h4>
     <ul>
@@ -550,18 +399,6 @@ dd{ margin-bottom: 8px;}
         <li>Test due richieste (la seconda inviata mentre il robot stava tornando a casa dalla prima richiesta) accettate</li>
         <li>Test due richieste (la seconda inviata mentre il robot stava tornando a casa dalla prima richiesta) una accettata e una rifiutata</li>
     </ul>
-
-</div>
-
-<h2>Project</h2> 
- 
-</div>
-
-<h2>Testing</h2> 
- 
-<h2>Work plan</h2>
-<div class="remark">
-    
 
 </div>
 
