@@ -1,0 +1,135 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+    <!--
+<link rel="stylesheet" type="text/css" href="../css/issStyle1.css">
+<script type="text/javascript" src="../css/issStyle.js"></script>
+-->
+<link rel="stylesheet" type="text/css" href="./docs_common/defaultTemplateStyle.css">
+<style>
+code>pre { 
+    font-family: monospace;
+}
+dd{
+    margin-bottom: 7px;
+}
+.todo{
+    color: orange
+}
+.centerimg{
+    display: block;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 90%;
+    max-width: 800px;
+}
+p { margin: 4px 0px; }
+dd{ margin-bottom: 8px;}
+</style>
+<head>
+   
+<title>QAK</title></head>
+    
+<body>
+<div id="top">
+<h1>QAK </h1>
+</div>  
+
+<div class="body"> 
+<h2>QActor (meta)model</h2>
+<div class="remark">
+    <p><b>QActor</b> è il nome dato al linguaggio personalizzato ispirato al <b>akka actor</b> model basato, a sua volta, sul lavoro di Hewitt al MIT .</p>
+    <p>Lo scopo è stato quello della creazione di un linguaggio di modellazione per l’analisi e il progetto di applicazioni distribuiti e per la definizione di modelli di comportamento di attori che si comportano come Finite State Machines.</p>
+    <p>Inoltre fa riferimento alla versione implementata in <b>Kotlin</b>, senza utilizzare alcun supporto Akka (come fatto nella prima versione del linguaggio).</p>
+    <br>
+    <p>Il linguaggio Qak è definito utilizzando il framework <b>Xtext</b> e si basa su un nucleo di concetti che compongono il metamodello QActor.</p>
+    <p>Questi concetti possono essere così riassunti:</p>
+    <ul>
+        <lI>Un <b>QA-System</b> è una collezione di entità attive (QActors) ognuna eseguita in un nodo computazionale (<b>contesto</b>).</lI>
+        <li>QActors interagiscono usando messaggi di diversi tipi (<b>Dispatch</b>, <b>Request</b>,...) e <b>eventi</b>.</li>
+        <li>Un QActor può inviare informazioni ad un altro QActor (<b>locale</b> o <b>remoto</b>) usando apposite operazioni o emettendo eventi.</li>
+        <li>Ogni contesto presenta un insieme di QActors che possono interagire con componenti (<b>attori</b> o <b>"alieni"</b>) che lavorano in nodi differenti, ciò avviene tramite l'utilizzo di appositi protocolli (<b>TCP,CoAP,MQTT</b>).</li>
+    </ul>
+</div>
+
+<h2>QActor software factory</h2>
+<div class="remark">
+    <p>Il mapping tra le azioni di comunicazione di alto livello e uno specifico protocollo avviene tramite la <b>QActor-infrastructure</b> con l'aiuto del <b>Eclipse QActor software factory.</b></p>
+    <img class="align-center" src="./docs_common//qakSoftwareFactory.png" style="width: 30%;">
+</div>
+
+<h2>Messaggi ed eventi</h2>
+<div class="remark">
+    <p>Nel metamodello QActor:</p>
+    <ul>
+        <li>Un <b>messaggio</b> è inteso come una informazione inviata in maniera asincrona da un mittente ad uno specifico destinatario.</li>
+        <li>Un <b>evento</b> è inteso come una informazione emessa da un mittente senza uno specifico destinatario. </li>
+    </ul>
+    <p>I metodi che un application designer può utilizzare per inviare messaggi sono:</p>
+    <ul>
+        <li><b>Forward</b>  per un Dispatch.</li>
+        <li><b>Request, replyTo, askFor</b> per una Request. </li>
+        <li><b>Emit</b> per un Event/li>
+    </ul>
+        
+</div>
+
+<h2>Struttura QAK</h2>
+<div class="remark">
+    <p>Un modello Qak viene definito organizzando la sua descrizione in base al seguente template:</p>
+    <code><pre>
+    System < NAME OF THE SYSTEM >
+    //mqttBroker "broker.hivemq.com" : 1883 //OPTIONAL
+
+    //DECLARATION OF MESSAGES AND EVENTS
+
+    //DECLARATION OF CONTEXTS
+    Context CTXNAME ip [host="HOSTIP" port=PORTNUM]
+
+    //DECLARATION OF ACTORS
+    </pre></code> 
+</div>
+
+<h2>Sintassi QAK</h2>
+<div class="remark">
+<h3>Dichiarazione dei messaggi</h3>
+<code><pre>
+    Event:    "Event"     name=ID  ":" msg = PHead  ;
+    Dispatch: "Dispatch"  name=ID  ":" msg = PHead  ;
+    Request:  "Request"   name=ID  ":" msg = PHead  ;
+    Reply:    "Reply"     name=ID  ":" msg = PHead  ;
+
+    PHead :       PAtom | PStruct | PStructRef ;
+    ...
+</pre></code> 
+<h3>Operazioni di invio-messaggi</h3>
+<code><pre>
+    Forward   : "forward" dest=[QActorDeclaration] "-m" msgref=[Dispatch] ":" val = PHead ;
+    Emit      : "emit" msgref=[Event] ":" val = PHead     ;
+    Demand    : "request" dest=[QActorDeclaration] "-m" msgref=[Request]  ":" val = PHead ;
+    Answer    : "replyTo" reqref=[Request] "with"    msgref=[Reply]   ":" val = PHead ;
+    ReplyReq  : "askFor"  reqref=[Request] "request" msgref=[Request] ":" val = PHead ;
+</pre></code> 
+</div>
+
+
+
+<div style="background-color:rgba(86, 56, 253, 0.9); width:100%;text-align:left;color:white">
+    <table style="border: 0px solid transparent; margin: 0 auto;">
+        <tr>
+            <th>
+                <p>Loris Giannatempo <br>
+                Email: loris.giannatempo@studio.unibo.it</p>
+                <img class="centerimg" src="./docs_common/lorisgiannatempo.jpg" style="width: 30%; height: 30%; border: 0px">
+            </th>
+            <th>
+                <p>Davide Guidetti <br>
+                Email: davide.guidetti3@studio.unibo.it</p>
+                <img class="centerimg" src="./docs_common/davideguidetti.jpg" style="width: 30%; height: 30%; border: 0px">
+            </th>
+        </tr>
+    </table>
+</div> 
+</body>
+</html>
