@@ -13,6 +13,7 @@ import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStreamReader
 import java.net.ServerSocket
+import java.time.Duration
 import kotlin.test.Test
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation::class)
@@ -85,58 +86,63 @@ internal class TestSprint1_simple {
 
 
     @Test
+    @Timeout(30)
     fun test_2_accepted() {
-        CommUtils.delay(100)
-        var truckRequestStr = "msg(depositrequest, request,python,wasteservice,depositrequest(GLASS,2),1)"
-        try {
-            //FIRST REQUEST
-            val connTcp = ConnTcp("localhost", 8095)
-            var answer = connTcp.request(truckRequestStr)
-            ColorsOut.outappl("test_2_accepted answer=$answer", ColorsOut.GREEN)
-            Assert.assertTrue(answer.contains("loadaccept"))
-            while (!coapCheckWasteService("wait")) {
-                CommUtils.delay(1000)
+        assertTimeoutPreemptively<Unit>(Duration.ofSeconds(25)) {
+            CommUtils.delay(100)
+            var truckRequestStr = "msg(depositrequest, request,python,wasteservice,depositrequest(GLASS,2),1)"
+            try {
+                //FIRST REQUEST
+                val connTcp = ConnTcp("localhost", 8095)
+                var answer = connTcp.request(truckRequestStr)
+                ColorsOut.outappl("test_2_accepted answer=$answer", ColorsOut.GREEN)
+                Assert.assertTrue(answer.contains("loadaccept"))
+                while (!coapCheckWasteService("wait")) {
+                    CommUtils.delay(1000)
+                }
+                //SECONDO REQUEST
+                truckRequestStr = "msg(depositrequest, request,python,wasteservice,depositrequest(GLASS,7),1)"
+                answer = connTcp.request(truckRequestStr)
+                ColorsOut.outappl("testSecondRequest answer=$answer", ColorsOut.GREEN)
+                Assert.assertTrue(answer.contains("loadaccept"))
+                while (!coapCheckWasteService("wait")) {
+                    CommUtils.delay(1000)
+                }
+                connTcp.close()
+            } catch (e: java.lang.Exception) {
+                ColorsOut.outerr("test_2_accepted ERROR:" + e.message)
+                Assert.fail();
             }
-            //SECONDO REQUEST
-            truckRequestStr = "msg(depositrequest, request,python,wasteservice,depositrequest(GLASS,7),1)"
-            answer = connTcp.request(truckRequestStr)
-            ColorsOut.outappl("testSecondRequest answer=$answer", ColorsOut.GREEN)
-            Assert.assertTrue(answer.contains("loadaccept"))
-            while (!coapCheckWasteService("wait")) {
-                CommUtils.delay(1000)
-            }
-            connTcp.close()
-        } catch (e: java.lang.Exception) {
-            ColorsOut.outerr("test_2_accepted ERROR:" + e.message)
-            Assert.fail();
         }
     }
 
     @Test
     fun test_1_accepted_1_rejected() {
-        CommUtils.delay(100)
-        var truckRequestStr = "msg(depositrequest, request,python,wasteservice,depositrequest(GLASS,2),1)"
-        try {
-            //FIRST REQUEST
-            val connTcp = ConnTcp("localhost", 8095)
-            var answer = connTcp.request(truckRequestStr)
-            ColorsOut.outappl("testFirstRequest answer=$answer", ColorsOut.GREEN)
-            Assert.assertTrue(answer.contains("loadaccept"))
-            while (!coapCheckWasteService("wait")) {
-                CommUtils.delay(1000)
+        assertTimeoutPreemptively<Unit>(Duration.ofSeconds(15)){
+            CommUtils.delay(100)
+            var truckRequestStr = "msg(depositrequest, request,python,wasteservice,depositrequest(GLASS,2),1)"
+            try {
+                //FIRST REQUEST
+                val connTcp = ConnTcp("localhost", 8095)
+                var answer = connTcp.request(truckRequestStr)
+                ColorsOut.outappl("testFirstRequest answer=$answer", ColorsOut.GREEN)
+                Assert.assertTrue(answer.contains("loadaccept"))
+                while (!coapCheckWasteService("wait")) {
+                    CommUtils.delay(1000)
+                }
+                //SECONDO REQUEST
+                truckRequestStr = "msg(depositrequest, request,python,wasteservice,depositrequest(GLASS,9),1)"
+                answer = connTcp.request(truckRequestStr)
+                ColorsOut.outappl("testSecondRequest answer=$answer", ColorsOut.GREEN)
+                Assert.assertTrue(answer.contains("loadrejected"))
+                while (!coapCheckWasteService("wait")) {
+                    CommUtils.delay(1000)
+                }
+                connTcp.close()
+            } catch (e: java.lang.Exception) {
+                ColorsOut.outerr("test_1_accepted_1_rejected ERROR:" + e.message)
+                Assert.fail();
             }
-            //SECONDO REQUEST
-            truckRequestStr = "msg(depositrequest, request,python,wasteservice,depositrequest(GLASS,9),1)"
-            answer = connTcp.request(truckRequestStr)
-            ColorsOut.outappl("testSecondRequest answer=$answer", ColorsOut.GREEN)
-            Assert.assertTrue(answer.contains("loadrejected"))
-            while (!coapCheckWasteService("wait")) {
-                CommUtils.delay(1000)
-            }
-            connTcp.close()
-        } catch (e: java.lang.Exception) {
-            ColorsOut.outerr("test_1_accepted_1_rejected ERROR:" + e.message)
-            Assert.fail();
         }
     }
 

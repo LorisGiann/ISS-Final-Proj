@@ -83,6 +83,9 @@ QActor wasteservice context ctxserver{
  		}
 	#]
 	
+	/*State backToWait {}
+	Goto wait*/
+	
 	State wait initial {
 		updateResource [# "wasteservice(wait,$contPB,$contGB)" #] 
 		printCurrentMessage
@@ -92,6 +95,7 @@ QActor wasteservice context ctxserver{
 		//[# sysUtil.logMsgs=true #]
  	}
  	Transition t0 whenRequest depositrequest -> handle_req
+ 					whenReply moveanswer -> wait //consume pending moveanswer (happens when a request which has been rejected has been received while the robot was returning to home). See also test_1_accepted_1_rejected_while_returning_home_1_accepted() test
  	
  	State handle_req {
  		updateResource [# "wasteservice(handle_req,$contPB,$contGB)" #] 

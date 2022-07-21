@@ -51,13 +51,13 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 						 ){forward("noMsg", "noMsg(_)" ,"transporttrolley" ) 
 						}
 					}
-					 transition(edgeName="toNewState17",targetState="picking_up",cond=whenRequestGuarded("pickup",{ currpos==dest 
+					 transition(edgeName="toNewState18",targetState="picking_up",cond=whenRequestGuarded("pickup",{ currpos==dest 
 					}))
-					transition(edgeName="toNewState18",targetState="dropping_down",cond=whenRequestGuarded("dropout",{ currpos==dest 
+					transition(edgeName="toNewState19",targetState="dropping_down",cond=whenRequestGuarded("dropout",{ currpos==dest 
 					}))
-					transition(edgeName="toNewState19",targetState="set_new_dest",cond=whenRequestGuarded("move",{ currpos==dest 
+					transition(edgeName="toNewState20",targetState="set_new_dest",cond=whenRequestGuarded("move",{ currpos==dest 
 					}))
-					transition(edgeName="toNewState20",targetState="forward_robot",cond=whenDispatch("noMsg"))
+					transition(edgeName="toNewState21",targetState="forward_robot",cond=whenDispatch("noMsg"))
 				}	 
 				state("picking_up") { //this:State
 					action { //it:State
@@ -97,7 +97,7 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 						)
 						forward("cmd", "cmd(w)" ,"basicrobot" ) 
 					}
-					 transition(edgeName="t121",targetState="turn",cond=whenEvent("info"))
+					 transition(edgeName="t122",targetState="turn",cond=whenEvent("info"))
 				}	 
 				state("turn") { //this:State
 					action { //it:State

@@ -50,6 +50,7 @@ class Wasteservice ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 						println("Waiting for requests")
 					}
 					 transition(edgeName="t00",targetState="handle_req",cond=whenRequest("depositrequest"))
+					transition(edgeName="t01",targetState="wait",cond=whenReply("moveanswer"))
 				}	 
 				state("handle_req") { //this:State
 					action { //it:State
@@ -73,8 +74,8 @@ class Wasteservice ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 								 }
 						}
 					}
-					 transition(edgeName="t01",targetState="handle_move_indoor",cond=whenReply("moveanswer"))
-					transition(edgeName="t02",targetState="wait",cond=whenDispatch("noMsg"))
+					 transition(edgeName="t02",targetState="handle_move_indoor",cond=whenReply("moveanswer"))
+					transition(edgeName="t03",targetState="wait",cond=whenDispatch("noMsg"))
 				}	 
 				state("handle_move_indoor") { //this:State
 					action { //it:State
@@ -93,8 +94,8 @@ class Wasteservice ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 								 }
 						}
 					}
-					 transition(edgeName="t03",targetState="handle_pickup_answer",cond=whenReply("pickupanswer"))
-					transition(edgeName="t04",targetState="error",cond=whenDispatch("noMsg"))
+					 transition(edgeName="t04",targetState="handle_pickup_answer",cond=whenReply("pickupanswer"))
+					transition(edgeName="t05",targetState="error",cond=whenDispatch("noMsg"))
 				}	 
 				state("handle_pickup_answer") { //this:State
 					action { //it:State
@@ -124,8 +125,8 @@ class Wasteservice ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 								 }
 						}
 					}
-					 transition(edgeName="t05",targetState="handle_move_container",cond=whenReply("moveanswer"))
-					transition(edgeName="t06",targetState="error",cond=whenDispatch("noMsg"))
+					 transition(edgeName="t06",targetState="handle_move_container",cond=whenReply("moveanswer"))
+					transition(edgeName="t07",targetState="error",cond=whenDispatch("noMsg"))
 				}	 
 				state("handle_move_container") { //this:State
 					action { //it:State
@@ -144,8 +145,8 @@ class Wasteservice ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 								 }
 						}
 					}
-					 transition(edgeName="t07",targetState="handle_dropout_answer",cond=whenReply("dropoutanswer"))
-					transition(edgeName="t08",targetState="error",cond=whenDispatch("noMsg"))
+					 transition(edgeName="t08",targetState="handle_dropout_answer",cond=whenReply("dropoutanswer"))
+					transition(edgeName="t09",targetState="error",cond=whenDispatch("noMsg"))
 				}	 
 				state("handle_dropout_answer") { //this:State
 					action { //it:State
@@ -162,10 +163,10 @@ class Wasteservice ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 						stateTimer = TimerActor("timer_handle_dropout_answer", 
 							scope, context!!, "local_tout_wasteservice_handle_dropout_answer", 10.toLong() )
 					}
-					 transition(edgeName="t09",targetState="move_home",cond=whenTimeout("local_tout_wasteservice_handle_dropout_answer"))   
-					transition(edgeName="t010",targetState="error",cond=whenDispatchGuarded("noMsg",{ RES!="OK"  
+					 transition(edgeName="t010",targetState="move_home",cond=whenTimeout("local_tout_wasteservice_handle_dropout_answer"))   
+					transition(edgeName="t011",targetState="error",cond=whenDispatchGuarded("noMsg",{ RES!="OK"  
 					}))
-					transition(edgeName="t011",targetState="handle_new_req",cond=whenRequest("depositrequest"))
+					transition(edgeName="t012",targetState="handle_new_req",cond=whenRequest("depositrequest"))
 				}	 
 				state("handle_new_req") { //this:State
 					action { //it:State
@@ -188,8 +189,8 @@ class Wasteservice ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 								 }
 						}
 					}
-					 transition(edgeName="t012",targetState="handle_move_indoor",cond=whenReply("moveanswer"))
-					transition(edgeName="t013",targetState="move_home",cond=whenDispatch("noMsg"))
+					 transition(edgeName="t013",targetState="handle_move_indoor",cond=whenReply("moveanswer"))
+					transition(edgeName="t014",targetState="move_home",cond=whenDispatch("noMsg"))
 				}	 
 				state("move_home") { //this:State
 					action { //it:State
@@ -216,10 +217,10 @@ class Wasteservice ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 								 }
 						}
 					}
-					 transition(edgeName="t014",targetState="handle_req",cond=whenRequest("depositrequest"))
-					transition(edgeName="t015",targetState="error",cond=whenDispatchGuarded("noMsg",{ RES!="OK"  
+					 transition(edgeName="t015",targetState="handle_req",cond=whenRequest("depositrequest"))
+					transition(edgeName="t016",targetState="error",cond=whenDispatchGuarded("noMsg",{ RES!="OK"  
 					}))
-					transition(edgeName="t016",targetState="wait",cond=whenReply("moveanswer"))
+					transition(edgeName="t017",targetState="wait",cond=whenReply("moveanswer"))
 				}	 
 				state("error") { //this:State
 					action { //it:State
