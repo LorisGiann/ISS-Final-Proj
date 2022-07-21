@@ -353,9 +353,7 @@ dd{ margin-bottom: 8px;}
         Abbiamo analizzato le funzionalità che il servizio <b>WasteService</b> deve offrire, e abbiamo quindi formalizzato tale entità con il modello qak. <br>
         Per una migliore comprensione il diagramma degli stati di questo attore viene qui riassunto con il seguente schema: </p>
     <img class="centerimg" src="docs/_images/wasteservice_actor_state_diagram_1.png"/>
-    <p style="color: red">Possibile BUG! Se si riceve una depositrequest, ed essa è poi rifiutata, si ha un messaggio moveanswer che viene accodato e utilizzato impropriamente quando 
-        si gestirà nuovamente una nuova richiest. Necessario autoanello su wait per consumare il messaggio.</p>
-
+   
     <hr>  
 
     <h3>Impostazione di una prima architettura logica</h3>
@@ -385,19 +383,24 @@ dd{ margin-bottom: 8px;}
 <div class="remark">
     Per il <b>Test plan</b> è stata definita una classe JUnit <b><a href="QakSprint1/test/testSprint1/TestSprint1.java">TestSprint1</a></b><br>
     Sono stati resi osservabili tramite Coap gli attori WasteService e TrasportTrolley.<br>
-    <p class="todo">É stata inoltre creata una classe di utilità <b><a href="QakSprint1/test/testSprint1/TestObserver.java">TestObserver</a></b> in grado di leggere lo storico delle informazioni di WasteService e TrasportTrolley
+    <p>Sono state inoltre create due classi di utilità <b><a href="QakSprint1/test/testSprint1/TestObserver.java">TestObserver</a></b> e <b><a href="QakSprint1/test/testSprint1/TestUtils.kt">TestUtils</a></b>  in grado di leggere lo storico delle informazioni di WasteService e TrasportTrolley
     e poterne valutare il corretto funzionamento nei test<br></p>
 
     <h4><p>Test effettuati:</p></h4>
     <ul>
-        <lI>Test singola richiesta accettata</lI>
-        <li>Test singola richiesta rifiutata</li>
-        <li>Test due richieste accettate</li>
-        <li>Test due richieste una accettata e una rifiutata</li>
-        <li>Test due richieste (la seconda inviata mentre la prima richiesta non era ancora conclusa) accettate</li>
-        <li>Test due richieste (la seconda inviata mentre la prima richiesta non era ancora conclusa) una accettata e una rifiutata</li>
-        <li>Test due richieste (la seconda inviata mentre il robot stava tornando a casa dalla prima richiesta) accettate</li>
-        <li>Test due richieste (la seconda inviata mentre il robot stava tornando a casa dalla prima richiesta) una accettata e una rifiutata</li>
+        <h5>TestSprint1_simple.kt:</h5>
+        <li><b>test_2_accepted()</b>: Test due richieste accettate</li>
+        <li><b>test_1_accepted_1_rejected()</b>: Test due richieste una accettata e una rifiutata</li>
+        <h5>Classe di test TestSprint1_hystory.kt:</h5>
+        <p>La seguente classe di test verifica inoltre i cambiamenti di stato che avvengono negli attori <b>WasteService</b> e <b>TrasportTrolley</b> mediante un <u>Observer CoAP</u>.</p><br>
+        <lI><b>test_accepted()</b>: Test singola richiesta accettata</lI>
+        <li><b>test_rejected()</b>: Test singola richiesta rifiutata</li>
+        <li><b>test_2_accepted_while_in_operation()</b>: Test due richieste (la seconda inviata mentre la prima richiesta non era ancora conclusa) accettate</li>
+        <li><b>test_1_accepted_1_rejected_while_in_operation()</b>: Test due richieste (la seconda inviata mentre la prima richiesta non era ancora conclusa) una accettata e una rifiutata</li>
+        <li><b>test_2_accepted_while_returning_home()</b>: Test due richieste (la seconda inviata mentre il robot stava tornando a casa dalla prima richiesta) accettate</li>
+        <li><b>test_1_accepted_1_rejected_while_returning_home</b>: Test due richieste (la seconda inviata mentre il robot stava tornando a casa dalla prima richiesta) una accettata e una rifiutata</li>
+        <li><b>test_1_accepted_1_rejected_while_returning_home_1_accepted()</b>: Test dove se si riceva una depositrequest, ed essa è poi rifiutata, viene consumato il messaggio mediante un autoanello nello stato di wait</li>
+    
     </ul>
 
 </div>
