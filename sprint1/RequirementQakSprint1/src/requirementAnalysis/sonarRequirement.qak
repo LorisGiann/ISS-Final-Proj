@@ -1,0 +1,61 @@
+//https://dl.bintray.com/jetbrains/kotlin/eclipse-plugin/0.8.19/
+ 
+System demo0    
+ 
+Event update_sonar : update_sonar(DISTANCE)
+
+Dispatch noMsg : noMsg(_)
+
+Context ctxSonar ip [host="localhost" port=8095]
+ 
+QActor sonar context ctxSonar{
+	[# var distance : Int = 0
+		val DLIMIT = 10 
+	#]
+	
+	State wait initial {
+		println("wait")
+		discardMsg On
+	}
+	Transition t0 whenEvent update_sonar -> handle_update_moving
+	
+	State handle_update_moving {
+		onMsg( update_sonar:update_sonar(DISTANCE) ){
+			[# distance = payloadArg(0).toInt() #]
+ 			println("update_sonar(${distance})")
+ 			if [#distance<DLIMIT#] {
+ 				println("Stop robot")
+ 			}
+ 		}
+ 	}
+ 	Goto wait if [#distance>=DLIMIT#] else stop
+ 	
+ 	State stop {}
+ 	Transition t0 whenEvent  update_sonar -> update_sonar_resuming 
+ 	
+ 	State update_sonar_resuming {
+		onMsg( update_sonar:update_sonar(DISTANCE) ){
+			[# distance = payloadArg(0).toInt() #]
+ 			println("update_sonar(${distance})")
+ 			if [#distance>=DLIMIT#] {
+ 				println("Resume robot")
+ 			}
+ 		}
+ 	}
+ 	Goto wait if [#distance>=DLIMIT#] else stop 
+	
+}
+
+   
+   
+//sonar TESTER
+QActor test_sonar context ctxSonar{
+	State s0 initial { 	    
+		discardMsg On
+		emit update_sonar : update_sonar(8)
+		delay 2000
+		emit update_sonar : update_sonar(12)
+		delay 2000
+		emit update_sonar : update_sonar(7)
+ 	}
+}

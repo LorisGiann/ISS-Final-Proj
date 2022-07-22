@@ -112,7 +112,7 @@ dd{ margin-bottom: 8px;}
             </code>
             Il componente invia comandi al <b>Transport trolley</b> per svolgere le azioni necessarie
             <br><br>
-            Il funzionamento delle <i>depositrequest</i>, <i>loadaccept</i> e<i>loadrejected</i> può essere esaminato in <b><a href="./QakSprint1/src/requestWasteService.qak">requestWasteService.qak</a></b>.
+            Il funzionamento delle <i>depositrequest</i>, <i>loadaccept</i> e<i>loadrejected</i> può essere esaminato in <b><a href="./RequirementQakSprint1/src/requirementAnalysis/requestWasteService.qak">requestWasteService.qak</a></b>.
         </dd>
         <dt><b>Service area:</b></dt>
         <dd>Superfice rettangolare, piana, priva di ostacoli nella quale il robot può muoversi, e nella quale sono presenti le zone <b>INDOOR</b>, <b>PLASTICBOX</b>, <b>GLASSBOX</b>, <b>HOME</b>.<br>
@@ -152,6 +152,9 @@ dd{ margin-bottom: 8px;}
                 Reply   dropoutanswer  : dropoutanswer(RESULT)</pre>
             </code>
             Nota: il <b>Transport trolley</b> può ricevere una richiesta di nuova posizione prima che abbia raggiunto la destinazione precedente: la navigazione sarà impostata sulla nuova destinazione.
+            <br><br>
+            Il funzionamento del <i>move</i>, <i>moveanswer</i>, <i>pickup</i>, <i>pickupanswer</i>, <i>dropout</i> e <i>dropoutanswer</i>  può essere esaminato in <b><a href="./RequirementQakSprint1/src/requirementAnalysis/requestTransportTrolley.qak">requestTransportTrolley.qak</a></b>.
+        
         </dd>
         <dt><b>DDR Robot concreto</b> o "robot":</dt>
         <dd>Con questo termine ci si riferisce al robot vero e proprio (fisico o simulato virtualmente). <br>
@@ -221,6 +224,8 @@ dd{ margin-bottom: 8px;}
                 <lI>Il peso corrente <b>contPB</b> e <b>contGB</b> del materiale contenuto in <b>PLASTICBOX</b> e in <b>GLASSBOX</b></lI>
                 <lI>Lo stato del <b>LED</b></lI>
             </ul>
+            <br>
+            Il funzionamento della <i>GUI</i> può essere esaminato in <b><a href="./RequirementQakSprint1/src/requirementAnalysis/GUIRequirement.qak">GUIRequirement.qak</a></b>.
         </dd>
         <dt><b>LED concreto:</b></dt> 
         <dd>Dispositivo di output connesso al RaspberryPI (che NON è a bordo del <b>DDR Robot</b>)</dd>
@@ -232,6 +237,8 @@ dd{ margin-bottom: 8px;}
                 <lI>Led Blink: quando il <b>Transport trolley:</b> è in movimento, o sta scaricando/caricando materiale</lI>
             </ul>
             <p>Il committente fornisce già del software per relativo al led in <a href="https://github.com/anatali/issLab2022/tree/main/it.unibo.radarSystem22.domain">it.unibo.radarSystem22.domain</a></p>
+            <br>
+            Il funzionamento del <i>led</i> può essere esaminato in <b><a href="./RequirementQakSprint1/src/requirementAnalysis/ledRequirement.qak">ledRequirement.qak</a></b>.
         </dd>
         <dt><b>Sonar concreto:</b></dt> 
         <dd>Dispositivo di input connesso al RaspberryPI (che NON è a bordo del <b>DDR Robot</b>)</dd>
@@ -248,6 +255,8 @@ dd{ margin-bottom: 8px;}
                 //V = distance int val
                 Event  sonar       : sonar(V)</pre>
             </code>
+            <br>
+            Il funzionamento del <i>sonar</i> può essere esaminato in <b><a href="./RequirementQakSprint1/src/requirementAnalysis/sonarRequirement.qak">sonarRequirement.qak</a></b>.
         </dd>
         <dt><b>DLIMT:</b></dt>
         <dd>Misura in CM della distanza limite. Se la distanza attualmente misurata dal <b>Sonar concreto</b> è ≤ DLIMT, il robot deve essere nello stato stopped. Qunando la distanza misurata &gt DLIMIT il robot può muoversi<br>
@@ -431,7 +440,7 @@ dd{ margin-bottom: 8px;}
 
 </div>
 
-<h3><a href="QakSprint1/src/demo0.qak">Metamodello eseguibile QAK</a></h3>
+<h3><a href="QakSprint1/src/Prototype/demo0.qak">Metamodello eseguibile QAK</a></h3>
  
 <!-- USEFUL
 <table style="width:100%" border="1">

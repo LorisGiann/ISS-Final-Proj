@@ -1,0 +1,78 @@
+//https://dl.bintray.com/jetbrains/kotlin/eclipse-plugin/0.8.19/
+
+System demo0    
+
+Event update_led : update_led(STATE) //STATE = on | off | blink+
+Event update_position : update_position(POSITION)
+Event update_container : update_container(MATERIAL, QUANTITA)
+ 
+Dispatch noMsg : noMsg(_)
+  
+Context ctxGUI ip [host="localhost" port=8095]
+
+QActor gui context ctxGUI{ 
+	[# 
+		var LedStatus = "off"
+		var ContainerGlass = 0
+		var ContainerPaper = 0
+		var Position = "HOME"
+	#]
+	
+	State init initial {
+	}
+	Transition t0 whenEvent update_position ->  handlePosition
+				  whenEvent update_led ->  handleLed
+				  whenEvent update_container ->  handleContainer
+	
+	State handleLed {
+		onMsg(update_led : update_led(STATO)){
+			[# LedStatus = payloadArg(0) #]
+		}
+		println("LedStatus: $LedStatus")
+		println("ContainerGlass: $ContainerGlass")
+		println("ContainerPaper: $ContainerPaper")
+		println("Position: $Position")
+	}
+	Goto init
+	
+	State handlePosition {
+		onMsg(update_position : update_position(POSITION)){
+			[# Position = payloadArg(0) #]
+		}
+		println("LedStatus: $LedStatus")
+		println("ContainerGlass: $ContainerGlass")
+		println("ContainerPaper: $ContainerPaper")
+		println("Position: $Position")
+	}
+	Goto init
+	
+	State handleContainer {
+		onMsg(update_container : update_container(MATERIAL, TRUCKLOAD)){
+			if [# payloadArg(0) == "GLASS" #]{
+				[# ContainerGlass = payloadArg(1).toInt()+ContainerGlass #]
+			} else {
+				[# ContainerPaper = payloadArg(1).toInt()+ContainerPaper #]
+			}
+		}
+		println("LedStatus: $LedStatus")
+		println("Position: $Position")
+		println("CurrentGlass: $ContainerGlass")
+		println("CurrentPaper: $ContainerPaper")
+	}
+	Goto init
+}  
+
+   
+   
+//GUI TESTER
+QActor test_gui context ctxGUI{
+	State s0 initial { 	    
+		discardMsg On
+		//[# sysUtil.logMsgs=true #]
+		emit update_led : update_led(off)
+		delay 2000
+		emit update_position : update_position(INDOOR)
+		delay 2000
+		emit update_container : update_container(GLASS,5)
+ 	}
+}
