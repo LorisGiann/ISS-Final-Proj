@@ -14,31 +14,14 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 		return "init"
 	}
 	override fun getBody() : (ActorBasicFsm.() -> Unit){
-		 var dest ="HOME"
-			   var currpos = "HOME"
-			   
-			   fun newPosition(CURRPOS:String) : String {
-		 			if (CURRPOS=="HOME"){
-		 				return "INDOOR";
-		 			}
-		 			if (CURRPOS=="INDOOR"){
-		 				return "PLASTICBOX";
-		 			}
-		 			if (CURRPOS=="PLASTICBOX"){
-		 				return "GLASSBOX";
-		 			}
-		 			if (CURRPOS=="GLASSBOX"){
-		 				return "HOME";
-		 			}
-		 			return "ERRORE";
-		 		} 			
-			   
+		 var dest = ws.Position.HOME
+			   var currpos = ws.Position.HOME
 		return { //this:ActionBasciFsm
 				state("init") { //this:State
 					action { //it:State
 						discardMessages = true
-						 dest = "HOME"
-								   currpos = "HOME"	
+						 dest = ws.Position.HOME
+							       currpos = ws.Position.HOME
 					}
 					 transition( edgeName="goto",targetState="wait", cond=doswitch() )
 				}	 
@@ -85,7 +68,7 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 						)
 						if( checkMsgContent( Term.createTerm("move(POSITION)"), Term.createTerm("move(ARG)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
-								 dest=payloadArg(0)  
+								 dest=ws.Position.valueOf(payloadArg(0))  
 								println("transporttrolley | New robot destination: ${dest}")
 						}
 					}
@@ -105,7 +88,7 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 						)
 						forward("cmd", "cmd(l)" ,"basicrobot" ) 
 						delay(450) 
-						currpos=newPosition(currpos)  
+						currpos=ws.func.nextPosition(currpos)  
 						if(  currpos==dest  
 						 ){println("transporttrolley | Robot arrived at $currpos")
 						answer("move", "moveanswer", "moveanswer(OK)"   )  

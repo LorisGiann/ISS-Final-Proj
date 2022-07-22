@@ -118,19 +118,19 @@ internal class TestSprint1_hystory {
                 ColorsOut.outappl(to!!.getHistory().toString(), ColorsOut.MAGENTA)
                 //assertTrue(to.checkNextContents(new String[]{"wasteservice(wait,0,0)", "transporttrolley(wait,HOME,HOME)"}) > 0);
                 Assert.assertTrue(to!!.checkNextSequence(arrayOf(
-                        "wasteservice(handle_req,0,0)",
+                        "wasteservice(handle_req,0.0,0.0)",
                         "transporttrolley(wait,HOME,INDOOR)",
                         "transporttrolley(wait,INDOOR,INDOOR)",
                         "transporttrolley(picking_up,INDOOR,INDOOR)"
                 )))
-                Assert.assertTrue(to!!.checkNextContents(arrayOf("wasteservice(handle_pickup_answer,0,2)", "transporttrolley(wait,INDOOR,GLASSBOX)")) > 0) //check container load update. (handle_pickup_answer also moves the robot to the container)
+                Assert.assertTrue(to!!.checkNextContents(arrayOf("wasteservice(handle_pickup_answer,0.0,2.0)", "transporttrolley(wait,INDOOR,GLASSBOX)")) > 0) //check container load update. (handle_pickup_answer also moves the robot to the container)
                 Assert.assertTrue(to!!.checkNextSequence(arrayOf(
                         "transporttrolley(wait,PLASTICBOX,GLASSBOX)",
                         "transporttrolley(wait,GLASSBOX,GLASSBOX)",
                         "transporttrolley(dropping_down,GLASSBOX,GLASSBOX)"
                 )))
-                Assert.assertTrue(to!!.checkNextContents(arrayOf("wasteservice(handle_move_home,0,2)", "transporttrolley(wait,GLASSBOX,HOME)")) > 0)
-                Assert.assertTrue(to!!.checkNextContents(arrayOf("wasteservice(wait,0,2)", "transporttrolley(wait,HOME,HOME)")) > 0)
+                Assert.assertTrue(to!!.checkNextContents(arrayOf("wasteservice(handle_move_home,0.0,2.0)", "transporttrolley(wait,GLASSBOX,HOME)")) > 0)
+                Assert.assertTrue(to!!.checkNextContents(arrayOf("wasteservice(wait,0.0,2.0)", "transporttrolley(wait,HOME,HOME)")) > 0)
                 //to.setStartPosition(0);*/
             } catch (e: Exception) {
                 Assert.fail("test_accepted ERROR:" + e.message)
@@ -156,8 +156,8 @@ internal class TestSprint1_hystory {
                 ColorsOut.outappl(to!!.getHistory().toString(), ColorsOut.MAGENTA)
                 //Assert.assertTrue(to!!.checkNextContents(arrayOf("wasteservice(wait,0,0)", "transporttrolley(wait,HOME,HOME)")) > 0)
                 Assert.assertTrue(to!!.checkNextSequence(arrayOf(
-                        "wasteservice(handle_req,0,0)",
-                        "wasteservice(wait,0,0)"
+                        "wasteservice(handle_req,0.0,0.0)",
+                        "wasteservice(wait,0.0,0.0)"
                 )))
             } catch (e: java.lang.Exception) {
                 Assert.fail("test_rejected ERROR:" + e.message)
@@ -191,20 +191,20 @@ internal class TestSprint1_hystory {
                 connTcp.close()
                 //Assert.assertTrue(to!!.checkNextContents(arrayOf("wasteservice(wait,0,0)", "transporttrolley(wait,HOME,HOME)")) > 0)
                 Assert.assertTrue(to!!.checkNextSequence(arrayOf(
-                        "wasteservice(handle_req,0,0)",
+                        "wasteservice(handle_req,0.0,0.0)",
                         "transporttrolley(wait,HOME,INDOOR)",
                         "transporttrolley(wait,INDOOR,INDOOR)",
                         "transporttrolley(picking_up,INDOOR,INDOOR)"
                 )))
-                Assert.assertTrue(to!!.checkNextContents(arrayOf("wasteservice(handle_pickup_answer,2,0)", "transporttrolley(wait,INDOOR,PLASTICBOX)")) > 0) //check container load update. (handle_pickup_answer also moves the robot to the container)
+                Assert.assertTrue(to!!.checkNextContents(arrayOf("wasteservice(handle_pickup_answer,2.0,0.0)", "transporttrolley(wait,INDOOR,PLASTICBOX)")) > 0) //check container load update. (handle_pickup_answer also moves the robot to the container)
                 Assert.assertTrue(to!!.checkNextSequence(arrayOf(
                         "transporttrolley(wait,PLASTICBOX,PLASTICBOX)",
                         "transporttrolley(dropping_down,PLASTICBOX,PLASTICBOX)"
                 )))
-                Assert.assertTrue(to!!.checkNextContents(arrayOf("wasteservice(handle_new_req,2,0)", "transporttrolley(wait,PLASTICBOX,INDOOR)")) > 0)
-                Assert.assertTrue(to!!.checkNextContent("wasteservice(handle_move_indoor,2,7)") > 0)
+                Assert.assertTrue(to!!.checkNextContents(arrayOf("wasteservice(handle_new_req,2.0,0.0)", "transporttrolley(wait,PLASTICBOX,INDOOR)")) > 0)
+                Assert.assertTrue(to!!.checkNextContent("wasteservice(handle_move_indoor,2.0,7.0)") > 0)
                 //second request management...
-                Assert.assertTrue(to!!.checkNextContent("wasteservice(wait,2,7)") > 0)
+                Assert.assertTrue(to!!.checkNextContent("wasteservice(wait,2.0,7.0)") > 0)
             } catch (e: java.lang.Exception) {
                 Assert.fail("test_2_accepted_while_in_operation ERROR:" + e.message)
             }
@@ -237,19 +237,19 @@ internal class TestSprint1_hystory {
                 connTcp.close()
                 //Assert.assertTrue(to!!.checkNextContents(arrayOf("wasteservice(wait,0,0)", "transporttrolley(wait,HOME,HOME)")) > 0)
                 Assert.assertTrue(to!!.checkNextSequence(arrayOf(
-                        "wasteservice(handle_req,0,0)",
+                        "wasteservice(handle_req,0.0,0.0)",
                         "transporttrolley(wait,HOME,INDOOR)",
                         "transporttrolley(wait,INDOOR,INDOOR)",
                         "transporttrolley(picking_up,INDOOR,INDOOR)"
                 )))
-                Assert.assertTrue(to!!.checkNextContents(arrayOf("wasteservice(handle_pickup_answer,2,0)", "transporttrolley(wait,INDOOR,PLASTICBOX)")) > 0) //check container load update. (handle_pickup_answer also moves the robot to the container)
+                Assert.assertTrue(to!!.checkNextContents(arrayOf("wasteservice(handle_pickup_answer,2.0,0.0)", "transporttrolley(wait,INDOOR,PLASTICBOX)")) > 0) //check container load update. (handle_pickup_answer also moves the robot to the container)
                 Assert.assertTrue(to!!.checkNextSequence(arrayOf(
                         "transporttrolley(wait,PLASTICBOX,PLASTICBOX)",
                         "transporttrolley(dropping_down,PLASTICBOX,PLASTICBOX)"
                 )))
-                Assert.assertTrue(to!!.checkNextContents(arrayOf("wasteservice(handle_new_req,2,0)", "transporttrolley(wait,PLASTICBOX,HOME)", "wasteservice(handle_move_home,2,0)")) > 0)
+                Assert.assertTrue(to!!.checkNextContents(arrayOf("wasteservice(handle_new_req,2.0,0.0)", "transporttrolley(wait,PLASTICBOX,HOME)", "wasteservice(handle_move_home,2.0,0.0)")) > 0)
                 //robot moves towards home
-                Assert.assertTrue(to!!.checkNextContent("wasteservice(wait,2,0)") > 0)
+                Assert.assertTrue(to!!.checkNextContent("wasteservice(wait,2.0,0.0)") > 0)
             } catch (e: java.lang.Exception) {
                 Assert.fail("test_1_accepted_1_rejected_while_in_operation ERROR:" + e.message)
             }
@@ -282,21 +282,21 @@ internal class TestSprint1_hystory {
                 connTcp.close()
                 //Assert.assertTrue(to!!.checkNextContents(arrayOf("wasteservice(wait,0,0)", "transporttrolley(wait,HOME,HOME)")) > 0)
                 Assert.assertTrue(to!!.checkNextSequence(arrayOf(
-                        "wasteservice(handle_req,0,0)",
+                        "wasteservice(handle_req,0.0,0.0)",
                         "transporttrolley(wait,HOME,INDOOR)",
                         "transporttrolley(wait,INDOOR,INDOOR)",
                         "transporttrolley(picking_up,INDOOR,INDOOR)"
                 )))
-                Assert.assertTrue(to!!.checkNextContents(arrayOf("wasteservice(handle_pickup_answer,2,0)", "transporttrolley(wait,INDOOR,PLASTICBOX)")) > 0) //check container load update. (handle_pickup_answer also moves the robot to the container)
+                Assert.assertTrue(to!!.checkNextContents(arrayOf("wasteservice(handle_pickup_answer,2.0,0.0)", "transporttrolley(wait,INDOOR,PLASTICBOX)")) > 0) //check container load update. (handle_pickup_answer also moves the robot to the container)
                 Assert.assertTrue(to!!.checkNextSequence(arrayOf(
                         "transporttrolley(wait,PLASTICBOX,PLASTICBOX)",
                         "transporttrolley(dropping_down,PLASTICBOX,PLASTICBOX)"
                 )))
-                Assert.assertTrue(to!!.checkNextContents(arrayOf("wasteservice(handle_move_home,2,0)", "transporttrolley(wait,PLASTICBOX,HOME)")) > 0)
-                Assert.assertTrue(to!!.checkNextContent("wasteservice(home,2,0)") < 0) //wasteservice shouldnt pass through wait...
-                Assert.assertTrue(to!!.checkNextContent("wasteservice(handle_req,2,0)") > 0) //...it should go directly to handle_req
+                Assert.assertTrue(to!!.checkNextContents(arrayOf("wasteservice(handle_move_home,2.0,0.0)", "transporttrolley(wait,PLASTICBOX,HOME)")) > 0)
+                Assert.assertTrue(to!!.checkNextContent("wasteservice(home,2.0,0.0)") < 0) //wasteservice shouldnt pass through wait...
+                Assert.assertTrue(to!!.checkNextContent("wasteservice(handle_req,2.0,0.0)") > 0) //...it should go directly to handle_req
                 //second request management...
-                Assert.assertTrue(to!!.checkNextContent("wasteservice(wait,2,7)") > 0)
+                Assert.assertTrue(to!!.checkNextContent("wasteservice(wait,2.0,7.0)") > 0)
             } catch (e: java.lang.Exception) {
                 Assert.fail("test_2_accepted_while_returning_home ERROR:" + e.message)
             }
@@ -333,20 +333,20 @@ internal class TestSprint1_hystory {
                 connTcp.close()
                 //Assert.assertTrue(to!!.checkNextContents(arrayOf("wasteservice(wait,0,0)", "transporttrolley(wait,HOME,HOME)")) > 0)
                 Assert.assertTrue(to!!.checkNextSequence(arrayOf(
-                        "wasteservice(handle_req,0,0)",
+                        "wasteservice(handle_req,0.0,0.0)",
                         "transporttrolley(wait,HOME,INDOOR)",
                         "transporttrolley(wait,INDOOR,INDOOR)",
                         "transporttrolley(picking_up,INDOOR,INDOOR)"
                 )))
-                Assert.assertTrue(to!!.checkNextContents(arrayOf("wasteservice(handle_pickup_answer,2,0)", "transporttrolley(wait,INDOOR,PLASTICBOX)")) > 0) //check container load update. (handle_pickup_answer also moves the robot to the container)
+                Assert.assertTrue(to!!.checkNextContents(arrayOf("wasteservice(handle_pickup_answer,2.0,0.0)", "transporttrolley(wait,INDOOR,PLASTICBOX)")) > 0) //check container load update. (handle_pickup_answer also moves the robot to the container)
                 Assert.assertTrue(to!!.checkNextSequence(arrayOf(
                         "transporttrolley(wait,PLASTICBOX,PLASTICBOX)",
                         "transporttrolley(dropping_down,PLASTICBOX,PLASTICBOX)"
                 )))
-                Assert.assertTrue(to!!.checkNextContents(arrayOf("wasteservice(handle_move_home,2,0)", "transporttrolley(wait,PLASTICBOX,HOME)")) > 0)
+                Assert.assertTrue(to!!.checkNextContents(arrayOf("wasteservice(handle_move_home,2.0,0.0)", "transporttrolley(wait,PLASTICBOX,HOME)")) > 0)
                 //assertTrue(to.checkNextContent("wasteservice(home,2,0)") < 0); //wasteservice shouldnt pass through wait...
-                Assert.assertTrue(to!!.checkNextContent("wasteservice(handle_req,2,0)") > 0) //...it should go directly to handle_req
-                Assert.assertTrue(to!!.checkNextContent("wasteservice(wait,2,0)") > 0) //then it goes into wait, since request is rejected
+                Assert.assertTrue(to!!.checkNextContent("wasteservice(handle_req,2.0,0.0)") > 0) //...it should go directly to handle_req
+                Assert.assertTrue(to!!.checkNextContent("wasteservice(wait,2.0,0.0)") > 0) //then it goes into wait, since request is rejected
             } catch (e: java.lang.Exception) {
                 Assert.fail("test_1_accepted_1_rejected_while_returning_home ERROR:" + e.message)
             }
@@ -391,14 +391,14 @@ internal class TestSprint1_hystory {
                 truckRequestStr = "msg(depositrequest, request,python,wasteservice,depositrequest(PLASTIC,1),1)"
                 answer = connTcp.request(truckRequestStr)      //ACTUALLY WHAT HAPPENS IS A DEADLOCK BETWEEN ACTORS: THIS REPLY WILL NEVER ARRIVE AND THE TEST WILL FAIL BECAUSE OF THE TIMEOUT!
                 ColorsOut.outappl("testSecondRequest answer=$answer", ColorsOut.GREEN)
-                Assert.assertTrue(answer.contains("loadaccepted"))
+                Assert.assertTrue(answer.contains("loadaccept"))
 
-                while(to!!.checkNextContent("wasteservice(handle_req,2,0)") > 0){} //jump to the last few messages, after the request has been made
+                while(to!!.checkNextContent("wasteservice(handle_req,2.0,0.0)") > 0){} //jump to the last few messages, after the request has been made
 
                 //check wether the previous move_answer interfears with the one we now have to receive from the robot
                 //if the previous remained in the queue, the transition of wasteservice from handle_req->handle_move_indoor happens before the robot actually arrives (and this is bad)
                 Assert.assertFalse(
-                        to!!.checkNextSequence(arrayOf("wasteservice(handle_move_indoor,3,0)", "transporttrolley(forward_robot,HOME,INDOOR)"))
+                        to!!.checkNextSequence(arrayOf("wasteservice(handle_move_indoor,3.0,0.0)", "transporttrolley(forward_robot,HOME,INDOOR)"))
                 );
 
                 //stop the test aafter bringing the robot home

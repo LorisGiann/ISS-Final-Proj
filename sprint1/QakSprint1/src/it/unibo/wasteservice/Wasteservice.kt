@@ -14,35 +14,15 @@ class Wasteservice ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 		return "wait"
 	}
 	override fun getBody() : (ActorBasicFsm.() -> Unit){
-		 
-				val MAXPB = 10
-				val MAXGB = 10
-				var contPB = 0
-				var contGB = 0
-				lateinit var Material  : String
-				lateinit var TruckLoad : String
-				lateinit var RES : String
-				
-				lateinit var TrolleyPos : String   //gbox,pbox,Home,indoor,other
-				
-				fun checkdepositpossible(MATERIAL:String,LOAD:String) : Boolean {
-		 				return (MATERIAL=="PLASTIC" && LOAD.toInt()+contPB<=MAXPB) 
-		 				 || (MATERIAL=="GLASS" && LOAD.toInt()+contGB<=MAXGB);
-		 		}
-		 				 
-		 		fun updateDeposit(MATERIAL:String,LOAD:String) : Unit {
-		 				when(MATERIAL){
-						    "PLASTIC" -> contPB+=LOAD.toInt()
-						    "GLASS" -> contGB+=LOAD.toInt()
-						    else -> {
-						        print("ERRORE MATERIALE")
-							}
-		 				}
-		 		}
+		 lateinit var Material  : ws.Material
+			   var TruckLoad : Float = 0F
+			   
+			   lateinit var RES : String
+			   lateinit var TrolleyPos : String   //gbox,pbox,Home,indoor
 		return { //this:ActionBasciFsm
 				state("wait") { //this:State
 					action { //it:State
-						updateResourceRep( "wasteservice(wait,$contPB,$contGB)"  
+						updateResourceRep( "wasteservice(wait,${ws.func.contPB},${ws.func.contGB})"  
 						)
 						println("$name in ${currentState.stateName} | $currentMsg")
 						discardMessages = false
@@ -54,18 +34,18 @@ class Wasteservice ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 				}	 
 				state("handle_req") { //this:State
 					action { //it:State
-						updateResourceRep( "wasteservice(handle_req,$contPB,$contGB)"  
+						updateResourceRep( "wasteservice(handle_req,${ws.func.contPB},${ws.func.contGB})"  
 						)
 						println("$name in ${currentState.stateName} | $currentMsg")
 						if( checkMsgContent( Term.createTerm("depositrequest(MATERIAL,TRUCKLOAD)"), Term.createTerm("depositrequest(MATERIAL,TRUCKLOAD)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								
-												 Material 	= payloadArg(0) ;
-												 TruckLoad 	= payloadArg(1) ;
+												 Material 	= ws.Material.valueOf(payloadArg(0))
+												 TruckLoad 	= payloadArg(1).toFloat()
 								println("arrived $TruckLoad Kg of $Material")
-								if(  checkdepositpossible( Material, TruckLoad )  
-								 ){ updateDeposit( Material, TruckLoad ) 
-								println("PB capacity: ${contPB}, GB capacity: ${contGB}")
+								if(  ws.func.checkdepositpossible( Material, TruckLoad )  
+								 ){ ws.func.updateDeposit( Material, TruckLoad ) 
+								println("PB capacity: ${ws.func.contPB}, GB capacity: ${ws.func.contGB}")
 								request("move", "move(INDOOR)" ,"transporttrolley" )  
 								}
 								else
@@ -79,7 +59,7 @@ class Wasteservice ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 				}	 
 				state("handle_move_indoor") { //this:State
 					action { //it:State
-						updateResourceRep( "wasteservice(handle_move_indoor,$contPB,$contGB)"  
+						updateResourceRep( "wasteservice(handle_move_indoor,${ws.func.contPB},${ws.func.contGB})"  
 						)
 						println("$name in ${currentState.stateName} | $currentMsg")
 						if( checkMsgContent( Term.createTerm("moveanswer(RESULT)"), Term.createTerm("moveanswer(RESULT)"), 
@@ -99,7 +79,7 @@ class Wasteservice ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 				}	 
 				state("handle_pickup_answer") { //this:State
 					action { //it:State
-						updateResourceRep( "wasteservice(handle_pickup_answer,$contPB,$contGB)"  
+						updateResourceRep( "wasteservice(handle_pickup_answer,${ws.func.contPB},${ws.func.contGB})"  
 						)
 						println("$name in ${currentState.stateName} | $currentMsg")
 						if( checkMsgContent( Term.createTerm("pickupanswer(RESULT)"), Term.createTerm("pickupanswer(RESULT)"), 
@@ -107,18 +87,13 @@ class Wasteservice ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 								 RES = payloadArg(0);  
 								if(  RES == "OK"  
 								 ){ 
-													lateinit var Position : String
-													when(Material){
-												    "PLASTIC" -> Position = "PLASTICBOX"
-												    "GLASS" -> Position = "GLASSBOX"
-												    else -> { // Note the block
-												        print("ERRORE POSIZIONE")
-												    }
-												    //emit container_position : container_position(Material,TruckLoad)    ??
-												}  
+													val Position = when(Material){
+													    ws.Material.PLASTIC -> ws.Position.PLASTICBOX
+													    ws.Material.GLASS -> ws.Position.GLASSBOX
+													}  
 								println("move to ${Position}")
 								request("move", "move($Position)" ,"transporttrolley" )  
-								answer("depositrequest", "loadaccepted", "loadaccepted($Material,$TruckLoad)"   )  
+								answer("depositrequest", "loadaccept", "loadaccept($Material,$TruckLoad)"   )  
 								}
 								else
 								 {forward("noMsg", "noMsg(_)" ,"wasteservice" ) 
@@ -130,7 +105,7 @@ class Wasteservice ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 				}	 
 				state("handle_move_container") { //this:State
 					action { //it:State
-						updateResourceRep( "wasteservice(handle_move_container,$contPB,$contGB)"  
+						updateResourceRep( "wasteservice(handle_move_container,${ws.func.contPB},${ws.func.contGB})"  
 						)
 						println("$name in ${currentState.stateName} | $currentMsg")
 						if( checkMsgContent( Term.createTerm("moveanswer(RESULT)"), Term.createTerm("moveanswer(RESULT)"), 
@@ -150,7 +125,7 @@ class Wasteservice ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 				}	 
 				state("handle_dropout_answer") { //this:State
 					action { //it:State
-						updateResourceRep( "wasteservice(handle_dropout_answer,$contPB,$contGB)"  
+						updateResourceRep( "wasteservice(handle_dropout_answer,${ws.func.contPB},${ws.func.contGB})"  
 						)
 						println("$name in ${currentState.stateName} | $currentMsg")
 						if( checkMsgContent( Term.createTerm("dropoutanswer(RESULT)"), Term.createTerm("dropoutanswer(RESULT)"), 
@@ -170,17 +145,17 @@ class Wasteservice ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 				}	 
 				state("handle_new_req") { //this:State
 					action { //it:State
-						updateResourceRep( "wasteservice(handle_new_req,$contPB,$contGB)"  
+						updateResourceRep( "wasteservice(handle_new_req,${ws.func.contPB},${ws.func.contGB})"  
 						)
 						println("$name in ${currentState.stateName} | $currentMsg")
 						if( checkMsgContent( Term.createTerm("depositrequest(MATERIAL,TRUCKLOAD)"), Term.createTerm("depositrequest(MATERIAL,TRUCKLOAD)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								
-												 Material 	= payloadArg(0) ;
-												 TruckLoad 	= payloadArg(1) ;
-								if(  checkdepositpossible( Material, TruckLoad )  
-								 ){ updateDeposit( Material, TruckLoad ) 
-								println("PB capacity: ${contPB}, GB capacity: ${contGB}")
+												 Material 	= ws.Material.valueOf(payloadArg(0))
+												 TruckLoad 	= payloadArg(1).toFloat()
+								if(  ws.func.checkdepositpossible( Material, TruckLoad )  
+								 ){ ws.func.updateDeposit( Material, TruckLoad ) 
+								println("PB capacity: ${ws.func.contPB}, GB capacity: ${ws.func.contGB}")
 								request("move", "move(INDOOR)" ,"transporttrolley" )  
 								}
 								else
@@ -194,7 +169,7 @@ class Wasteservice ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 				}	 
 				state("move_home") { //this:State
 					action { //it:State
-						updateResourceRep( "wasteservice(move_home,$contPB,$contGB)"  
+						updateResourceRep( "wasteservice(move_home,${ws.func.contPB},${ws.func.contGB})"  
 						)
 						println("$name in ${currentState.stateName} | $currentMsg")
 						request("move", "move(HOME)" ,"transporttrolley" )  
@@ -203,7 +178,7 @@ class Wasteservice ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 				}	 
 				state("handle_move_home") { //this:State
 					action { //it:State
-						updateResourceRep( "wasteservice(handle_move_home,$contPB,$contGB)"  
+						updateResourceRep( "wasteservice(handle_move_home,${ws.func.contPB},${ws.func.contGB})"  
 						)
 						println("$name in ${currentState.stateName} | $currentMsg")
 						if( checkMsgContent( Term.createTerm("moveanswer(RESULT)"), Term.createTerm("moveanswer(RESULT)"), 
@@ -224,7 +199,7 @@ class Wasteservice ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 				}	 
 				state("error") { //this:State
 					action { //it:State
-						updateResourceRep( "wasteservice(error,$contPB,$contGB)"  
+						updateResourceRep( "wasteservice(error,${ws.func.contPB},${ws.func.contGB})"  
 						)
 						println("error")
 						println("$name in ${currentState.stateName} | $currentMsg")
