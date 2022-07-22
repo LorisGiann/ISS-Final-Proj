@@ -44,7 +44,7 @@ dd{ margin-bottom: 8px;}
 
 <h2>Requirements</h2>
 <div class="remark">
-    <a href="../docs_prof/html/TemaFinale22.html">Requisiti</a>
+    <a href="../docs_prof/html/TemaFinale22.html">Link alla pagina dei requisiti del committente</a>
     <br><br>
     <p>Ulteriori requisiti scaturiti da colloqui con committente:</p>
     <ul>
@@ -94,34 +94,51 @@ dd{ margin-bottom: 8px;}
 <h3>Dizionario</h3>
 <div class="remark">
     <dl>
+        <dt><b>MATERIAL: </b></dt>
+        <dd>Enumerativo corrispondonte al tipo di materiale trasportato nel Waste-truck, di valore PLASTIC o GLASS.<br>
+            <code><pre>MATERIAL = PLASTIC | GLASS</pre></code></dd>
+        <dt><b>TRUCKLOAD: </b></dt>
+        <dd>Variabile di tipo intero corrispondente al numero di Kg di materiale trasportato dal Waste-truck.<br>
+            <code><pre>TRUCKLOAD = integer number</pre></code></dd>
         <dt><b>WasteService:</b></dt> 
-        <dd>Attore che si occupa del coordinamento delle attività di raccolta e smistamento dei rifiuti. Contiene buona parte della business logic del sistema. 
-            Riceve le <i>depositrequest</i> e risponde con <i>loadaccepted</i> o <i>loadrejected</i> in base al carico dei <b>Waste-truck</b> e allo spazio ancora disponibile in <b>PLASTICBOX</b> o <b>GLASSBOX</b>: <br>    
+        <dd>Il WasteService è un servizio che si occupa del coordinamento delle attività di raccolta e smistamento dei rifiuti. Contiene buona parte della business logic del sistema.<br> 
+            Viene formalizzato mediante un attore QActor che riceve le <i>depositrequest</i> e risponde con <i>loadaccept</i> o <i>loadrejected</i> in base al carico dei <b>Waste-truck</b> e allo spazio ancora disponibile in <b>PLASTICBOX</b> o <b>GLASSBOX</b>: <br>    
             <code><pre>
                 //MATERIAL = PLASTIC | GLASS
                 //TRUCKLOAD =  integer number
                 Request depositrequest : depositrequest(MATERIAL, TRUCKLOAD)
-                Reply loadaccepted     : loadaccepted(MATERIAL, TRUCKLOAD)
+                Reply loadaccept       : loadaccepted(MATERIAL, TRUCKLOAD)
                 Reply loadrejected     : loadrejected(MATERIAL, TRUCKLOAD)</pre>
             </code>
             Il componente invia comandi al <b>Transport trolley</b> per svolgere le azioni necessarie
         </dd>
         <dt><b>Service area:</b></dt>
-        <dd>Superfice rettangolare, piana, priva di ostacoli nella quale il robot può muoversi, e nella quale sono presenti le zone <b>INDOOR</b>, <b>PLASTICBOX</b>, <b>GLASSBOX</b>, <b>HOME</b>; </dd>
+        <dd>Superfice rettangolare, piana, priva di ostacoli nella quale il robot può muoversi, e nella quale sono presenti le zone <b>INDOOR</b>, <b>PLASTICBOX</b>, <b>GLASSBOX</b>, <b>HOME</b>.<br>
+            Le zone vengono rappresentate mediante un enumerativo.<br>
+            <code><pre>POSITION = INDOOR | PLASTICBOX | GLASSBOX | HOME</pre></code></dd>
         <dt><b>INDOOR:</b></dt>
         <dd>Porta di ingresso adibita alla raccolta del <b>Waste-load</b> che dal <b>Waste-truck</b> va al <b>Transport trolley</b>. <br> 
             Il termine viene anche usato per indicare la zona nella quale il robot deve trovarsi per effettuare l'operazione di carico</dd>
         <dt><b>PLASTICBOX:</b></dt>
-        <dd>Container adibito al deposito di materiale plastico, con capienza attuale <b>contPB</b> e capienza massima pari a <b>MAXPB</b> Kg. <br> 
-            Il termine viene anche usato per indicare la zona nella quale il robot deve trovarsi per effettuare l'operazione di scarico della plastica</dd>
+        <dd>Container adibito al deposito di materiale plastico, con capienza massima pari a <b>MAXPB</b> Kg. <br> 
+            Il termine viene anche usato per indicare la zona nella quale il robot deve trovarsi per effettuare l'operazione di scarico della plastica.<br>
+            Viene formalizzato il container con la variabile di tipo intero <b>contPB</b> corrispondente alla capienza attuale e la costante <b>MAXPB</b> corrispondente alla capienza massima in Kg.<br>
+            <code><pre>contPB = integer number</pre></code>
+            <code><pre>MAXPB = constant</pre></code>
+        </dd>
         <dt><b>GLASSBOX:</b></dt> 
-        <dd>Container adibito al deposito di materiale vetroso, con capienza attuale <b>contGB</b> e capienza massima pari a <b>MAXGB</b> Kg. <br> 
-            Il termine viene anche usato per indicare la zona nella quale il robot deve trovarsi per effettuare l'operazione di scarico del vetro</dd>
+        <dd>Container adibito al deposito di materiale vetroso, con capienza massima pari a <b>MAXGB</b> Kg. <br> 
+            Il termine viene anche usato per indicare la zona nella quale il robot deve trovarsi per effettuare l'operazione di scarico del vetro.<br>
+            Viene formalizzato il container con la variabile di tipo intero <b>contGB</b> corrispondente alla capienza attuale e la costante <b>MAXGB</b> corrispondente alla capienza massima in Kg.<br>
+            <code><pre>contGB = integer number</pre></code>
+            <code><pre>MAXGB = constant</pre></code>
+        </dd>
         <dt><b>HOME:</b></dt> 
         <dd>Area nella quale risiede il robot quando non deve svolgere alcuna attività<br>
             È inoltre l'area dove si trova inizialmente il robot.</dd>
         <dt><b>Transport trolley:</b></dt>
-        <dd>Attore rappresentante un'entità robotica astratta che riceve i comandi relativi alla prossima destinazione da raggiungere. Esso riceve anche i comandi relativi allo scarico e carico del materiale:<br>
+        <dd>Servizio rappresentante un'entità robotica astratta che riceve i comandi relativi alla prossima destinazione da raggiungere. Esso riceve anche i comandi relativi allo scarico e carico del materiale:<br>
+            Viene formalizzato tramite un attore QActor che riceve le richieste di <i>move</i>,<i>pickup</i> e <i>dropout</i> e risponde con <i>moveanswer</i>,<i>pickupanswer</i> e <i>dropoutanswer</i> in base all'esito dell'operazione.
             <code><pre>
                 //POSITION = INDOOR | PLASTICBOX | GLASSBOX | HOME
                 //RESULT =  OK | ERROR
@@ -132,13 +149,14 @@ dd{ margin-bottom: 8px;}
                 Request dropout        : dropout(_)
                 Reply   dropoutanswer  : dropoutanswer(RESULT)</pre>
             </code>
-            Nota: il <b>Transport trolley</b> può ricevere una richiesta di nuova posizione prima che abbia raggiunto la destinazione precedente: la navigazione è ora impostata sulla nuova destinazione.
+            Nota: il <b>Transport trolley</b> può ricevere una richiesta di nuova posizione prima che abbia raggiunto la destinazione precedente: la navigazione sarà impostata sulla nuova destinazione.
         </dd>
         <dt><b>DDR Robot concreto</b> o "robot":</dt>
         <dd>Con questo termine ci si riferisce al robot vero e proprio (fisico o simulato virtualmente). <br>
             Il committente fornisce già un ambiente di simulazione che implementa un <b>DDR Robot concreto</b> virtuale. Documentazione: <a href="../docs_prof/html/VirtualRobot.html#wenv">WEnv</a>, Progetto: <a href="https://github.com/anatali/issLab2022/tree/main/it.unibo.virtualRobot2020">it.unibo.virtualRobot2020</a>. </dd>
         <dt><b>DDR Robot:</b></dt>
-        <dd>Attore che riceve ed esegue i comandi di basso livello di spostamento del robot: <br>
+        <dd>Entità che riceve ed esegue i comandi di basso livello di spostamento del robot: <br>
+            Viene formalizzato tramite un attore QActor che esegue il Dispatch di <i>cmd</i> inviando un valore <b>MOVE</b>, enumerativo corrispondente al comando di direzione del robot.<br>
             <p>Il committente fornisce già un attore che si interfaccia con il <b>DDR Robot concreto</b> <a href="../docs_prof/html/VirtualRobot.html#wenv">WEnv</a>: <a href="https://github.com/anatali/issLab2022/tree/main/unibo.wenvUsage22">unibo.wenvUsage22</a>, <a href="https://github.com/anatali/issLab2022/tree/main/unibo.basicrobot22">unibo.asicRobot22</a>, <a href="https://github.com/anatali/issLab2022/tree/main/unibo.boundaryQak22">unibo.boundaryQak22</a> </p>
             <p>In particolare in <i>basicrobot22</i> esiste un attore <i>basicrobot</i> che si interfaccia sia con il WEnv, che con altri robot reali.
             <p>Esso può ricevere i messaggi:</p>
@@ -182,12 +200,12 @@ dd{ margin-bottom: 8px;}
                 </lI>
                 <lI>Kg di materiale</lI>
             </ul>
-            E riceve dal <b>WasteService</b> l'esito, che può essere <i>LoadAccepted</i> o <i>LoadRejected</i>:
+            E riceve dal <b>WasteService</b> l'esito, che può essere <i>loadaccept</i> o <i>loadrejected</i>:
             <code><pre>
                 //MATERIAL = PLASTIC | GLASS
                 //TRUCKLOAD =  integer number
                 Request depositrequest : depositrequest(MATERIAL, TRUCKLOAD)
-                Reply loadaccepted     : loadaccepted(MATERIAL, TRUCKLOAD)
+                Reply loadaccept     : loadaccepted(MATERIAL, TRUCKLOAD)
                 Reply loadrejected     : loadrejected(MATERIAL, TRUCKLOAD)</pre>
             </code>
         </dd>
@@ -196,7 +214,7 @@ dd{ margin-bottom: 8px;}
         <dt><b>WasteServiceStatusGUI:</b></dt>
         <dd>Pannello di controllo che permette al <b>Service-manager</b> di monitorare:
             <ul>
-                <lI>La poszione del <b>Transport trolley</b> (basta l'area nella quale si trova attualmente, non necessariamente delle coordinate spaziali)</lI>
+                <lI>La posizione del <b>Transport trolley</b> (basta l'area nella quale si trova attualmente, non necessariamente delle coordinate spaziali)</lI>
                 <lI>Lo stato attuale del <b>Transport trolley</b></lI>
                 <lI>Il peso corrente <b>contPB</b> e <b>contGB</b> del materiale contenuto in <b>PLASTICBOX</b> e in <b>GLASSBOX</b></lI>
                 <lI>Lo stato del <b>LED</b></lI>
@@ -216,17 +234,23 @@ dd{ margin-bottom: 8px;}
         <dt><b>Sonar concreto:</b></dt> 
         <dd>Dispositivo di input connesso al RaspberryPI (che NON è a bordo del <b>DDR Robot</b>)</dd>
         <dt><b>Sonar:</b></dt> 
-        <dd>Attore che rappresenta il <b>sonar concreto</b>. <br> 
+        <dd>Entità che rappresenta il <b>sonar concreto</b>. <br> 
+            Viene formalizzato tramite un attore QActor che emette eventi <i>sonar</i> in base alla distanza rilevata <b>V</b>, corrispondente ad una varibile di tipo intero.<br>
             <p>Il committente fornisce già del software relativo al sonar in <a href="https://github.com/anatali/issLab2022/tree/main/unibo.basicrobot22">unibo.basicrobot22</a>, <a href="https://github.com/anatali/issLab2022/tree/main/it.unibo.radarSystem22.domain">it.unibo.radarSystem22.domain</a>, <a href="https://github.com/anatali/issLab2022/tree/main/unibo.sonarqak22">unibo.sonarqak22</a></p>
             <p>In particolare <i>sonarHCSR04SupportActor</i> di <i>BasicRobot22</i> emette eventi che vengono ridiretti in <a href="../docs_prof/html/QakIntro.html#creazione-di-una-pipe">pipe</a> ad altri attori per successive elaborazioni. <br>
             Gli eventi che escono da questa pipe sono del tipo:</p>
             <code><pre>
-                V = distance int val
+                V = integer number</pre>
+            </code>
+            <code><pre>
+                //V = distance int val
                 Event  sonar       : sonar(V)</pre>
             </code>
         </dd>
         <dt><b>DLIMT:</b></dt>
-        <dd>Misura in CM della distanza limite. Se la distanza attualmente misurata dal <b>Sonar concreto</b> è ≤ DLIMT, il robot deve essere nello stato stopped. Qunando la distanza misurata &gt DLIMIT il robot può muoversi</dd>
+        <dd>Misura in CM della distanza limite. Se la distanza attualmente misurata dal <b>Sonar concreto</b> è ≤ DLIMT, il robot deve essere nello stato stopped. Qunando la distanza misurata &gt DLIMIT il robot può muoversi<br>
+            Viene formalizzato tramite una costante <b>DLIMIT</b>.<br>
+            <code><pre>DLIMIT = constant</pre></code></dd>
     </dl>
 </div>
 
