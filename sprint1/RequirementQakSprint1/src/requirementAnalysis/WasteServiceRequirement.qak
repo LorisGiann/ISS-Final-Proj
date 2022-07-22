@@ -1,0 +1,40 @@
+//https://dl.bintray.com/jetbrains/kotlin/eclipse-plugin/0.8.19/
+  
+System demo0    
+// ------------ wasteservice msgs --------------------
+//MATERIAL = PLASTIC | GLASS
+//TRUCKLOAD =  float number
+Request depositrequest : depositrequest(MATERIAL, TRUCKLOAD)
+Reply loadaccept     : loadaccept(MATERIAL, TRUCKLOAD)
+Reply loadrejected     : loadrejected(MATERIAL, TRUCKLOAD)
+// ------------------------------------------------------ 
+    
+// ------------------ CONTEXTS -------------------
+Context ctxtest ip [host="localhost" port=8095]
+
+QActor wasteservice context ctxtest{  
+	[# var Material  : ws.Material
+	   var TruckLoad : Float       #]
+	
+	State wait initial {
+		printCurrentMessage
+		discardMsg Off
+ 	}
+ 	Transition t0 whenRequest depositrequest -> handle_req
+ 	
+ 	State handle_req {
+		printCurrentMessage
+		onMsg(depositrequest : depositrequest(MATERIAL, TRUCKLOAD)) {
+			[#   Material 	= ws.Material.valueOf(payloadArg(0))
+				 TruckLoad 	= payloadArg(1).toFloat()   #]
+			if[# ws.func.checkdepositpossible( Material, TruckLoad ) #]{
+				[# ws.func.updateDeposit( Material, TruckLoad ) #]
+				replyTo depositrequest with loadaccept : loadaccept($Material,$TruckLoad)
+			} else{  
+				replyTo depositrequest with loadrejected : loadrejected($Material,$TruckLoad)
+			}		
+		} 
+ 	}
+ 	Goto wait
+}
+

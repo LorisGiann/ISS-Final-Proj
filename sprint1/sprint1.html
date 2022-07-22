@@ -76,13 +76,13 @@ dd{ margin-bottom: 8px;}
     </ul>
 
     <h4>Perchè QAK:</h4>
-    <p>Il metamodello <a href="../Qak.html">QAK</a> viene qui utilizzato sia perchè parte del software disponibile è stato sviluppato uando questo linguaggio, sia perchè introdurre modelli QAK già in fase di analisi può essere molto utile per:</p>
+    <p>Il metamodello <a href="../Qak.html">QAK</a> viene qui utilizzato sia perchè parte del software disponibile è stato sviluppato uando questo linguaggio, sia perchè data la natura distribuita dell'applicazione, l'utilizzo di attori contribuisce a ridurre l'abstraction gap, il che a sua volta permette:</p>
     <ul>
+        <li>Definire fin da subito in maniera formale diversi aspetti</li>
+        <li>Definire modelli eseguibili e giungere ad una archittetura logica di riferimento non ambigua</li>
+        <li>Definire piano di lavoro e impostare i primi SPRINT</li>
         <li>Avere un’interazione più produttiva con il cliente al fine di comprendere meglio i requisiti</li>
-        <li>Definire una archittetura logica di riferimento per il sistema da produrre in seguito in fase di progettazione</li>
-        <li>Definire piano di lavoro e impostare il primi SPRINT, e per definire un insieme significativo di test già espressi in modo formale come programmi</li>
     </ul>
-    <p>Infine, data la natura distribuita dell'applicazione, l'utilizzo di attori contribuisce a ridurre l'abstraction gap</p>
     <h3>Documentazione QAK</h3>
     <a href="../Qak.html">Quick notes QAK</a> <br>
     <a href="../docs_prof/html/QakIntro.html">Full documentation</a>
@@ -94,53 +94,91 @@ dd{ margin-bottom: 8px;}
 <h3>Dizionario</h3>
 <div class="remark">
     <dl>
-        <dt><b>MATERIAL: </b></dt>
-        <dd>Enumerativo corrispondonte al tipo di materiale trasportato nel Waste-truck, di valore PLASTIC o GLASS.<br>
-            <code><pre>MATERIAL = PLASTIC | GLASS</pre></code></dd>
-        <dt><b>TRUCKLOAD: </b></dt>
-        <dd>Variabile di tipo intero corrispondente al numero di Kg di materiale trasportato dal Waste-truck.<br>
-            <code><pre>TRUCKLOAD = integer number</pre></code></dd>
+        <dt><b>Waste-load:</b></dt> 
+        <dd>Termine generico per indicare il Materiale inizialmente presente sul <b>Waste-truck</b></dd>
+        <dt><b>TRUCKLOAD:</b></dt>
+        <dd>Numero di Kg di materiale <b>Waste-load</b>. Formalizzazine (<a href="./RequirementQakSprint1/src/requirementAnalysis/WasteServiceRequirement.qak">definito qui</a>):<br>
+            <code><pre>var TruckLoad : Float</pre></code>
+        </dd>
+        <dt><b>MATERIAL:</b></dt>
+        <dd>Tipo di materiale del <b>Waste-load</b>, che può essere plastica o vetro. Formalizzazine (<a href="./RequirementQakSprint1/resources/ws/Material.kt">definito qui</a>):<br>
+            <code><pre>enum class Material { PLASTIC, GLASS }</pre></code></dd>
         <dt><b>WasteService:</b></dt> 
         <dd>Il WasteService è un servizio che si occupa del coordinamento delle attività di raccolta e smistamento dei rifiuti. Contiene buona parte della business logic del sistema.<br> 
-            Viene formalizzato mediante un attore QActor che riceve le <i>depositrequest</i> e risponde con <i>loadaccept</i> o <i>loadrejected</i> in base al carico dei <b>Waste-truck</b> e allo spazio ancora disponibile in <b>PLASTICBOX</b> o <b>GLASSBOX</b>: <br>    
+            Viene formalizzato mediante un attore QAK che riceve le <i>depositrequest</i> e risponde con <i>loadaccept</i> o <i>loadrejected</i> in base al carico dei <b>Waste-truck</b> e allo spazio ancora disponibile in <b>PLASTICBOX</b> o <b>GLASSBOX</b>: <br>    
             <code><pre>
                 //MATERIAL = PLASTIC | GLASS
-                //TRUCKLOAD =  integer number
-                Request depositrequest : depositrequest(MATERIAL, TRUCKLOAD)
-                Reply loadaccept       : loadaccepted(MATERIAL, TRUCKLOAD)
-                Reply loadrejected     : loadrejected(MATERIAL, TRUCKLOAD)</pre>
+                //TRUCKLOAD =  float number
+                Request <b>depositrequest</b> : depositrequest(MATERIAL, TRUCKLOAD)
+                Reply <b>loadaccept</b>       : loadaccepted(MATERIAL, TRUCKLOAD)
+                Reply <b>loadrejected</b>     : loadrejected(MATERIAL, TRUCKLOAD)
+
+                QActor wasteservice context ctxtest{  
+                    [# var Material  : ws.Material
+                       var TruckLoad : Float       #]
+                    
+                    State wait initial {
+                        printCurrentMessage
+                        discardMsg Off
+                     }
+                     Transition t0 whenRequest depositrequest -> handle_req
+                     
+                     State handle_req {
+                        printCurrentMessage
+                        onMsg(depositrequest : depositrequest(MATERIAL, TRUCKLOAD)) {
+                            [#   Material 	= ws.Material.valueOf(payloadArg(0))
+                                 TruckLoad 	= payloadArg(1).toFloat()   #]
+                            if[# ws.func.checkdepositpossible( Material, TruckLoad ) #]{
+                                [# ws.func.updateDeposit( Material, TruckLoad ) #]
+                                replyTo depositrequest with loadaccept : loadaccept($Material,$TruckLoad)
+                            } else{  
+                                replyTo depositrequest with loadrejected : loadrejected($Material,$TruckLoad)
+                            }		
+                        } 
+                     }
+                     Goto wait
+                }</pre>
             </code>
             Il componente invia comandi al <b>Transport trolley</b> per svolgere le azioni necessarie
             <br><br>
-            Il funzionamento delle <i>depositrequest</i>, <i>loadaccept</i> e<i>loadrejected</i> può essere esaminato in <b><a href="./RequirementQakSprint1/src/requirementAnalysis/requestWasteService.qak">requestWasteService.qak</a></b>.
+            Con il file <a href="./RequirementQakSprint1/src/requirementAnalysis/WasteServiceRequirement.qak">WasteServiceRequirement.qak</a> abbiamo potuto formalizzare interfaccia e comportamento di questo componente. <br>
+            Inoltre, al fine di meglio specificare il comportamento che ci si aspetta, sono stati predisposti alcuni semplici test in <a href="./RequirementQakSprint1/test/testSprint1/TestSprint1_simple.kt">WasteServiceRequirement.qak</a>
+            <code><pre>
+                var truckRequestStr = "msg(depositrequest, request,python,wasteservice,depositrequest(GLASS,2),1)"
+                var answer = connTcp.request(truckRequestStr)
+                Assert.assertTrue(answer.contains("loadaccept"))
+
+                truckRequestStr = "msg(depositrequest, request,python,wasteservice,depositrequest(GLASS,9),1)"
+                answer = connTcp.request(truckRequestStr)
+                Assert.assertTrue(answer.contains("loadrejected"))</pre>
+            </code>
         </dd>
         <dt><b>Service area:</b></dt>
         <dd>Superfice rettangolare, piana, priva di ostacoli nella quale il robot può muoversi, e nella quale sono presenti le zone <b>INDOOR</b>, <b>PLASTICBOX</b>, <b>GLASSBOX</b>, <b>HOME</b>.<br>
-            Le zone vengono rappresentate mediante un enumerativo.<br>
-            <code><pre>POSITION = INDOOR | PLASTICBOX | GLASSBOX | HOME</pre></code></dd>
+            Le zone vengono rappresentate mediante l'enumerativo <a href="./RequirementQakSprint1/resources/ws/Position.kt">Position.kt</a>:<br>
+            <code><pre>enum class Position { INDOOR, PLASTICBOX, GLASSBOX, HOME }</pre></code></dd>
         <dt><b>INDOOR:</b></dt>
         <dd>Porta di ingresso adibita alla raccolta del <b>Waste-load</b> che dal <b>Waste-truck</b> va al <b>Transport trolley</b>. <br> 
             Il termine viene anche usato per indicare la zona nella quale il robot deve trovarsi per effettuare l'operazione di carico</dd>
         <dt><b>PLASTICBOX:</b></dt>
         <dd>Container adibito al deposito di materiale plastico, con capienza massima pari a <b>MAXPB</b> Kg. <br> 
             Il termine viene anche usato per indicare la zona nella quale il robot deve trovarsi per effettuare l'operazione di scarico della plastica.<br>
-            Viene formalizzato il container con la variabile di tipo intero <b>contPB</b> corrispondente alla capienza attuale e la costante <b>MAXPB</b> corrispondente alla capienza massima in Kg.<br>
-            <code><pre>contPB = integer number</pre></code>
-            <code><pre>MAXPB = constant</pre></code>
+            Formalizzazione: la variabile <b>contPB</b> (<a href="./RequirementQakSprint1/resources/ws/func.kt">definita qui</a>) corrispondente alla capienza attuale, la costante <b>MAXPB</b> (<a href="./RequirementQakSprint1/resources/ws/const.kt">definita qui</a>) corrispondente alla capienza massima (entrambi in Kg).<br>
+            <code><pre>var contPB : Float = 0F</pre></code>
+            <code><pre>val MAXPB : Float = 10.0F</pre></code>
         </dd>
         <dt><b>GLASSBOX:</b></dt> 
         <dd>Container adibito al deposito di materiale vetroso, con capienza massima pari a <b>MAXGB</b> Kg. <br> 
             Il termine viene anche usato per indicare la zona nella quale il robot deve trovarsi per effettuare l'operazione di scarico del vetro.<br>
-            Viene formalizzato il container con la variabile di tipo intero <b>contGB</b> corrispondente alla capienza attuale e la costante <b>MAXGB</b> corrispondente alla capienza massima in Kg.<br>
-            <code><pre>contGB = integer number</pre></code>
-            <code><pre>MAXGB = constant</pre></code>
+            Formalizzazione: la variabile <b>contGB</b> (<a href="./RequirementQakSprint1/resources/ws/func.kt">definita qui</a>) corrispondente alla capienza attuale, la costante <b>MAXGB</b> (<a href="./RequirementQakSprint1/resources/ws/const.kt">definita qui</a>) corrispondente alla capienza massima (entrambi in Kg).<br>
+            <code><pre>var contGB : Float = 0F</pre></code>
+            <code><pre>val MAXGB : Float = 10.0F</pre></code>
         </dd>
         <dt><b>HOME:</b></dt> 
         <dd>Area nella quale risiede il robot quando non deve svolgere alcuna attività<br>
             È inoltre l'area dove si trova inizialmente il robot.</dd>
         <dt><b>Transport trolley:</b></dt>
-        <dd>Servizio rappresentante un'entità robotica astratta che riceve i comandi relativi alla prossima destinazione da raggiungere. Esso riceve anche i comandi relativi allo scarico e carico del materiale:<br>
-            Viene formalizzato tramite un attore QActor che riceve le richieste di <i>move</i>,<i>pickup</i> e <i>dropout</i> e risponde con <i>moveanswer</i>,<i>pickupanswer</i> e <i>dropoutanswer</i> in base all'esito dell'operazione.
+        <dd>In seguito alla relativa <a href="#DDR_robot_vs_Transport_trolley">analisi del problema</a>, <b>Transport trolley</b> è l'attore rappresentante un'entità robotica astratta che riceve i comandi relativi alla prossima destinazione da raggiungere. Esso riceve anche i comandi relativi allo scarico e carico del materiale:<br>
             <code><pre>
                 //POSITION = INDOOR | PLASTICBOX | GLASSBOX | HOME
                 //RESULT =  OK | ERROR
@@ -153,7 +191,7 @@ dd{ margin-bottom: 8px;}
             </code>
             Nota: il <b>Transport trolley</b> può ricevere una richiesta di nuova posizione prima che abbia raggiunto la destinazione precedente: la navigazione sarà impostata sulla nuova destinazione.
             <br><br>
-            Il funzionamento del <i>move</i>, <i>moveanswer</i>, <i>pickup</i>, <i>pickupanswer</i>, <i>dropout</i> e <i>dropoutanswer</i>  può essere esaminato in <b><a href="./RequirementQakSprint1/src/requirementAnalysis/requestTransportTrolley.qak">requestTransportTrolley.qak</a></b>.
+            <!--Il funzionamento del <i>move</i>, <i>moveanswer</i>, <i>pickup</i>, <i>pickupanswer</i>, <i>dropout</i> e <i>dropoutanswer</i>  può essere esaminato in <b><a href="./RequirementQakSprint1/src/requirementAnalysis/requestTransportTrolley.qak">requestTransportTrolley.qak</a></b>.-->
         
         </dd>
         <dt><b>DDR Robot concreto</b> o "robot":</dt>
@@ -161,10 +199,10 @@ dd{ margin-bottom: 8px;}
             Il committente fornisce già un ambiente di simulazione che implementa un <b>DDR Robot concreto</b> virtuale. Documentazione: <a href="../docs_prof/html/VirtualRobot.html#wenv">WEnv</a>, Progetto: <a href="https://github.com/anatali/issLab2022/tree/main/it.unibo.virtualRobot2020">it.unibo.virtualRobot2020</a>. </dd>
         <dt><b>DDR Robot:</b></dt>
         <dd>Entità che riceve ed esegue i comandi di basso livello di spostamento del robot: <br>
-            Viene formalizzato tramite un attore QActor che esegue il Dispatch di <i>cmd</i> inviando un valore <b>MOVE</b>, enumerativo corrispondente al comando di direzione del robot.<br>
-            <p>Il committente fornisce già un attore che si interfaccia con il <b>DDR Robot concreto</b> <a href="../docs_prof/html/VirtualRobot.html#wenv">WEnv</a>: <a href="https://github.com/anatali/issLab2022/tree/main/unibo.wenvUsage22">unibo.wenvUsage22</a>, <a href="https://github.com/anatali/issLab2022/tree/main/unibo.basicrobot22">unibo.asicRobot22</a>, <a href="https://github.com/anatali/issLab2022/tree/main/unibo.boundaryQak22">unibo.boundaryQak22</a> </p>
-            <p>In particolare in <i>basicrobot22</i> esiste un attore <i>basicrobot</i> che si interfaccia sia con il WEnv, che con altri robot reali.
-            <p>Esso può ricevere i messaggi:</p>
+            <p>Il committente fornisce già molto software in grado di interfacciarsi al <b>DDR Robot concreto</b> di <a href="../docs_prof/html/VirtualRobot.html#wenv">WEnv</a>: <a href="https://github.com/anatali/issLab2022/tree/main/unibo.wenvUsage22">unibo.wenvUsage22</a>, <a href="https://github.com/anatali/issLab2022/tree/main/unibo.basicrobot22">unibo.basicRobot22</a>, <a href="https://github.com/anatali/issLab2022/tree/main/unibo.boundaryQak22">unibo.boundaryQak22</a> </p>
+            <p>Formalizzazione: utilizzeremo <a href="https://github.com/anatali/issLab2022/blob/main/unibo.basicrobot22/src/basicrobot.qak">l'attore QAK <i>basicrobot</i></a> presente in <i>basicrobot22</i>, che è in grado di interfacciarsi sia con il WEnv, che con altri robot reali.</p>
+            <p>Vengono qui brevemente illustrate le caratteristiche di <a href="https://github.com/anatali/issLab2022/blob/main/unibo.basicrobot22/src/basicrobot.qak">basicrobot</a>:</p>
+            <p>Possiamo comandare mosse elementari, inviando i messaggi:</p>
             <code><pre>
                 //MOVE =  w | a | s | d | h
                 Dispatch cmd           : cmd(MOVE)</pre>
@@ -192,8 +230,6 @@ dd{ margin-bottom: 8px;}
         </dd>
         <dt><b>Waste-truck:</b></dt> 
         <dd>Entità che si presenta in <b>INDOOR</b>, e richiede lo scarico del materiale che trasporta attraverso l'uso dello <b>SmartDevice</b></dd>
-        <dt><b>Waste-load:</b></dt> 
-        <dd>Materiale inizialmente presente sul <b>Waste-truck</b></dd>
         <dt><b>SmartDevice:</b></dt> 
         <dd>Dispositivo attraverso il quale il <b>Waste-truck</b> comunica al <b>WasteService</b>:
             <ul>
@@ -232,9 +268,9 @@ dd{ margin-bottom: 8px;}
         <dt><b>LED:</b></dt>
         <dd>Entità attiva e astratta che rappresenta il <b>LED concreto:</b>, è che può essere impostato secondo 3 modalità:
             <ul>
-                <lI>Led Off: quando il <b>Transport trolley:</b> è in <b>HOME</b> </lI>
-                <lI>Led On: quando il <b>Transport trolley:</b> è fermo (quando distanza rilevata &lt DLIMIT)</lI>
-                <lI>Led Blink: quando il <b>Transport trolley:</b> è in movimento, o sta scaricando/caricando materiale</lI>
+                <lI>Led Off: quando il <b>Transport trolley</b> è in <b>HOME</b> </lI>
+                <lI>Led On: quando il <b>Transport trolley</b> è fermo (quando distanza rilevata &lt DLIMIT)</lI>
+                <lI>Led Blink: quando il <b>Transport trolley</b> è in movimento, o sta scaricando/caricando materiale</lI>
             </ul>
             <p>Il committente fornisce già del software per relativo al led in <a href="https://github.com/anatali/issLab2022/tree/main/it.unibo.radarSystem22.domain">it.unibo.radarSystem22.domain</a></p>
             <br>
@@ -271,7 +307,7 @@ dd{ margin-bottom: 8px;}
 
     <h3><b>Transport trolley</b></h3>
 
-    <h4><b>DDR robot</b> vs <b>Transport trolley</b>:</h4>
+    <h4 id="DDR_robot_vs_Transport_trolley"><b>DDR robot</b> vs <b>Transport trolley</b>:</h4>
     <ul>
         <li>
             Possibile una separazione dei due concetti: <br>

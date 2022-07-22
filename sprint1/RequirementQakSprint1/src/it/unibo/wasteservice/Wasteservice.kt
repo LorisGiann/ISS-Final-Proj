@@ -14,34 +14,13 @@ class Wasteservice ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 		return "wait"
 	}
 	override fun getBody() : (ActorBasicFsm.() -> Unit){
-		 
-				val MAXPB = 10
-				val MAXGB = 10
-				var contPB = 0
-				var contGB = 0
-				lateinit var Material  : String
-				lateinit var TruckLoad : String
-				
-				fun checkdepositpossible(MATERIAL:String,LOAD:String) : Boolean {
-		 				return (MATERIAL=="PLASTIC" && LOAD.toInt()+contPB<=MAXPB) 
-		 				 || (MATERIAL=="GLASS" && LOAD.toInt()+contGB<=MAXGB);
-		 		}
-		 				 
-		 		fun updateDeposit(MATERIAL:String,LOAD:String) : Unit {
-		 				when(MATERIAL){
-						    "PLASTIC" -> contPB+=LOAD.toInt()
-						    "GLASS" -> contGB+=LOAD.toInt()
-						    else -> {
-						        print("ERRORE MATERIALE")
-							} 
-		 				}
-		 		}
+		 var Material  : ws.Material
+			   var TruckLoad : Float        
 		return { //this:ActionBasciFsm
 				state("wait") { //this:State
 					action { //it:State
 						println("$name in ${currentState.stateName} | $currentMsg")
 						discardMessages = false
-						println("Waiting for requests")
 					}
 					 transition(edgeName="t00",targetState="handle_req",cond=whenRequest("depositrequest"))
 				}	 
@@ -50,14 +29,11 @@ class Wasteservice ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 						println("$name in ${currentState.stateName} | $currentMsg")
 						if( checkMsgContent( Term.createTerm("depositrequest(MATERIAL,TRUCKLOAD)"), Term.createTerm("depositrequest(MATERIAL,TRUCKLOAD)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
-								
-												 Material 	= payloadArg(0) ;
-												 TruckLoad 	= payloadArg(1) ;
-								println("arrived $TruckLoad Kg of $Material")
-								if(  checkdepositpossible( Material, TruckLoad )  
-								 ){ updateDeposit( Material, TruckLoad ) 
-								println("PB capacity: ${contPB}, GB capacity: ${contGB}")
-								answer("depositrequest", "loadaccepted", "loadaccepted($Material,$TruckLoad)"   )  
+								   Material 	= ws.Material.valueOf(payloadArg(0))
+												 TruckLoad 	= payloadArg(1).toFloat()    
+								if(  ws.func.checkdepositpossible( Material, TruckLoad )  
+								 ){ ws.func.updateDeposit( Material, TruckLoad )  
+								answer("depositrequest", "loadaccept", "loadaccept($Material,$TruckLoad)"   )  
 								}
 								else
 								 {answer("depositrequest", "loadrejected", "loadrejected($Material,$TruckLoad)"   )  

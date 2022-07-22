@@ -50,6 +50,7 @@ class TestUtils {
                 ColorsOut.outappl(line, ColorsOut.YELLOW)
                 if (line!!.contains("WAIT/RETRY TO SET PROXY TO")) break
                 if (line!!.contains("PROXY DONE TO")) break
+                if (line!!.contains("msg(")) break //one context only, application already started
                 if (line!!.contains("WARNING: Address already in use (Bind failed)")){
                     ColorsOut.outappl("JAR launch failed, process already running", ColorsOut.RED)
                     System.exit(1)
