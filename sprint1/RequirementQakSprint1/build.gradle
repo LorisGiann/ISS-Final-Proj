@@ -155,7 +155,7 @@ jar {
 //task run:
 //	gradle -PmainClass=it.unibo.ctxrobot.MainCtxrobotKt execute
 //should the process not end, you can free the port by killing it:
-//	sudo kill -9 $( sudo ss -ntlp | grep 8096 | awk -F 'pid=' '{ print $2 }' | cut -d',' -f1 )
+//	sudo kill -9 $( sudo ss -ntlp | grep 8095 | awk -F 'pid=' '{ print $2 }' | cut -d',' -f1 )
 task execute(type:JavaExec) {
     description = "Run the other context with ExecTask"
     //main = project.hasProperty("mainClass") ? getProperty("mainClass") : "NULL"   //getProperty("mainClass") doesnt work !!

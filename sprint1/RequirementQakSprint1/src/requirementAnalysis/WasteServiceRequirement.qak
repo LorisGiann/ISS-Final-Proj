@@ -1,6 +1,6 @@
-//https://dl.bintray.com/jetbrains/kotlin/eclipse-plugin/0.8.19/
+//https://dl.bintray.com/jetbrains/kotlin/eclipse-plugin/0.8.19/ 
   
-System demo0    
+System demowasteservice 
 // ------------ wasteservice msgs --------------------
 //MATERIAL = PLASTIC | GLASS
 //TRUCKLOAD =  float number
@@ -10,9 +10,9 @@ Reply loadrejected     : loadrejected(MATERIAL, TRUCKLOAD)
 // ------------------------------------------------------ 
     
 // ------------------ CONTEXTS -------------------
-Context ctxtest ip [host="localhost" port=8095]
+Context ctxwasteservice ip [host="localhost" port=8095]
 
-QActor wasteservice context ctxtest{  
+QActor wasteservice context ctxwasteservice{  
 	[# var Material  : ws.Material
 	   var TruckLoad : Float       #]
 	

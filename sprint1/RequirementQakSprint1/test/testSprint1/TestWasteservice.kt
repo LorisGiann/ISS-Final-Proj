@@ -1,7 +1,5 @@
 package testSprint1
 
-import it.unibo.ctxtest.main
-import it.unibo.kactor.QakContext
 import org.eclipse.californium.core.CoapHandler
 import org.junit.Assert
 import org.junit.jupiter.api.*
@@ -9,15 +7,12 @@ import unibo.comm22.coap.CoapConnection
 import unibo.comm22.utils.ColorsOut
 import unibo.comm22.utils.CommSystemConfig
 import unibo.comm22.utils.CommUtils
-import java.io.BufferedReader
 import java.io.IOException
-import java.io.InputStreamReader
-import java.net.ServerSocket
 import java.time.Duration
 import kotlin.test.Test
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation::class)
-internal class TestSprint1_simple {
+internal class TestWasteservice {
     private var connWasteService: CoapConnection? = null
     private var to: TestObserver? = null
     private var processHandleServer: ProcessHandle? = null
@@ -38,7 +33,7 @@ internal class TestSprint1_simple {
         CommSystemConfig.tracing = false
         try {
             TestUtils.terminateProcOnPort(8095); //making sure that the port is free
-            val (prS, processHandleS) = TestUtils.runCtx("build/libs/it.unibo.ctxtest.MainCtxtestKt-1.0.jar")
+            val (prS, processHandleS) = TestUtils.runCtx("build/libs/it.unibo.ctxwasteservice.MainCtxwasteserviceKt-1.0.jar")
             prServer=prS; processHandleServer=processHandleS
         } catch (e: IOException) {
             ColorsOut.outappl("Errore launch ", ColorsOut.RED)

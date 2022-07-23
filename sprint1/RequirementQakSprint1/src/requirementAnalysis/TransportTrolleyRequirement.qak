@@ -1,11 +1,11 @@
-//https://dl.bintray.com/jetbrains/kotlin/eclipse-plugin/0.8.19/
+//https://dl.bintray.com/jetbrains/kotlin/eclipse-plugin/0.8.19/ 
 
-System demo0    
+System demotransporttrolley    
 //mqttBroker "localhost" : 1883 eventTopic "demo0/events"
 //mqttBroker "broker.hivemq.com" : 1883 eventTopic "demo0/events"
    
 
-//richiesta al wasteservice
+//richiesta al wasteservice 
 //MATERIAL = PLASTIC | GLASS
 //TRUCKLOAD =  integer number
 //richiesta al trolley
@@ -17,22 +17,19 @@ Reply   dropoutanswer  : dropoutanswer(RESULT)
 Request move           : move(POSITION)    //INDOOR | PLASTICBOX | GLASSBOX | HOME
 Reply   moveanswer     : moveanswer(RESULT)
 
-Dispatch endMoveKo     : endMoveKo( V )
-Request  cmd 		   : cmd(MOVE)
-Reply    cmdanswer     : cmdanswer(RESULT)
-
 //method to trigger the next transition within the state: send this message to the actor itself (cumbersome but works great)
 Dispatch noMsg : noMsg(_)
 
  
-Context ctxTransportTrolley ip [host="localhost" port=8095]
-  
+Context ctxtransporttrolley ip [host="localhost" port=8095]
+ 
 
-QActor transporttrolley context ctxTransportTrolley{
+QActor transporttrolley context ctxtransporttrolley{
 	[# lateinit var tmp : String #]
 	
 	State s0 initial { 	    
 		discardMsg On
+		printCurrentMessage
 		[# sysUtil.logMsgs=true #]
  	}
  	Transition t0 whenRequest move -> handle_cmd
@@ -115,7 +112,7 @@ QActor transporttrolley context ctxTransportTrolley{
 
  
 //transportTrolley TEST
-QActor test_trasporttrolley context ctxTransportTrolley{
+/*QActor test_trasporttrolley context ctxTransportTrolley{
 	[# lateinit var RES : String #]
 	
 	State s0 initial { 	    
@@ -166,4 +163,4 @@ QActor test_trasporttrolley context ctxTransportTrolley{
  	}
  	
 
-}
+}*/

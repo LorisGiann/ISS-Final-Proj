@@ -120,10 +120,10 @@ dd{ margin-bottom: 8px;}
                     State wait initial {
                         printCurrentMessage
                         discardMsg Off
-                     }
-                     Transition t0 whenRequest depositrequest -> handle_req
+                    }
+                    Transition t0 whenRequest depositrequest -> handle_req
                      
-                     State handle_req {
+                    State handle_req {
                         printCurrentMessage
                         onMsg(depositrequest : depositrequest(MATERIAL, TRUCKLOAD)) {
                             [#   Material 	= ws.Material.valueOf(payloadArg(0))
@@ -131,18 +131,18 @@ dd{ margin-bottom: 8px;}
                             if[# ws.func.checkdepositpossible( Material, TruckLoad ) #]{
                                 [# ws.func.updateDeposit( Material, TruckLoad ) #]
                                 replyTo depositrequest with loadaccept : loadaccept($Material,$TruckLoad)
-                            } else{  
+                            }else{  
                                 replyTo depositrequest with loadrejected : loadrejected($Material,$TruckLoad)
-                            }		
-                        } 
-                     }
-                     Goto wait
+                            }
+                        }
+                    }
+                    Goto wait
                 }</pre>
             </code>
             Il componente invia comandi al <b>Transport trolley</b> per svolgere le azioni necessarie
             <br><br>
             Con il file <a href="./RequirementQakSprint1/src/requirementAnalysis/WasteServiceRequirement.qak">WasteServiceRequirement.qak</a> abbiamo potuto formalizzare interfaccia e comportamento di questo componente. <br>
-            Inoltre, al fine di meglio specificare il comportamento che ci si aspetta, sono stati predisposti alcuni semplici test in <a href="./RequirementQakSprint1/test/testSprint1/TestSprint1_simple.kt">WasteServiceRequirement.qak</a>
+            Inoltre, al fine di meglio specificare il comportamento che ci si aspetta, sono stati predisposti alcuni semplici test in <a href="./RequirementQakSprint1/test/testSprint1/TestWasteservice.kt">TestWasteservice.kt</a>
             <code><pre>
                 var truckRequestStr = "msg(depositrequest, request,python,wasteservice,depositrequest(GLASS,2),1)"
                 var answer = connTcp.request(truckRequestStr)
@@ -191,7 +191,7 @@ dd{ margin-bottom: 8px;}
             </code>
             Nota: il <b>Transport trolley</b> può ricevere una richiesta di nuova posizione prima che abbia raggiunto la destinazione precedente: la navigazione sarà impostata sulla nuova destinazione.
             <br><br>
-            <!--Il funzionamento del <i>move</i>, <i>moveanswer</i>, <i>pickup</i>, <i>pickupanswer</i>, <i>dropout</i> e <i>dropoutanswer</i>  può essere esaminato in <b><a href="./RequirementQakSprint1/src/requirementAnalysis/requestTransportTrolley.qak">requestTransportTrolley.qak</a></b>.-->
+            File QAK: <a href="./RequirementQakSprint1/src/requirementAnalysis/TransportTrolleyRequirement.qak">TransportTrolleyRequirement.qak</a></b>. Test per specificarne il comportamento: <a href="./RequirementQakSprint1/test/testSprint1/TestTransporttrolley.kt">TestTransporttrolley.kt</a>.
         
         </dd>
         <dt><b>DDR Robot concreto</b> o "robot":</dt>
@@ -260,8 +260,6 @@ dd{ margin-bottom: 8px;}
                 <lI>Il peso corrente <b>contPB</b> e <b>contGB</b> del materiale contenuto in <b>PLASTICBOX</b> e in <b>GLASSBOX</b></lI>
                 <lI>Lo stato del <b>LED</b></lI>
             </ul>
-            <br>
-            Il funzionamento della <i>GUI</i> può essere esaminato in <b><a href="./RequirementQakSprint1/src/requirementAnalysis/GUIRequirement.qak">GUIRequirement.qak</a></b>.
         </dd>
         <dt><b>LED concreto:</b></dt> 
         <dd>Dispositivo di output connesso al RaspberryPI (che NON è a bordo del <b>DDR Robot</b>)</dd>
@@ -273,31 +271,36 @@ dd{ margin-bottom: 8px;}
                 <lI>Led Blink: quando il <b>Transport trolley</b> è in movimento, o sta scaricando/caricando materiale</lI>
             </ul>
             <p>Il committente fornisce già del software per relativo al led in <a href="https://github.com/anatali/issLab2022/tree/main/it.unibo.radarSystem22.domain">it.unibo.radarSystem22.domain</a></p>
-            <br>
-            Il funzionamento del <i>led</i> può essere esaminato in <b><a href="./RequirementQakSprint1/src/requirementAnalysis/ledRequirement.qak">ledRequirement.qak</a></b>.
         </dd>
         <dt><b>Sonar concreto:</b></dt> 
         <dd>Dispositivo di input connesso al RaspberryPI (che NON è a bordo del <b>DDR Robot</b>)</dd>
         <dt><b>Sonar:</b></dt> 
-        <dd>Entità che rappresenta il <b>sonar concreto</b>. <br> 
-            Viene formalizzato tramite un attore QActor che emette eventi <i>sonar</i> in base alla distanza rilevata <b>V</b>, corrispondente ad una varibile di tipo intero.<br>
+        <dd>Entità che rappresenta il <b>sonar concreto</b>. <br>
             <p>Il committente fornisce già del software relativo al sonar in <a href="https://github.com/anatali/issLab2022/tree/main/unibo.basicrobot22">unibo.basicrobot22</a>, <a href="https://github.com/anatali/issLab2022/tree/main/it.unibo.radarSystem22.domain">it.unibo.radarSystem22.domain</a>, <a href="https://github.com/anatali/issLab2022/tree/main/unibo.sonarqak22">unibo.sonarqak22</a></p>
-            <p>In particolare <i>sonarHCSR04SupportActor</i> di <i>BasicRobot22</i> emette eventi che vengono ridiretti in <a href="../docs_prof/html/QakIntro.html#creazione-di-una-pipe">pipe</a> ad altri attori per successive elaborazioni. <br>
-            Gli eventi che escono da questa pipe sono del tipo:</p>
+            <p>Formalizziamo il sonar con un attore QAK. In particolare nel progetto <a href="https://github.com/anatali/issLab2022/tree/main/unibo.sonarqak22">unibo.sonarqak22</a> esiste un attore <i>sonarqak22</i> in grado di emettere eventi in base alla distanza rilevata da sonar reale o simulato: </p>
             <code><pre>
-                V = integer number</pre>
+                Dispatch sonaractivate   : info(ARG)
+                Dispatch sonardeactivate : info(ARG)
+                Event    sonar           : distance( V )   //emitted by sonarSimulator or sonardatasource</pre>
             </code>
+            <p>I comandi <i>sonaractivate</i> e <i>sonardeactivate</i> servono rispettivamente per attivare e disattivare il sonar, mentre l'evento <i>sonar</i> viene emesso o da <i>sonarsimulator</i>, o da <i>sonardatasource</i> e inviato al prossimo attore della pipe. La pipe può essere configurata nel seguente modo:</p>
             <code><pre>
-                //V = distance int val
-                Event  sonar       : sonar(V)</pre>
+                if( simulate )  firstActorInPipe = sysUtil.getActor("sonarsimulator")!!  //generates simulated data
+                else firstActorInPipe           = sysUtil.getActor("sonardatasource")!!  //generates REAL data
+                firstActorInPipe.
+                    subscribeLocalActor("datacleaner"). 		//removes 'wrong' data''
+                    //subscribeLocalActor("datalogger").		    //logs (shows) the data generated by the sonar
+                    //subscribeLocalActor("sonar").				//handles sonarrobot but does not propagate ...
+                    //subscribeLocalActor("distancefilter").		//propagates the lcoal stream event obstacle
+                    subscribeLocalActor(sonarActorName)</pre>
             </code>
-            <br>
-            Il funzionamento del <i>sonar</i> può essere esaminato in <b><a href="./RequirementQakSprint1/src/requirementAnalysis/sonarRequirement.qak">sonarRequirement.qak</a></b>.
+            <p>In particolare l'attore <i>distancefilter</i> si occupa di filtrare gli eventi e inviare al prossimo attore solo eventi di tipo obstacle:obstacle($distance) solo nel caso in cui la distanza rilevata sia minore di una distanza prefissata.</p>
+            <img src="../docs_prof/html/_images/sonarpipenano.png" class="centerimg" style="width: 800px;"/>
         </dd>
         <dt><b>DLIMT:</b></dt>
         <dd>Misura in CM della distanza limite. Se la distanza attualmente misurata dal <b>Sonar concreto</b> è ≤ DLIMT, il robot deve essere nello stato stopped. Qunando la distanza misurata &gt DLIMIT il robot può muoversi<br>
             Viene formalizzato tramite una costante <b>DLIMIT</b>.<br>
-            <code><pre>DLIMIT = constant</pre></code></dd>
+            <code><pre>val DLIMIT : Float</pre></code></dd>
     </dl>
 </div>
 

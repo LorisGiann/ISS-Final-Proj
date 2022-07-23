@@ -10,13 +10,12 @@
 JAR_OUPUT_PATH=build/libs
 
 #first generate the jar files
-gradle -PmainClass=it.unibo.ctxtest.MainCtxtestKt jar
+gradle -PmainClass=it.unibo.ctxtransporttrolley.MainCtxtransporttrolleyKt jar
 
 SAVEIFS=$IFS   # Save current IFS (Internal Field Separator)
 IFS=$'\n'      # Change IFS to newline char
 declare -a TEST_METHODS=(
-    "testSprint1.TestSprint1_simple.test_2_accepted"
-    "testSprint1.TestSprint1_simple.test_1_accepted_1_rejected"
+    "testSprint1.TestTransporttrolley.test_1_move"
 )
 
 IFS=$SAVEIFS   # Restore original IFS
