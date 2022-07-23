@@ -16,6 +16,9 @@ SAVEIFS=$IFS   # Save current IFS (Internal Field Separator)
 IFS=$'\n'      # Change IFS to newline char
 declare -a TEST_METHODS=(
     "testSprint1.TestTransporttrolley.test_1_move"
+    "testSprint1.TestTransporttrolley.test_2_move"
+    "testSprint1.TestTransporttrolley.test_pickup"
+    "testSprint1.TestTransporttrolley.test_dropout"
 )
 
 IFS=$SAVEIFS   # Restore original IFS
