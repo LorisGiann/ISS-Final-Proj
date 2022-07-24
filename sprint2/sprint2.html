@@ -1,0 +1,185 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+    <!--
+<link rel="stylesheet" type="text/css" href="../css/issStyle1.css">
+<script type="text/javascript" src="../css/issStyle.js"></script>
+-->
+<link rel="stylesheet" type="text/css" href="../docs_common/defaultTemplateStyle.css">
+<style>
+code>pre { 
+    font-family: monospace;
+}
+dd{
+    margin-bottom: 7px;
+}
+.todo{
+    color: orange
+}
+.centerimg{
+    display: block;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 90%;
+    max-width: 800px;
+}
+p { margin: 4px 0px; }
+dd{ margin-bottom: 8px;}
+</style>
+<head>
+   
+<title>WasteService SPRINT2</title></head>
+    
+<body>
+<div id="top">
+<h1>ISS FINAL PROJECT </h1>
+</div>  
+
+<div class="body"> 
+<h2>Introduction</h2>
+<div class="remark">
+    <p>Progetto finale di ISS, che consiste in un impianto di smistamento dei rifiuti nel quale un robot deve trasportare il materiale dal camion al relativo container</p>
+</div>
+
+<h2>Requirements</h2>
+<div class="remark">
+    <a href="../docs_prof/html/TemaFinale22.html">Link alla pagina dei requisiti del committente</a>
+    <br><br>
+    <a href="../sprint1/sprint1.html">Link alla pagina dello SPRINT1</a>
+    <br><br>
+    <p>Ulteriori requisiti scaturiti da colloqui con committente:</p>
+    <ul>
+        <lI>Può esserci solo un camion alla volta in INDOOR? SI</lI>
+        <li>Il Waste-truck deve essere liberato non appena il materiale viene scaricato? SI</li>
+        <li>La GUI deve mostrare le coordine del robot o basta l'area nella quale si trova attualmente? basta l'area nella quale si trova attualmente</li>
+        <li>A cosa serve il sonar se la stanza è priva di ostacoli? Il sonar non è a bordo del robot, è un dispositivo esterno (così come il RPI). Se si mette una mano davanti al dispositivo, il robot si ferma.</li>
+        <li>Ci deve essere il contatto con la parete per il carico/scarico dei materiali? SI (o comunque il più vicino possibile)</li>
+        <li>Supponiamo che il robot si stia dirigendo verso HOME (perché ha scaricato l'ultimo carico di materiale e non ci sono altri Waste truck sull'INDOOR). Se arriva un Waste truck prima che il trolley raggiunga la base, il robot deve cambiare rotta immediatamente o può raggiungere la base e poi dirigersi presso l'Indoor? CAMBIA IMMEDIATAMENTE ROTTA per dirigersi su indoor</li>
+        <li>È il robot a determinare quando avviene la fine di una azione di carico/scarico? In che modo tale evento può essere rilevato dal sistema da noi sviluppato? Modellare l'operazione con un SEMPLICE DELAY di durata fissa</li>
+        <li>Il nodo sul quale la GUI va installata e un nodo fisso? O si tratta forse di palmari posseduti dai Service-manager stessi? Il NODO è FISSO </li>
+        <li>In cosa consiste lo smart device? Quanti sono (viene usato sempre lo stesso dispositivo o ve ne è uno per ogni conducente)? Come si relaziona con il nostro sistema? Un dispositivo per ogni conducente, "alieno" invia un messaggio</li>
+        <li>Committente ha server aziendali disponibili? È possibile usare la RPI come server (nodo sempre attivo mentre il sistema è operativo)? E' possibile usare la raspberry, ma si può anche mettere sul PC che usiamo.</li>
+    </ul>
+</div>
+
+<h2>Scrum Goal and Work Plan</h2>
+<div class="remark">
+    <dt><a href="../sprint1/sprint1.html#ScrumGoalWorkPlan">Link allo scrum goal e work plan dello SPRINT1</a></dt>
+    <br><br>
+    <p><b>Scrum goal</b>: obiettivo dello <u>SPRINT2</u>  è la creazione di una seconda demo (su ambiente virtuale) che, partendo dalla demo sviluppata tramite lo SPRINT1, implementi i <i>warning devices</i> e gli <i>alarm devices</i> (l'entità <b>led</b> e l'entità <b>sonar)</b>.</p>
+    <p><b>Piano di lavoro:</b></p>
+    <ul>
+        <li>Comprensione dei requisiti del sistema relativi al <i>led</i> e al <i>sonar</i></li>
+        <li>Analisi delle principali problematiche da affrontare nello sviluppo dei componenti analizzati di cui è composto il sistema</li>
+        <li>Definire i componenti e le interazioni fra di essi: realizzazione di una seconda architettura logica partendo da quella definita all'interno dello SPRINT1</li>
+        <li>Realizzazione di modelli usando un linguaggio di modellazione che permetta di formalizzare e di creare modelli eseguibili facendo uso del metamodello <a href="../Qak.html">QAK</a>.</li>
+        <li>Realizzazione di test-plan</li>
+    </ul>
+
+</div>
+
+<h2>Requirement analysis</h2>
+
+<h3>Dizionario</h3>
+<div class="remark">
+    <dl>
+        <dt><a href="../sprint1/sprint1.html#Dizionario">Link al dizionario dello SPRINT1</a></dt>
+        <br><br>
+        <dt><b>LED concreto:</b></dt> 
+        <dd>Dispositivo di output connesso al RaspberryPI (che NON è a bordo del <b>DDR Robot</b>)</dd>
+        <dt><b>LED:</b></dt>
+        <dd><i>Warning device</i> corrispondente ad una entità attiva e astratta che rappresenta il <b>LED concreto:</b>, è che può essere impostato secondo 3 modalità:
+            <ul>
+                <lI>Led Off: quando il <b>Transport trolley</b> è in <b>HOME</b> </lI>
+                <lI>Led On: quando il <b>Transport trolley</b> è fermo (quando distanza rilevata &lt DLIMIT)</lI>
+                <lI>Led Blink: quando il <b>Transport trolley</b> è in movimento, o sta scaricando/caricando materiale</lI>
+            </ul>
+            <p>Il committente fornisce già del software per relativo al led in <a href="https://github.com/anatali/issLab2022/tree/main/it.unibo.radarSystem22.domain">it.unibo.radarSystem22.domain</a></p>
+        </dd>
+        <dt><b>Sonar concreto:</b></dt> 
+        <dd>Dispositivo di input connesso al RaspberryPI (che NON è a bordo del <b>DDR Robot</b>)</dd>
+        <dt><b>Sonar:</b></dt> 
+        <dd><i>Alarm device</i> corrispondente ad una entità che rappresenta il <b>sonar concreto</b>. <br>
+            <p>Il committente fornisce già del software relativo al sonar in <a href="https://github.com/anatali/issLab2022/tree/main/unibo.basicrobot22">unibo.basicrobot22</a>, <a href="https://github.com/anatali/issLab2022/tree/main/it.unibo.radarSystem22.domain">it.unibo.radarSystem22.domain</a>, <a href="https://github.com/anatali/issLab2022/tree/main/unibo.sonarqak22">unibo.sonarqak22</a></p>
+            <p>Formalizziamo il sonar con un attore QAK. In particolare nel progetto <a href="https://github.com/anatali/issLab2022/tree/main/unibo.sonarqak22">unibo.sonarqak22</a> esiste un attore <i>sonarqak22</i> in grado di emettere eventi in base alla distanza rilevata da sonar reale o simulato: </p>
+            <code><pre>
+                Dispatch sonaractivate   : info(ARG)
+                Dispatch sonardeactivate : info(ARG)
+                Event    sonar           : distance( V )   //emitted by sonarSimulator or sonardatasource</pre>
+            </code>
+            <p>I comandi <i>sonaractivate</i> e <i>sonardeactivate</i> servono rispettivamente per attivare e disattivare il sonar, mentre l'evento <i>sonar</i> viene emesso o da <i>sonarsimulator</i>, o da <i>sonardatasource</i> e inviato al prossimo attore della pipe. La pipe può essere configurata nel seguente modo:</p>
+            <code><pre>
+                if( simulate )  firstActorInPipe = sysUtil.getActor("sonarsimulator")!!  //generates simulated data
+                else firstActorInPipe           = sysUtil.getActor("sonardatasource")!!  //generates REAL data
+                firstActorInPipe.
+                    subscribeLocalActor("datacleaner"). 		//removes 'wrong' data''
+                    //subscribeLocalActor("datalogger").		    //logs (shows) the data generated by the sonar
+                    //subscribeLocalActor("sonar").				//handles sonarrobot but does not propagate ...
+                    //subscribeLocalActor("distancefilter").		//propagates the lcoal stream event obstacle
+                    subscribeLocalActor(sonarActorName)</pre>
+            </code>
+            <p>In particolare l'attore <i>distancefilter</i> si occupa di filtrare gli eventi e inviare al prossimo attore solo eventi di tipo obstacle:obstacle($distance) solo nel caso in cui la distanza rilevata sia minore di una distanza prefissata.</p>
+            <img src="../docs_prof/html/_images/sonarpipenano.png" class="centerimg" style="width: 800px;"/>
+        </dd>
+        <dt><b>DLIMT:</b></dt>
+        <dd>Misura in CM della distanza limite. Se la distanza attualmente misurata dal <b>Sonar concreto</b> è ≤ DLIMT, il robot deve essere nello stato stopped. Qunando la distanza misurata &gt DLIMIT il robot può muoversi<br>
+            Viene formalizzato tramite una costante <b>DLIMIT</b>.<br>
+            <code><pre>val DLIMIT : Float</pre></code></dd>
+    </dl>
+</div>
+
+<!--PROBLEM ANALYSIS-->
+<h2>Problem analysis</h2>
+<div class="remark">
+    <dt><a href="../sprint1/sprint1.html#ProblemAnalysis">Link alla problem analysis dello SPRINT1</a></dt>
+    <br><br>
+    <h3><b>Led</b></h3>
+
+    <h3><b>Sonar</b></h3>
+</div>
+    
+
+
+<!--<h2>Project</h2> 
+</div>-->
+
+
+<h2>Test plans</h2> 
+<div class="remark">
+
+</div>
+
+<h3><a href="QakSprint1/src/Prototype/demo0.qak">Metamodello eseguibile QAK</a></h3>
+ 
+<!-- USEFUL
+<table style="width:100%" border="1">
+<tr>
+<td style="width:50%">
+</td>
+<td></td>
+</tr>
+</table>
+-->
+	      	
+<br/><br/> 	
+</div>  
+
+<div style="background-color:rgba(86, 56, 253, 0.9); width:100%;text-align:left;color:white">
+    <table style="border: 0px solid transparent; margin: 0 auto;">
+        <tr>
+            <th>
+                <p>Loris Giannatempo <br>
+                Email: loris.giannatempo@studio.unibo.it</p>
+                <img class="centerimg" src="../docs_common/lorisgiannatempo.jpg" style="width: 30%; height: 30%; border: 0px">
+            </th>
+            <th>
+                <p>Davide Guidetti <br>
+                Email: davide.guidetti3@studio.unibo.it</p>
+                <img class="centerimg" src="../docs_common/davideguidetti.jpg" style="width: 30%; height: 30%; border: 0px">
+            </th>
+        </tr>
+    </table>
+</div> 
+</body>
+</html>

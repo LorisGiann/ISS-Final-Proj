@@ -1,0 +1,71 @@
+//https://dl.bintray.com/jetbrains/kotlin/eclipse-plugin/0.8.19/
+
+System demo0    
+//mqttBroker "localhost" : 1883 eventTopic "demo0/events"
+  
+Event update_led : update_led(STATE) //STATE = on | off | blink
+ 
+Dispatch noMsg : noMsg(_)
+
+Context ctxled ip [host="localhost" port=8095]
+ 
+
+QActor led context ctxled { 
+	[# lateinit var newState : String #]
+	
+	State s0 initial { 	    
+		discardMsg On
+		//[# sysUtil.logMsgs=true #]
+ 	}
+ 	Transition t0 whenEvent update_led -> handle_update
+ 	
+ 	State handle_update {
+		onMsg( update_led:update_led(ARG) ){
+			[# newState = payloadArg(0) #]
+ 			println("update_led(${newState})")
+ 			forward led -m noMsg : noMsg(_)
+ 		}
+ 	}
+ 	//Transition to else Goto off
+ 	Transition toNewState whenMsg noMsg and [# newState=="off" #] -> off
+ 					whenMsg noMsg and [# newState=="on" #] -> on
+ 					whenMsg noMsg and [# newState=="blink" #] -> blink_on
+ 	
+ 	State off {
+ 		println("Led off")
+ 	}
+ 	Transition t0 whenEvent update_led -> handle_update
+ 	
+ 	State on {
+ 		println("Led on")
+ 	}
+ 	Transition t0 whenEvent update_led -> handle_update
+ 	
+ 	State blink_on {
+ 		println("Blinking on")
+ 	}
+ 	Transition t0 whenTime 500 -> blink_off
+ 					whenEvent update_led -> handle_update
+ 					
+ 	State blink_off {
+ 		println("Blinking off")
+ 	}
+ 	Transition t0 whenTime 500 -> blink_on
+ 					whenEvent update_led -> handle_update
+ 					
+}
+
+/*
+//led TEST
+QActor test_led context ctxled{
+	State s0 initial { 	    
+		discardMsg On
+		//[# sysUtil.logMsgs=true #]
+		emit update_led : update_led(off)
+		delay 2000
+		emit update_led : update_led(on)
+		delay 2000
+ 	}
+}
+* */
+
