@@ -124,6 +124,10 @@ dd{ margin-bottom: 8px;}
             </code>
             <p>In particolare l'attore <i>distancefilter</i> si occupa di filtrare gli eventi e inviare al prossimo attore solo eventi di tipo obstacle:obstacle($distance) solo nel caso in cui la distanza rilevata sia minore di una distanza prefissata.</p>
             <img src="../docs_prof/html/_images/sonarpipenano.png" class="centerimg" style="width: 800px;"/>
+            <br>
+            <p>Con il file <a href="./RequirementQakSprint2/src/requirementAnalysis/SonarRequirement.qak">SonarRequirement.qak</a> abbiamo potuto formalizzare interfaccia e comportamento di questo componente. <br>
+            Inoltre, al fine di meglio specificare il comportamento che ci si aspetta, sono stati predisposti alcuni semplici test in <a href="./RequirementQakSprint2/test/testSprint2/TestSonar.kt">TestSonar.kt</a></p>
+        
         </dd>
         <dt><b>DLIMT:</b></dt>
         <dd>Misura in CM della distanza limite. Se la distanza attualmente misurata dal <b>Sonar concreto</b> è ≤ DLIMT, il robot deve essere nello stato stopped. Qunando la distanza misurata &gt DLIMIT il robot può muoversi<br>
