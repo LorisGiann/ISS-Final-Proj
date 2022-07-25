@@ -94,6 +94,9 @@ dependencies {
     // https://mvnrepository.com/artifact/com.googlecode.aima-java/aima-core
     implementation group: 'com.googlecode.aima-java', name: 'aima-core', version: '3.0.0'
 
+	//RadarSystem
+	implementation name: 'it.unibo.radarSystem22.domain-1.0'
+
 }
 
 test {
