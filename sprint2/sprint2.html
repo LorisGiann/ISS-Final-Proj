@@ -141,7 +141,7 @@ dd{ margin-bottom: 8px;}
     <h3><b>Interazione di robot - sonar</b></h3>
 
     <p>Sono state analizzate diverse possibilità per integrare in maniera coerente la possibilità di fermare e far riprendere le attività che il robot deve svolgere. <br>
-        A tal fine supponiamo di ricevere già eventi del tipo <i>stop</i> e <i>resume></i> (che sarà generato da qualche attore a sua volta collegato al sonar "di base")</p>
+        A tal fine supponiamo di ricevere già eventi del tipo <i>stop</i> e <i>resume</i> (che sarà generato da qualche attore a sua volta collegato al sonar "di base")</p>
 
     <h4>OPZIONE 1</h4>
     <p>Il <b>Transport trolley</b> riceve direttamente gli eventi di stop e resume, inviando gli opportuni comandi di basso livello a <i>basicrobot</i>:</p>
@@ -217,7 +217,7 @@ dd{ margin-bottom: 8px;}
 
     <h3>Attore-controller <i>alarmcontrol</i>:</h3>
     <p>La logica di questo attore viene qui descritta schematicametne in linguaggio naturale / pseudocodice.</p>
-    <p>La parte del controller che si occupa di gestire il robot risulta piuttosto semplice, si tratta semplicemente di inviare a <i>transporttrolley</i> dei messaggi <i>enable</i> o <i>disable</i> 
+    <p>La parte del controller che si occupa di gestire il robot risulta piuttosto semplice, si tratta di inviare a <i>transporttrolley</i> dei messaggi <i>enable</i> o <i>disable</i> 
         in base alla sola distanza rilevata:</p>
     <p class="pseudocode_i">
         <p>Ricezione evento <i>Distance(V)</i>:</p>
