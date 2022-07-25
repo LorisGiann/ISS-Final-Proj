@@ -137,9 +137,116 @@ dd{ margin-bottom: 8px;}
 <div class="remark">
     <dt><a href="../sprint1/sprint1.html#ProblemAnalysis">Link alla problem analysis dello SPRINT1</a></dt>
     <br><br>
-    <h3><b>Led</b></h3>
 
-    <h3><b>Sonar</b></h3>
+    <h3><b>Interazione di robot - sonar</b></h3>
+
+    <p>Sono state analizzate diverse possibilità per integrare in maniera coerente la possibilità di fermare e far riprendere le attività che il robot deve svolgere. <br>
+        A tal fine supponiamo di ricevere già eventi del tipo <i>stop</i> e <i>resume></i> (che sarà generato da qualche attore a sua volta collegato al sonar "di base")</p>
+
+    <h4>OPZIONE 1</h4>
+    <p>Il <b>Transport trolley</b> riceve direttamente gli eventi di stop e resume, inviando gli opportuni comandi di basso livello a <i>basicrobot</i>:</p>
+    <img src="../sprint2/docs/_images/transporttrolley_option1_logic_architecture.png" class="centerimg" style="width: 250px;"/>
+    <ul>
+        <li>- <b>Transport trolley</b> ha la responsabilità diretta di restare in ascolto di eventi riguardanti il sonar</li>
+        <li>- necessario aggiungere uno stato a <b>Transport trolley</b></li>
+    </ul>
+    <p>La macchina a stati non risulta ancora eccessivamente complicata (rispetto a prima è stato aggiunto solo lo stato <i>halt</i>):</p>
+    <img src="../sprint2/docs/_images/transporttrolley_option1_state_machine.png" class="centerimg" style="width: 500px;"/>
+    
+    <h4>OPZIONE 2 e 3</h4>
+    <p>Le due soluzioni sono simili, in quanto prevedono entrambe l'utilizzo di un attore intermedio (<i>intermediario</i>) il cui compito è quello di ricevere i comandi emessi dal <b>Transport trolley</b>, 
+        e di mandarli al sottostante <i>basicrobot</i> compatibilmente con i comandi di <i>stop</i> e <i>resume</i>. Più nello specifico, dovrà fermare il robot quando viene ricevuto il 
+        comando di <i>stop</i>, metnre se viene ricevuto <i>resume</i> il robot verrà fatto ripartire solo se era precedentemente in movimento.</p>
+        <img src="../sprint2/docs/_images/transporttrolley_option3_logic_architecture.png" class="centerimg" style="width: 300px;"/>
+        <ul>
+            <li>+ principio di singola resposabilità: Il transporttrolley traduce le destinazioni da raggiungere in comandi di basso livello, senza preoccuparsi di rimanere in ascolto di eventi dal sonar</li>
+        </ul>
+        <table style="width:100%; text-align: start;">
+            <tr style="border: 1px solid black;">
+                <td>
+                    <p>L'opzione 2 raggiunge questo obiettivo rendendo i comandi da inviare al <i>basicrobot</i> sincroni: la risposta non verrà data finche il robot risulta bloccato dal sonar 
+                        non verrà data la risposta a <b>Transport trolley</b>, il quale quindi non potrà procedere con le prossime mosse.</p>
+                    <ul>
+                        <li>- richiede di modificare il transport trolley</li>
+                    </ul>
+                    <p style="font-size: 0.8rem;">N.B: per maggior robustezza è stata inserita la transizione da halt a collision nell'eventualità che il robot riesca comunque a raggiungere il muro subito 
+                        dopo aver impartito il comando di halt (dovuto a inerzia del robot, ritardo nell'arrivo dell'evento <i>info</i>, ecc..).</p>
+                </td>
+                <td style="width:25%; min-width: 310px;"><img src="../sprint2/docs/_images/transporttrolley_option2_state_machine.png" class="centerimg" style="width: 300px;"/></td>
+            </tr>
+            <tr style="border: 1px solid black;"> 
+                <td>
+                    <p>L'opzione 3 permette di ottenere lo stesso risultato utilizzando gli stessi comandi di tipo dispatch attualmente inviati dal <b>Transport trolley</b>. 
+                        Quest'ultimo saprà comunque quando l'operazione <i>cmd(w)</i> termina siccome resta in ascolto dell'evento <i>info</i>.
+                        </p>
+                    <ul>
+                        <li>+ Richiede solo di modificare il destinatario dei messaggi del transporttrolley.</li>
+                    </ul>
+                </td>
+                <td style="width:25%; min-width: 310px;"><img src="../sprint2/docs/_images/transporttrolley_option3_state_machine.png" class="centerimg" style="width: 300px;"/></td>
+            </tr>
+        </table>
+        <p>Le opzioni 2 e 3 sono ottime se il robot si deve fermare solo mentre questo sta procedendo in avanti. <br>
+            Sarebbe però opportuno fermare il robot anche tra un'operazione e l'altra, quindi non solo mentre si sta spostando in avanti. Ad esempio, supponiamo che il robot sia arrivato in indoor 
+            ed abbia appena iniziato a girarsi (stato TURN di <i>transporttrolley</i>). Se in questo momento la distanza diventa &ltDLIMIT, il robot si dovrebbe fermare subito dopo aver completato 
+            l'operazione di turn, ossia deve aspettare prima di eseguire una <b>Pickup</b>. Ma <b>Pickup</b> è un'operazione svolta da <i>transporttrolley</i>, quindi non può essere facilmente 
+            controllata dall'intermediario.
+            Inoltre, supponendo che la distanza diventi &ltDLIMIT durante una operazione di <b>Pickup</b>, il basicrobot riceverà dapprima un comando <i>cmd(w)</i>, e poi un <i>cmd(h)</i>, provocando dunque un glitch. 
+        </p>
+
+        <h4>OPZIONE 4 (= soluzione adottata)</h4>
+        <p>Optiamo quindi per una 4a opzione, che è per certi versi simile alla 1a, ma con la differenza che ora il transporttrolley espone un'ulteriore operazione che consentono al robot di 
+            essere "abilitato" o "disabilitato" a comando. <br>            
+            Tali operazioni assumono un significato particolare nel caso in cui il robot si stia muovendo in avanti: in tal caso il robot viene fermato, mentre la riabilitazione provoca il ripristino 
+            dell'avanzamento. Questo non accade per tutte le altre mosse, che vengono infatti portate sempre a termine (siccome più rapide), tuttavia subito dopo la loro esecuzione si aspetta il 
+            messaggio di riabilitazione prima di eseguire altre mosse.</p>
+        <p>
+            L'invio di questi comandi è delegato ad un apposito controllore <i>alarmcontrol</i>, la cui responsabilità è proprio quella di controllare le azioni da svolgere nel caso in cui la distanza 
+            rilevata dal sonar varchi la soglia DLIMIT. L'architettura logica diventa dunque la seguente:
+        </p>
+        <img src="../sprint2/docs/_images/transporttrolley_option4_logic_architecture.png" class="centerimg"/>
+        <p style="font-size: 0.8rem;">N.B: per limitazioni imposti dal linguaggio QAK, inviamo i comandi <i>enable</i> e <i>disable</i> sottoforma di dispatch, siccome gli eventi non vengono accodati dagli attori.</p>
+    
+    <h3><b>Led</b></h3>
+    <p>Per il led seguiamo la stessa linea di ragionamento intrapresa per il sonar, ossia l'utlizzo dell'attore <i>alarmcontrol</i> per coordinare le azioni derivanti dalla variazione della
+        distanza misurata dal sonar. Esso comanderà anche il cambiamento di stato del led.<br>
+        Per farlo il controllore ha tuttavia necessità di sapere se dove sia il robot attualmente, più in particolare è necessario sapere se esso è al di fuori di <b>HOME</b> o meno. Il reperimento
+        di tale informazione è possibile grazie all'emissione di eventi di tipo <i>moving(From,To)</i> da parte del <i>transporttrolley</i>: il robot si trova in <b>HOME</b> se e solo se 
+        <i>From</i>=<i>To</i>=<b>HOME</b>. </p>
+    <img src="../sprint2/docs/_images/logic_architecture.png" class="centerimg"/>
+
+    <h3>Attore-controller <i>alarmcontrol</i>:</h3>
+    <p>La logica di questo attore viene qui descritta schematicametne in linguaggio naturale / pseudocodice.</p>
+    <p>La parte del controller che si occupa di gestire il robot risulta piuttosto semplice, si tratta semplicemente di inviare a <i>transporttrolley</i> dei messaggi <i>enable</i> o <i>disable</i> 
+        in base alla sola distanza rilevata:</p>
+    <p class="pseudocode_i">
+        <p>Ricezione evento <i>Distance(V)</i>:</p>
+        <ul>
+            <li>Se <code>V&ltDLIMIT</code> ➔ Transporttrolley DISABLE</li>
+            <li>Se <code>V&gtDLIMIT</code> ➔ Transporttrolley ENABLE</li>
+        </ul>
+    </p>
+    <p class="pseudocode_i">
+        GESIONE <i>led</i>:
+        <ul>
+            <li>Ricezione evento <i>Moving(F,T)</i>:<br>
+                si determina <code>ISHOME = (F==HOME && T==HOME)</code>
+                <ul>
+                    <li>Se <code>ISHOME==TRUE</code> ➔ led OFF</li>
+                    <li>Se <code>ISHOME==FALSE</code> ➔ led BLINK</li>
+                </ul>
+            </li>
+            <li>Ricezione evento <i>Distance(V)</i>:<br>
+                <ul>
+                    <li>Se <code>ISHOME==FALSE && V&ltDLIMIT</code> ➔ led ON</li>
+                    <li>Se <code>ISHOME==FALSE && V&gtDLIMIT</code> ➔ led BLINK</li>
+                </ul>
+            </li>
+        </ul>
+    </p>
+    <p>Il modello QAK dell'attore consiste semplicemente nei 2 stati di gesione dei due eventi, più quello iniziale di attesa:</p>
+    <img src="../sprint2/docs/_images/alarmcontrol_state_machine.png" class="centerimg" style="width: 400px;"/>
+    <p class="todo">Momento ottimo per riportare il QAK di questo <i>alarmcontrol</i>.</p>
 </div>
     
 
@@ -171,16 +278,16 @@ dd{ margin-bottom: 8px;}
 <div style="background-color:rgba(86, 56, 253, 0.9); width:100%;text-align:left;color:white">
     <table style="border: 0px solid transparent; margin: 0 auto;">
         <tr>
-            <th>
-                <p>Loris Giannatempo <br>
+            <td>
+                <p style="font-weight: bold;">Loris Giannatempo <br>
                 Email: loris.giannatempo@studio.unibo.it</p>
                 <img class="centerimg" src="../docs_common/lorisgiannatempo.jpg" style="width: 30%; height: 30%; border: 0px">
-            </th>
-            <th>
-                <p>Davide Guidetti <br>
+            </td>
+            <td>
+                <p style="font-weight: bold;">Davide Guidetti <br>
                 Email: davide.guidetti3@studio.unibo.it</p>
                 <img class="centerimg" src="../docs_common/davideguidetti.jpg" style="width: 30%; height: 30%; border: 0px">
-            </th>
+            </td>
         </tr>
     </table>
 </div> 
