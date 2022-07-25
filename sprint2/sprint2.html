@@ -92,7 +92,7 @@ dd{ margin-bottom: 8px;}
         <dd><i>Warning device</i> corrispondente ad una entità attiva e astratta che rappresenta il <b>LED concreto:</b>, è che può essere impostato secondo 3 modalità:
             <ul>
                 <lI>Led Off: quando il <b>Transport trolley</b> è in <b>HOME</b> </lI>
-                <lI>Led On: quando il <b>Transport trolley</b> è fermo (quando distanza rilevata &lt DLIMIT)</lI>
+                <lI>Led On: quando il <b>Transport trolley</b> è fermo (quando distanza rilevata &lt <b>DLIMIT</b>)</lI>
                 <lI>Led Blink: quando il <b>Transport trolley</b> è in movimento, o sta scaricando/caricando materiale</lI>
             </ul>
             <p>Il committente fornisce già del software per relativo al led in <a href="https://github.com/anatali/issLab2022/tree/main/it.unibo.radarSystem22.domain">it.unibo.radarSystem22.domain</a></p>
@@ -124,6 +124,10 @@ dd{ margin-bottom: 8px;}
             </code>
             <p>In particolare l'attore <i>distancefilter</i> si occupa di filtrare gli eventi e inviare al prossimo attore solo eventi di tipo obstacle:obstacle($distance) solo nel caso in cui la distanza rilevata sia minore di una distanza prefissata.</p>
             <img src="../docs_prof/html/_images/sonarpipenano.png" class="centerimg" style="max-width: 800px;"/>
+            <br>
+            <p>Con il file <a href="./RequirementQakSprint2/src/requirementAnalysis/SonarRequirement.qak">SonarRequirement.qak</a> abbiamo potuto formalizzare interfaccia e comportamento di questo componente. <br>
+            Inoltre, al fine di meglio specificare il comportamento che ci si aspetta, sono stati predisposti alcuni semplici test in <a href="./RequirementQakSprint2/test/testSprint2/TestSonar.kt">TestSonar.kt</a></p>
+        
         </dd>
         <dt><b>DLIMT:</b></dt>
         <dd>Misura in CM della distanza limite. Se la distanza attualmente misurata dal <b>Sonar concreto</b> è ≤ DLIMT, il robot deve essere nello stato stopped. Qunando la distanza misurata &gt DLIMIT il robot può muoversi<br>
@@ -156,67 +160,67 @@ dd{ margin-bottom: 8px;}
     
     <h4>OPZIONE 2 e 3</h4>
     <p>Le opzioni 2 e 3 sono simili, in quanto prevedono entrambe l'utilizzo di un attore intermedio (qui chiamato <i>intermediario</i>) il cui compito è quello di ricevere i comandi inviati 
-        da <i>transporttrolley</i>, e di mandarli al sottostante <i>basicrobot</i> compatibilmente con i comandi di <i>stop</i> e <i>resume</i>. Più nello specifico, dovrà fermare il robot quando 
-        viene ricevuto il comando di <i>stop</i>, metnre se viene ricevuto <i>resume</i> il robot verrà fatto ripartire solo se era precedentemente in movimento.</p>
+        da <i>transporttrolley</i>, e di mandarli al sottostante <i>basicrobot</i> compatibilmente con i comandi di <i>stop</i> e <i>resume</i>. Più nello specifico <i>intermediario</i> 
+        dovrà fermare il robot quando viene ricevuto il comando di <i>stop</i>, mentre se viene ricevuto <i>resume</i> il robot verrà fatto ripartire solo se era precedentemente in movimento.</p>
         <img src="../sprint2/docs/_images/transporttrolley_option3_logic_architecture.png" class="centerimg" style="max-width: 300px;"/>
         <ul>
-            <li>+ principio di singola resposabilità: Il transporttrolley traduce le destinazioni da raggiungere in comandi di basso livello, senza preoccuparsi di rimanere in ascolto di eventi dal sonar</li>
+            <li>+ Principio di singola resposabilità: Il transporttrolley traduce le destinazioni da raggiungere in comandi di basso livello, senza preoccuparsi di rimanere in ascolto di eventi dal sonar</li>
         </ul>
         <table style="width:100%; text-align: start;">
             <tr style="border: 1px solid black;">
                 <td>
-                    <p>L'opzione 2 raggiunge questo obiettivo rendendo i comandi da inviare al <i>basicrobot</i> sincroni: la risposta non verrà data finche il robot risulta bloccato dal sonar 
-                        non verrà data la risposta a <b>Transport trolley</b>, il quale quindi non potrà procedere con le prossime mosse.</p>
+                    <p>L'opzione 2 raggiunge questo obiettivo ricevendo i comandi che prima erano inviati a <i>basicrobot</i>, con la differenza che questi ora sono sottoforma di request, ed hanno quindi 
+                        semantica sincrona bloccante: finche il robot risulta bloccato dal sonar la risposta non verrà data, quindi <i>transporttrolley</i> non potrà procedere con le prossime mosse.</p>
                     <ul>
-                        <li>- richiede di modificare il transport trolley</li>
+                        <li>- Richiede modifiche al <i>transporttrolley</i>.</li>
                     </ul>
                 </td>
-                <td style="width:25%; min-width: 310px;"><img src="../sprint2/docs/_images/transporttrolley_option2_state_machine.png" class="centerimg" style="width: 300px;"/></td>
+                <td style="width:25%; min-width: 410px;"><img src="../sprint2/docs/_images/transporttrolley_option2_state_machine.png" class="centerimg" style="max-width: 400px;"/></td>
             </tr>
             <tr style="border: 1px solid black;"> 
                 <td>
-                    <p>L'opzione 3 permette di ottenere lo stesso risultato utilizzando gli stessi comandi di tipo dispatch attualmente inviati dal <b>Transport trolley</b>. 
+                    <p>L'opzione 3 permette di ottenere lo stesso risultato utilizzando gli stessi comandi di tipo dispatch attualmente inviati da <i>transporttrolley</i>. 
                         Quest'ultimo saprà comunque quando l'operazione <i>cmd(w)</i> termina siccome resta in ascolto dell'evento <i>info</i>.
                         </p>
                     <ul>
-                        <li>+ Richiede solo di modificare il destinatario dei messaggi del transporttrolley.</li>
+                        <li>+ Richiede solo di modificare il destinatario dei messaggi inviati da <i>transporttrolley</i>.</li>
                     </ul>
                 </td>
-                <td style="width:25%; min-width: 310px;"><img src="../sprint2/docs/_images/transporttrolley_option3_state_machine.png" class="centerimg" style="max-width: 300px;"/></td>
+                <td style="width:25%; min-width: 410px;"><img src="../sprint2/docs/_images/transporttrolley_option3_state_machine.png" class="centerimg" style="max-width: 250px;"/></td>
             </tr>
         </table>
-        <p>Le opzioni 2 e 3 sono ottime se il robot si deve fermare solo mentre questo sta procedendo in avanti. <br>
-            Sarebbe però opportuno fermare il robot anche tra un'operazione e l'altra, quindi non solo mentre si sta spostando in avanti. Ad esempio, supponiamo che il robot sia arrivato in indoor 
-            ed abbia appena iniziato a girarsi (stato TURN di <i>transporttrolley</i>). Se in questo momento la distanza diventa &ltDLIMIT, il robot si dovrebbe fermare subito dopo aver completato 
-            l'operazione di turn, ossia deve aspettare prima di eseguire una <b>Pickup</b>. Ma <b>Pickup</b> è un'operazione svolta da <i>transporttrolley</i>, quindi non può essere facilmente 
-            controllata dall'intermediario.
-            Inoltre, supponendo che la distanza diventi &ltDLIMIT durante una operazione di <b>Pickup</b>, il basicrobot riceverà dapprima un comando <i>cmd(w)</i>, e poi un <i>cmd(h)</i>, provocando dunque un glitch. 
+        <p>A livello architetturale le opzioni 2 e 3 sono ottime se il robot si deve fermare solo mentre questo sta procedendo in avanti. <br>
+            Sarebbe però opportuno fermare il robot anche tra un'operazione e l'altra, quindi non solo mentre si sta spostando in avanti. <br>
+            Ad esempio, supponiamo che il robot sia arrivato in indoor ed abbia appena iniziato a girarsi (stato TURN di <i>transporttrolley</i>). Se in questo momento la distanza diventa &ltDLIMIT, 
+            il robot si dovrebbe fermare subito dopo aver completato l'operazione di turn, ossia deve aspettare prima di eseguire una <b>Pickup</b>. Ma <b>Pickup</b> è un'operazione svolta da <i>transporttrolley</i>, 
+            quindi non può essere facilmente controllata da <i>intermediario</i>.<br>
+            Inoltre, supponendo che la distanza diventi &lt<b>DLIMIT</b> durante un'operazione di <b>Pickup</b>, il basicrobot riceverà dapprima un comando <i>cmd(w)</i>, e poi un <i>cmd(h)</i>, provocando dunque un glitch. 
         </p>
 
         <h4>OPZIONE 4 (= soluzione adottata)</h4>
-        <p>Optiamo quindi per una 4a opzione, che è per certi versi simile alla 1a, ma con la differenza che ora il transporttrolley espone un'ulteriore operazione che consentono al robot di 
+        <p>Optiamo quindi per una 4<sup>a</sup> opzione, che è per certi versi simile alla 1<sup>a</sup>, ma che a differenza di questa ora il transporttrolley espone ulteriori operazioni che consentono al robot di 
             essere "abilitato" o "disabilitato" a comando. <br>            
-            Tali operazioni assumono un significato particolare nel caso in cui il robot si stia muovendo in avanti: in tal caso il robot viene fermato, mentre la riabilitazione provoca il ripristino 
-            dell'avanzamento. Questo non accade per tutte le altre mosse, che vengono infatti portate sempre a termine (siccome più rapide), tuttavia subito dopo la loro esecuzione si aspetta il 
-            messaggio di riabilitazione prima di eseguire altre mosse.</p>
+            Le operazioni <i>disable</i> ed <i>enable</i> assumono un significato particolare nel caso in cui il robot si stia muovendo in avanti: in tal caso esso viene fermato, mentre la riabilitazione 
+            provoca il ripristino dell'avanzamento. Per tutte le altre mosse non vi è alcun ripristino, le operazioni vengono infatti portate sempre a termine (siccome più rapide), è solo dopo la loro esecuzione 
+            che si aspetta il messaggio di riabilitazione prima di eseguire altre mosse.</p>
         <img src="../sprint2/docs/_images/transporttrolley_option4_state_machine.png" class="centerimg" style="max-width: 700px;"/>
         <p>L'invio di questi comandi è delegato ad un apposito controllore <i>alarmcontrol</i>, la cui responsabilità è proprio quella di controllare le azioni da svolgere nel caso in cui la distanza 
-            rilevata dal sonar varchi la soglia DLIMIT. L'architettura logica diventa dunque la seguente:
+            rilevata dal sonar varchi la soglia <b>DLIMIT</b>. L'architettura logica diventa dunque la seguente:
         </p>
         <img src="../sprint2/docs/_images/transporttrolley_option4_logic_architecture.png" class="centerimg"/>
         <p style="font-size: 0.8rem;">N.B: per limitazioni imposti dal linguaggio QAK, inviamo i comandi <i>enable</i> e <i>disable</i> sottoforma di dispatch, siccome gli eventi non vengono accodati dagli attori.</p>
     
     <h3><b>Led</b></h3>
-    <p>Per il led seguiamo la stessa linea di ragionamento intrapresa per il sonar, ossia l'utlizzo dell'attore <i>alarmcontrol</i> per coordinare le azioni derivanti dalla variazione della
+    <p>Per il led seguiamo la stessa linea di ragionamento intrapresa per il sonar, utilizziamo cioè l'attore <i>alarmcontrol</i> per coordinare le azioni derivanti dalla variazione della
         distanza misurata dal sonar. Esso comanderà anche il cambiamento di stato del led.<br>
-        Per farlo il controllore ha tuttavia necessità di sapere se dove sia il robot attualmente, più in particolare è necessario sapere se esso è al di fuori di <b>HOME</b> o meno. Il reperimento
+        Per farlo il controllore ha tuttavia necessità di sapere dove sia il robot attualmente, più in particolare è necessario sapere se esso è al di fuori di <b>HOME</b> o meno. Il reperimento
         di tale informazione è possibile grazie all'emissione di eventi di tipo <i>moving(From,To)</i> da parte del <i>transporttrolley</i>: il robot si trova in <b>HOME</b> se e solo se 
-        <i>From</i>=<i>To</i>=<b>HOME</b>. </p>
+        <i>From</i>=<i>To</i>=<b>HOME</b>. L'architettura logica diventa dunque la seguente: </p>
     <img src="../sprint2/docs/_images/logic_architecture.png" class="centerimg"/>
 
     <h3>Attore-controller <i>alarmcontrol</i>:</h3>
     <p>La logica di questo attore viene qui descritta schematicametne in linguaggio naturale / pseudocodice.</p>
-    <p>La parte del controller che si occupa di gestire il robot risulta piuttosto semplice, si tratta semplicemente di inviare a <i>transporttrolley</i> dei messaggi <i>enable</i> o <i>disable</i> 
+    <p>La parte del controller che si occupa di gestire il robot risulta piuttosto semplice, si tratta di inviare a <i>transporttrolley</i> dei dispatch <i>enable</i> o <i>disable</i> 
         in base alla sola distanza rilevata:</p>
     <p class="pseudocode_i">
         <p>Ricezione evento <i>Distance(V)</i>:</p>
