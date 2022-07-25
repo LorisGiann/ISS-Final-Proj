@@ -123,7 +123,7 @@ dd{ margin-bottom: 8px;}
                     subscribeLocalActor(sonarActorName)</pre>
             </code>
             <p>In particolare l'attore <i>distancefilter</i> si occupa di filtrare gli eventi e inviare al prossimo attore solo eventi di tipo obstacle:obstacle($distance) solo nel caso in cui la distanza rilevata sia minore di una distanza prefissata.</p>
-            <img src="../docs_prof/html/_images/sonarpipenano.png" class="centerimg" style="width: 800px;"/>
+            <img src="../docs_prof/html/_images/sonarpipenano.png" class="centerimg" style="max-width: 800px;"/>
         </dd>
         <dt><b>DLIMT:</b></dt>
         <dd>Misura in CM della distanza limite. Se la distanza attualmente misurata dal <b>Sonar concreto</b> è ≤ DLIMT, il robot deve essere nello stato stopped. Qunando la distanza misurata &gt DLIMIT il robot può muoversi<br>
@@ -138,26 +138,27 @@ dd{ margin-bottom: 8px;}
     <dt><a href="../sprint1/sprint1.html#ProblemAnalysis">Link alla problem analysis dello SPRINT1</a></dt>
     <br><br>
 
-    <h3><b>Interazione di robot - sonar</b></h3>
+    <h3><b>Interazione robot - sonar</b></h3>
 
     <p>Sono state analizzate diverse possibilità per integrare in maniera coerente la possibilità di fermare e far riprendere le attività che il robot deve svolgere. <br>
-        A tal fine supponiamo di ricevere già eventi del tipo <i>stop</i> e <i>resume></i> (che sarà generato da qualche attore a sua volta collegato al sonar "di base")</p>
+        A tal fine supponiamo di ricevere già eventi del tipo <i>stop</i> e <i>resume</i> (che sarà generato da qualche attore a sua volta collegato al sonar "di base")</p>
 
     <h4>OPZIONE 1</h4>
-    <p>Il <b>Transport trolley</b> riceve direttamente gli eventi di stop e resume, inviando gli opportuni comandi di basso livello a <i>basicrobot</i>:</p>
-    <img src="../sprint2/docs/_images/transporttrolley_option1_logic_architecture.png" class="centerimg" style="width: 250px;"/>
+    <p><b>Transport trolley</b> riceve direttamente gli eventi <i>stop</i> e <i>resume</i>, inviando gli opportuni comandi di basso livello a <i>basicrobot</i>:</p>
+    <img src="../sprint2/docs/_images/transporttrolley_option1_logic_architecture.png" class="centerimg" style="max-width: 250px;"/>
     <ul>
         <li>- <b>Transport trolley</b> ha la responsabilità diretta di restare in ascolto di eventi riguardanti il sonar</li>
-        <li>- necessario aggiungere uno stato a <b>Transport trolley</b></li>
     </ul>
-    <p>La macchina a stati non risulta ancora eccessivamente complicata (rispetto a prima è stato aggiunto solo lo stato <i>halt</i>):</p>
-    <img src="../sprint2/docs/_images/transporttrolley_option1_state_machine.png" class="centerimg" style="width: 500px;"/>
+    <p>La macchina a stati dell'attore <i>transporttrolley</i> non risulta ancora eccessivamente complicata (rispetto a prima è stato aggiunto solo lo stato <i>halt</i>):</p>
+    <img src="../sprint2/docs/_images/transporttrolley_option1_state_machine.png" class="centerimg" style="max-width: 500px;"/>
+    <p style="font-size: 0.8rem;">N.B: per maggior robustezza è stata inserita la transizione da halt a turn nell'eventualità che il robot riesca comunque a raggiungere il muro subito 
+        dopo aver impartito il comando di halt (dovuto a inerzia del robot, ritardo nell'arrivo dell'evento <i>info</i>, ecc..).</p>
     
     <h4>OPZIONE 2 e 3</h4>
-    <p>Le due soluzioni sono simili, in quanto prevedono entrambe l'utilizzo di un attore intermedio (<i>intermediario</i>) il cui compito è quello di ricevere i comandi emessi dal <b>Transport trolley</b>, 
-        e di mandarli al sottostante <i>basicrobot</i> compatibilmente con i comandi di <i>stop</i> e <i>resume</i>. Più nello specifico, dovrà fermare il robot quando viene ricevuto il 
-        comando di <i>stop</i>, metnre se viene ricevuto <i>resume</i> il robot verrà fatto ripartire solo se era precedentemente in movimento.</p>
-        <img src="../sprint2/docs/_images/transporttrolley_option3_logic_architecture.png" class="centerimg" style="width: 300px;"/>
+    <p>Le opzioni 2 e 3 sono simili, in quanto prevedono entrambe l'utilizzo di un attore intermedio (qui chiamato <i>intermediario</i>) il cui compito è quello di ricevere i comandi inviati 
+        da <i>transporttrolley</i>, e di mandarli al sottostante <i>basicrobot</i> compatibilmente con i comandi di <i>stop</i> e <i>resume</i>. Più nello specifico, dovrà fermare il robot quando 
+        viene ricevuto il comando di <i>stop</i>, metnre se viene ricevuto <i>resume</i> il robot verrà fatto ripartire solo se era precedentemente in movimento.</p>
+        <img src="../sprint2/docs/_images/transporttrolley_option3_logic_architecture.png" class="centerimg" style="max-width: 300px;"/>
         <ul>
             <li>+ principio di singola resposabilità: Il transporttrolley traduce le destinazioni da raggiungere in comandi di basso livello, senza preoccuparsi di rimanere in ascolto di eventi dal sonar</li>
         </ul>
@@ -169,8 +170,6 @@ dd{ margin-bottom: 8px;}
                     <ul>
                         <li>- richiede di modificare il transport trolley</li>
                     </ul>
-                    <p style="font-size: 0.8rem;">N.B: per maggior robustezza è stata inserita la transizione da halt a collision nell'eventualità che il robot riesca comunque a raggiungere il muro subito 
-                        dopo aver impartito il comando di halt (dovuto a inerzia del robot, ritardo nell'arrivo dell'evento <i>info</i>, ecc..).</p>
                 </td>
                 <td style="width:25%; min-width: 310px;"><img src="../sprint2/docs/_images/transporttrolley_option2_state_machine.png" class="centerimg" style="width: 300px;"/></td>
             </tr>
@@ -183,7 +182,7 @@ dd{ margin-bottom: 8px;}
                         <li>+ Richiede solo di modificare il destinatario dei messaggi del transporttrolley.</li>
                     </ul>
                 </td>
-                <td style="width:25%; min-width: 310px;"><img src="../sprint2/docs/_images/transporttrolley_option3_state_machine.png" class="centerimg" style="width: 300px;"/></td>
+                <td style="width:25%; min-width: 310px;"><img src="../sprint2/docs/_images/transporttrolley_option3_state_machine.png" class="centerimg" style="max-width: 300px;"/></td>
             </tr>
         </table>
         <p>Le opzioni 2 e 3 sono ottime se il robot si deve fermare solo mentre questo sta procedendo in avanti. <br>
@@ -200,8 +199,8 @@ dd{ margin-bottom: 8px;}
             Tali operazioni assumono un significato particolare nel caso in cui il robot si stia muovendo in avanti: in tal caso il robot viene fermato, mentre la riabilitazione provoca il ripristino 
             dell'avanzamento. Questo non accade per tutte le altre mosse, che vengono infatti portate sempre a termine (siccome più rapide), tuttavia subito dopo la loro esecuzione si aspetta il 
             messaggio di riabilitazione prima di eseguire altre mosse.</p>
-        <p>
-            L'invio di questi comandi è delegato ad un apposito controllore <i>alarmcontrol</i>, la cui responsabilità è proprio quella di controllare le azioni da svolgere nel caso in cui la distanza 
+        <img src="../sprint2/docs/_images/transporttrolley_option4_state_machine.png" class="centerimg" style="max-width: 700px;"/>
+        <p>L'invio di questi comandi è delegato ad un apposito controllore <i>alarmcontrol</i>, la cui responsabilità è proprio quella di controllare le azioni da svolgere nel caso in cui la distanza 
             rilevata dal sonar varchi la soglia DLIMIT. L'architettura logica diventa dunque la seguente:
         </p>
         <img src="../sprint2/docs/_images/transporttrolley_option4_logic_architecture.png" class="centerimg"/>
@@ -245,7 +244,7 @@ dd{ margin-bottom: 8px;}
         </ul>
     </p>
     <p>Il modello QAK dell'attore consiste semplicemente nei 2 stati di gesione dei due eventi, più quello iniziale di attesa:</p>
-    <img src="../sprint2/docs/_images/alarmcontrol_state_machine.png" class="centerimg" style="width: 400px;"/>
+    <img src="../sprint2/docs/_images/alarmcontrol_state_machine.png" class="centerimg" style="max-width: 400px;"/>
     <p class="todo">Momento ottimo per riportare il QAK di questo <i>alarmcontrol</i>.</p>
 </div>
     
