@@ -15,6 +15,7 @@ QActor led context ctxled {
 	State s0 initial { 	     
 		discardMsg On
 		printCurrentMessage
+		updateResource [# "led(off)" #]
 		//[# sysUtil.logMsgs=true #]
  	}
  	Transition t0 whenEvent update_led -> handle_update
@@ -32,22 +33,26 @@ QActor led context ctxled {
  					whenMsg noMsg and [# newState=="blink" #] -> blink_on
  	
  	State off {
+ 		updateResource [# "led(off)" #]
  		println("Led off")
  	}
  	Transition t0 whenEvent update_led -> handle_update
  	
  	State on {
+ 		updateResource [# "led(on)" #]
  		println("Led on")
  	}
  	Transition t0 whenEvent update_led -> handle_update
  	
  	State blink_on {
+ 		updateResource [# "led(blink)" #]
  		println("Blinking on")
  	}
  	Transition t0 whenTime 500 -> blink_off
  					whenEvent update_led -> handle_update
  					
  	State blink_off {
+ 		updateResource [# "led(blink)" #]
  		println("Blinking off")
  	}
  	Transition t0 whenTime 500 -> blink_on
