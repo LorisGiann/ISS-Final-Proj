@@ -116,7 +116,7 @@ eclipse {
 
 application {
     // Define the main class for the application.
-    mainClass = 'it.unibo.ctxserver.MainCtxserverKt'
+    mainClass = 'it.unibo.ctxled.MainCtxledKt'
 }
 
 test {

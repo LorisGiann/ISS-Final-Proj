@@ -1,5 +1,4 @@
 //https://dl.bintray.com/jetbrains/kotlin/eclipse-plugin/0.8.19/
-
 System demo0    
 //mqttBroker "localhost" : 1883 eventTopic "demo0/events"
   
@@ -9,17 +8,17 @@ Dispatch noMsg : noMsg(_)
 
 Context ctxled ip [host="localhost" port=8095]
  
-
+ 
 QActor led context ctxled { 
 	[# lateinit var newState : String #]
 	
-	State s0 initial { 	    
+	State s0 initial { 	     
 		discardMsg On
 		//[# sysUtil.logMsgs=true #]
  	}
  	Transition t0 whenEvent update_led -> handle_update
  	
- 	State handle_update {
+ 	State handle_update { 
 		onMsg( update_led:update_led(ARG) ){
 			[# newState = payloadArg(0) #]
  			println("update_led(${newState})")

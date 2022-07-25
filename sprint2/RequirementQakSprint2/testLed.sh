@@ -14,7 +14,9 @@ gradle -PmainClass=it.unibo.ctxled.MainCtxledKt jar
 
 SAVEIFS=$IFS   # Save current IFS (Internal Field Separator)
 IFS=$'\n'      # Change IFS to newline char
+
 declare -a TEST_METHODS=(
+    "testSprint2.TestLed.test_always_ok"
     "testSprint2.TestLed.test_on"
 )
 
