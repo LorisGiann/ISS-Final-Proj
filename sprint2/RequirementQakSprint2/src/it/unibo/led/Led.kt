@@ -19,6 +19,7 @@ class Led ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scope 
 				state("s0") { //this:State
 					action { //it:State
 						discardMessages = true
+						println("$name in ${currentState.stateName} | $currentMsg")
 					}
 					 transition(edgeName="t00",targetState="handle_update",cond=whenEvent("update_led"))
 				}	 
