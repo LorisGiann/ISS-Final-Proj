@@ -15,7 +15,10 @@ class Led ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scope 
 	}
 	override fun getBody() : (ActorBasicFsm.() -> Unit){
 		 lateinit var ledM : `it.unibo`.radarSystem22.domain.interfaces.ILed
-			   lateinit var newState : String  
+			   lateinit var newState : String 
+			   //set domainsystemconfig
+			   `it.unibo`.radarSystem22.domain.utils.DomainSystemConfig.simulation = true
+			   `it.unibo`.radarSystem22.domain.utils.DomainSystemConfig.ledGui      = true 
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
