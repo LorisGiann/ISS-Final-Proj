@@ -44,12 +44,15 @@ Dispatch noMsg : noMsg(_)
 //SONAR
 Dispatch sonaractivate   : info(ARG)
 Dispatch sonardeactivate : info(ARG)
-Event    sonardistance   : distance( V )   //emitted by sonarSimulator or sonardatasource	
+Event    sonardistance   : distance( V )   //emitted by sonarSimulator or sonardatasource
+Event    sonardata       : distance( V )   //for the application level	
 Event    obstacle        : obstacle( D )   //for the application level
 
 Dispatch enable			 : enable(_)
 Dispatch disable		 : disable(_)
 
+//LED 
+Event    update_led 	 : update_led(ARG)
 // ------------------ CONTEXTS -------------------
 //REMEMBER TO PUT datacleaner AND distancefilter IN THE SAME CONTEXT OF basicrobot
 Context ctxserver ip [host="localhost" port=8095]
@@ -450,13 +453,7 @@ QActor alarmcontrol context ctxalarm{
 	[# var ISHOME: Boolean = true
 	   val DLIMIT: Int = 10
 	   var DISABLE: Boolean = false
-	   
-	   //define sonar
-	   val simulate       = true
-	   val sonarActorName = "alarmcontrol"
-	   val usingDomain    = false
-	
-		
+	   		
 	   fun checkIsHome(F: String, T: String) : Boolean {
 	       return F==T;
 	   }	   
@@ -466,16 +463,8 @@ QActor alarmcontrol context ctxalarm{
 		printCurrentMessage
 		println("Activate the sonar")
 		updateResource [# "alarmcontrol(activateSonar)" #]	 
-		run  sonarConfig.configureTheSonar(simulate, sonarActorName, usingDomain)
-		if[#  `it.unibo`.radarSystem22.domain.utils.DomainSystemConfig.simulation #]{
-			println("sonar simulator testing")
-			//forward sonarsimulator -m sonaractivate : info(ok) 
-			forward sonarsimulatortesting -m sonaractivate : info(ok) 
-			//run sonarConfig.activateSonarSimulated() //usingDomain
-		}else {
-			println("sonar real")
-			forward sonardatasource -m sonaractivate : info(ok)  
-		}
+		forward sonar -m sonaractivate : info(ok)
+
 	}
 	Goto wait
 
@@ -483,7 +472,7 @@ QActor alarmcontrol context ctxalarm{
 		println("wait")
 	}
 	Transition t0 whenEvent moving -> handle_moving
-				  whenEvent sonardistance -> handle_distance 
+				  whenEvent sonardata -> handle_distance 
 				  
 	State handle_moving{
 		onMsg( moving : moving(F,T) ){
@@ -493,22 +482,27 @@ QActor alarmcontrol context ctxalarm{
 			updateResource [# "alarmcontrol(handle_moving,${F},${T})" #]	 
 			if [# ISHOME==true #]{
   		    	println("led off")
+  		    	emit update_led : update_led(off)
   		    }else {
   		    	println("led blink")
+  		    	emit update_led : update_led(blink)
   		    }
 		}
 	}
 	Goto wait
 	
 	State handle_distance{
-		onMsg( sonardistance : distance(D) ){
+		onMsg( sonardata : distance(D) ){
    		 	[# val D = payloadArg(0).toInt() #]  
   		    //println("Distance ${D}")		    
   		    //LED
   		    if [# ISHOME==false && D<DLIMIT#]{
+  		    	emit update_led : update_led(on)
   		    	println("led on")
-  		    }else {
+  		    }
+  		    if [# ISHOME==false && D>=DLIMIT#]{ 
   		    	println("led blink")
+  		    	emit update_led : update_led(blink)
   		    }
   		    
   		    if [# D<DLIMIT#]{
@@ -537,6 +531,121 @@ QActor alarmcontrol context ctxalarm{
 	}
 	Goto wait
 }
+
+QActor sonar context ctxalarm {
+	[# val simulate       = true
+	   val sonarActorName = "sonar"
+	   val usingDomain    = false
+	#]
+	State s0 initial {
+		printCurrentMessage
+		run  sonarConfig.configureTheSonar(simulate, sonarActorName, usingDomain)
+		 
+		//ASSUMPTION: the sonar subsystem emits the event sonar:distance(V)
+	}
+	Transition t0 whenMsg sonaractivate   -> activateTheSonar
+			      whenMsg sonardeactivate -> deactivateTheSonar
+	
+	State activateTheSonar{
+		printCurrentMessage
+		println("activate the sonar")
+		if[#  `it.unibo`.radarSystem22.domain.utils.DomainSystemConfig.simulation #]{
+			println("sonar simulator")
+			updateResource [# "sonaractivate" #]
+			forward sonarsimulatortesting -m sonaractivate : info(ok) 
+			//run sonarConfig.activateSonarSimulated() //usingDomain
+		}else {
+			println("sonar real")
+			forward sonardatasource -m sonaractivate : info(ok)  
+		}
+	}
+	Transition t0  whenEvent sonardistance         -> handleSonarData  
+	               whenMsg   sonardeactivate       -> deactivateTheSonar
+	
+	State deactivateTheSonar{
+		printCurrentMessage
+	}
+	Goto end
+  
+  	State handleSonarData{
+  		 onMsg( sonar : distance(D) ){
+   		 	[# val D = payloadArg(0) #]   
+   		 	updateResource [# "Distance ${D}" #]
+  		    println("Distance ${D}")
+  		 	emit sonardata : distance($D) //for the application
+  		 }
+  	}
+   	Transition t0 whenEvent sonardistance -> handleSonarData
+   				  whenMsg   sonardeactivate -> deactivateTheSonar
+   		
+	State end{  
+		println("sonarqak22 BYE")
+		updateResource [# "sonardeactivate" #]
+		[# System.exit(0) #]
+	}
+}
+
+QActor led context ctxalarm{ 
+	[# lateinit var ledM : `it.unibo`.radarSystem22.domain.interfaces.ILed
+	   lateinit var newState : String #]
+	
+	State s0 initial { 	     
+		discardMsg On
+		printCurrentMessage
+		updateResource [# "led(off)" #]
+		println("${name} STARTS")
+		[# ledM = `it.unibo`.radarSystem22.domain.models.LedModel.create() #]
+		//[# sysUtil.logMsgs=true #]
+ 	}
+ 	Transition t0 whenEvent update_led -> handle_update
+ 	
+ 	State handle_update { 
+		onMsg( update_led:update_led(ARG) ){
+			[# newState = payloadArg(0) #]
+ 			println("update_led(${newState})")
+ 			forward led -m noMsg : noMsg(_)
+ 		}
+ 	}
+ 	//Transition to else Goto off
+ 	Transition toNewState whenMsg noMsg and [# newState=="off" #] -> off
+ 						  whenMsg noMsg and [# newState=="on" #] -> on
+ 						  whenMsg noMsg and [# newState=="blink" #] -> blink_on
+ 	
+ 	State off {
+ 		updateResource [# "led(off)" #]
+ 		println("Led off")
+ 		[# unibo.actor22comm.utils.ColorsOut.outappl("${name} - off", unibo.actor22comm.utils.ColorsOut.GREEN)#]
+ 		[# ledM.turnOff()#]
+ 	}
+ 	Transition t0 whenEvent update_led -> handle_update
+ 	
+ 	State on {
+ 		updateResource [# "led(on)" #]
+ 		[# unibo.actor22comm.utils.ColorsOut.outappl("${name} - on", unibo.actor22comm.utils.ColorsOut.GREEN)#]
+ 		println("Led on")
+ 		[# ledM.turnOn()#]
+ 	}
+ 	Transition t0 whenEvent update_led -> handle_update
+ 	
+ 	State blink_on {
+ 		updateResource [# "led(blink)" #]
+ 		[# unibo.actor22comm.utils.ColorsOut.outappl("${name} - on", unibo.actor22comm.utils.ColorsOut.GREEN)#]
+ 		println("Blinking on")
+ 		[# ledM.turnOn()#]
+ 	}
+ 	Transition t0 whenTime 500 -> blink_off
+ 					whenEvent update_led -> handle_update
+ 					
+ 	State blink_off {
+ 		updateResource [# "led(blink)" #]
+ 		[# unibo.actor22comm.utils.ColorsOut.outappl("${name} - off", unibo.actor22comm.utils.ColorsOut.GREEN)#]
+ 		println("Blinking off")
+ 		[# ledM.turnOff()#]
+ 	}
+ 	Transition t0 whenTime 500 -> blink_on
+ 					whenEvent update_led -> handle_update
+}
+
 
 
 //wasteservice TESTER
