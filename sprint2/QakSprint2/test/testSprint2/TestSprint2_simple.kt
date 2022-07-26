@@ -47,11 +47,11 @@ internal class TestSprint2_simple {
             TestUtils.terminateProcOnPort(8096); //making sure that the port is free
             TestUtils.terminateProcOnPort(8097); //making sure that the port is free
 
-            val (prS, processHandleS) = TestUtils.runCtx("build/libs/it.unibo.ctxserver.MainCtxserverKt-1.0.jar")
+            val (prS, processHandleS) = TestUtils.runCtx("build/libs/it.unibo.ctxserver.MainCtxserverCustomKt-1.0.jar")
             prServer=prS; processHandleServer=processHandleS
-            val (prR, processHandleR) = TestUtils.runCtx("build/libs/it.unibo.ctxrobot.MainCtxrobotKt-1.0.jar")
+            val (prR, processHandleR) = TestUtils.runCtx("build/libs/it.unibo.ctxrobot.MainCtxrobotCustomKt-1.0.jar")
             prRobot=prR; processHandleRobot=processHandleR
-            val (prA, processHandleA) = TestUtils.runCtx("build/libs/it.unibo.ctxalarm.MainCtxalarmKt-1.0.jar")
+            val (prA, processHandleA) = TestUtils.runCtx("build/libs/it.unibo.ctxalarm.MainCtxalarmCustomKt-1.0.jar")
             prAlarm=prA; processHandleAlarm=processHandleA
         } catch (e: IOException) {
             ColorsOut.outappl("Errore launch ", ColorsOut.RED)
