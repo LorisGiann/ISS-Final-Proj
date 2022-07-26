@@ -82,8 +82,8 @@ internal class TestLed {
                 connTcp.close()
                 ColorsOut.outappl(to!!.getHistory().toString(), ColorsOut.MAGENTA)
                 Assert.assertTrue(to!!.checkNextSequence(arrayOf(
-                    "led(off)",
-                    "led(on)",
+                    "led(off,false)",
+                    "led(on,true)",
                 )))
 
             } catch (e: java.lang.Exception) {
@@ -107,8 +107,8 @@ internal class TestLed {
                 connTcp.close()
                 ColorsOut.outappl(to!!.getHistory().toString(), ColorsOut.MAGENTA)
                 Assert.assertTrue(to!!.checkNextSequence(arrayOf(
-                    "led(off)",
-                    "led(off)",
+                    "led(off,false)",
+                    "led(off,false)",
                 )))
 
             } catch (e: java.lang.Exception) {
@@ -132,8 +132,8 @@ internal class TestLed {
                 connTcp.close()
                 ColorsOut.outappl(to!!.getHistory().toString(), ColorsOut.MAGENTA)
                 Assert.assertTrue(to!!.checkNextSequence(arrayOf(
-                    "led(off)",
-                    "led(blink)",
+                    "led(off,false)",
+                    "led(blink,true)",
                 )))
 
             } catch (e: java.lang.Exception) {
@@ -159,10 +159,10 @@ internal class TestLed {
                 CommUtils.delay(300)
                 connTcp.close()
                 Assert.assertTrue(to!!.checkNextSequence(arrayOf(
-                    "led(off)",
-                    "led(on)",
-                    "led(off)",
-                    "led(blink)"
+                    "led(off,false)",
+                    "led(on,true)",
+                    "led(off,false)",
+                    "led(blink,true)"
                 )))
 
             } catch (e: java.lang.Exception) {

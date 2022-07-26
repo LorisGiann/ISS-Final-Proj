@@ -64,9 +64,11 @@ class Alarmcontrol ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 								)
 								if(  ISHOME==true  
 								 ){println("led off")
+								emit("update_led", "update_led(off)" ) 
 								}
 								else
 								 {println("led blink")
+								 emit("update_led", "update_led(blink)" ) 
 								 }
 						}
 					}
@@ -78,11 +80,13 @@ class Alarmcontrol ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 val D = payloadArg(0).toInt()  
 								if(  ISHOME==false && D<DLIMIT 
-								 ){println("led on")
+								 ){emit("update_led", "update_led(on)" ) 
+								println("led on")
 								}
-								else
-								 {println("led blink")
-								 }
+								if(  ISHOME==false && D>=DLIMIT 
+								 ){println("led blink")
+								emit("update_led", "update_led(blink)" ) 
+								}
 								if(  D<DLIMIT 
 								 ){updateResourceRep( "alarmcontrol(handle_distance,${D},${DLIMIT},true)"  
 								)
