@@ -1,4 +1,4 @@
-package testSprint1;
+package testSprint2;
 
 import unibo.comm22.interfaces.Interaction2021;
 import unibo.comm22.tcp.TcpClientSupport;

@@ -1,4 +1,4 @@
-package testSprint1;
+package testSprint2;
 
 import org.eclipse.californium.core.CoapHandler;
 import org.eclipse.californium.core.CoapResponse;

@@ -1,4 +1,4 @@
-package testSprint1
+package testSprint2
 
 import it.unibo.ctxserver.main
 import it.unibo.kactor.QakContext
@@ -17,12 +17,14 @@ import java.time.Duration
 import kotlin.test.Test
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation::class)
-internal class TestSprint1_simple {
+internal class TestSprint2_simple {
     private var connTransportTrolley: CoapConnection? = null
     private var connWasteService: CoapConnection? = null
     private var to: TestObserver? = null
     private var processHandleServer: ProcessHandle? = null
     private var processHandleRobot: ProcessHandle? = null
+	private var processHandleAlarm: ProcessHandle? = null
+    private var prAlarm: Process? = null
     private var prServer: Process? = null
     private var prRobot: Process? = null
 
@@ -41,6 +43,7 @@ internal class TestSprint1_simple {
     fun up() {
         CommSystemConfig.tracing = false
         try {
+            TestUtils.terminateProcOnPort(8097); //making sure that the port is free
             TestUtils.terminateProcOnPort(8096); //making sure that the port is free
             TestUtils.terminateProcOnPort(8095); //making sure that the port is free
 
@@ -48,6 +51,8 @@ internal class TestSprint1_simple {
             prRobot=prR; processHandleRobot=processHandleR
             val (prS, processHandleS) = TestUtils.runCtx("build/libs/it.unibo.ctxserver.MainCtxserverKt-1.0.jar")
             prServer=prS; processHandleServer=processHandleS
+            val (prA, processHandleA) = TestUtils.runCtx("build/libs/it.unibo.ctxrobot.MainCtxalarmKt-1.0.jar")
+            prAlarm=prA; processHandleAlarm=processHandleA
         } catch (e: IOException) {
             ColorsOut.outappl("Errore launch ", ColorsOut.RED)
             System.exit(1)
@@ -67,12 +72,16 @@ internal class TestSprint1_simple {
             prRobot!!.destroy()
             processHandleServer!!.destroy()
             prServer!!.destroy()
+			processHandleAlarm!!.destroy()
+            prAlarm!!.destroy()
         }catch(e :  NullPointerException){ }
         CommUtils.delay(1000)
         //since sometime this isn't enough, do it the heavy way...
         processHandleRobot!!.destroyForcibly()
         processHandleServer!!.destroyForcibly()
-
+		processHandleAlarm!!.destroyForcibly()
+        //val s = ServerSocket(8095)
+        //s.close()
         connTransportTrolley!!.close()
         connWasteService!!.close()
     }

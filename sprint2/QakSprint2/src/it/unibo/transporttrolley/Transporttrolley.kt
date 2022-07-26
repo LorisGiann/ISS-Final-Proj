@@ -30,6 +30,9 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 						updateResourceRep( "transporttrolley(wait,$currpos,$dest)"  
 						)
 						println("transporttrolley | Wait (Dest: ${dest} CurrPos: ${currpos})")
+						 val F = currpos 
+								   val T = dest 
+						emit("moving", "moving($F,$T)" ) 
 						if(  currpos!=dest  
 						 ){forward("noMsg", "noMsg(_)" ,"transporttrolley" ) 
 						}
@@ -41,6 +44,24 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 					transition(edgeName="toNewState20",targetState="set_new_dest",cond=whenRequestGuarded("move",{ currpos==dest 
 					}))
 					transition(edgeName="toNewState21",targetState="forward_robot",cond=whenDispatch("noMsg"))
+					transition(edgeName="toNewState22",targetState="halt",cond=whenDispatch("disable"))
+				}	 
+				state("halt") { //this:State
+					action { //it:State
+						updateResourceRep( "transporttrolley(halt,$currpos,$dest)"  
+						)
+						forward("cmd", "cmd(h)" ,"basicrobot" ) 
+					}
+					 transition(edgeName="toNewState23",targetState="wait",cond=whenDispatch("enable"))
+				}	 
+				state("forward_halt") { //this:State
+					action { //it:State
+						updateResourceRep( "transporttrolley(forward_halt,$currpos,$dest)"  
+						)
+						forward("cmd", "cmd(h)" ,"basicrobot" ) 
+					}
+					 transition(edgeName="toNewState24",targetState="forward_robot",cond=whenDispatch("enable"))
+					transition(edgeName="toNewState25",targetState="turn",cond=whenEvent("info"))
 				}	 
 				state("picking_up") { //this:State
 					action { //it:State
@@ -69,8 +90,8 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 						if( checkMsgContent( Term.createTerm("move(POSITION)"), Term.createTerm("move(ARG)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 dest=ws.Position.valueOf(payloadArg(0))  
-								 val F = $currpos 
-											   val T = $dest 
+								 val F = currpos 
+											   val T = dest 
 								println("transporttrolley | New robot destination: ${dest}")
 								emit("moving", "moving($F,$T)" ) 
 						}
@@ -83,16 +104,14 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 						)
 						forward("cmd", "cmd(w)" ,"basicrobot" ) 
 					}
-					 transition(edgeName="t122",targetState="turn",cond=whenEvent("info"))
+					 transition(edgeName="t126",targetState="turn",cond=whenEvent("info"))
+					transition(edgeName="t127",targetState="forward_halt",cond=whenDispatch("disable"))
 				}	 
 				state("turn") { //this:State
 					action { //it:State
 						updateResourceRep( "transporttrolley(turn,$currpos,$dest)"  
 						)
 						currpos=ws.func.nextPosition(currpos)  
-						 val F = $currpos 
-								   val T = $dest 
-						emit("moving", "moving($F,$T)" ) 
 						forward("cmd", "cmd(l)" ,"basicrobot" ) 
 						delay(450) 
 						if(  currpos==dest  

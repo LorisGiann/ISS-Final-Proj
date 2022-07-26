@@ -87,6 +87,9 @@ dependencies {
     implementation name: 'unibo.comm22-1.1'
     implementation name: 'unibonoawtsupports'  //required by the old infrastructure
 	implementation name: 'unibo.actor22-1.1'
+	
+	//RadarSystem
+	implementation name: 'it.unibo.radarSystem22.domain-1.0'
 
     /* AIMA **************************************************************************************************************** */
  	//PLANNER  

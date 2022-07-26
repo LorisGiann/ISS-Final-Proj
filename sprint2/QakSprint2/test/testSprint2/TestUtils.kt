@@ -1,4 +1,4 @@
-package testSprint1
+package testSprint2
 
 import unibo.comm22.utils.ColorsOut
 import unibo.comm22.utils.CommUtils

@@ -1,4 +1,4 @@
-package testSprint1
+package testSprint2
 
 import it.unibo.kactor.QakContext
 import org.eclipse.californium.core.CoapHandler
@@ -13,12 +13,15 @@ import java.time.Duration
 import kotlin.test.Test
 
 //@TestMethodOrder(MethodOrderer.OrderAnnotation::class)
-internal class TestSprint1_hystory {
+internal class TestSprint2_hystory {
     private var connTransportTrolley: CoapConnection? = null
     private var connWasteService: CoapConnection? = null
+    private var connAlarmControl: CoapConnection? = null
     private var to: TestObserver? = null
     private var processHandleServer: ProcessHandle? = null
     private var processHandleRobot: ProcessHandle? = null
+	private var processHandleAlarm: ProcessHandle? = null
+    private var prAlarm: Process? = null
     private var prServer: Process? = null
     private var prRobot: Process? = null
     private var serverThread: Thread? = null
@@ -37,7 +40,9 @@ internal class TestSprint1_hystory {
     @Throws(IOException::class, InterruptedException::class)
     fun up() {
         CommSystemConfig.tracing = false
+
         try {
+			TestUtils.terminateProcOnPort(8097); //making sure that the port is free
             TestUtils.terminateProcOnPort(8096); //making sure that the port is free
             TestUtils.terminateProcOnPort(8095); //making sure that the port is free
 
@@ -45,6 +50,8 @@ internal class TestSprint1_hystory {
             prRobot=prR; processHandleRobot=processHandleR
             val (prS, processHandleS) = TestUtils.runCtx("build/libs/it.unibo.ctxserver.MainCtxserverKt-1.0.jar")
             prServer=prS; processHandleServer=processHandleS
+            val (prA, processHandleA) = TestUtils.runCtx("build/libs/it.unibo.ctxalarm.MainCtxalarmKt-1.0.jar")
+            prAlarm=prA; processHandleAlarm=processHandleA
         } catch (e: IOException) {
             ColorsOut.outappl("Errore launch ", ColorsOut.RED)
             System.exit(1)
@@ -58,7 +65,7 @@ internal class TestSprint1_hystory {
 
         //waitForApplStarted()
         to = TestObserver()
-        startObserverCoap("localhost", to)
+        startObserverCoap("localhost", "127.0.0.1","127.0.0.1", to)
         CommUtils.delay(2000)
         ColorsOut.outappl("INITIALIZATION DONE", ColorsOut.BLUE)
     }
@@ -72,15 +79,19 @@ internal class TestSprint1_hystory {
             prRobot!!.destroy()
             processHandleServer!!.destroy()
             prServer!!.destroy()
+			processHandleAlarm!!.destroy()
+            prAlarm!!.destroy()
         }catch(e :  NullPointerException){ }
         CommUtils.delay(1000)
         //since sometime this isn't enough, do it the heavy way...
         processHandleRobot!!.destroyForcibly()
         processHandleServer!!.destroyForcibly()
+		processHandleAlarm!!.destroyForcibly()
         //val s = ServerSocket(8095)
         //s.close()
         connTransportTrolley!!.close()
         connWasteService!!.close()
+        connAlarmControl!!.close()
     }
 
     protected fun waitForApplStarted() {
@@ -103,7 +114,7 @@ internal class TestSprint1_hystory {
     @Test
     //@Order(1)
     fun test_accepted() {
-        assertTimeoutPreemptively<Unit>(Duration.ofSeconds(15)){
+        assertTimeoutPreemptively<Unit>(Duration.ofSeconds(20)){
             ColorsOut.outappl("test_accepted STARTS", ColorsOut.BLUE)
             val truckRequestStr = "msg(depositrequest, request,python,wasteservice,depositrequest(GLASS,2),1)"
             try {
@@ -426,28 +437,38 @@ internal class TestSprint1_hystory {
         return answer.contains(check!!)
     }
 
-    protected fun startObserverCoap(addr: String, handler: CoapHandler?) {
+    protected fun startObserverCoap(addr1: String, addr2: String, addr3: String, handler: CoapHandler?) {
         /*object : Thread() {
             override fun run() {*/
                 try {
                     val qakdestination1 = "wasteservice"
                     val qakdestination2 = "transporttrolley"
+                    val qakdestination3 = "alarmcontrol"
                     val ctxqakdest1 = "ctxserver"
                     val ctxqakdest2 = "ctxrobot"
+                    val ctxqakdest3 = "ctxalarm"
                     val applPort1 = "8095"
                     val applPort2 = "8096"
-                    connWasteService = CoapConnection("$addr:$applPort1", "$ctxqakdest1/$qakdestination1")
-                    connTransportTrolley = CoapConnection("$addr:$applPort2", "$ctxqakdest2/$qakdestination2")
+                    val applPort3 = "8097"
+                    connWasteService = CoapConnection("$addr1:$applPort1", "$ctxqakdest1/$qakdestination1")
+                    connTransportTrolley = CoapConnection("$addr2:$applPort2", "$ctxqakdest2/$qakdestination2")
+                    connAlarmControl = CoapConnection("$addr3:$applPort3", "$ctxqakdest3/$qakdestination3")
                     connWasteService!!.observeResource(handler)
                     connTransportTrolley!!.observeResource(handler)
+                    connAlarmControl!!.observeResource(handler)
                     ColorsOut.outappl("connecting via Coap conn:$connWasteService", ColorsOut.CYAN)
                     ColorsOut.outappl("connecting via Coap conn:$connTransportTrolley", ColorsOut.CYAN)
+                    ColorsOut.outappl("connecting via Coap conn:$connAlarmControl", ColorsOut.CYAN)
                     while (connWasteService!!.request("") === "0") {
                         ColorsOut.outappl("waiting for conn $connWasteService", ColorsOut.CYAN)
                         CommUtils.delay(500)
                     }
                     while (connTransportTrolley!!.request("") === "0") {
                         ColorsOut.outappl("waiting for conn $connTransportTrolley", ColorsOut.CYAN)
+                        CommUtils.delay(500)
+                    }
+                    while (connAlarmControl!!.request("") === "0") {
+                        ColorsOut.outappl("waiting for conn $connAlarmControl", ColorsOut.CYAN)
                         CommUtils.delay(500)
                     }
                 } catch (e: Exception) {
