@@ -17,13 +17,7 @@ class Alarmcontrol ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 		 var ISHOME: Boolean = true
 			   val DLIMIT: Int = 10
 			   var DISABLE: Boolean = false
-			   
-			   //define sonar
-			   val simulate       = true
-			   val sonarActorName = "alarmcontrol"
-			   val usingDomain    = false
-			
-				
+			   		
 			   fun checkIsHome(F: String, T: String) : Boolean {
 			       return F==T;
 			   }	   
@@ -34,15 +28,7 @@ class Alarmcontrol ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 						println("Activate the sonar")
 						updateResourceRep( "alarmcontrol(activateSonar)"  
 						)
-						sonarConfig.configureTheSonar( simulate, sonarActorName, usingDomain  )
-						if(   `it.unibo`.radarSystem22.domain.utils.DomainSystemConfig.simulation  
-						 ){println("sonar simulator testing")
-						forward("sonaractivate", "info(ok)" ,"sonarsimulatortesting" ) 
-						}
-						else
-						 {println("sonar real")
-						 forward("sonaractivate", "info(ok)" ,"sonardatasource" ) 
-						 }
+						forward("sonaractivate", "info(ok)" ,"sonar" ) 
 					}
 					 transition( edgeName="goto",targetState="wait", cond=doswitch() )
 				}	 
@@ -51,7 +37,7 @@ class Alarmcontrol ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 						println("wait")
 					}
 					 transition(edgeName="t034",targetState="handle_moving",cond=whenEvent("moving"))
-					transition(edgeName="t035",targetState="handle_distance",cond=whenEvent("sonardistance"))
+					transition(edgeName="t035",targetState="handle_distance",cond=whenEvent("sonardata"))
 				}	 
 				state("handle_moving") { //this:State
 					action { //it:State

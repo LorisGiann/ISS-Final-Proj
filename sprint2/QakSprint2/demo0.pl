@@ -13,4 +13,5 @@ context(ctxalarm, "127.0.0.1",  "TCP", "8097").
   qactor( transporttrolley, ctxrobot, "it.unibo.transporttrolley.Transporttrolley").
   qactor( basicrobot, ctxrobot, "it.unibo.basicrobot.Basicrobot").
   qactor( alarmcontrol, ctxalarm, "it.unibo.alarmcontrol.Alarmcontrol").
+  qactor( sonar, ctxalarm, "it.unibo.sonar.Sonar").
   qactor( led, ctxalarm, "it.unibo.led.Led").

@@ -26,7 +26,7 @@ class Led ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scope 
 						println("${name} STARTS")
 						 ledM = `it.unibo`.radarSystem22.domain.models.LedModel.create()  
 					}
-					 transition(edgeName="t036",targetState="handle_update",cond=whenEvent("update_led"))
+					 transition(edgeName="t042",targetState="handle_update",cond=whenEvent("update_led"))
 				}	 
 				state("handle_update") { //this:State
 					action { //it:State
@@ -37,11 +37,11 @@ class Led ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scope 
 								forward("noMsg", "noMsg(_)" ,"led" ) 
 						}
 					}
-					 transition(edgeName="toNewState37",targetState="off",cond=whenDispatchGuarded("noMsg",{ newState=="off"  
+					 transition(edgeName="toNewState43",targetState="off",cond=whenDispatchGuarded("noMsg",{ newState=="off"  
 					}))
-					transition(edgeName="toNewState38",targetState="on",cond=whenDispatchGuarded("noMsg",{ newState=="on"  
+					transition(edgeName="toNewState44",targetState="on",cond=whenDispatchGuarded("noMsg",{ newState=="on"  
 					}))
-					transition(edgeName="toNewState39",targetState="blink_on",cond=whenDispatchGuarded("noMsg",{ newState=="blink"  
+					transition(edgeName="toNewState45",targetState="blink_on",cond=whenDispatchGuarded("noMsg",{ newState=="blink"  
 					}))
 				}	 
 				state("off") { //this:State
@@ -52,7 +52,7 @@ class Led ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scope 
 						 unibo.actor22comm.utils.ColorsOut.outappl("${name} - off", unibo.actor22comm.utils.ColorsOut.GREEN) 
 						 ledM.turnOff() 
 					}
-					 transition(edgeName="t040",targetState="handle_update",cond=whenEvent("update_led"))
+					 transition(edgeName="t046",targetState="handle_update",cond=whenEvent("update_led"))
 				}	 
 				state("on") { //this:State
 					action { //it:State
@@ -62,7 +62,7 @@ class Led ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scope 
 						println("Led on")
 						 ledM.turnOn() 
 					}
-					 transition(edgeName="t041",targetState="handle_update",cond=whenEvent("update_led"))
+					 transition(edgeName="t047",targetState="handle_update",cond=whenEvent("update_led"))
 				}	 
 				state("blink_on") { //this:State
 					action { //it:State
@@ -74,8 +74,8 @@ class Led ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scope 
 						stateTimer = TimerActor("timer_blink_on", 
 							scope, context!!, "local_tout_led_blink_on", 500.toLong() )
 					}
-					 transition(edgeName="t042",targetState="blink_off",cond=whenTimeout("local_tout_led_blink_on"))   
-					transition(edgeName="t043",targetState="handle_update",cond=whenEvent("update_led"))
+					 transition(edgeName="t048",targetState="blink_off",cond=whenTimeout("local_tout_led_blink_on"))   
+					transition(edgeName="t049",targetState="handle_update",cond=whenEvent("update_led"))
 				}	 
 				state("blink_off") { //this:State
 					action { //it:State
@@ -87,8 +87,8 @@ class Led ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scope 
 						stateTimer = TimerActor("timer_blink_off", 
 							scope, context!!, "local_tout_led_blink_off", 500.toLong() )
 					}
-					 transition(edgeName="t044",targetState="blink_on",cond=whenTimeout("local_tout_led_blink_off"))   
-					transition(edgeName="t045",targetState="handle_update",cond=whenEvent("update_led"))
+					 transition(edgeName="t050",targetState="blink_on",cond=whenTimeout("local_tout_led_blink_off"))   
+					transition(edgeName="t051",targetState="handle_update",cond=whenEvent("update_led"))
 				}	 
 			}
 		}
