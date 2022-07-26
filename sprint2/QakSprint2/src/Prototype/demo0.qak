@@ -54,7 +54,7 @@ Dispatch disable		 : disable(_)
 //REMEMBER TO PUT datacleaner AND distancefilter IN THE SAME CONTEXT OF basicrobot
 Context ctxserver ip [host="localhost" port=8095]
 Context ctxrobot ip  [host="127.0.0.1" port=8096]
-Context ctxalarm ip  [host="127.0.0.1" port=8097] //127.0.0.2 per avere due pid distinti, ma cosi si riesce ad fare un collegamento coAP unico
+Context ctxalarm ip  [host="127.0.0.1" port=8097]
 // ------------------------------------------------
 
 CodedQActor distancefilter context ctxserver className "rx.distanceFilter"   //Nel caso di robot virtuale semplicemente assorbe eventi obstacle e reinvia dispatch "obstacle:obstacle(virtual)" a basicrobot. Nel caso di robot reali riceve messaggi "sonarRobot" e invia a basicrobot dispatch "obstacle:obstacle(dist)" se vicino, altrimenti sonardata", "sonardata:distance(dist)" se lontano.

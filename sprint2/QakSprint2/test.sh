@@ -10,9 +10,9 @@
 JAR_OUPUT_PATH=build/libs
 
 #first generate the jar files
-gradle -PmainClass=it.unibo.ctxrobot.MainCtxrobotKt jar
-gradle -PmainClass=it.unibo.ctxserver.MainCtxserverKt jar
-gradle -PmainClass=it.unibo.ctxalarm.MainCtxalarmKt jar
+gradle -PmainClass=it.unibo.ctxrobot.MainCtxrobotCustomKt jar
+gradle -PmainClass=it.unibo.ctxserver.MainCtxserverCustomKt jar
+gradle -PmainClass=it.unibo.ctxalarm.MainCtxalarmCustomKt jar
 
 SAVEIFS=$IFS   # Save current IFS (Internal Field Separator)
 IFS=$'\n'      # Change IFS to newline char
