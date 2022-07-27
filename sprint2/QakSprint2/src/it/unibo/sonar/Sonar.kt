@@ -23,8 +23,8 @@ class Sonar ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scop
 						println("$name in ${currentState.stateName} | $currentMsg")
 						sonarConfig.configureTheSonar( simulate, sonarActorName, usingDomain  )
 					}
-					 transition(edgeName="t036",targetState="activateTheSonar",cond=whenDispatch("sonaractivate"))
-					transition(edgeName="t037",targetState="deactivateTheSonar",cond=whenDispatch("sonardeactivate"))
+					 transition(edgeName="t037",targetState="activateTheSonar",cond=whenDispatch("sonaractivate"))
+					transition(edgeName="t038",targetState="deactivateTheSonar",cond=whenDispatch("sonardeactivate"))
 				}	 
 				state("activateTheSonar") { //this:State
 					action { //it:State
@@ -43,8 +43,8 @@ class Sonar ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scop
 						 forward("sonaractivate", "info(ok)" ,"sonardatasource" ) 
 						 }
 					}
-					 transition(edgeName="t038",targetState="handleSonarData",cond=whenEvent("sonardistance"))
-					transition(edgeName="t039",targetState="deactivateTheSonar",cond=whenDispatch("sonardeactivate"))
+					 transition(edgeName="t039",targetState="handleSonarData",cond=whenEvent("sonardistance"))
+					transition(edgeName="t040",targetState="deactivateTheSonar",cond=whenDispatch("sonardeactivate"))
 				}	 
 				state("deactivateTheSonar") { //this:State
 					action { //it:State
@@ -63,8 +63,8 @@ class Sonar ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scop
 								emit("sonardata", "distance($D)" ) 
 						}
 					}
-					 transition(edgeName="t040",targetState="handleSonarData",cond=whenEvent("sonardistance"))
-					transition(edgeName="t041",targetState="deactivateTheSonar",cond=whenDispatch("sonardeactivate"))
+					 transition(edgeName="t041",targetState="handleSonarData",cond=whenEvent("sonardistance"))
+					transition(edgeName="t042",targetState="deactivateTheSonar",cond=whenDispatch("sonardeactivate"))
 				}	 
 				state("end") { //this:State
 					action { //it:State

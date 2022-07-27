@@ -14,7 +14,9 @@ class Alarmcontrol ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 		return "init"
 	}
 	override fun getBody() : (ActorBasicFsm.() -> Unit){
-		 var ISHOME: Boolean = true
+		 var F: String = "HOME"
+			   var T: String = "HOME"
+			   var ISHOME: Boolean = true
 			   val DLIMIT: Int = 10
 			   var DISABLE: Boolean = false
 			   		
@@ -35,20 +37,18 @@ class Alarmcontrol ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 				state("wait") { //this:State
 					action { //it:State
 						println("wait")
-						updateResourceRep( "alarmcontrol(activateSonar)"  
-						)
 					}
-					 transition(edgeName="t034",targetState="handle_moving",cond=whenEvent("moving"))
-					transition(edgeName="t035",targetState="handle_distance",cond=whenEvent("sonardata"))
+					 transition(edgeName="t035",targetState="handle_moving",cond=whenEvent("moving"))
+					transition(edgeName="t036",targetState="handle_distance",cond=whenEvent("sonardata"))
 				}	 
 				state("handle_moving") { //this:State
 					action { //it:State
 						if( checkMsgContent( Term.createTerm("moving(F,T)"), Term.createTerm("moving(F,T)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
-								 val F = payloadArg(0)    
-								 val T = payloadArg(1)    
+								 F = payloadArg(0)    
+								 T = payloadArg(1)    
 								 ISHOME=checkIsHome(F,T)  
-								updateResourceRep( "alarmcontrol(handle_moving,${F},${T})"  
+								updateResourceRep( "alarmcontrol(handle_moving,${F},${T},${DISABLE})"  
 								)
 								if(  ISHOME==true  
 								 ){println("led off")
@@ -75,24 +75,8 @@ class Alarmcontrol ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 								 ){println("led blink")
 								emit("update_led", "update_led(blink)" ) 
 								}
-								if(  D<DLIMIT 
-								 ){updateResourceRep( "alarmcontrol(handle_distance,${D},${DLIMIT},true)"  
+								updateResourceRep( "alarmcontrol(handle_distance,${F},${T},${DISABLE},${D})"  
 								)
-								updateResourceRep( "alarmcontrol(disable)"  
-								)
-								}
-								else
-								 {if(  D>=DLIMIT && DISABLE==true   
-								  ){updateResourceRep( "alarmcontrol(handle_distance,${D},${DLIMIT},false)"  
-								 )
-								 updateResourceRep( "alarmcontrol(enable)"  
-								 )
-								 }
-								 else
-								  {updateResourceRep( "alarmcontrol(handle_distance,${D},${DLIMIT},${DISABLE})"  
-								  )
-								  }
-								 }
 								if(  D<DLIMIT 
 								 ){ DISABLE=true  
 								forward("disable", "disable(_)" ,"transporttrolley" ) 

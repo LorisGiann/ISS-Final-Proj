@@ -98,7 +98,7 @@ internal class TestSprint2_simple {
     @Test
     @Timeout(30)
     fun test_2_accepted() {
-        assertTimeoutPreemptively<Unit>(Duration.ofSeconds(25)) {
+        assertTimeoutPreemptively<Unit>(Duration.ofSeconds(30)) {
             CommUtils.delay(100)
             var truckRequestStr = "msg(depositrequest, request,python,wasteservice,depositrequest(GLASS,2),1)"
             try {
@@ -128,7 +128,7 @@ internal class TestSprint2_simple {
 
     @Test
     fun test_1_accepted_1_rejected() {
-        assertTimeoutPreemptively<Unit>(Duration.ofSeconds(15)){
+        assertTimeoutPreemptively<Unit>(Duration.ofSeconds(20)){
             CommUtils.delay(100)
             var truckRequestStr = "msg(depositrequest, request,python,wasteservice,depositrequest(GLASS,2),1)"
             try {

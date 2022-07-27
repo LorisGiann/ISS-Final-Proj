@@ -234,7 +234,13 @@ QActor wasteservice context ctxserver{
 }
 
 QActor transporttrolley context ctxrobot{
-	[# var dest = ws.Position.HOME
+	[# val actor = this@Transporttrolley;
+		suspend fun transitNow(stateName : String){
+			var res = actor.handleCurrentMessage(NoMsg,actor.getStateByName(stateName));
+			if(res) actor.elabMsgInState( );
+			else println("ERROR: transition was not possible")
+		}
+	   var dest = ws.Position.HOME
 	   var currpos = ws.Position.HOME
 	#]
 	
@@ -246,8 +252,22 @@ QActor transporttrolley context ctxrobot{
 		//println("Init trasport trolley")
 		//[# sysUtil.logMsgs=true #]
  	}
- 	Goto wait 
+ 	Goto wait_check_disable 
  	
+ 	State wait_check_disable{
+ 		printCurrentMessage
+ 		updateResource [# "transporttrolley(wait_check_disable,$currpos,$dest)" #] 
+ 	}
+ 	Transition t0 whenTime 10 -> wait
+ 					whenMsg disable -> halt
+ 					
+ 	State halt{
+		printCurrentMessage
+		updateResource [# "transporttrolley(halt,$currpos,$dest)" #] 
+		//forward basicrobot -m cmd : cmd(h)
+	}
+	Transition toNewState whenMsg enable -> wait_check_disable
+	
  	State wait {
  		printCurrentMessage
  		updateResource [# "transporttrolley(wait,$currpos,$dest)" #] 
@@ -256,21 +276,18 @@ QActor transporttrolley context ctxrobot{
 		   val T = dest#]  
  		emit moving : moving ($F,$T)
  		if [# currpos!=dest #] {
- 			forward transporttrolley -m noMsg : noMsg(_)
+ 			//forward transporttrolley -m noMsg : noMsg(_)
+ 			println("instant transition")
+ 			[# transitNow("forward_robot") #]
  		}
  	}
  	Transition toNewState whenRequest pickup and [# currpos==dest#]-> picking_up
  						  whenRequest dropout and [# currpos==dest#]-> dropping_down
  						  whenRequest move and [# currpos==dest#] -> set_new_dest
- 						  whenMsg noMsg -> forward_robot
+ 						  //whenMsg noMsg -> forward_robot
  						  whenMsg disable -> halt
  						  
-	State halt{
-		printCurrentMessage
-		updateResource [# "transporttrolley(halt,$currpos,$dest)" #] 
-		forward basicrobot -m cmd : cmd(h)
-	}
-	Transition toNewState whenMsg enable -> wait
+	
 	
 	State forward_halt{
 		printCurrentMessage
@@ -286,7 +303,7 @@ QActor transporttrolley context ctxrobot{
  		delay 1000
 		replyTo pickup with pickupanswer : pickupanswer(OK)
  	}
- 	Goto wait
+ 	Goto wait_check_disable
  	
  	State dropping_down {
  		updateResource [# "transporttrolley(dropping_down,$currpos,$dest)" #] 
@@ -294,7 +311,7 @@ QActor transporttrolley context ctxrobot{
  		delay 1000
 		replyTo dropout with dropoutanswer : dropoutanswer(OK)
  	}
- 	Goto wait
+ 	Goto wait_check_disable
  	
  	State set_new_dest {
  		updateResource [# "transporttrolley(set_new_dest,$currpos,$dest)" #] 
@@ -306,7 +323,7 @@ QActor transporttrolley context ctxrobot{
  			emit moving : moving ($F ,$T)
  		}
  	}
- 	Goto wait
+ 	Goto wait_check_disable
  	
  	State forward_robot {
  		printCurrentMessage
@@ -330,7 +347,7 @@ QActor transporttrolley context ctxrobot{
 			println("transporttrolley | moving (now in $currpos)")
 		}*/
  	}
- 	Goto wait
+ 	Goto wait_check_disable
  	
 }
 
@@ -461,7 +478,9 @@ QActor basicrobot context ctxrobot{
 
 
 QActor alarmcontrol context ctxalarm{
-	[# var ISHOME: Boolean = true
+	[# var F: String = "HOME"
+	   var T: String = "HOME"
+	   var ISHOME: Boolean = true
 	   val DLIMIT: Int = 10
 	   var DISABLE: Boolean = false
 	   		
@@ -475,23 +494,21 @@ QActor alarmcontrol context ctxalarm{
 		println("Activate the sonar")
 		updateResource [# "alarmcontrol(activateSonar)" #]	 
 		forward sonar -m sonaractivate : info(ok)
-
 	}
 	Goto wait
 
 	State wait{
 		println("wait")
-		updateResource [# "alarmcontrol(activateSonar)" #]
 	}
 	Transition t0 whenEvent moving -> handle_moving
 				  whenEvent sonardata -> handle_distance 
 				  
 	State handle_moving{
 		onMsg( moving : moving(F,T) ){
-			[# val F = payloadArg(0)   #] 
-			[# val T = payloadArg(1)   #]   
+			[# F = payloadArg(0)   #] 
+			[# T = payloadArg(1)   #]   
 			[# ISHOME=checkIsHome(F,T) #]
-			updateResource [# "alarmcontrol(handle_moving,${F},${T})" #]	 
+			updateResource [# "alarmcontrol(handle_moving,${F},${T},${DISABLE})" #]
 			if [# ISHOME==true #]{
   		    	println("led off")
   		    	emit update_led : update_led(off)
@@ -516,19 +533,7 @@ QActor alarmcontrol context ctxalarm{
   		    	println("led blink")
   		    	emit update_led : update_led(blink)
   		    }
-  		    
-  		    if [# D<DLIMIT#]{
-  		    	updateResource [# "alarmcontrol(handle_distance,${D},${DLIMIT},true)" #]	 
-  		    	updateResource [# "alarmcontrol(disable)" #]	
-  		    	}
-  		    else{
-	  		    if [# D>=DLIMIT && DISABLE==true  #] {
-	  		    	updateResource [# "alarmcontrol(handle_distance,${D},${DLIMIT},false)" #]	 
-	  		    	updateResource [# "alarmcontrol(enable)" #]	 
-	  		    }else{
-	  		    	updateResource [# "alarmcontrol(handle_distance,${D},${DLIMIT},${DISABLE})" #]	
-	  		    }
-  		    }
+  		    updateResource [# "alarmcontrol(handle_distance,${F},${T},${DISABLE},${D})" #]
   		    //TRASPORTROLLEY
   		    if [# D<DLIMIT#]{
   		    	[# DISABLE=true #]

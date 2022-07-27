@@ -14,7 +14,13 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 		return "init"
 	}
 	override fun getBody() : (ActorBasicFsm.() -> Unit){
-		 var dest = ws.Position.HOME
+		 val actor = this@Transporttrolley;
+				suspend fun transitNow(stateName : String){
+					var res = actor.handleCurrentMessage(NoMsg,actor.getStateByName(stateName));
+					if(res) actor.elabMsgInState( );
+					else println("ERROR: transition was not possible")
+				}
+			   var dest = ws.Position.HOME
 			   var currpos = ws.Position.HOME
 		return { //this:ActionBasciFsm
 				state("init") { //this:State
@@ -23,7 +29,26 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 						 dest = ws.Position.HOME
 							       currpos = ws.Position.HOME
 					}
-					 transition( edgeName="goto",targetState="wait", cond=doswitch() )
+					 transition( edgeName="goto",targetState="wait_check_disable", cond=doswitch() )
+				}	 
+				state("wait_check_disable") { //this:State
+					action { //it:State
+						println("$name in ${currentState.stateName} | $currentMsg")
+						updateResourceRep( "transporttrolley(wait_check_disable,$currpos,$dest)"  
+						)
+						stateTimer = TimerActor("timer_wait_check_disable", 
+							scope, context!!, "local_tout_transporttrolley_wait_check_disable", 10.toLong() )
+					}
+					 transition(edgeName="t018",targetState="wait",cond=whenTimeout("local_tout_transporttrolley_wait_check_disable"))   
+					transition(edgeName="t019",targetState="halt",cond=whenDispatch("disable"))
+				}	 
+				state("halt") { //this:State
+					action { //it:State
+						println("$name in ${currentState.stateName} | $currentMsg")
+						updateResourceRep( "transporttrolley(halt,$currpos,$dest)"  
+						)
+					}
+					 transition(edgeName="toNewState20",targetState="wait_check_disable",cond=whenDispatch("enable"))
 				}	 
 				state("wait") { //this:State
 					action { //it:State
@@ -35,26 +60,17 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 								   val T = dest 
 						emit("moving", "moving($F,$T)" ) 
 						if(  currpos!=dest  
-						 ){forward("noMsg", "noMsg(_)" ,"transporttrolley" ) 
+						 ){println("instant transition")
+						 transitNow("forward_robot")  
 						}
 					}
-					 transition(edgeName="toNewState18",targetState="picking_up",cond=whenRequestGuarded("pickup",{ currpos==dest 
+					 transition(edgeName="toNewState21",targetState="picking_up",cond=whenRequestGuarded("pickup",{ currpos==dest 
 					}))
-					transition(edgeName="toNewState19",targetState="dropping_down",cond=whenRequestGuarded("dropout",{ currpos==dest 
+					transition(edgeName="toNewState22",targetState="dropping_down",cond=whenRequestGuarded("dropout",{ currpos==dest 
 					}))
-					transition(edgeName="toNewState20",targetState="set_new_dest",cond=whenRequestGuarded("move",{ currpos==dest 
+					transition(edgeName="toNewState23",targetState="set_new_dest",cond=whenRequestGuarded("move",{ currpos==dest 
 					}))
-					transition(edgeName="toNewState21",targetState="forward_robot",cond=whenDispatch("noMsg"))
-					transition(edgeName="toNewState22",targetState="halt",cond=whenDispatch("disable"))
-				}	 
-				state("halt") { //this:State
-					action { //it:State
-						println("$name in ${currentState.stateName} | $currentMsg")
-						updateResourceRep( "transporttrolley(halt,$currpos,$dest)"  
-						)
-						forward("cmd", "cmd(h)" ,"basicrobot" ) 
-					}
-					 transition(edgeName="toNewState23",targetState="wait",cond=whenDispatch("enable"))
+					transition(edgeName="toNewState24",targetState="halt",cond=whenDispatch("disable"))
 				}	 
 				state("forward_halt") { //this:State
 					action { //it:State
@@ -63,8 +79,8 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 						)
 						forward("cmd", "cmd(h)" ,"basicrobot" ) 
 					}
-					 transition(edgeName="toNewState24",targetState="forward_robot",cond=whenDispatch("enable"))
-					transition(edgeName="toNewState25",targetState="turn",cond=whenEvent("info"))
+					 transition(edgeName="toNewState25",targetState="forward_robot",cond=whenDispatch("enable"))
+					transition(edgeName="toNewState26",targetState="turn",cond=whenEvent("info"))
 				}	 
 				state("picking_up") { //this:State
 					action { //it:State
@@ -74,7 +90,7 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 						delay(1000) 
 						answer("pickup", "pickupanswer", "pickupanswer(OK)"   )  
 					}
-					 transition( edgeName="goto",targetState="wait", cond=doswitch() )
+					 transition( edgeName="goto",targetState="wait_check_disable", cond=doswitch() )
 				}	 
 				state("dropping_down") { //this:State
 					action { //it:State
@@ -84,7 +100,7 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 						delay(1000) 
 						answer("dropout", "dropoutanswer", "dropoutanswer(OK)"   )  
 					}
-					 transition( edgeName="goto",targetState="wait", cond=doswitch() )
+					 transition( edgeName="goto",targetState="wait_check_disable", cond=doswitch() )
 				}	 
 				state("set_new_dest") { //this:State
 					action { //it:State
@@ -99,7 +115,7 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 								emit("moving", "moving($F,$T)" ) 
 						}
 					}
-					 transition( edgeName="goto",targetState="wait", cond=doswitch() )
+					 transition( edgeName="goto",targetState="wait_check_disable", cond=doswitch() )
 				}	 
 				state("forward_robot") { //this:State
 					action { //it:State
@@ -108,8 +124,8 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 						)
 						forward("cmd", "cmd(w)" ,"basicrobot" ) 
 					}
-					 transition(edgeName="t126",targetState="turn",cond=whenEvent("info"))
-					transition(edgeName="t127",targetState="forward_halt",cond=whenDispatch("disable"))
+					 transition(edgeName="t127",targetState="turn",cond=whenEvent("info"))
+					transition(edgeName="t128",targetState="forward_halt",cond=whenDispatch("disable"))
 				}	 
 				state("turn") { //this:State
 					action { //it:State
@@ -124,7 +140,7 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 						answer("move", "moveanswer", "moveanswer(OK)"   )  
 						}
 					}
-					 transition( edgeName="goto",targetState="wait", cond=doswitch() )
+					 transition( edgeName="goto",targetState="wait_check_disable", cond=doswitch() )
 				}	 
 			}
 		}
