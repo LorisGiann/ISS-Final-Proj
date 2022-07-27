@@ -19,7 +19,7 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 		return { //this:ActionBasciFsm
 				state("init") { //this:State
 					action { //it:State
-						discardMessages = true
+						discardMessages = false
 						 dest = ws.Position.HOME
 							       currpos = ws.Position.HOME
 					}
@@ -27,6 +27,7 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 				}	 
 				state("wait") { //this:State
 					action { //it:State
+						println("$name in ${currentState.stateName} | $currentMsg")
 						updateResourceRep( "transporttrolley(wait,$currpos,$dest)"  
 						)
 						println("transporttrolley | Wait (Dest: ${dest} CurrPos: ${currpos})")
@@ -48,6 +49,7 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 				}	 
 				state("halt") { //this:State
 					action { //it:State
+						println("$name in ${currentState.stateName} | $currentMsg")
 						updateResourceRep( "transporttrolley(halt,$currpos,$dest)"  
 						)
 						forward("cmd", "cmd(h)" ,"basicrobot" ) 
@@ -56,6 +58,7 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 				}	 
 				state("forward_halt") { //this:State
 					action { //it:State
+						println("$name in ${currentState.stateName} | $currentMsg")
 						updateResourceRep( "transporttrolley(forward_halt,$currpos,$dest)"  
 						)
 						forward("cmd", "cmd(h)" ,"basicrobot" ) 
@@ -100,6 +103,7 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 				}	 
 				state("forward_robot") { //this:State
 					action { //it:State
+						println("$name in ${currentState.stateName} | $currentMsg")
 						updateResourceRep( "transporttrolley(forward_robot,$currpos,$dest)"  
 						)
 						forward("cmd", "cmd(w)" ,"basicrobot" ) 
@@ -109,6 +113,7 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 				}	 
 				state("turn") { //this:State
 					action { //it:State
+						println("$name in ${currentState.stateName} | $currentMsg")
 						updateResourceRep( "transporttrolley(turn,$currpos,$dest)"  
 						)
 						currpos=ws.func.nextPosition(currpos)  

@@ -1,0 +1,75 @@
+//https://dl.bintray.com/jetbrains/kotlin/eclipse-plugin/0.8.19/
+
+System demo0    
+//mqttBroker "localhost" : 1883 eventTopic "demo0/events"
+ 
+  
+  
+Event myMsg1 : myMsg1(_)
+Event myMsg2 : myMsg2(_)
+
+Dispatch noMsg : noMsg(_)
+ 
+Context ctxtest ip [host="localhost" port=8095]
+ 
+
+QActor component context ctxtest{
+	
+	[# val actor = this@Component;
+		suspend fun transitNow(stateName : String){
+			var res = actor.handleCurrentMessage(NoMsg,actor.getStateByName(stateName));
+			if(res) actor.elabMsgInState( );
+			else println("ERROR: transition was not possible")
+		}
+	#]
+	
+	State s0 initial {
+		printCurrentMessage   
+		discardMsg Off
+		//[# sysUtil.logMsgs=true #]
+		delay 2000
+ 	}
+ 	Goto s1
+ 	
+ 	State s1 {
+ 		printCurrentMessage
+ 		//priority to myMsg1
+		if[# actor.checkMsgQueueStore("myMsg1") #]{
+			println("body transition")
+			[# transitNow("myMsg1") #]
+		}else{
+			println("no msg1")
+		}
+ 	}
+ 	//Transition to else Goto off
+ 	Transition t0 whenEvent myMsg1 -> stateMsg1
+ 					whenEvent myMsg2 -> stateMsg2
+ 	
+ 	State stateMsg1 {
+ 		printCurrentMessage
+ 		println("stateMsg1")
+ 	}
+ 	Goto s0
+ 	
+ 	State stateMsg2 {
+ 		printCurrentMessage
+ 		println("stateMsg2")
+ 	}
+ 	Goto s0
+ 					
+}
+
+   
+QActor test_component context ctxtest{
+	State s0 initial { 	    
+		discardMsg On
+		//[# sysUtil.logMsgs=true #]
+		//forward component -m myMsg2 : myMsg2(off)
+		emit myMsg2 : myMsg2(off)
+		emit myMsg2 : myMsg2(off)
+		delay 200
+		//forward component -m myMsg1 : myMsg1(off)
+		emit myMsg1 : myMsg1(off)
+		delay 200
+ 	}
+}

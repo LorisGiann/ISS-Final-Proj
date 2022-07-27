@@ -109,7 +109,7 @@ abstract class ActorBasicFsm(  qafsmname:  String,
         stateList.add(state)
     }
 
-    private fun getStateByName(name: String): State {
+    fun getStateByName(name: String): State {
         return stateList.firstOrNull { it.stateName == name }
             ?: throw NoSuchElementException(name)
     }
@@ -250,6 +250,16 @@ abstract class ActorBasicFsm(  qafsmname:  String,
 		}
         return false
 	}
+
+    /***
+     * Check if the message with msgId @param msgId is in the queue
+     */
+    fun checkMsgQueueStore( msgId : String ) : Boolean {
+        msgQueueStore.forEach {
+           if( it.msgId()==msgId ) return true
+        }
+        return false
+    }
 
     private fun checkTransition(msg: IApplMessage): State? {
         val trans = currentState.getTransitionForMessage(msg)

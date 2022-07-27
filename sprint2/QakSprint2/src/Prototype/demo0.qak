@@ -239,7 +239,7 @@ QActor transporttrolley context ctxrobot{
 	#]
 	
 	State init initial { 	    
-		discardMsg On
+		discardMsg Off
 		[# dest = ws.Position.HOME
 	       currpos = ws.Position.HOME
 		#]
@@ -249,6 +249,7 @@ QActor transporttrolley context ctxrobot{
  	Goto wait 
  	
  	State wait {
+ 		printCurrentMessage
  		updateResource [# "transporttrolley(wait,$currpos,$dest)" #] 
  		println("transporttrolley | Wait (Dest: ${dest} CurrPos: ${currpos})")
  		[# val F = currpos 
@@ -265,12 +266,14 @@ QActor transporttrolley context ctxrobot{
  						  whenMsg disable -> halt
  						  
 	State halt{
+		printCurrentMessage
 		updateResource [# "transporttrolley(halt,$currpos,$dest)" #] 
 		forward basicrobot -m cmd : cmd(h)
 	}
 	Transition toNewState whenMsg enable -> wait
 	
 	State forward_halt{
+		printCurrentMessage
 		updateResource [# "transporttrolley(forward_halt,$currpos,$dest)" #] 
 		forward basicrobot -m cmd : cmd(h)
 	}
@@ -306,6 +309,7 @@ QActor transporttrolley context ctxrobot{
  	Goto wait
  	
  	State forward_robot {
+ 		printCurrentMessage
  		updateResource [# "transporttrolley(forward_robot,$currpos,$dest)" #] 
  		//println("Forward robot")
  		forward basicrobot -m cmd : cmd(w)
@@ -314,6 +318,7 @@ QActor transporttrolley context ctxrobot{
  				  whenMsg disable -> forward_halt
  	
  	State turn {
+ 		printCurrentMessage
  		updateResource [# "transporttrolley(turn,$currpos,$dest)" #] 
  		[#currpos=ws.func.nextPosition(currpos) #]
  		forward basicrobot -m cmd : cmd(l)
@@ -335,15 +340,16 @@ QActor basicrobot context ctxrobot{
 [#
   var StepTime      = 0L
   var StartTime     = 0L     
-  var Duration      = 0L  
-  var RobotType     = "" 
+  var Duration      = 0L
+  var ExpectingCollision = false
+  //var RobotType     = "" 
   var CurrentMove   = "unkknown"
 #]  
  	State s0 initial { 	      
  		discardMsg Off  //WE want receive any msg
 		println("basicrobot | START")	
  		qrun unibo.robot.robotSupport.create(myself,"basicrobotConfig.json")	
- 		[# RobotType = unibo.robot.robotSupport.robotKind #]
+ 		//[# RobotType = unibo.robot.robotSupport.robotKind #]
  		/*delay 1000  //give to the realsonar the time to start
         if[# RobotType != "virtual" #]{
         	[# var robotsonar = context!!.hasActor("realsonar")  
@@ -372,6 +378,7 @@ QActor basicrobot context ctxrobot{
 		onMsg( cmd : cmd(MOVE) ){
   			//activate the motors
   			[# val Move = payloadArg(0) #]
+  			[# if(Move=="w") ExpectingCollision=true #]
   			println("basicrobot | executing '${Move}'")
 			run unibo.robot.robotSupport.move( Move )
 			updateResource [# "moveactivated(Move)" #]
@@ -380,19 +387,23 @@ QActor basicrobot context ctxrobot{
 	 Goto work  
 	 
 	State handleObstacle{
-		//println("basicrobot | handleObstacle")	
-		run unibo.robot.robotSupport.move( "h" )
-		delay 600
-		//printCurrentMessage
-		updateResource [# "obstacle(${CurrentMove})" #]
-		/*if[# CurrentMove == "w"#]{
-		//back to avoid emission of obstacle again if real robot moving forward !!!
-		//if[# RobotType != "virtual" #]{	//is it better to embed this behavior in the support?
-			run unibo.robot.robotSupport.move( "s" )
-			delay 100 
-			run unibo.robot.robotSupport.move( "h" ) 
- 		}*/
- 		emit info : info( obstacledoing(w) )
+		printCurrentMessage
+		//println("basicrobot | handleObstacle")
+		if[# ExpectingCollision #]{
+			[# ExpectingCollision=false #]
+			run unibo.robot.robotSupport.move( "h" )
+			delay 600
+			updateResource [# "obstacle(${CurrentMove})" #]
+			/*if[# CurrentMove == "w"#]{
+			//back to avoid emission of obstacle again if real robot moving forward !!!
+			//if[# RobotType != "virtual" #]{	//is it better to embed this behavior in the support?
+				run unibo.robot.robotSupport.move( "s" )
+				delay 100 
+				run unibo.robot.robotSupport.move( "h" ) 
+	 		}*/
+	 		emit info : info( obstacledoing(w) )
+	 		//forward transporttrolley -m wall : wall( obstacledoing(w) )
+		}
 	}
 	Goto work 
  

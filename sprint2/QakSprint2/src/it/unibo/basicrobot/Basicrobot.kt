@@ -17,8 +17,9 @@ class Basicrobot ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 		
 		  var StepTime      = 0L
 		  var StartTime     = 0L     
-		  var Duration      = 0L  
-		  var RobotType     = "" 
+		  var Duration      = 0L
+		  var ExpectingCollision = false
+		  //var RobotType     = "" 
 		  var CurrentMove   = "unkknown"
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
@@ -26,7 +27,6 @@ class Basicrobot ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 						discardMessages = false
 						println("basicrobot | START")
 						unibo.robot.robotSupport.create(myself ,"basicrobotConfig.json" )
-						 RobotType = unibo.robot.robotSupport.robotKind  
 						updateResourceRep( "basicrobot(start)"  
 						)
 					}
@@ -47,6 +47,7 @@ class Basicrobot ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 						if( checkMsgContent( Term.createTerm("cmd(MOVE)"), Term.createTerm("cmd(MOVE)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 val Move = payloadArg(0)  
+								 if(Move=="w") ExpectingCollision=true  
 								println("basicrobot | executing '${Move}'")
 								unibo.robot.robotSupport.move( Move  )
 								updateResourceRep( "moveactivated(Move)"  
@@ -57,11 +58,15 @@ class Basicrobot ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 				}	 
 				state("handleObstacle") { //this:State
 					action { //it:State
+						println("$name in ${currentState.stateName} | $currentMsg")
+						if(  ExpectingCollision  
+						 ){ ExpectingCollision=false  
 						unibo.robot.robotSupport.move( "h"  )
 						delay(600) 
 						updateResourceRep( "obstacle(${CurrentMove})"  
 						)
 						emit("info", "info(obstacledoing(w))" ) 
+						}
 					}
 					 transition( edgeName="goto",targetState="work", cond=doswitch() )
 				}	 
