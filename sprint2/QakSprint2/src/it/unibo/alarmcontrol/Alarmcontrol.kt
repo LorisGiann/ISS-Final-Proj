@@ -35,6 +35,8 @@ class Alarmcontrol ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 				state("wait") { //this:State
 					action { //it:State
 						println("wait")
+						updateResourceRep( "alarmcontrol(activateSonar)"  
+						)
 					}
 					 transition(edgeName="t034",targetState="handle_moving",cond=whenEvent("moving"))
 					transition(edgeName="t035",targetState="handle_distance",cond=whenEvent("sonardata"))

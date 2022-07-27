@@ -32,12 +32,14 @@ class Sonar ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scop
 						println("activate the sonar")
 						if(   `it.unibo`.radarSystem22.domain.utils.DomainSystemConfig.simulation  
 						 ){println("sonar simulator")
-						updateResourceRep( "sonaractivate"  
+						updateResourceRep( "sonar(sonaractivate)"  
 						)
 						forward("sonaractivate", "info(ok)" ,"sonarsimulatortesting" ) 
 						}
 						else
 						 {println("sonar real")
+						 updateResourceRep( "sonaractivate"  
+						 )
 						 forward("sonaractivate", "info(ok)" ,"sonardatasource" ) 
 						 }
 					}
@@ -52,7 +54,7 @@ class Sonar ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scop
 				}	 
 				state("handleSonarData") { //this:State
 					action { //it:State
-						if( checkMsgContent( Term.createTerm("sonar(DISTANCE,NAME)"), Term.createTerm("distance(D)"), 
+						if( checkMsgContent( Term.createTerm("distance(V)"), Term.createTerm("distance(D)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 val D = payloadArg(0)  
 								updateResourceRep( "Distance ${D}"  

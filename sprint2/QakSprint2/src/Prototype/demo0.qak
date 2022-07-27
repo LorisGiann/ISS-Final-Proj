@@ -470,6 +470,7 @@ QActor alarmcontrol context ctxalarm{
 
 	State wait{
 		println("wait")
+		updateResource [# "alarmcontrol(activateSonar)" #]
 	}
 	Transition t0 whenEvent moving -> handle_moving
 				  whenEvent sonardata -> handle_distance 
@@ -551,11 +552,12 @@ QActor sonar context ctxalarm {
 		println("activate the sonar")
 		if[#  `it.unibo`.radarSystem22.domain.utils.DomainSystemConfig.simulation #]{
 			println("sonar simulator")
-			updateResource [# "sonaractivate" #]
+			updateResource [# "sonar(sonaractivate)" #]
 			forward sonarsimulatortesting -m sonaractivate : info(ok) 
 			//run sonarConfig.activateSonarSimulated() //usingDomain
 		}else {
 			println("sonar real")
+			updateResource [# "sonaractivate" #]
 			forward sonardatasource -m sonaractivate : info(ok)  
 		}
 	}
@@ -568,7 +570,7 @@ QActor sonar context ctxalarm {
 	Goto end
   
   	State handleSonarData{
-  		 onMsg( sonar : distance(D) ){
+  		 onMsg( sonardistance : distance(D) ){
    		 	[# val D = payloadArg(0) #]   
    		 	updateResource [# "Distance ${D}" #]
   		    println("Distance ${D}")
