@@ -37,7 +37,7 @@ class sonarSimulatorTesting (name : String ) : ActorBasic( name ) {
 					i=0
 				}
 				println(m1)
- 				val event = MsgUtil.buildEvent( "alarmcontrol","sonardistance",m1)
+ 				val event = MsgUtil.buildEvent( "sonar","sonardistance",m1)
 				//println(event.toString())								
   				//emitLocalStreamEvent( event )
  				println("$tt $name | generates $event")
