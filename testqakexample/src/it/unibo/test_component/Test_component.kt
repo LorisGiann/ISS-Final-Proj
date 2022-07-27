@@ -18,10 +18,11 @@ class Test_component ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( n
 				state("s0") { //this:State
 					action { //it:State
 						discardMessages = true
-						emit("myMsg2", "myMsg2(off)" ) 
-						emit("myMsg2", "myMsg2(off)" ) 
+						forward("myMsg3", "myMsg3(off)" ,"component" ) 
 						delay(200) 
-						emit("myMsg1", "myMsg1(off)" ) 
+						forward("myMsg2", "myMsg2(off)" ,"component" ) 
+						delay(200) 
+						forward("myMsg1", "myMsg1(off)" ,"component" ) 
 						delay(200) 
 					}
 				}	 

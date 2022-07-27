@@ -260,6 +260,17 @@ abstract class ActorBasicFsm(  qafsmname:  String,
         }
         return false
     }
+    /***
+     * Check if the message with msgId @param msgId is in the queue
+     */
+    fun getMsgFromQueueStore( msgId : String ) : IApplMessage? {
+        var res : IApplMessage? = null
+        msgQueueStore.forEach {
+            if( it.msgId()==msgId ) res=it;
+        }
+        if(res != null) msgQueueStore.remove(res);
+        return res
+    }
 
     private fun checkTransition(msg: IApplMessage): State? {
         val trans = currentState.getTransitionForMessage(msg)

@@ -5,8 +5,9 @@ System demo0
  
   
   
-Event myMsg1 : myMsg1(_)
-Event myMsg2 : myMsg2(_)
+Dispatch myMsg1 : myMsg1(_)
+Dispatch myMsg2 : myMsg2(_)
+Dispatch myMsg3 : myMsg3(_)
 
 Dispatch noMsg : noMsg(_)
  
@@ -18,6 +19,11 @@ QActor component context ctxtest{
 	[# val actor = this@Component;
 		suspend fun transitNow(stateName : String){
 			var res = actor.handleCurrentMessage(NoMsg,actor.getStateByName(stateName));
+			if(res) actor.elabMsgInState( );
+			else println("ERROR: transition was not possible")
+		}
+		suspend fun transitNow(stateName : String, messageId : String){
+			var res = actor.handleCurrentMessage(actor.getMsgFromQueueStore(messageId)!!,actor.getStateByName(stateName));
 			if(res) actor.elabMsgInState( );
 			else println("ERROR: transition was not possible")
 		}
@@ -34,29 +40,52 @@ QActor component context ctxtest{
  	State s1 {
  		printCurrentMessage
  		//priority to myMsg1
-		if[# actor.checkMsgQueueStore("myMsg1") #]{
+		/*if[# actor.checkMsgQueueStore("myMsg1") #]{
 			println("body transition")
 			[# transitNow("myMsg1") #]
 		}else{
 			println("no msg1")
+		}*/
+ 	}
+ 	Transition t0 whenTime 10 -> s2
+ 					whenMsg myMsg1 -> stateMsg1
+ 	
+ 	State s2 {
+ 		printCurrentMessage
+ 		if[# actor.checkMsgQueueStore("myMsg2") #]{
+			println("msg2 in queue")
+			//[# transitNow("stateMsg2") #] //transition without consuming messages
+			[# transitNow("stateMsg2","myMsg2") #]
+		}else{
+			println("no msg2 in queue")
 		}
  	}
- 	//Transition to else Goto off
- 	Transition t0 whenEvent myMsg1 -> stateMsg1
- 					whenEvent myMsg2 -> stateMsg2
+ 	Transition t0 whenTime 10 -> s3
+ 					whenMsg myMsg2 -> stateMsg2
+ 				
+ 	State s3 {
+ 		printCurrentMessage
+ 	}
+ 	Transition t0 whenMsg myMsg3 -> stateMsg3
+ 	
  	
  	State stateMsg1 {
  		printCurrentMessage
  		println("stateMsg1")
  	}
- 	Goto s0
+ 	Goto s0	
  	
  	State stateMsg2 {
  		printCurrentMessage
  		println("stateMsg2")
  	}
  	Goto s0
- 					
+ 	
+ 	State stateMsg3 {
+ 		printCurrentMessage
+ 		println("stateMsg3")
+ 	}
+ 	Goto s0
 }
 
    
@@ -64,12 +93,13 @@ QActor test_component context ctxtest{
 	State s0 initial { 	    
 		discardMsg On
 		//[# sysUtil.logMsgs=true #]
-		//forward component -m myMsg2 : myMsg2(off)
-		emit myMsg2 : myMsg2(off)
-		emit myMsg2 : myMsg2(off)
+		forward component -m myMsg3 : myMsg3(off)
 		delay 200
-		//forward component -m myMsg1 : myMsg1(off)
-		emit myMsg1 : myMsg1(off)
+		forward component -m myMsg2 : myMsg2(off)
+		//emit myMsg2 : myMsg2(off)/
+		delay 200
+		forward component -m myMsg1 : myMsg1(off)
+		//emit myMsg1 : myMsg1(off)
 		delay 200
  	}
 }

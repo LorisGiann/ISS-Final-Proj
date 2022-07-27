@@ -20,6 +20,11 @@ class Component ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, 
 					if(res) actor.elabMsgInState( );
 					else println("ERROR: transition was not possible")
 				}
+				suspend fun transitNow(stateName : String, messageId : String){
+					var res = actor.handleCurrentMessage(actor.getMsgFromQueueStore(messageId)!!,actor.getStateByName(stateName));
+					if(res) actor.elabMsgInState( );
+					else println("ERROR: transition was not possible")
+				}
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
@@ -32,16 +37,33 @@ class Component ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, 
 				state("s1") { //this:State
 					action { //it:State
 						println("$name in ${currentState.stateName} | $currentMsg")
-						if(  actor.checkMsgQueueStore("myMsg1")  
-						 ){println("body transition")
-						 transitNow("myMsg1")  
+						stateTimer = TimerActor("timer_s1", 
+							scope, context!!, "local_tout_component_s1", 10.toLong() )
+					}
+					 transition(edgeName="t00",targetState="s2",cond=whenTimeout("local_tout_component_s1"))   
+					transition(edgeName="t01",targetState="stateMsg1",cond=whenDispatch("myMsg1"))
+				}	 
+				state("s2") { //this:State
+					action { //it:State
+						println("$name in ${currentState.stateName} | $currentMsg")
+						if(  actor.checkMsgQueueStore("myMsg2")  
+						 ){println("msg2 in queue")
+						 transitNow("stateMsg2","myMsg2")  
 						}
 						else
-						 {println("no msg1")
+						 {println("no msg2 in queue")
 						 }
+						stateTimer = TimerActor("timer_s2", 
+							scope, context!!, "local_tout_component_s2", 10.toLong() )
 					}
-					 transition(edgeName="t00",targetState="stateMsg1",cond=whenEvent("myMsg1"))
-					transition(edgeName="t01",targetState="stateMsg2",cond=whenEvent("myMsg2"))
+					 transition(edgeName="t02",targetState="s3",cond=whenTimeout("local_tout_component_s2"))   
+					transition(edgeName="t03",targetState="stateMsg2",cond=whenDispatch("myMsg2"))
+				}	 
+				state("s3") { //this:State
+					action { //it:State
+						println("$name in ${currentState.stateName} | $currentMsg")
+					}
+					 transition(edgeName="t04",targetState="stateMsg3",cond=whenDispatch("myMsg3"))
 				}	 
 				state("stateMsg1") { //this:State
 					action { //it:State
@@ -54,6 +76,13 @@ class Component ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, 
 					action { //it:State
 						println("$name in ${currentState.stateName} | $currentMsg")
 						println("stateMsg2")
+					}
+					 transition( edgeName="goto",targetState="s0", cond=doswitch() )
+				}	 
+				state("stateMsg3") { //this:State
+					action { //it:State
+						println("$name in ${currentState.stateName} | $currentMsg")
+						println("stateMsg3")
 					}
 					 transition( edgeName="goto",targetState="s0", cond=doswitch() )
 				}	 
