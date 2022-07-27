@@ -287,9 +287,9 @@ internal class TestSprint2_hystory {
                 answer = connTcp.request(truckRequestStr)
                 ColorsOut.outappl("testSecondRequest answer=$answer", ColorsOut.GREEN)
                 Assert.assertTrue(answer.contains("loadaccept"))
-                while (!coapCheckWasteService("wait")) {
-                    CommUtils.delay(1000)
-                }
+                while (!coapCheckWasteService("wait")) { CommUtils.delay(1000) }
+                while (!coapCheckTransportTrolley("wait")) { CommUtils.delay(1000) }
+
                 connTcp.close()
                 //Assert.assertTrue(to!!.checkNextContents(arrayOf("wasteservice(wait,0,0)", "transporttrolley(wait,HOME,HOME)")) > 0)
                 Assert.assertTrue(to!!.checkNextSequence(arrayOf(
@@ -338,7 +338,7 @@ internal class TestSprint2_hystory {
                     CommUtils.delay(1000)
                 }
                 //this is a special case: we are in wait even if the robot is still moving towards home. Gire the robot some extra more time
-                while (!coapCheckconnTransportTrolley("wait")) { //wait for the robot to reach home
+                while (!coapCheckTransportTrolley("wait")) { //wait for the robot to reach home
                     CommUtils.delay(1000)
                 }
                 connTcp.close()
@@ -388,11 +388,11 @@ internal class TestSprint2_hystory {
                 ColorsOut.outappl("testSecondRequest answer=$answer", ColorsOut.GREEN)
                 Assert.assertTrue(answer.contains("loadrejected"))
                 //WasteService is in wait, but robot is still moving towards home (actually since this is critical let's check that)
-                if (!coapCheckconnTransportTrolley("forward")) {
+                if (!coapCheckTransportTrolley("forward")) {
                     fail("Unlucky test: Robot did reached home before wasteservice was in wait. This test is meaningful only if the robot is still moving while the wasteservice is in wait");
                 }
                 to!!.getHistory().clear()  //jump directly to the messages that will arrive from now onwards     //to!!.setStartPosition(to!!.getHistory().size);
-                while (!coapCheckconnTransportTrolley("wait")) { //now wait for the robot to reach home (move_answer received)
+                while (!coapCheckTransportTrolley("wait")) { //now wait for the robot to reach home (move_answer received)
                     CommUtils.delay(1000)
                 }
                 CommUtils.delay(100)
@@ -431,7 +431,7 @@ internal class TestSprint2_hystory {
         return answer.contains(check!!)
     }
 
-    protected fun coapCheckconnTransportTrolley(check: String?): Boolean {
+    protected fun coapCheckTransportTrolley(check: String?): Boolean {
         val answer = connTransportTrolley!!.request("")
         ColorsOut.outappl("coapCheck answer=$answer", ColorsOut.CYAN)
         return answer.contains(check!!)
