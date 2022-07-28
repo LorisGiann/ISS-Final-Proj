@@ -173,9 +173,20 @@ dd{ margin-bottom: 8px;}
     <img src="../sprint2/docs/_images/transporttrolley_option4_logic_architecture.png" class="centerimg"/>
     <p style="font-size: 0.8rem;">N.B: per limitazioni imposti dal linguaggio QAK, inviamo i comandi <i>enable</i> e <i>disable</i> sottoforma di dispatch, siccome gli eventi non vengono accodati dagli attori.</p>
     <ul>
-        <li>+ <b>Transport trolley</b> esegue comandi impartit dal <i>wasteservice</i> e da <i>alarmcontrol</i>, senza quindi restare direttamente in ascolto di eventi dal sonar</li>
+        <li>+ <b>Transport trolley</b> esegue comandi impartiti dal <i>wasteservice</i> e da <i>alarmcontrol</i>, senza quindi restare direttamente in ascolto di eventi dal sonar</li>
         <li>+ Il robot può essere interrotto non solo mentre sta andando in avanti, ma anche tra un'operazione e l'altra (ad esempio tra una turn e una <b>Pickup</b>)</li>
     </ul>
+    <p>I comandi <i>disable</i> ed <i>enable</i> dovrebbero avere sempre la priorità rispetto a tutti gli altri. Per questo motivo è poi stato deciso di utilizzare due stati distinti di wait:</p>
+	<img src="../sprint2/docs/_images/transporttrolley_final_state_machine.png" class="centerimg" style="max-width: 700px;"/>
+    <ul>
+        <li>Quando si entra nel primo stato (chiamato <i>wait_check_disable</i>), i messaggi in attesa sulla coda di ingresso dell'attore vengono consumati fino a che non viene incontrato un messaggio di 
+            <i>disable</i>. Se non è stato incontrato alcun <i>disable</i> e la coda risulta vuota, si passa al successivo stato <i>wait</i>.</li>
+        <li>Nel secondo stato <i>wait</i> vengono ora analizzati gli eventuali messaggi precedentemente estratti e salvati internamente all'attore.
+            In questo stato quando non restano più messaggi da elaborare, e la destinazione finale è già stata raggiunta, si rimane in attesa di nuovi comandi (compresi eventuali <i>disable</i>, che verranno immediatamente gestiti) </li>
+    </ul>
+    <p>In questo modo i messaggi gestiti nel secondo stato sono elaborati dopo i messaggi analizzati nel primo, indipendentemente dal loro ordine di arrivo sulla coda di ingresso dell'attore. <br>
+        Al termine di ogni operazione si torna nel primo stato <i>wait_check_disable</i>, per verificare che nel frattempo non siano arrivati nuovi comandi prioritari.</p>
+    
 
     <h4>OPZIONE 2 e 3</h4>
     <p>Le opzioni 2 e 3 sono simili, in quanto prevedono entrambe l'utilizzo di un attore intermedio (qui chiamato <i>intermediario</i>) il cui compito è quello di ricevere i comandi inviati 
