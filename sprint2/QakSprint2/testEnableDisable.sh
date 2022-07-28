@@ -17,7 +17,7 @@ gradle -PmainClass=it.unibo.ctxalarm.MainCtxalarmCustomKt jar
 SAVEIFS=$IFS   # Save current IFS (Internal Field Separator)
 IFS=$'\n'      # Change IFS to newline char
 declare -a TEST_METHODS=(
-    "testSprint2.TestSprint2_enable_disable.test_2_accepted"
+    "testSprint2.TestSprint2_enable_disable.test_halt_forward"
 )
 
 IFS=$SAVEIFS   # Restore original IFS

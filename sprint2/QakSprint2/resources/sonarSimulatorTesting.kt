@@ -34,7 +34,7 @@ class sonarSimulatorTesting (name : String ) : ActorBasic( name ) {
 				m1 = "distance( 0 )"
 				i=0
 			}
-			println(m1)
+			//println(m1)
 			val event = MsgUtil.buildEvent( "sonar","sonardistance",m1)
 			println("$tt $name | generates $event")
 			emit(event)  //APPROPRIATE ONLY IF NOT INCLUDED IN A PIPE

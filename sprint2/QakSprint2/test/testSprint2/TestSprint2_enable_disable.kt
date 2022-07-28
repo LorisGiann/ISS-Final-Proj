@@ -50,8 +50,8 @@ internal class TestSprint2_enable_disable {
 
             val (prS, processHandleS) = TestUtils.runCtx("build/libs/it.unibo.ctxserver.MainCtxserverCustomKt-1.0.jar")
             prServer=prS; processHandleServer=processHandleS
-            val (prR, processHandleR) = TestUtils.runCtx("build/libs/it.unibo.ctxrobot.MainCtxrobotCustomKt-1.0.jar")
-            prRobot=prR; processHandleRobot=processHandleR
+            //val (prR, processHandleR) = TestUtils.runCtx("build/libs/it.unibo.ctxrobot.MainCtxrobotCustomKt-1.0.jar")
+            //prRobot=prR; processHandleRobot=processHandleR
             val (prA, processHandleA) = TestUtils.runCtx("build/libs/it.unibo.ctxalarm.MainCtxalarmCustomKt-1.0.jar")
             prAlarm=prA; processHandleAlarm=processHandleA
         } catch (e: IOException) {
@@ -70,8 +70,8 @@ internal class TestSprint2_enable_disable {
         //FIRSTLY, try to be nice and make the program exit "normally"
         //serverThread!!.stop();
         try {
-            processHandleRobot!!.destroy()
-            prRobot!!.destroy()
+            //processHandleRobot!!.destroy()
+            //prRobot!!.destroy()
             processHandleServer!!.destroy()
             prServer!!.destroy()
 			processHandleAlarm!!.destroy()
@@ -109,14 +109,13 @@ internal class TestSprint2_enable_disable {
 
     @Test
     //@Order(1)
-    fun test_accepted() {
+    fun test_halt_forward() {
         assertTimeoutPreemptively<Unit>(Duration.ofSeconds(25)){
             CommUtils.delay(1000)
-            ColorsOut.outappl("test_accepted STARTS", ColorsOut.BLUE)
+            ColorsOut.outappl("test_halt_forward STARTS", ColorsOut.BLUE)
             val truckRequestStr = "msg(depositrequest, request,python,wasteservice,depositrequest(GLASS,2),1)"
             try {
                 val connTcpWasteService = ConnTcp("localhost", 8095)
-                val connTcpTrasportTrolley = ConnTcp("127.0.0.1", 8096)
                 val connTcpAlarmControl = ConnTcp("127.0.0.1", 8097)
 
                 //deactive sonar and launch manually value
@@ -136,10 +135,11 @@ internal class TestSprint2_enable_disable {
                 CommUtils.delay(1000)
                 ColorsOut.outappl("Enable", ColorsOut.GREEN)
                 connTcpAlarmControl.forward(MsgUtil.buildEvent("sonar","sonardata","distance(20)").toString())
-                CommUtils.delay(5000)
+                while (!coapCheckTransportTrolley("transporttrolley(wait,HOME,HOME)")) {
+                    CommUtils.delay(100)
+                }
                 connTcpAlarmControl.close()
                 connTcpWasteService.close()
-                connTcpTrasportTrolley.close()
 
 
                 ColorsOut.outappl(to!!.getHistory().toString(), ColorsOut.MAGENTA)
@@ -151,7 +151,60 @@ internal class TestSprint2_enable_disable {
                 ColorsOut.outappl("FINISH", ColorsOut.GREEN)
                 //to.setStartPosition(0);*/
             } catch (e: Exception) {
-                Assert.fail("test_accepted ERROR:" + e.message)
+                Assert.fail("test_halt_forward ERROR:" + e.message)
+            }
+        }
+    }
+
+    @Test
+    //@Order(1)
+    fun test_halt_pickup() {
+        assertTimeoutPreemptively<Unit>(Duration.ofSeconds(25)){
+            CommUtils.delay(1000)
+            ColorsOut.outappl("test_halt_pickup STARTS", ColorsOut.BLUE)
+            val truckRequestStr = "msg(depositrequest, request,python,wasteservice,depositrequest(GLASS,2),1)"
+            try {
+                val connTcpWasteService = ConnTcp("localhost", 8095)
+                val connTcpAlarmControl = ConnTcp("127.0.0.1", 8097)
+
+                //deactive sonar and launch manually value
+                CommUtils.delay(100)
+                connTcpAlarmControl.forward(MsgUtil.buildDispatch("alarmcontrol","sonardeactivate","info(ok)","alarmcontrol").toString())
+                CommUtils.delay(100)
+                //truck request
+                object: Thread(){
+                    override fun run(){
+                        val answer = connTcpWasteService.request(truckRequestStr)
+                        ColorsOut.outappl("test_accepted answer=$answer", ColorsOut.GREEN)
+                        Assert.assertTrue(answer.contains("loadaccept"))
+                    }
+                }.start()
+
+                while (!coapCheckTransportTrolley("transporttrolley(picking_up,INDOOR,INDOOR)")) {
+                    CommUtils.delay(500)
+                }
+                ColorsOut.outappl("Disable", ColorsOut.GREEN)
+                connTcpAlarmControl.forward(MsgUtil.buildEvent("sonar","sonardata","distance(0)").toString())
+                CommUtils.delay(1000)
+                ColorsOut.outappl("Enable", ColorsOut.GREEN)
+                connTcpAlarmControl.forward(MsgUtil.buildEvent("sonar","sonardata","distance(20)").toString())
+
+                while (!coapCheckTransportTrolley("transporttrolley(wait,HOME,HOME)")) {
+                    CommUtils.delay(100)
+                }
+                connTcpAlarmControl.close()
+                connTcpWasteService.close()
+
+
+                ColorsOut.outappl(to!!.getHistory().toString(), ColorsOut.BgMagenta)
+                Assert.assertTrue(to!!.checkNextSequence(arrayOf(
+                    "sonar(sonardeactivate)",
+                    "transporttrolley(halt,INDOOR,INDOOR)"
+                )))
+                ColorsOut.outappl("FINISH", ColorsOut.GREEN)
+                //to.setStartPosition(0);*/
+            } catch (e: Exception) {
+                Assert.fail("test_halt_pickup ERROR:" + e.message)
             }
         }
     }
