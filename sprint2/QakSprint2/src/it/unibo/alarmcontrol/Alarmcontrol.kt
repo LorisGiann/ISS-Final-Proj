@@ -36,7 +36,9 @@ class Alarmcontrol ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 				}	 
 				state("wait") { //this:State
 					action { //it:State
-						println("wait")
+						println("$name in ${currentState.stateName} | $currentMsg")
+						updateResourceRep( "alarmcontrol(wait)"  
+						)
 					}
 					 transition(edgeName="t035",targetState="handle_moving",cond=whenEvent("moving"))
 					transition(edgeName="t036",targetState="handle_distance",cond=whenEvent("sonardata"))
@@ -44,10 +46,11 @@ class Alarmcontrol ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 				}	 
 				state("sonardeactivate") { //this:State
 					action { //it:State
+						println("$name in ${currentState.stateName} | $currentMsg")
+						updateResourceRep( "alarmcontrol(sonardeactivate)"  
+						)
 						if( checkMsgContent( Term.createTerm("info(ARG)"), Term.createTerm("info(ok)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
-								updateResourceRep( "alarmcontrol(deactivateSonar)"  
-								)
 								forward("sonardeactivate", "info(ok)" ,"sonar" ) 
 						}
 					}
@@ -55,6 +58,7 @@ class Alarmcontrol ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 				}	 
 				state("handle_moving") { //this:State
 					action { //it:State
+						println("$name in ${currentState.stateName} | $currentMsg")
 						if( checkMsgContent( Term.createTerm("moving(F,T)"), Term.createTerm("moving(F,T)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 F = payloadArg(0)    
@@ -64,11 +68,11 @@ class Alarmcontrol ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 								)
 								if(  ISHOME==true  
 								 ){println("led off")
-								emit("update_led", "update_led(off)" ) 
+								emit("update_led", "update_led(OFF)" ) 
 								}
 								else
 								 {println("led blink")
-								 emit("update_led", "update_led(blink)" ) 
+								 emit("update_led", "update_led(BLINK)" ) 
 								 }
 						}
 					}
@@ -76,16 +80,15 @@ class Alarmcontrol ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 				}	 
 				state("handle_distance") { //this:State
 					action { //it:State
+						println("$name in ${currentState.stateName} | $currentMsg")
 						if( checkMsgContent( Term.createTerm("distance(V)"), Term.createTerm("distance(D)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 val D = payloadArg(0).toInt()  
 								if(  ISHOME==false && D<DLIMIT 
-								 ){emit("update_led", "update_led(on)" ) 
-								println("led on")
+								 ){emit("update_led", "update_led(ON)" ) 
 								}
 								if(  ISHOME==false && D>=DLIMIT 
-								 ){println("led blink")
-								emit("update_led", "update_led(blink)" ) 
+								 ){emit("update_led", "update_led(BLINK)" ) 
 								}
 								updateResourceRep( "alarmcontrol(handle_distance,${F},${T},${DISABLE},${D})"  
 								)

@@ -15,80 +15,88 @@ class Led ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scope 
 	}
 	override fun getBody() : (ActorBasicFsm.() -> Unit){
 		 lateinit var ledM : `it.unibo`.radarSystem22.domain.interfaces.ILed
-			   lateinit var newState : String  
+			   var newState = ws.LedState.OFF 
+			   
+			   val actor = this@Led;
+				suspend fun transitNow(stateName : String){
+					var res = actor.handleCurrentMessage(NoMsg,actor.getStateByName(stateName));
+					if(res) actor.elabMsgInState( );
+					else println("ERROR: transition was not possible")
+				}
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
 						discardMessages = true
 						println("$name in ${currentState.stateName} | $currentMsg")
-						updateResourceRep( "led(off)"  
+						updateResourceRep( "led(initial,${newState})"  
 						)
-						println("${name} STARTS")
 						 ledM = `it.unibo`.radarSystem22.domain.models.LedModel.create()  
+						 ledM.turnOff() 
 					}
 					 transition(edgeName="t044",targetState="handle_update",cond=whenEvent("update_led"))
 				}	 
 				state("handle_update") { //this:State
 					action { //it:State
-						if( checkMsgContent( Term.createTerm("update_led(ARG)"), Term.createTerm("update_led(ARG)"), 
+						println("$name in ${currentState.stateName} | $currentMsg")
+						if( checkMsgContent( Term.createTerm("update_led(LEDSTATE)"), Term.createTerm("update_led(ARG)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
-								 newState = payloadArg(0)  
-								println("update_led(${newState})")
-								forward("noMsg", "noMsg(_)" ,"led" ) 
+								 newState = ws.LedState.valueOf(payloadArg(0))  
+								 val stateName = when(newState) {
+									 					ws.LedState.ON -> "off"
+									 					ws.LedState.OFF -> "on"
+									 					ws.LedState.BLINK -> "blink_on"
+									 			   }
+											   transitNow(stateName)
 						}
+						updateResourceRep( "led(handle_update,${newState})"  
+						)
 					}
-					 transition(edgeName="toNewState45",targetState="off",cond=whenDispatchGuarded("noMsg",{ newState=="off"  
-					}))
-					transition(edgeName="toNewState46",targetState="on",cond=whenDispatchGuarded("noMsg",{ newState=="on"  
-					}))
-					transition(edgeName="toNewState47",targetState="blink_on",cond=whenDispatchGuarded("noMsg",{ newState=="blink"  
-					}))
 				}	 
 				state("off") { //this:State
 					action { //it:State
-						updateResourceRep( "led(off)"  
+						println("$name in ${currentState.stateName} | $currentMsg")
+						updateResourceRep( "led(off,${newState})"  
 						)
-						println("Led off")
 						 unibo.actor22comm.utils.ColorsOut.outappl("${name} - off", unibo.actor22comm.utils.ColorsOut.GREEN) 
 						 ledM.turnOff() 
 					}
-					 transition(edgeName="t048",targetState="handle_update",cond=whenEvent("update_led"))
+					 transition(edgeName="t045",targetState="handle_update",cond=whenEvent("update_led"))
 				}	 
 				state("on") { //this:State
 					action { //it:State
-						updateResourceRep( "led(on)"  
+						println("$name in ${currentState.stateName} | $currentMsg")
+						updateResourceRep( "led(on,${newState})"  
 						)
 						 unibo.actor22comm.utils.ColorsOut.outappl("${name} - on", unibo.actor22comm.utils.ColorsOut.GREEN) 
-						println("Led on")
 						 ledM.turnOn() 
 					}
-					 transition(edgeName="t049",targetState="handle_update",cond=whenEvent("update_led"))
+					 transition(edgeName="t046",targetState="handle_update",cond=whenEvent("update_led"))
 				}	 
 				state("blink_on") { //this:State
 					action { //it:State
-						updateResourceRep( "led(blink)"  
+						println("$name in ${currentState.stateName} | $currentMsg")
+						updateResourceRep( "led(blink_on,${newState})"  
 						)
 						 unibo.actor22comm.utils.ColorsOut.outappl("${name} - on", unibo.actor22comm.utils.ColorsOut.GREEN) 
-						println("Blinking on")
 						 ledM.turnOn() 
 						stateTimer = TimerActor("timer_blink_on", 
 							scope, context!!, "local_tout_led_blink_on", 500.toLong() )
 					}
-					 transition(edgeName="t050",targetState="blink_off",cond=whenTimeout("local_tout_led_blink_on"))   
-					transition(edgeName="t051",targetState="handle_update",cond=whenEvent("update_led"))
+					 transition(edgeName="t047",targetState="blink_off",cond=whenTimeout("local_tout_led_blink_on"))   
+					transition(edgeName="t048",targetState="handle_update",cond=whenEvent("update_led"))
 				}	 
 				state("blink_off") { //this:State
 					action { //it:State
-						updateResourceRep( "led(blink)"  
+						println("$name in ${currentState.stateName} | $currentMsg")
+						updateResourceRep( "led(blink_off,${newState})"  
 						)
 						 unibo.actor22comm.utils.ColorsOut.outappl("${name} - off", unibo.actor22comm.utils.ColorsOut.GREEN) 
-						println("Blinking off")
 						 ledM.turnOff() 
 						stateTimer = TimerActor("timer_blink_off", 
 							scope, context!!, "local_tout_led_blink_off", 500.toLong() )
 					}
-					 transition(edgeName="t052",targetState="blink_on",cond=whenTimeout("local_tout_led_blink_off"))   
-					transition(edgeName="t053",targetState="handle_update",cond=whenEvent("update_led"))
+					 transition(edgeName="t049",targetState="blink_on",cond=whenTimeout("local_tout_led_blink_off"))   
+					transition(edgeName="t050",targetState="handle_update",cond=whenEvent("update_led"))
 				}	 
 			}
 		}

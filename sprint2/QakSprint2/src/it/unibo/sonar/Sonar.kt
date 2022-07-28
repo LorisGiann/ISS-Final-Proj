@@ -44,7 +44,7 @@ class Sonar ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scop
 				state("deactivateTheSonar") { //this:State
 					action { //it:State
 						println("$name in ${currentState.stateName} | $currentMsg")
-						updateResourceRep( "sonar(deactivateTheSonar,`it.unibo`.radarSystem22.domain.utils.DomainSystemConfig.simulation)"  
+						updateResourceRep( "sonar(deactivateTheSonar,${`it.unibo`.radarSystem22.domain.utils.DomainSystemConfig.simulation}"  
 						)
 						if(   `it.unibo`.radarSystem22.domain.utils.DomainSystemConfig.simulation  
 						 ){forward("sonardeactivate", "info(ok)" ,"sonarsimulatortesting" ) 
@@ -61,7 +61,7 @@ class Sonar ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scop
 						if( checkMsgContent( Term.createTerm("distance(V)"), Term.createTerm("distance(D)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 val D = payloadArg(0)  
-								updateResourceRep( "sonar(handleSonarData,`it.unibo`.radarSystem22.domain.utils.DomainSystemConfig.simulation,${D})"  
+								updateResourceRep( "sonar(handleSonarData,${`it.unibo`.radarSystem22.domain.utils.DomainSystemConfig.simulation},${D})"  
 								)
 								emit("sonardata", "distance($D)" ) 
 						}
@@ -72,7 +72,7 @@ class Sonar ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scop
 				state("end") { //this:State
 					action { //it:State
 						println("$name in ${currentState.stateName} | $currentMsg")
-						updateResourceRep( "sonar(end,`it.unibo`.radarSystem22.domain.utils.DomainSystemConfig.simulation)"  
+						updateResourceRep( "sonar(end,${`it.unibo`.radarSystem22.domain.utils.DomainSystemConfig.simulation})"  
 						)
 					}
 				}	 

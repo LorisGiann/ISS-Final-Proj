@@ -18,7 +18,7 @@ Request pickup         : pickup(_)
 Reply   pickupanswer   : pickupanswer(RESULT)
 Request dropout        : dropout(_)
 Reply   dropoutanswer  : dropoutanswer(RESULT)
-Request move           : move(POSITION)    //INDOOR | PLASTICBOX | GLASSBOX | HOME
+Request move           : move(POSITION)    //POSITION = INDOOR | PLASTICBOX | GLASSBOX | HOME
 Reply   moveanswer     : moveanswer(RESULT)
 // ------------------------------------------------------
 
@@ -52,7 +52,7 @@ Dispatch enable			 : enable(_)
 Dispatch disable		 : disable(_)
 
 //LED 
-Event    update_led 	 : update_led(ARG)
+Event    update_led 	 : update_led(LEDSTATE) // LEDSTATE = ON | OFF | BLINK
 // ------------------ CONTEXTS -------------------
 //REMEMBER TO PUT datacleaner AND distancefilter IN THE SAME CONTEXT OF basicrobot
 Context ctxserver ip [host="localhost" port=8095]
@@ -498,21 +498,25 @@ QActor alarmcontrol context ctxalarm{
 	Goto wait
 
 	State wait{
-		println("wait")
+		printCurrentMessage
+		updateResource [# "alarmcontrol(wait)" #]
+		//println("wait")
 	}
 	Transition t0 whenEvent moving -> handle_moving
 				  whenEvent sonardata -> handle_distance 
 				  whenMsg   sonardeactivate -> sonardeactivate
 				  
     State sonardeactivate {
+    	printCurrentMessage
+    	updateResource [# "alarmcontrol(sonardeactivate)" #]	
     	onMsg(sonardeactivate : info(ok)){
-	    	updateResource [# "alarmcontrol(deactivateSonar)" #]	 
 	    	forward sonar -m sonardeactivate : info(ok)	
     	}
     }
     Goto wait
 				  
 	State handle_moving{
+		printCurrentMessage
 		onMsg( moving : moving(F,T) ){
 			[# F = payloadArg(0)   #] 
 			[# T = payloadArg(1)   #]   
@@ -520,27 +524,28 @@ QActor alarmcontrol context ctxalarm{
 			updateResource [# "alarmcontrol(handle_moving,${F},${T},${DISABLE})" #]
 			if [# ISHOME==true #]{
   		    	println("led off")
-  		    	emit update_led : update_led(off)
+  		    	emit update_led : update_led(OFF)
   		    }else {
   		    	println("led blink")
-  		    	emit update_led : update_led(blink)
+  		    	emit update_led : update_led(BLINK)
   		    }
 		}
 	}
 	Goto wait
 	
 	State handle_distance{
+		printCurrentMessage
 		onMsg( sonardata : distance(D) ){
    		 	[# val D = payloadArg(0).toInt() #]  
   		    //println("Distance ${D}")		    
   		    //LED
   		    if [# ISHOME==false && D<DLIMIT#]{
-  		    	emit update_led : update_led(on)
-  		    	println("led on")
+  		    	emit update_led : update_led(ON)
+  		    	//println("led on")
   		    }
   		    if [# ISHOME==false && D>=DLIMIT#]{ 
-  		    	println("led blink")
-  		    	emit update_led : update_led(blink)
+  		    	//println("led blink")
+  		    	emit update_led : update_led(BLINK)
   		    }
   		    updateResource [# "alarmcontrol(handle_distance,${F},${T},${DISABLE},${D})" #]
   		    //TRASPORTROLLEY
@@ -588,7 +593,7 @@ QActor sonar context ctxalarm {
 	
 	State deactivateTheSonar{
 		printCurrentMessage
-		updateResource [# "sonar(deactivateTheSonar,`it.unibo`.radarSystem22.domain.utils.DomainSystemConfig.simulation)" #]
+		updateResource [# "sonar(deactivateTheSonar,${`it.unibo`.radarSystem22.domain.utils.DomainSystemConfig.simulation}" #]
 		if[#  `it.unibo`.radarSystem22.domain.utils.DomainSystemConfig.simulation #]{
 			//println("sonar simulator")
 			forward sonarsimulatortesting -m sonardeactivate : info(ok) 
@@ -604,7 +609,7 @@ QActor sonar context ctxalarm {
   		printCurrentMessage
   		 onMsg( sonardistance : distance(D) ){
    		 	[# val D = payloadArg(0) #]   
-   		 	updateResource [# "sonar(handleSonarData,`it.unibo`.radarSystem22.domain.utils.DomainSystemConfig.simulation,${D})" #]
+   		 	updateResource [# "sonar(handleSonarData,${`it.unibo`.radarSystem22.domain.utils.DomainSystemConfig.simulation},${D})" #]
   		    //println("Distance ${D}")
   		 	emit sonardata : distance($D) //for the application
   		 }
@@ -614,7 +619,7 @@ QActor sonar context ctxalarm {
    		
 	State end{
 		printCurrentMessage
-		updateResource [# "sonar(end,`it.unibo`.radarSystem22.domain.utils.DomainSystemConfig.simulation)" #]
+		updateResource [# "sonar(end,${`it.unibo`.radarSystem22.domain.utils.DomainSystemConfig.simulation})" #]
 		//println("sonar BYE")
 		//[# System.exit(0) #]
 	}
@@ -622,118 +627,81 @@ QActor sonar context ctxalarm {
 
 QActor led context ctxalarm{ 
 	[# lateinit var ledM : `it.unibo`.radarSystem22.domain.interfaces.ILed
-	   lateinit var newState : String #]
+	   var newState = ws.LedState.OFF 
+	   
+	   val actor = this@Led;
+		suspend fun transitNow(stateName : String){
+			var res = actor.handleCurrentMessage(NoMsg,actor.getStateByName(stateName));
+			if(res) actor.elabMsgInState( );
+			else println("ERROR: transition was not possible")
+		}
+	#]
 	
 	State s0 initial { 	     
 		discardMsg On
 		printCurrentMessage
-		updateResource [# "led(off)" #]
-		println("${name} STARTS")
+		updateResource [# "led(initial,${newState})" #]
+		//println("${name} STARTS")
 		[# ledM = `it.unibo`.radarSystem22.domain.models.LedModel.create() #]
+		[# ledM.turnOff()#]
 		//[# sysUtil.logMsgs=true #]
  	}
  	Transition t0 whenEvent update_led -> handle_update
  	
- 	State handle_update { 
+ 	State handle_update {
+ 		printCurrentMessage
 		onMsg( update_led:update_led(ARG) ){
-			[# newState = payloadArg(0) #]
- 			println("update_led(${newState})")
- 			forward led -m noMsg : noMsg(_)
+			[# newState = ws.LedState.valueOf(payloadArg(0)) #]
+ 			//println("update_led(${newState})")
+ 			[# val stateName = when(newState) {
+	 					ws.LedState.ON -> "off"
+	 					ws.LedState.OFF -> "on"
+	 					ws.LedState.BLINKING -> "blink_on"
+	 			   }
+			   transitNow(stateName)
+			#]
+ 			//forward led -m noMsg : noMsg(_)
  		}
+ 		updateResource [# "led(handle_update,${newState})" #]
  	}
- 	//Transition to else Goto off
- 	Transition toNewState whenMsg noMsg and [# newState=="off" #] -> off
+ 	/*Transition toNewState whenMsg noMsg and [# newState=="off" #] -> off
  						  whenMsg noMsg and [# newState=="on" #] -> on
- 						  whenMsg noMsg and [# newState=="blink" #] -> blink_on
+ 						  whenMsg noMsg and [# newState=="blink" #] -> blink_on*/
  	
  	State off {
- 		updateResource [# "led(off)" #]
- 		println("Led off")
+ 		printCurrentMessage
+ 		updateResource [# "led(off,${newState})" #]
  		[# unibo.actor22comm.utils.ColorsOut.outappl("${name} - off", unibo.actor22comm.utils.ColorsOut.GREEN)#]
  		[# ledM.turnOff()#]
  	}
  	Transition t0 whenEvent update_led -> handle_update
  	
  	State on {
- 		updateResource [# "led(on)" #]
+ 		printCurrentMessage
+ 		updateResource [# "led(on,${newState})" #]
  		[# unibo.actor22comm.utils.ColorsOut.outappl("${name} - on", unibo.actor22comm.utils.ColorsOut.GREEN)#]
- 		println("Led on")
+ 		//println("Led on")
  		[# ledM.turnOn()#]
  	}
  	Transition t0 whenEvent update_led -> handle_update
  	
  	State blink_on {
- 		updateResource [# "led(blink)" #]
+ 		printCurrentMessage
+ 		updateResource [# "led(blink_on,${newState})" #]
  		[# unibo.actor22comm.utils.ColorsOut.outappl("${name} - on", unibo.actor22comm.utils.ColorsOut.GREEN)#]
- 		println("Blinking on")
+ 		//println("Blinking on")
  		[# ledM.turnOn()#]
  	}
  	Transition t0 whenTime 500 -> blink_off
  					whenEvent update_led -> handle_update
  					
  	State blink_off {
- 		updateResource [# "led(blink)" #]
+ 		printCurrentMessage
+ 		updateResource [# "led(blink_off,${newState})" #]
  		[# unibo.actor22comm.utils.ColorsOut.outappl("${name} - off", unibo.actor22comm.utils.ColorsOut.GREEN)#]
- 		println("Blinking off")
+ 		//println("Blinking off")
  		[# ledM.turnOff()#]
  	}
  	Transition t0 whenTime 500 -> blink_on
  					whenEvent update_led -> handle_update
 }
-
-
-
-//wasteservice TESTER
-//TEST VETRO RIGETTATO E PLASTICA ACCETTATA, RICHIESTE SEQUENZIALE
-/*
-QActor testwasteservice context ctxserver{
-	State s0 initial { 	    
-		discardMsg On
-		//[# sysUtil.logMsgs=true #]
-		request wasteservice -m depositrequest : depositrequest(GLASS,11)
- 	}
- 	Transition t0 whenReply loadaccept -> error
- 					whenReply loadrejected -> s1
- 	
- 	State s1 {
- 		println("load rejected successfully")
- 		request wasteservice -m depositrequest : depositrequest(PLASTIC,3)
- 	}
- 	Transition t0 whenReply loadaccept -> s2
- 					whenReply loadrejected -> error
- 	
- 	State s2 {
- 		println("load accepted successfully")
- 	}
- 	
- 	State error {
- 		println("errore")
- 	}
-} 
- 
-//TEST PLASTICA ACCETTATA, PLASTICA RIGETTATA, SEQUENZIALI
-/*QActor testwasteservice context ctxRPI{
-	State s0 initial { 	    
-		discardMsg On
-		//[# sysUtil.logMsgs=true #]
-		request wasteservice -m depositrequest : depositrequest(PLASTIC,9)
- 	}
- 	Transition t0 whenReply loadaccept -> s1
- 					whenReply loadrejected -> error
- 	
- 	State s1 {
- 		println("load accepted successfully")
- 		request wasteservice -m depositrequest : depositrequest(PLASTIC,2)
- 	}
- 	Transition t0 whenReply loadaccept -> error
- 					whenReply loadrejected -> s2
- 	
- 	State s2 {
- 		println("load rejected successfully")
- 	}
- 	
- 	State error {
- 		println("errore")
- 	}
-}*/
-
