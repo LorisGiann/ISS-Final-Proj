@@ -44,14 +44,14 @@ internal class TestSprint2_enable_disable {
         CommSystemConfig.tracing = false
 
         try {
-			TestUtils.terminateProcOnPort(8097); //making sure that the port is free
             TestUtils.terminateProcOnPort(8096); //making sure that the port is free
             TestUtils.terminateProcOnPort(8095); //making sure that the port is free
+            TestUtils.terminateProcOnPort(8097); //making sure that the port is free
 
             val (prS, processHandleS) = TestUtils.runCtx("build/libs/it.unibo.ctxserver.MainCtxserverCustomKt-1.0.jar")
             prServer=prS; processHandleServer=processHandleS
-            //val (prR, processHandleR) = TestUtils.runCtx("build/libs/it.unibo.ctxrobot.MainCtxrobotCustomKt-1.0.jar")
-            //prRobot=prR; processHandleRobot=processHandleR
+            val (prR, processHandleR) = TestUtils.runCtx("build/libs/it.unibo.ctxrobot.MainCtxrobotCustomKt-1.0.jar")
+            prRobot=prR; processHandleRobot=processHandleR
             val (prA, processHandleA) = TestUtils.runCtx("build/libs/it.unibo.ctxalarm.MainCtxalarmCustomKt-1.0.jar")
             prAlarm=prA; processHandleAlarm=processHandleA
         } catch (e: IOException) {
@@ -70,8 +70,8 @@ internal class TestSprint2_enable_disable {
         //FIRSTLY, try to be nice and make the program exit "normally"
         //serverThread!!.stop();
         try {
-            //processHandleRobot!!.destroy()
-            //prRobot!!.destroy()
+            processHandleRobot!!.destroy()
+            prRobot!!.destroy()
             processHandleServer!!.destroy()
             prServer!!.destroy()
 			processHandleAlarm!!.destroy()

@@ -180,7 +180,7 @@ object sysUtil{
 		//val newctx = QakContext( ctx, "$ctxHost", portNum, "") //isa ActorBasic
 		newctx.mqttAddr = mqttAddr //!!!!!! INJECTION !!!!!!
 		ctxsMap.put(ctx, newctx)
-		if( ! ctxHost.equals(hostName) ){
+		if( ctx!=localContextName ){
 			return null
 		}
 		ctxOnHost.add(newctx)
