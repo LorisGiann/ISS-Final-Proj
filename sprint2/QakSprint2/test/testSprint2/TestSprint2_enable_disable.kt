@@ -144,7 +144,7 @@ internal class TestSprint2_enable_disable {
 
                 ColorsOut.outappl(to!!.getHistory().toString(), ColorsOut.MAGENTA)
                 Assert.assertTrue(to!!.checkNextSequence(arrayOf(
-                    "sonar(sonardeactivate)",
+                    "sonar(end,*)",
                     "transporttrolley(forward_halt,GLASSBOX,HOME)",
                     "transporttrolley(forward_robot,GLASSBOX,HOME)"
                 )))
@@ -198,7 +198,7 @@ internal class TestSprint2_enable_disable {
 
                 ColorsOut.outappl(to!!.getHistory().toString(), ColorsOut.BgMagenta)
                 Assert.assertTrue(to!!.checkNextSequence(arrayOf(
-                    "sonar(sonardeactivate)",
+                    "sonar(end,*)",
                     "transporttrolley(halt,INDOOR,INDOOR)"
                 )))
                 ColorsOut.outappl("FINISH", ColorsOut.GREEN)

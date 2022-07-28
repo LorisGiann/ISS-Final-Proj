@@ -566,7 +566,6 @@ QActor sonar context ctxalarm {
 	State s0 initial {
 		printCurrentMessage
 		run  sonarConfig.configureTheSonar(simulate, sonarActorName, usingDomain)
-		 
 		//ASSUMPTION: the sonar subsystem emits the event sonar:distance(V)
 	}
 	Transition t0 whenMsg sonaractivate   -> activateTheSonar
@@ -574,15 +573,13 @@ QActor sonar context ctxalarm {
 	
 	State activateTheSonar{
 		printCurrentMessage
-		println("activate the sonar")
+		updateResource [# "sonar(activateTheSonar,${`it.unibo`.radarSystem22.domain.utils.DomainSystemConfig.simulation})" #]
 		if[#  `it.unibo`.radarSystem22.domain.utils.DomainSystemConfig.simulation #]{
-			println("sonar simulator")
-			updateResource [# "sonar(sonaractivate)" #]
+			//println("sonar simulator")
 			forward sonarsimulatortesting -m sonaractivate : info(ok) 
 			//run sonarConfig.activateSonarSimulated() //usingDomain
 		}else {
-			println("sonar real")
-			updateResource [# "sonar(sonaractivate)" #]
+			//println("sonar real")
 			forward sonardatasource -m sonaractivate : info(ok)  
 		}
 	}
@@ -591,33 +588,34 @@ QActor sonar context ctxalarm {
 	
 	State deactivateTheSonar{
 		printCurrentMessage
-		println("deactivate the sonar")
+		updateResource [# "sonar(deactivateTheSonar,`it.unibo`.radarSystem22.domain.utils.DomainSystemConfig.simulation)" #]
 		if[#  `it.unibo`.radarSystem22.domain.utils.DomainSystemConfig.simulation #]{
-			println("sonar simulator")
-			updateResource [# "sonar(sonardeactivate)" #]
+			//println("sonar simulator")
 			forward sonarsimulatortesting -m sonardeactivate : info(ok) 
 			//run sonarConfig.activateSonarSimulated() //usingDomain
 		}else {
-			println("sonar real")
-			updateResource [# "sonar(sonardeactivate)" #]
+			//println("sonar real")
 			forward sonardatasource -m sonardeactivate : info(ok)  
 		}
 	}
 	Goto end
   
   	State handleSonarData{
+  		printCurrentMessage
   		 onMsg( sonardistance : distance(D) ){
    		 	[# val D = payloadArg(0) #]   
-   		 	updateResource [# "sonar( Distance ${D} )" #]
-  		    println("Distance ${D}")
+   		 	updateResource [# "sonar(handleSonarData,`it.unibo`.radarSystem22.domain.utils.DomainSystemConfig.simulation,${D})" #]
+  		    //println("Distance ${D}")
   		 	emit sonardata : distance($D) //for the application
   		 }
   	}
    	Transition t0 whenEvent sonardistance -> handleSonarData
    				  whenMsg   sonardeactivate -> deactivateTheSonar
    		
-	State end{  
-		println("sonar BYE")
+	State end{
+		printCurrentMessage
+		updateResource [# "sonar(end,`it.unibo`.radarSystem22.domain.utils.DomainSystemConfig.simulation)" #]
+		//println("sonar BYE")
 		//[# System.exit(0) #]
 	}
 }
