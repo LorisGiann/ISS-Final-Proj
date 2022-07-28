@@ -502,6 +502,15 @@ QActor alarmcontrol context ctxalarm{
 	}
 	Transition t0 whenEvent moving -> handle_moving
 				  whenEvent sonardata -> handle_distance 
+				  whenMsg   sonardeactivate -> sonardeactivate
+				  
+    State sonardeactivate {
+    	onMsg(sonardeactivate : info(ok)){
+	    	updateResource [# "alarmcontrol(deactivateSonar)" #]	 
+	    	forward sonar -m sonardeactivate : info(ok)	
+    	}
+    }
+    Goto wait
 				  
 	State handle_moving{
 		onMsg( moving : moving(F,T) ){
@@ -535,7 +544,7 @@ QActor alarmcontrol context ctxalarm{
   		    }
   		    updateResource [# "alarmcontrol(handle_distance,${F},${T},${DISABLE},${D})" #]
   		    //TRASPORTROLLEY
-  		    if [# D<DLIMIT#]{
+  		    if [# D<DLIMIT #]{
   		    	[# DISABLE=true #]
   		    	forward transporttrolley -m disable : disable(_)
   		    }
@@ -573,7 +582,7 @@ QActor sonar context ctxalarm {
 			//run sonarConfig.activateSonarSimulated() //usingDomain
 		}else {
 			println("sonar real")
-			updateResource [# "sonaractivate" #]
+			updateResource [# "sonar(sonaractivate)" #]
 			forward sonardatasource -m sonaractivate : info(ok)  
 		}
 	}
@@ -582,13 +591,24 @@ QActor sonar context ctxalarm {
 	
 	State deactivateTheSonar{
 		printCurrentMessage
+		println("deactivate the sonar")
+		if[#  `it.unibo`.radarSystem22.domain.utils.DomainSystemConfig.simulation #]{
+			println("sonar simulator")
+			updateResource [# "sonar(sonardeactivate)" #]
+			forward sonarsimulatortesting -m sonardeactivate : info(ok) 
+			//run sonarConfig.activateSonarSimulated() //usingDomain
+		}else {
+			println("sonar real")
+			updateResource [# "sonar(sonardeactivate)" #]
+			forward sonardatasource -m sonardeactivate : info(ok)  
+		}
 	}
 	Goto end
   
   	State handleSonarData{
   		 onMsg( sonardistance : distance(D) ){
    		 	[# val D = payloadArg(0) #]   
-   		 	updateResource [# "Distance ${D}" #]
+   		 	updateResource [# "sonar( Distance ${D} )" #]
   		    println("Distance ${D}")
   		 	emit sonardata : distance($D) //for the application
   		 }
@@ -597,9 +617,8 @@ QActor sonar context ctxalarm {
    				  whenMsg   sonardeactivate -> deactivateTheSonar
    		
 	State end{  
-		println("sonarqak22 BYE")
-		updateResource [# "sonardeactivate" #]
-		[# System.exit(0) #]
+		println("sonar BYE")
+		//[# System.exit(0) #]
 	}
 }
 

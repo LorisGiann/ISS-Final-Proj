@@ -23,8 +23,8 @@ class Sonar ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scop
 						println("$name in ${currentState.stateName} | $currentMsg")
 						sonarConfig.configureTheSonar( simulate, sonarActorName, usingDomain  )
 					}
-					 transition(edgeName="t037",targetState="activateTheSonar",cond=whenDispatch("sonaractivate"))
-					transition(edgeName="t038",targetState="deactivateTheSonar",cond=whenDispatch("sonardeactivate"))
+					 transition(edgeName="t038",targetState="activateTheSonar",cond=whenDispatch("sonaractivate"))
+					transition(edgeName="t039",targetState="deactivateTheSonar",cond=whenDispatch("sonardeactivate"))
 				}	 
 				state("activateTheSonar") { //this:State
 					action { //it:State
@@ -38,17 +38,30 @@ class Sonar ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scop
 						}
 						else
 						 {println("sonar real")
-						 updateResourceRep( "sonaractivate"  
+						 updateResourceRep( "sonar(sonaractivate)"  
 						 )
 						 forward("sonaractivate", "info(ok)" ,"sonardatasource" ) 
 						 }
 					}
-					 transition(edgeName="t039",targetState="handleSonarData",cond=whenEvent("sonardistance"))
-					transition(edgeName="t040",targetState="deactivateTheSonar",cond=whenDispatch("sonardeactivate"))
+					 transition(edgeName="t040",targetState="handleSonarData",cond=whenEvent("sonardistance"))
+					transition(edgeName="t041",targetState="deactivateTheSonar",cond=whenDispatch("sonardeactivate"))
 				}	 
 				state("deactivateTheSonar") { //this:State
 					action { //it:State
 						println("$name in ${currentState.stateName} | $currentMsg")
+						println("deactivate the sonar")
+						if(   `it.unibo`.radarSystem22.domain.utils.DomainSystemConfig.simulation  
+						 ){println("sonar simulator")
+						updateResourceRep( "sonar(sonardeactivate)"  
+						)
+						forward("sonardeactivate", "info(ok)" ,"sonarsimulatortesting" ) 
+						}
+						else
+						 {println("sonar real")
+						 updateResourceRep( "sonar(sonardeactivate)"  
+						 )
+						 forward("sonardeactivate", "info(ok)" ,"sonardatasource" ) 
+						 }
 					}
 					 transition( edgeName="goto",targetState="end", cond=doswitch() )
 				}	 
@@ -57,21 +70,18 @@ class Sonar ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scop
 						if( checkMsgContent( Term.createTerm("distance(V)"), Term.createTerm("distance(D)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 val D = payloadArg(0)  
-								updateResourceRep( "Distance ${D}"  
+								updateResourceRep( "sonar( Distance ${D} )"  
 								)
 								println("Distance ${D}")
 								emit("sonardata", "distance($D)" ) 
 						}
 					}
-					 transition(edgeName="t041",targetState="handleSonarData",cond=whenEvent("sonardistance"))
-					transition(edgeName="t042",targetState="deactivateTheSonar",cond=whenDispatch("sonardeactivate"))
+					 transition(edgeName="t042",targetState="handleSonarData",cond=whenEvent("sonardistance"))
+					transition(edgeName="t043",targetState="deactivateTheSonar",cond=whenDispatch("sonardeactivate"))
 				}	 
 				state("end") { //this:State
 					action { //it:State
-						println("sonarqak22 BYE")
-						updateResourceRep( "sonardeactivate"  
-						)
-						 System.exit(0)  
+						println("sonar BYE")
 					}
 				}	 
 			}

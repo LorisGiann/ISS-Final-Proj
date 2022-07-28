@@ -40,6 +40,18 @@ class Alarmcontrol ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 					}
 					 transition(edgeName="t035",targetState="handle_moving",cond=whenEvent("moving"))
 					transition(edgeName="t036",targetState="handle_distance",cond=whenEvent("sonardata"))
+					transition(edgeName="t037",targetState="sonardeactivate",cond=whenDispatch("sonardeactivate"))
+				}	 
+				state("sonardeactivate") { //this:State
+					action { //it:State
+						if( checkMsgContent( Term.createTerm("info(ARG)"), Term.createTerm("info(ok)"), 
+						                        currentMsg.msgContent()) ) { //set msgArgList
+								updateResourceRep( "alarmcontrol(deactivateSonar)"  
+								)
+								forward("sonardeactivate", "info(ok)" ,"sonar" ) 
+						}
+					}
+					 transition( edgeName="goto",targetState="wait", cond=doswitch() )
 				}	 
 				state("handle_moving") { //this:State
 					action { //it:State
@@ -77,7 +89,7 @@ class Alarmcontrol ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 								}
 								updateResourceRep( "alarmcontrol(handle_distance,${F},${T},${DISABLE},${D})"  
 								)
-								if(  D<DLIMIT 
+								if(  D<DLIMIT  
 								 ){ DISABLE=true  
 								forward("disable", "disable(_)" ,"transporttrolley" ) 
 								}
