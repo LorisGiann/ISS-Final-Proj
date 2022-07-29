@@ -24,7 +24,7 @@ class Mover ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scop
 						updateResourceRep( "mover(wait,$CURRPOS,$DEST)"  
 						)
 					}
-					 transition(edgeName="t026",targetState="handle",cond=whenRequest("move"))
+					 transition(edgeName="t021",targetState="handle",cond=whenRequest("move"))
 				}	 
 				state("handle") { //this:State
 					action { //it:State
@@ -48,7 +48,7 @@ class Mover ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scop
 						)
 						request("cmdsync", "cmdsync(w)" ,"basicrobotwrapper" )  
 					}
-					 transition(edgeName="t027",targetState="chk_forward",cond=whenReply("cmdanswer"))
+					 transition(edgeName="t022",targetState="chk_forward",cond=whenReply("cmdanswer"))
 				}	 
 				state("chk_forward") { //this:State
 					action { //it:State
@@ -72,7 +72,7 @@ class Mover ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scop
 						)
 						request("cmdsync", "cmdsync(l)" ,"basicrobotwrapper" )  
 					}
-					 transition(edgeName="t028",targetState="chk_turn",cond=whenReply("cmdanswer"))
+					 transition(edgeName="t023",targetState="chk_turn",cond=whenReply("cmdanswer"))
 				}	 
 				state("chk_turn") { //this:State
 					action { //it:State

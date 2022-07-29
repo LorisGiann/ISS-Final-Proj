@@ -28,9 +28,9 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 						updateResourceRep( "transporttrolley(wait)"  
 						)
 					}
-					 transition(edgeName="toNewState18",targetState="req_pickup",cond=whenRequest("pickup"))
-					transition(edgeName="toNewState19",targetState="req_dropout",cond=whenRequest("dropout"))
-					transition(edgeName="toNewState20",targetState="req_move",cond=whenRequest("move"))
+					 transition(edgeName="toNewState13",targetState="req_pickup",cond=whenRequest("pickup"))
+					transition(edgeName="toNewState14",targetState="req_dropout",cond=whenRequest("dropout"))
+					transition(edgeName="toNewState15",targetState="req_move",cond=whenRequest("move"))
 				}	 
 				state("req_pickup") { //this:State
 					action { //it:State
@@ -39,7 +39,7 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 						)
 						request("pickup", "pickup(_)" ,"pickupdropouthandler" )  
 					}
-					 transition(edgeName="toNewState21",targetState="chk_pickup",cond=whenReply("pickupanswer"))
+					 transition(edgeName="toNewState16",targetState="chk_pickup",cond=whenReply("pickupanswer"))
 				}	 
 				state("chk_pickup") { //this:State
 					action { //it:State
@@ -66,7 +66,7 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 						)
 						request("dropout", "dropout(_)" ,"pickupdropouthandler" )  
 					}
-					 transition(edgeName="toNewState22",targetState="chk_dropout",cond=whenReply("dropoutanswer"))
+					 transition(edgeName="toNewState17",targetState="chk_dropout",cond=whenReply("dropoutanswer"))
 				}	 
 				state("chk_dropout") { //this:State
 					action { //it:State
@@ -98,7 +98,7 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 						updateResourceRep( "transporttrolley(req_move,$Pos)"  
 						)
 					}
-					 transition(edgeName="toNewState23",targetState="chk_move",cond=whenReply("moveanswer"))
+					 transition(edgeName="toNewState18",targetState="chk_move",cond=whenReply("moveanswer"))
 				}	 
 				state("chk_move") { //this:State
 					action { //it:State

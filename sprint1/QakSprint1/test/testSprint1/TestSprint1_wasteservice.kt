@@ -43,6 +43,7 @@ internal class TestSprint1_wasteservice {
             prRobot=prR; processHandleRobot=processHandleR
             val (prS, processHandleS) = TestUtils.runCtx("build/libs/it.unibo.ctxserver.MainCtxserverCustomKt-1.0.jar")
             prServer=prS; processHandleServer=processHandleS
+
         } catch (e: IOException) {
             ColorsOut.outappl("Errore launch ", ColorsOut.RED)
             System.exit(1)
@@ -64,10 +65,11 @@ internal class TestSprint1_wasteservice {
             processHandleServer!!.destroy()
             prServer!!.destroy()
         }catch(e :  NullPointerException){ }
+
         CommUtils.delay(1000)
         //since sometime this isn't enough, do it the heavy way...
-        processHandleRobot!!.destroyForcibly()
-        processHandleServer!!.destroyForcibly()
+        //processHandleRobot!!.destroyForcibly()
+        //processHandleServer!!.destroyForcibly()
 
         //connTransportTrolley!!.close()
         connWasteService!!.close()

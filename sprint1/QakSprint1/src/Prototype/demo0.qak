@@ -20,7 +20,11 @@ Request dropout        : dropout(_)
 Reply   dropoutanswer  : dropoutanswer(RESULT)
 Request move           : move(POSITION)    //POSITION = INDOOR | PLASTICBOX | GLASSBOX | HOME
 Reply   moveanswer     : moveanswer(RESULT)
+Dispatch err		   : err(_)
 // ------------------------------------------------------
+// ------------ depositaction msgs
+Request depositaction  : depositaction(MATERIAL) 
+Reply   pickupdone	   : pickupdone(_)
 
 // --------------- basicrobotwrapper msgs ---------------
 //RESULT =  OK | ERROR 
@@ -63,7 +67,7 @@ CodedQActor distancefilter context ctxrobot className "rx.distanceFilter"   //Ne
 
 
 
-
+/* 
 QActor wasteservice context ctxserver{
 	[# lateinit var Material  : ws.Material
 	   var TruckLoad : Float = 0F
@@ -225,6 +229,192 @@ QActor wasteservice context ctxserver{
  		printCurrentMessage
  	}
 }
+*/
+
+QActor wasteservice context ctxserver{
+	[# lateinit var Material  : ws.Material
+	   var TruckLoad : Float = 0F
+
+	   lateinit var RES : String
+	   lateinit var TrolleyPos : String   //gbox,pbox,Home,indoor
+	#]
+	
+	State wait initial {
+			printCurrentMessage
+			updateResource [# "wasteservice(wait,${ws.func.contPB},${ws.func.contGB})" #]
+			discardMsg Off
+	}
+	Transition t0 whenRequest depositrequest -> handle_req
+				  whenMsg   err -> error
+	
+	State handle_req{
+		updateResource [# "wasteservice(handle_req,${ws.func.contPB},${ws.func.contGB})" #] 
+		printCurrentMessage
+		onMsg(depositrequest : depositrequest(MATERIAL, TRUCKLOAD)) {
+			[#
+				 Material 	= ws.Material.valueOf(payloadArg(0))
+				 TruckLoad 	= payloadArg(1).toFloat()
+			#]
+			println("wasteservice | arrived $TruckLoad Kg of $Material")
+			if[# ws.func.checkdepositpossible( Material, TruckLoad ) #]{
+				[# ws.func.updateDeposit( Material, TruckLoad ) 
+					#]
+				println("wasteservice | PB capacity: ${ws.func.contPB}, GB capacity: ${ws.func.contGB}")	
+				[# RES="OK"#]
+			} else{  
+				[# RES="ERR" #]
+			}		
+		} 
+	}
+	Goto req_depositaction if [# RES=="OK" #] else rejected
+	
+	State rejected{
+		println("wasteservice | rejected")
+		updateResource [# "wasteservice(rejected,${ws.func.contPB},${ws.func.contGB})" #]
+		printCurrentMessage
+ 		replyTo depositrequest with loadrejected : loadrejected($Material,$TruckLoad)
+	}
+	Goto wait
+	
+	State req_depositaction{
+		println("wasteservice | req_depositaction")
+		updateResource [# "wasteservice(req_depositaction,${ws.func.contPB},${ws.func.contGB})" #]
+		printCurrentMessage
+		request depositaction -m depositaction : depositaction($Material)
+	}
+	Transition t0 whenReply pickupdone -> chk_depositaction
+				  whenMsg   err -> error
+	
+	State chk_depositaction{
+		printCurrentMessage
+		updateResource [# "wasteservice(chk_depositaction,${ws.func.contPB},${ws.func.contGB})" #]
+		replyTo depositrequest with loadaccept : loadaccept($Material,$TruckLoad)	
+	}
+	Goto wait
+	
+	
+ 	State error {
+ 		updateResource [# "wasteservice(error,${ws.func.contPB},${ws.func.contGB})" #] 
+ 		println("wasteservice | error")
+ 		printCurrentMessage
+ 	}
+}
+
+QActor depositaction context ctxserver{
+	[# lateinit var RES : String
+	   lateinit var MATERIAL : ws.Material #]
+	
+	State error {
+		updateResource [# "depositaction(error)" #] 
+ 		println("depositaction | error")
+ 		printCurrentMessage
+ 		forward wasteservice -m err : err(_)
+	}
+	
+	State wait initial{
+		updateResource [# "depositaction(wait)" #] 
+		printCurrentMessage
+		discardMsg Off
+	}
+	Transition t0 whenRequest depositaction -> req_move_indoor
+	
+	State req_move_indoor {
+		printCurrentMessage
+		onMsg(depositaction : depositaction(MATERIAL)){
+			[# MATERIAL=ws.Material.valueOf(payloadArg(0)) #]
+			request transporttrolley -m move : move(INDOOR)
+		}
+		updateResource [# "depositaction(req_move_indoor,$MATERIAL)" #] 
+	}
+	Transition t0 whenReply moveanswer -> chk_move_indoor 
+	
+	State chk_move_indoor {
+		updateResource [# "depositaction(chk_move_indoor,$MATERIAL)" #] 
+		printCurrentMessage
+		onMsg(moveanswer : moveanswer(RES)){
+			[# RES = payloadArg(0); #]
+		}
+	}
+	Goto req_pickup if [# RES=="OK" #] else error
+	
+	State req_pickup{
+		printCurrentMessage
+		updateResource [# "depositaction(req_pickup,$MATERIAL)" #] 
+		request transporttrolley -m pickup : pickup(_)
+	}
+	Transition t0 whenReply pickupanswer -> chk_pickup 
+
+
+	State chk_pickup{
+		printCurrentMessage
+		updateResource [# "depositaction(chk_pickup,$MATERIAL)" #] 
+		onMsg(pickupanswer : pickupanswer(RES)){
+			[# RES = payloadArg(0); #]
+		}
+	}
+	Goto reply if [# RES=="OK" #] else error
+	
+	State reply {
+		printCurrentMessage
+		updateResource [# "depositaction(reply,$MATERIAL)" #] 
+		replyTo depositaction with pickupdone: pickupdone(_)
+	}
+	Goto req_move_container
+	
+	State req_move_container {
+		[# 
+			val Position = when(MATERIAL){
+			    ws.Material.PLASTIC -> ws.Position.PLASTICBOX
+			    ws.Material.GLASS -> ws.Position.GLASSBOX
+			} #]
+		printCurrentMessage
+		updateResource [# "depositaction(req_move_container,$MATERIAL)" #] 
+		request transporttrolley -m move : move($Position)
+	}
+	Transition t0 whenReply moveanswer -> chk_move_container
+	
+	State chk_move_container{
+		printCurrentMessage
+		updateResource [# "depositaction(chk_pickup,$MATERIAL)" #] 
+		onMsg(moveanswer : moveanswer(RES)){
+			[# RES = payloadArg(0); #]
+		}
+	}
+	Goto req_dropout if [# RES=="OK" #] else error
+	
+	State req_dropout{
+		updateResource [# "depositaction(req_dropout,$MATERIAL)" #] 
+		request transporttrolley -m dropout : dropout(_)
+	}
+	Transition t0 whenReply dropoutanswer -> chk_dropout
+
+
+	State chk_dropout{
+		printCurrentMessage
+		updateResource [# "depositaction(chk_pickup,$MATERIAL)" #] 
+		onMsg(dropoutanswer : dropoutanswer(RES)){
+			[# RES = payloadArg(0); #]
+		}
+	}
+	Goto next_move if [# RES=="OK" #] else error
+
+	State next_move{
+		printCurrentMessage
+		updateResource [# "depositaction(nextmove,$MATERIAL)" #] 
+	}
+	Transition t0 whenTime 10 -> move_home
+				  whenRequest depositaction -> req_move_indoor
+	
+	State move_home{
+		printCurrentMessage
+		updateResource [# "depositaction(move_home,$MATERIAL)" #] 
+		request transporttrolley -m move : move(HOME)
+	}
+	Transition t0 whenRequest depositaction -> req_move_indoor
+				  whenReply   moveanswer -> wait
+}
+
+
 
 QActor transporttrolley context ctxrobot{
 	[# val actor = this@Transporttrolley;

@@ -36,10 +36,10 @@ class Basicrobot ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 					action { //it:State
 						println("basicrobot | waiting .............. ")
 					}
-					 transition(edgeName="t131",targetState="execcmd",cond=whenDispatch("cmd"))
-					transition(edgeName="t132",targetState="doStep",cond=whenRequest("step"))
-					transition(edgeName="t133",targetState="handleObstacle",cond=whenDispatch("obstacle"))
-					transition(edgeName="t134",targetState="endwork",cond=whenDispatch("end"))
+					 transition(edgeName="t126",targetState="execcmd",cond=whenDispatch("cmd"))
+					transition(edgeName="t127",targetState="doStep",cond=whenRequest("step"))
+					transition(edgeName="t128",targetState="handleObstacle",cond=whenDispatch("obstacle"))
+					transition(edgeName="t129",targetState="endwork",cond=whenDispatch("end"))
 				}	 
 				state("execcmd") { //this:State
 					action { //it:State
@@ -85,8 +85,8 @@ class Basicrobot ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 						stateTimer = TimerActor("timer_doStep", 
 							scope, context!!, "local_tout_basicrobot_doStep", StepTime )
 					}
-					 transition(edgeName="t035",targetState="stepDone",cond=whenTimeout("local_tout_basicrobot_doStep"))   
-					transition(edgeName="t036",targetState="stepFail",cond=whenDispatch("obstacle"))
+					 transition(edgeName="t030",targetState="stepDone",cond=whenTimeout("local_tout_basicrobot_doStep"))   
+					transition(edgeName="t031",targetState="stepFail",cond=whenDispatch("obstacle"))
 				}	 
 				state("stepDone") { //this:State
 					action { //it:State
