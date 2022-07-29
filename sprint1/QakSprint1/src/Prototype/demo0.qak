@@ -8,7 +8,7 @@ System demo0
 //MATERIAL = PLASTIC | GLASS
 //TRUCKLOAD =  float number
 Request depositrequest : depositrequest(MATERIAL, TRUCKLOAD)
-Reply loadaccept     : loadaccept(MATERIAL, TRUCKLOAD)
+Reply loadaccept       : loadaccept(MATERIAL, TRUCKLOAD)
 Reply loadrejected     : loadrejected(MATERIAL, TRUCKLOAD)
 // ------------------------------------------------------
    
@@ -20,11 +20,12 @@ Request dropout        : dropout(_)
 Reply   dropoutanswer  : dropoutanswer(RESULT)
 Request move           : move(POSITION)    //POSITION = INDOOR | PLASTICBOX | GLASSBOX | HOME
 Reply   moveanswer     : moveanswer(RESULT)
-Dispatch err		   : err(_)
 // ------------------------------------------------------
-// ------------ depositaction msgs
+// --------------- depositaction msgs -------------------
 Request depositaction  : depositaction(MATERIAL) 
 Reply   pickupdone	   : pickupdone(_)
+Dispatch err		   : err(_)
+// ------------------------------------------------------
 
 // --------------- basicrobotwrapper msgs ---------------
 //RESULT =  OK | ERROR 
@@ -65,171 +66,6 @@ Context ctxrobot ip  [host="127.0.0.1" port=8096]
 CodedQActor distancefilter context ctxrobot className "rx.distanceFilter"   //Nel caso di robot virtuale semplicemente assorbe eventi obstacle e reinvia dispatch "obstacle:obstacle(virtual)" a basicrobot. Nel caso di robot reali riceve messaggi "sonarRobot" e invia a basicrobot dispatch "obstacle:obstacle(dist)" se vicino, altrimenti sonardata", "sonardata:distance(dist)" se lontano.
 // ------------------------------------------------
 
-
-
-/* 
-QActor wasteservice context ctxserver{
-	[# lateinit var Material  : ws.Material
-	   var TruckLoad : Float = 0F
-
-	   lateinit var RES : String
-	   lateinit var TrolleyPos : String   //gbox,pbox,Home,indoor
-	#]
-	
-	State wait initial {
-		updateResource [# "wasteservice(wait,${ws.func.contPB},${ws.func.contGB})" #] 
-		printCurrentMessage
-		discardMsg Off
-		[# TrolleyPos = "home" #]
-		println("Waiting for requests")
-		//[# sysUtil.logMsgs=true #]
- 	}
- 	Transition t0 whenRequest depositrequest -> handle_req
- 					whenReply moveanswer -> wait //consume pending moveanswer (happens when a request which has been rejected has been received while the robot was returning to home). See also test_1_accepted_1_rejected_while_returning_home_1_accepted() test
- 	
- 	State handle_req {
- 		updateResource [# "wasteservice(handle_req,${ws.func.contPB},${ws.func.contGB})" #] 
-		printCurrentMessage
-		onMsg(depositrequest : depositrequest(MATERIAL, TRUCKLOAD)) {
-			[#
-				 Material 	= ws.Material.valueOf(payloadArg(0))
-				 TruckLoad 	= payloadArg(1).toFloat()
-			#]
-			println("arrived $TruckLoad Kg of $Material")
-			if[# ws.func.checkdepositpossible( Material, TruckLoad ) #]{
-				[# ws.func.updateDeposit( Material, TruckLoad ) 
-					#]
-				println("PB capacity: ${ws.func.contPB}, GB capacity: ${ws.func.contGB}")	
-				request transporttrolley -m move : move(INDOOR)
-			} else{  
-				replyTo depositrequest with loadrejected : loadrejected($Material,$TruckLoad)
-				forward wasteservice -m noMsg : noMsg(_)
-			}		
-		} 
- 	}
- 	Transition t0 whenReply moveanswer -> handle_move_indoor
- 				whenMsg noMsg -> wait
- 	
- 	State handle_move_indoor {
- 		updateResource [# "wasteservice(handle_move_indoor,${ws.func.contPB},${ws.func.contGB})" #] 
-		printCurrentMessage
-		onMsg(moveanswer : moveanswer(RESULT)) {
-			[# RES = payloadArg(0); #]
-			if[# RES == "OK" #]{
-				println("wateservice - request pickup")
-				request transporttrolley -m pickup : pickup(_)
-			}else{
-				forward wasteservice -m noMsg : noMsg(_)
-			}
-		}
- 	}
- 	Transition t0 whenReply pickupanswer -> handle_pickup_answer
- 					whenMsg noMsg -> error
- 	
- 	State handle_pickup_answer{
- 		updateResource [# "wasteservice(handle_pickup_answer,${ws.func.contPB},${ws.func.contGB})" #] 
- 		printCurrentMessage
- 		onMsg(pickupanswer : pickupanswer(RESULT)) {
-			[# RES = payloadArg(0); #]
-			if[# RES == "OK" #]{ 
-				[# 
-					val Position = when(Material){
-					    ws.Material.PLASTIC -> ws.Position.PLASTICBOX
-					    ws.Material.GLASS -> ws.Position.GLASSBOX
-					} #]
-				println("move to ${Position}")
-				request transporttrolley -m move : move($Position)
-				replyTo depositrequest with loadaccept : loadaccept($Material,$TruckLoad)
-			}else{
-				forward wasteservice -m noMsg : noMsg(_)
-			}
-		}
- 	}
- 	Transition t0 whenReply moveanswer -> handle_move_container
- 					whenMsg noMsg -> error
- 					
- 	State handle_move_container{
- 		updateResource [# "wasteservice(handle_move_container,${ws.func.contPB},${ws.func.contGB})" #] 
- 		printCurrentMessage
- 		onMsg(moveanswer : moveanswer(RESULT)) {
-			[# RES = payloadArg(0); #]
-			if[# RES == "OK" #]{
-				println("wateservice - request dropout ${Material}")
-				request transporttrolley -m dropout : dropout(_)
-			}else{
-				forward wasteservice -m noMsg : noMsg(_)
-			}
-		}
- 	}
- 	Transition t0 whenReply dropoutanswer -> handle_dropout_answer
- 					whenMsg noMsg -> error
- 					
- 	State handle_dropout_answer {
- 		updateResource [# "wasteservice(handle_dropout_answer,${ws.func.contPB},${ws.func.contGB})" #] 
- 		printCurrentMessage
- 		onMsg(dropoutanswer : dropoutanswer(RESULT)) {
-			[# RES = payloadArg(0); #]
-			if[# RES != "OK" #]{
-				forward wasteservice -m noMsg : noMsg(_)
-			}
-		}
- 	} 
- 	Transition t0 whenTime 10 -> move_home
- 					whenMsg noMsg and [# RES!="OK" #] -> error
- 					whenRequest depositrequest -> handle_new_req
- 	
- 	State handle_new_req{ //simile ad handle_request, ma qui dobbiamo fare andare il robot a casa in caso di loadReqjected
- 		updateResource [# "wasteservice(handle_new_req,${ws.func.contPB},${ws.func.contGB})" #] 
-		printCurrentMessage
-		onMsg(depositrequest : depositrequest(MATERIAL, TRUCKLOAD)) {
-			[#
-				 Material 	= ws.Material.valueOf(payloadArg(0))
-				 TruckLoad 	= payloadArg(1).toFloat()
-			#]
-			if[# ws.func.checkdepositpossible( Material, TruckLoad ) #]{
-				[# ws.func.updateDeposit( Material, TruckLoad ) 
-					#]
-				println("PB capacity: ${ws.func.contPB}, GB capacity: ${ws.func.contGB}")	
-				request transporttrolley -m move : move(INDOOR)
-			} else{  
-				replyTo depositrequest with loadrejected : loadrejected($Material,$TruckLoad)
-				forward wasteservice -m noMsg : noMsg(_)
-			}		
-		}
- 	}
- 	Transition t0 whenReply moveanswer -> handle_move_indoor
- 				whenMsg noMsg -> move_home
- 	
- 	State move_home{
- 		updateResource [# "wasteservice(move_home,${ws.func.contPB},${ws.func.contGB})" #] 
- 		printCurrentMessage
- 		request transporttrolley -m move : move(HOME)
- 	}
- 	Goto handle_move_home
- 	
- 	State handle_move_home{
- 		updateResource [# "wasteservice(handle_move_home,${ws.func.contPB},${ws.func.contGB})" #] 
- 		printCurrentMessage
- 		onMsg(moveanswer : moveanswer(RESULT)) {
-			[# RES = payloadArg(0); #]
-			if[# RES == "OK" #]{
-				request transporttrolley -m dropout : dropout(_)
-			}else{
-				forward wasteservice -m noMsg : noMsg(_)
-			}
-		}
- 	}
- 	Transition t0 	whenRequest depositrequest -> handle_req //gestisci immediatamente nuova richiesta
- 					whenMsg noMsg and [# RES!="OK" #] -> error
- 					whenReply moveanswer -> wait
- 	
- 	State error {
- 		updateResource [# "wasteservice(error,${ws.func.contPB},${ws.func.contGB})" #] 
- 		println("error")
- 		printCurrentMessage
- 	}
-}
-*/
 
 QActor wasteservice context ctxserver{
 	[# lateinit var Material  : ws.Material
@@ -326,8 +162,7 @@ QActor depositaction context ctxserver{
 		}
 		updateResource [# "depositaction(req_move_indoor,$MATERIAL)" #] 
 	}
-	Transition t0 whenReply moveanswer -> chk_move_indoor 
-	
+	Transition t0 whenReply moveanswer -> chk_move_indoor
 	State chk_move_indoor {
 		updateResource [# "depositaction(chk_move_indoor,$MATERIAL)" #] 
 		printCurrentMessage
@@ -342,9 +177,7 @@ QActor depositaction context ctxserver{
 		updateResource [# "depositaction(req_pickup,$MATERIAL)" #] 
 		request transporttrolley -m pickup : pickup(_)
 	}
-	Transition t0 whenReply pickupanswer -> chk_pickup 
-
-
+	Transition t0 whenReply pickupanswer -> chk_pickup
 	State chk_pickup{
 		printCurrentMessage
 		updateResource [# "depositaction(chk_pickup,$MATERIAL)" #] 
@@ -372,7 +205,6 @@ QActor depositaction context ctxserver{
 		request transporttrolley -m move : move($Position)
 	}
 	Transition t0 whenReply moveanswer -> chk_move_container
-	
 	State chk_move_container{
 		printCurrentMessage
 		updateResource [# "depositaction(chk_pickup,$MATERIAL)" #] 
@@ -387,8 +219,6 @@ QActor depositaction context ctxserver{
 		request transporttrolley -m dropout : dropout(_)
 	}
 	Transition t0 whenReply dropoutanswer -> chk_dropout
-
-
 	State chk_dropout{
 		printCurrentMessage
 		updateResource [# "depositaction(chk_pickup,$MATERIAL)" #] 
