@@ -16,7 +16,7 @@ class Wasteservice ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 	override fun getBody() : (ActorBasicFsm.() -> Unit){
 		 lateinit var Material  : ws.Material
 			   var TruckLoad : Float = 0F
-			   
+		
 			   lateinit var RES : String
 			   lateinit var TrolleyPos : String   //gbox,pbox,Home,indoor
 		return { //this:ActionBasciFsm

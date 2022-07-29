@@ -1,7 +1,5 @@
 package testSprint1
 
-import it.unibo.ctxserver.main
-import it.unibo.kactor.QakContext
 import org.eclipse.californium.core.CoapHandler
 import org.junit.Assert
 import org.junit.jupiter.api.*
@@ -9,15 +7,12 @@ import unibo.comm22.coap.CoapConnection
 import unibo.comm22.utils.ColorsOut
 import unibo.comm22.utils.CommSystemConfig
 import unibo.comm22.utils.CommUtils
-import java.io.BufferedReader
 import java.io.IOException
-import java.io.InputStreamReader
-import java.net.ServerSocket
 import java.time.Duration
 import kotlin.test.Test
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation::class)
-internal class TestSprint1_simple {
+internal class TestSprint1_wasteservice {
     private var connTransportTrolley: CoapConnection? = null
     private var connWasteService: CoapConnection? = null
     private var to: TestObserver? = null
@@ -41,12 +36,12 @@ internal class TestSprint1_simple {
     fun up() {
         CommSystemConfig.tracing = false
         try {
-            TestUtils.terminateProcOnPort(8096); //making sure that the port is free
             TestUtils.terminateProcOnPort(8095); //making sure that the port is free
+            TestUtils.terminateProcOnPort(8096); //making sure that the port is free
 
-            val (prR, processHandleR) = TestUtils.runCtx("build/libs/it.unibo.ctxrobot.MainCtxrobotKt-1.0.jar")
+            val (prR, processHandleR) = TestUtils.runCtx("build/libs/it.unibo.ctxrobot.MainCtxrobotCustomKt-1.0.jar")
             prRobot=prR; processHandleRobot=processHandleR
-            val (prS, processHandleS) = TestUtils.runCtx("build/libs/it.unibo.ctxserver.MainCtxserverKt-1.0.jar")
+            val (prS, processHandleS) = TestUtils.runCtx("build/libs/it.unibo.ctxserver.MainCtxserverCustomKt-1.0.jar")
             prServer=prS; processHandleServer=processHandleS
         } catch (e: IOException) {
             ColorsOut.outappl("Errore launch ", ColorsOut.RED)
@@ -61,6 +56,7 @@ internal class TestSprint1_simple {
 
     @AfterEach
     fun down() {
+        ColorsOut.outappl("history=" + to!!.getHistory(), ColorsOut.MAGENTA);
         //FIRSTLY, try to be nice and make the program exit "normally"
         try {
             processHandleRobot!!.destroy()
@@ -73,7 +69,7 @@ internal class TestSprint1_simple {
         processHandleRobot!!.destroyForcibly()
         processHandleServer!!.destroyForcibly()
 
-        connTransportTrolley!!.close()
+        //connTransportTrolley!!.close()
         connWasteService!!.close()
     }
 
@@ -165,19 +161,19 @@ internal class TestSprint1_simple {
             val applPort1 = "8095"
             val applPort2 = "8096"
             connWasteService = CoapConnection("$addr:$applPort1", "$ctxqakdest1/$qakdestination1")
-            connTransportTrolley = CoapConnection("$addr:$applPort2", "$ctxqakdest2/$qakdestination2")
+            //connTransportTrolley = CoapConnection("$addr:$applPort2", "$ctxqakdest2/$qakdestination2")
             connWasteService!!.observeResource(handler)
-            connTransportTrolley!!.observeResource(handler)
+            //connTransportTrolley!!.observeResource(handler)
             ColorsOut.outappl("connecting via Coap conn:$connWasteService", ColorsOut.CYAN)
-            ColorsOut.outappl("connecting via Coap conn:$connTransportTrolley", ColorsOut.CYAN)
+            //ColorsOut.outappl("connecting via Coap conn:$connTransportTrolley", ColorsOut.CYAN)
             while (connWasteService!!.request("") === "0") {
                 ColorsOut.outappl("waiting for conn $connWasteService", ColorsOut.CYAN)
                 CommUtils.delay(500)
             }
-            while (connTransportTrolley!!.request("") === "0") {
+            /*while (connTransportTrolley!!.request("") === "0") {
                 ColorsOut.outappl("waiting for conn $connTransportTrolley", ColorsOut.CYAN)
                 CommUtils.delay(500)
-            }
+            }*/
         } catch (e: Exception) {
             ColorsOut.outerr("connectUsingCoap ERROR:" + e.message)
             System.exit(2);

@@ -10,22 +10,14 @@
 JAR_OUPUT_PATH=build/libs
 
 #first generate the jar files
-gradle -PmainClass=it.unibo.ctxrobot.MainCtxrobotKt jar
-gradle -PmainClass=it.unibo.ctxserver.MainCtxserverKt jar
+gradle -PmainClass=it.unibo.ctxrobot.MainCtxrobotCustomKt jar
+gradle -PmainClass=it.unibo.ctxserver.MainCtxserverCustomKt jar
 
 SAVEIFS=$IFS   # Save current IFS (Internal Field Separator)
 IFS=$'\n'      # Change IFS to newline char
 declare -a TEST_METHODS=(
-    "testSprint1.TestSprint1_simple.test_2_accepted"
-    "testSprint1.TestSprint1_simple.test_1_accepted_1_rejected"
-#
-    "testSprint1.TestSprint1_hystory.test_accepted"
-    "testSprint1.TestSprint1_hystory.test_rejected"
-    "testSprint1.TestSprint1_hystory.test_2_accepted_while_in_operation"
-    "testSprint1.TestSprint1_hystory.test_1_accepted_1_rejected_while_in_operation"
-    "testSprint1.TestSprint1_hystory.test_2_accepted_while_returning_home"
-    "testSprint1.TestSprint1_hystory.test_1_accepted_1_rejected_while_returning_home"
-    "testSprint1.TestSprint1_hystory.test_1_accepted_1_rejected_while_returning_home_1_accepted"
+    "testSprint1.TestSprint1_wasteservice.test_2_accepted"
+    "testSprint1.TestSprint1_wasteservice.test_1_accepted_1_rejected"
 )
 
 IFS=$SAVEIFS   # Restore original IFS

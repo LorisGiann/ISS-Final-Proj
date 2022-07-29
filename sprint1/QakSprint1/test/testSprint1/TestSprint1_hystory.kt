@@ -41,9 +41,9 @@ internal class TestSprint1_hystory {
             TestUtils.terminateProcOnPort(8096); //making sure that the port is free
             TestUtils.terminateProcOnPort(8095); //making sure that the port is free
 
-            val (prR, processHandleR) = TestUtils.runCtx("build/libs/it.unibo.ctxrobot.MainCtxrobotKt-1.0.jar")
+            val (prR, processHandleR) = TestUtils.runCtx("build/libs/it.unibo.ctxrobot.MainCtxrobotCustomKt-1.0.jar")
             prRobot=prR; processHandleRobot=processHandleR
-            val (prS, processHandleS) = TestUtils.runCtx("build/libs/it.unibo.ctxserver.MainCtxserverKt-1.0.jar")
+            val (prS, processHandleS) = TestUtils.runCtx("build/libs/it.unibo.ctxserver.MainCtxserverCustomKt-1.0.jar")
             prServer=prS; processHandleServer=processHandleS
         } catch (e: IOException) {
             ColorsOut.outappl("Errore launch ", ColorsOut.RED)
@@ -83,15 +83,6 @@ internal class TestSprint1_hystory {
         connWasteService!!.close()
     }
 
-    protected fun waitForApplStarted() {
-        var wasteservice = QakContext.getActor("wasteservice")
-        while (wasteservice == null) {
-            ColorsOut.outappl("TestSprint1 waits for appl ... ", ColorsOut.GREEN)
-            CommUtils.delay(200)
-            wasteservice = QakContext.getActor("wasteservice")
-        }
-        CommUtils.delay(100)
-    }
 
 
 

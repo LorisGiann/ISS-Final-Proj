@@ -11,87 +11,109 @@ import kotlinx.coroutines.runBlocking
 class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scope ){
 
 	override fun getInitialState() : String{
-		return "init"
+		return "wait"
 	}
 	override fun getBody() : (ActorBasicFsm.() -> Unit){
-		 var dest = ws.Position.HOME
-			   var currpos = ws.Position.HOME
+		 val actor = this@Transporttrolley;
+				suspend fun transitNow(stateName : String){
+					var res = actor.handleCurrentMessage(NoMsg,actor.getStateByName(stateName));
+					if(res) actor.elabMsgInState( );
+					else println("ERROR: transition was not possible")
+				}
+				lateinit var RES : String
 		return { //this:ActionBasciFsm
-				state("init") { //this:State
-					action { //it:State
-						discardMessages = true
-						 dest = ws.Position.HOME
-							       currpos = ws.Position.HOME
-					}
-					 transition( edgeName="goto",targetState="wait", cond=doswitch() )
-				}	 
 				state("wait") { //this:State
 					action { //it:State
-						updateResourceRep( "transporttrolley(wait,$currpos,$dest)"  
+						println("$name in ${currentState.stateName} | $currentMsg")
+						updateResourceRep( "transporttrolley(wait)"  
 						)
-						println("transporttrolley | Wait (Dest: ${dest} CurrPos: ${currpos})")
-						if(  currpos!=dest  
-						 ){forward("noMsg", "noMsg(_)" ,"transporttrolley" ) 
-						}
 					}
-					 transition(edgeName="toNewState18",targetState="picking_up",cond=whenRequestGuarded("pickup",{ currpos==dest 
-					}))
-					transition(edgeName="toNewState19",targetState="dropping_down",cond=whenRequestGuarded("dropout",{ currpos==dest 
-					}))
-					transition(edgeName="toNewState20",targetState="set_new_dest",cond=whenRequestGuarded("move",{ currpos==dest 
-					}))
-					transition(edgeName="toNewState21",targetState="forward_robot",cond=whenDispatch("noMsg"))
+					 transition(edgeName="toNewState18",targetState="req_pickup",cond=whenRequest("pickup"))
+					transition(edgeName="toNewState19",targetState="req_dropout",cond=whenRequest("dropout"))
+					transition(edgeName="toNewState20",targetState="req_move",cond=whenRequest("move"))
 				}	 
-				state("picking_up") { //this:State
+				state("req_pickup") { //this:State
 					action { //it:State
-						updateResourceRep( "transporttrolley(picking_up,$currpos,$dest)"  
+						println("$name in ${currentState.stateName} | $currentMsg")
+						updateResourceRep( "transporttrolley(req_pickup)"  
 						)
-						println("transporttrolley | PickUp material from truck")
-						delay(1000) 
-						answer("pickup", "pickupanswer", "pickupanswer(OK)"   )  
+						request("pickup", "pickup(_)" ,"pickupdropouthandler" )  
 					}
-					 transition( edgeName="goto",targetState="wait", cond=doswitch() )
+					 transition(edgeName="toNewState21",targetState="chk_pickup",cond=whenReply("pickupanswer"))
 				}	 
-				state("dropping_down") { //this:State
+				state("chk_pickup") { //this:State
 					action { //it:State
-						updateResourceRep( "transporttrolley(dropping_down,$currpos,$dest)"  
+						println("$name in ${currentState.stateName} | $currentMsg")
+						updateResourceRep( "transporttrolley(chk_pickup)"  
 						)
-						println("transporttrolley | DropOut material in container")
-						delay(1000) 
-						answer("dropout", "dropoutanswer", "dropoutanswer(OK)"   )  
-					}
-					 transition( edgeName="goto",targetState="wait", cond=doswitch() )
-				}	 
-				state("set_new_dest") { //this:State
-					action { //it:State
-						updateResourceRep( "transporttrolley(set_new_dest,$currpos,$dest)"  
-						)
-						if( checkMsgContent( Term.createTerm("move(POSITION)"), Term.createTerm("move(ARG)"), 
+						if( checkMsgContent( Term.createTerm("pickupanswer(RESULT)"), Term.createTerm("pickupanswer(RES)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
-								 dest=ws.Position.valueOf(payloadArg(0))  
-								println("transporttrolley | New robot destination: ${dest}")
+								 RES = payloadArg(0) 
+								if(  RES=="OK"  
+								 ){answer("pickup", "pickupanswer", "pickupanswer(OK)"   )  
+								}
+								else
+								 {answer("pickup", "pickupanswer", "pickupanswer(ERROR)"   )  
+								 }
 						}
 					}
 					 transition( edgeName="goto",targetState="wait", cond=doswitch() )
 				}	 
-				state("forward_robot") { //this:State
+				state("req_dropout") { //this:State
 					action { //it:State
-						updateResourceRep( "transporttrolley(forward_robot,$currpos,$dest)"  
+						println("$name in ${currentState.stateName} | $currentMsg")
+						updateResourceRep( "transporttrolley(req_dropout)"  
 						)
-						forward("cmd", "cmd(w)" ,"basicrobot" ) 
+						request("dropout", "dropout(_)" ,"pickupdropouthandler" )  
 					}
-					 transition(edgeName="t122",targetState="turn",cond=whenEvent("info"))
+					 transition(edgeName="toNewState22",targetState="chk_dropout",cond=whenReply("dropoutanswer"))
 				}	 
-				state("turn") { //this:State
+				state("chk_dropout") { //this:State
 					action { //it:State
-						updateResourceRep( "transporttrolley(turn,$currpos,$dest)"  
+						println("$name in ${currentState.stateName} | $currentMsg")
+						updateResourceRep( "transporttrolley(chk_dropout)"  
 						)
-						forward("cmd", "cmd(l)" ,"basicrobot" ) 
-						delay(450) 
-						currpos=ws.func.nextPosition(currpos)  
-						if(  currpos==dest  
-						 ){println("transporttrolley | Robot arrived at $currpos")
-						answer("move", "moveanswer", "moveanswer(OK)"   )  
+						if( checkMsgContent( Term.createTerm("dropoutanswer(RESULT)"), Term.createTerm("dropoutanswer(RES)"), 
+						                        currentMsg.msgContent()) ) { //set msgArgList
+								 RES = payloadArg(0) 
+								if(  RES=="OK"  
+								 ){answer("dropout", "dropoutanswer", "dropoutanswer(OK)"   )  
+								}
+								else
+								 {answer("dropout", "dropoutanswer", "dropoutanswer(ERROR)"   )  
+								 }
+						}
+					}
+					 transition( edgeName="goto",targetState="wait", cond=doswitch() )
+				}	 
+				state("req_move") { //this:State
+					action { //it:State
+						println("$name in ${currentState.stateName} | $currentMsg")
+						 var Pos : ws.Position? = null  
+						if( checkMsgContent( Term.createTerm("move(POSITION)"), Term.createTerm("move(POS)"), 
+						                        currentMsg.msgContent()) ) { //set msgArgList
+								 Pos=ws.Position.valueOf(payloadArg(0))  
+								request("move", "move($Pos)" ,"mover" )  
+						}
+						updateResourceRep( "transporttrolley(req_move,$Pos)"  
+						)
+					}
+					 transition(edgeName="toNewState23",targetState="chk_move",cond=whenReply("moveanswer"))
+				}	 
+				state("chk_move") { //this:State
+					action { //it:State
+						println("$name in ${currentState.stateName} | $currentMsg")
+						updateResourceRep( "transporttrolley(chk_move)"  
+						)
+						if( checkMsgContent( Term.createTerm("moveanswer(RESULT)"), Term.createTerm("moveanswer(RES)"), 
+						                        currentMsg.msgContent()) ) { //set msgArgList
+								 RES = payloadArg(0) 
+								if(  RES=="OK"  
+								 ){answer("move", "moveanswer", "moveanswer(OK)"   )  
+								}
+								else
+								 {answer("move", "moveanswer", "moveanswer(ERROR)"   )  
+								 }
 						}
 					}
 					 transition( edgeName="goto",targetState="wait", cond=doswitch() )
