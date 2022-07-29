@@ -60,7 +60,7 @@ Context ctxrobot ip  [host="127.0.0.1" port=8096]
 Context ctxalarm ip  [host="127.0.0.1" port=8097]
 // ------------------------------------------------
 
-CodedQActor distancefilter context ctxserver className "rx.distanceFilter"   //Nel caso di robot virtuale semplicemente assorbe eventi obstacle e reinvia dispatch "obstacle:obstacle(virtual)" a basicrobot. Nel caso di robot reali riceve messaggi "sonarRobot" e invia a basicrobot dispatch "obstacle:obstacle(dist)" se vicino, altrimenti sonardata", "sonardata:distance(dist)" se lontano.
+CodedQActor distancefilter context ctxrobot className "rx.distanceFilter"   //Nel caso di robot virtuale semplicemente assorbe eventi obstacle e reinvia dispatch "obstacle:obstacle(virtual)" a basicrobot. Nel caso di robot reali riceve messaggi "sonarRobot" e invia a basicrobot dispatch "obstacle:obstacle(dist)" se vicino, altrimenti sonardata", "sonardata:distance(dist)" se lontano.
 // ------------------------------------------------
 // ------- basicrobot collision detection ---------
 //DATA SOURCES
@@ -656,7 +656,7 @@ QActor led context ctxalarm{
  			[# val stateName = when(newState) {
 	 					ws.LedState.ON -> "off"
 	 					ws.LedState.OFF -> "on"
-	 					ws.LedState.BLINKING -> "blink_on"
+	 					ws.LedState.BLINK -> "blink_on"
 	 			   }
 			   transitNow(stateName)
 			#]
