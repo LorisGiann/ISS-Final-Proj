@@ -23,8 +23,7 @@ class Sonar ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scop
 						println("$name in ${currentState.stateName} | $currentMsg")
 						alarmSonar.configureSonarSubsystem.configureTheSonar( simulate, sonarActorName, usingDomain  )
 					}
-					 transition(edgeName="t045",targetState="activateTheSonar",cond=whenDispatch("sonaractivate"))
-					transition(edgeName="t046",targetState="deactivateTheSonar",cond=whenDispatch("sonardeactivate"))
+					 transition( edgeName="goto",targetState="activateTheSonar", cond=doswitch() )
 				}	 
 				state("activateTheSonar") { //this:State
 					action { //it:State
@@ -38,8 +37,8 @@ class Sonar ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scop
 						 {forward("sonaractivate", "info(ok)" ,"sonardatasource" ) 
 						 }
 					}
-					 transition(edgeName="t047",targetState="handleSonarData",cond=whenEvent("sonar"))
-					transition(edgeName="t048",targetState="deactivateTheSonar",cond=whenDispatch("sonardeactivate"))
+					 transition(edgeName="t045",targetState="handleSonarData",cond=whenEvent("sonar"))
+					transition(edgeName="t046",targetState="deactivateTheSonar",cond=whenDispatch("sonardeactivate"))
 				}	 
 				state("deactivateTheSonar") { //this:State
 					action { //it:State
@@ -66,8 +65,8 @@ class Sonar ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scop
 								emit("sonardata", "distance($D)" ) 
 						}
 					}
-					 transition(edgeName="t049",targetState="handleSonarData",cond=whenEvent("sonar"))
-					transition(edgeName="t050",targetState="deactivateTheSonar",cond=whenDispatch("sonardeactivate"))
+					 transition(edgeName="t047",targetState="handleSonarData",cond=whenEvent("sonar"))
+					transition(edgeName="t048",targetState="deactivateTheSonar",cond=whenDispatch("sonardeactivate"))
 				}	 
 				state("end") { //this:State
 					action { //it:State
@@ -75,6 +74,7 @@ class Sonar ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scop
 						updateResourceRep( "sonar(end,${`it.unibo`.radarSystem22.domain.utils.DomainSystemConfig.simulation})"  
 						)
 					}
+					 transition(edgeName="t049",targetState="activateTheSonar",cond=whenDispatch("sonaractivate"))
 				}	 
 			}
 		}

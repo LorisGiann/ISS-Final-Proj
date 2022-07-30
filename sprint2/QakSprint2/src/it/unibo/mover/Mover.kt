@@ -23,7 +23,6 @@ class Mover ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scop
 						println("$name in ${currentState.stateName} | $currentMsg")
 						updateResourceRep( "mover(wait,$CURRPOS,$DEST)"  
 						)
-						emit("moving", "moving($CURRPOS,$DEST)" ) 
 					}
 					 transition(edgeName="t026",targetState="handle",cond=whenRequest("move"))
 				}	 
@@ -34,6 +33,7 @@ class Mover ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scop
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 DEST = ws.Position.valueOf(payloadArg(0)) 
 						}
+						emit("moving", "moving($CURRPOS,$DEST)" ) 
 						updateResourceRep( "mover(handle,$CURRPOS,$DEST)"  
 						)
 					}

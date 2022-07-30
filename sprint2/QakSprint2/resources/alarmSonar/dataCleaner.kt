@@ -6,7 +6,7 @@ import it.unibo.kactor.ActorBasic
 import it.unibo.kactor.IApplMessage
 
 class dataCleaner (name : String ) : ActorBasic( name ) {
-val LimitLow  = 2	
+val LimitLow  = 0
 val LimitHigh = 100
 
 
@@ -23,7 +23,7 @@ val LimitHigh = 100
  		val data  = (Term.createTerm( msg.msgContent() ) as Struct).getArg(0).toString()
   		//println("$tt $name |  data = $data ")		
 		val Distance = Integer.parseInt( data ) 
- 		if( Distance > LimitLow && Distance < LimitHigh ){
+ 		if( Distance >= LimitLow && Distance < LimitHigh ){
 			//println("emit distance ${Distance}")
 			emitLocalStreamEvent( msg ) //propagate
      	}else{

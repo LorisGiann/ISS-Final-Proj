@@ -8,6 +8,8 @@ context(ctxalarm, "127.0.0.1",  "TCP", "8097").
   qactor( sonarsimulator, ctxalarm, "alarmSonar.sonarSimulator").
   qactor( sonardatasource, ctxalarm, "alarmSonar.sonarHCSR04Support2021").
   qactor( datacleaner, ctxalarm, "alarmSonar.dataCleaner").
+  qactor( robotalarmcontrol, ctxalarm, "alarmSonar.robotAlarmControl").
+  qactor( ledalarmcontrol, ctxalarm, "alarmLed.ledAlarmControl").
   qactor( wasteservice, ctxserver, "it.unibo.wasteservice.Wasteservice").
   qactor( depositaction, ctxserver, "it.unibo.depositaction.Depositaction").
   qactor( transporttrolley, ctxrobot, "it.unibo.transporttrolley.Transporttrolley").
@@ -18,3 +20,4 @@ context(ctxalarm, "127.0.0.1",  "TCP", "8097").
   qactor( basicrobotwrapper, ctxrobot, "it.unibo.basicrobotwrapper.Basicrobotwrapper").
   qactor( basicrobot, ctxrobot, "it.unibo.basicrobot.Basicrobot").
   qactor( sonar, ctxalarm, "it.unibo.sonar.Sonar").
+  qactor( led, ctxalarm, "it.unibo.led.Led").

@@ -60,6 +60,9 @@ Dispatch disable		 : disable(_)
 Event disable : disable(BOOL)
 //-------------------------------------
 
+//LED 
+Event    update_led 	 : update_led(LEDSTATE) // LEDSTATE = ON | OFF | BLINK
+
 //SONAR
 Dispatch sonaractivate   : info(ARG)
 Dispatch sonardeactivate : info(ARG)
@@ -84,6 +87,10 @@ CodedQActor distancefilter context ctxrobot className "rx.distanceFilter"   //Ne
 CodedQActor sonarsimulator     context ctxalarm className "alarmSonar.sonarSimulator"
 CodedQActor sonardatasource    context ctxalarm className "alarmSonar.sonarHCSR04Support2021"
 CodedQActor datacleaner        context ctxalarm className "alarmSonar.dataCleaner"
+
+CodedQActor robotalarmcontrol  context ctxalarm className "alarmSonar.robotAlarmControl"
+
+CodedQActor ledalarmcontrol    context ctxalarm className "alarmLed.ledAlarmControl"
 
 
 QActor wasteservice context ctxserver{
@@ -417,7 +424,6 @@ QActor mover context ctxrobot{
 	State wait initial {
 		printCurrentMessage
 		updateResource [# "mover(wait,$CURRPOS,$DEST)" #]
-		emit moving : moving ($CURRPOS ,$DEST)
 	}
 	Transition t0 whenRequest move -> handle
 	
@@ -426,6 +432,7 @@ QActor mover context ctxrobot{
 		onMsg( move:move(POS) ){
 			[# DEST = ws.Position.valueOf(payloadArg(0))#]
 		}
+		emit moving : moving ($CURRPOS ,$DEST)
 		updateResource [# "mover(handle,$CURRPOS,$DEST)" #]
 	}
 	Goto req_forward if [# DEST!=CURRPOS #] else wait //if the destinatio is different form the current position, reach next corner
@@ -689,21 +696,19 @@ QActor sonar context ctxalarm {
 	   val sonarActorName = "sonar"
 	   val usingDomain    = false
 	#]
+	
 	State s0 initial {
 		printCurrentMessage
 		run alarmSonar.configureSonarSubsystem.configureTheSonar(simulate, sonarActorName, usingDomain)
-		//ASSUMPTION: the sonar subsystem emits the event sonar:distance(V)
 	}
-	Transition t0 whenMsg sonaractivate   -> activateTheSonar
-			      whenMsg sonardeactivate -> deactivateTheSonar
+	Goto activateTheSonar
 	
 	State activateTheSonar{
 		printCurrentMessage
 		updateResource [# "sonar(activateTheSonar,${`it.unibo`.radarSystem22.domain.utils.DomainSystemConfig.simulation})" #]
 		if[#  `it.unibo`.radarSystem22.domain.utils.DomainSystemConfig.simulation #]{
 			//println("sonar simulator")
-			forward sonarsimulator -m sonaractivate : info(ok) 
-			//run sonarConfig.activateSonarSimulated() //usingDomain
+			forward sonarsimulator -m sonaractivate : info(ok)
 		}else {
 			//println("sonar real")
 			forward sonardatasource -m sonaractivate : info(ok)  
@@ -744,5 +749,90 @@ QActor sonar context ctxalarm {
 		//println("sonar BYE")
 		//[# System.exit(0) #]
 	}
+	Transition t0 whenMsg sonaractivate -> activateTheSonar
+}
+
+
+QActor led context ctxalarm{ 
+	[# lateinit var ledM : `it.unibo`.radarSystem22.domain.interfaces.ILed
+		
+		`it.unibo`.radarSystem22.domain.utils.DomainSystemConfig.ledGui=true
+		var newState = ws.LedState.OFF
+		
+		val actor = this@Led;
+		suspend fun transitNow(stateName : String){
+			var res = actor.handleCurrentMessage(NoMsg,actor.getStateByName(stateName));
+			if(res) actor.elabMsgInState( );
+			else println("ERROR: transition was not possible")
+		}
+	#]
+	
+	State s0 initial {
+		discardMsg On
+		printCurrentMessage
+		updateResource [# "led(initial,${newState})" #]
+		//println("${name} STARTS")
+		[# ledM = `it.unibo`.radarSystem22.domain.models.LedModel.create() #]
+		[# ledM.turnOff()#]
+		//[# sysUtil.logMsgs=true #]
+ 	}
+ 	Transition t0 whenEvent update_led -> handle_update
+ 	
+ 	State handle_update {
+ 		printCurrentMessage
+		onMsg( update_led:update_led(ARG) ){
+			[# newState = ws.LedState.valueOf(payloadArg(0)) #]
+ 			//println("update_led(${newState})")
+ 			[# val stateName = when(newState) {
+	 					ws.LedState.OFF -> "off"
+	 					ws.LedState.ON -> "on"
+	 					ws.LedState.BLINK -> "blink_on"
+	 			   }
+			   transitNow(stateName)
+			#]
+ 			//forward led -m noMsg : noMsg(_)
+ 		}
+ 		updateResource [# "led(handle_update,${newState})" #]
+ 	}
+ 	//Transition toNewState whenMsg noMsg and [# newState=="off" #] -> off
+ 	//					  whenMsg noMsg and [# newState=="on" #] -> on
+ 	//					  whenMsg noMsg and [# newState=="blink" #] -> blink_on
+ 	
+ 	State off {
+ 		printCurrentMessage
+ 		updateResource [# "led(off,${newState})" #]
+ 		[# unibo.actor22comm.utils.ColorsOut.outappl("${name} - off", unibo.actor22comm.utils.ColorsOut.GREEN)#]
+ 		[# ledM.turnOff()#]
+ 	}
+ 	Transition t0 whenEvent update_led -> handle_update
+ 	
+ 	State on {
+ 		printCurrentMessage
+ 		updateResource [# "led(on,${newState})" #]
+ 		[# unibo.actor22comm.utils.ColorsOut.outappl("${name} - on", unibo.actor22comm.utils.ColorsOut.GREEN)#]
+ 		//println("Led on")
+ 		[# ledM.turnOn()#]
+ 	}
+ 	Transition t0 whenEvent update_led -> handle_update
+ 	
+ 	State blink_on {
+ 		printCurrentMessage
+ 		updateResource [# "led(blink_on,${newState})" #]
+ 		[# unibo.actor22comm.utils.ColorsOut.outappl("${name} - on (blinking)", unibo.actor22comm.utils.ColorsOut.GREEN)#]
+ 		//println("Blinking on")
+ 		[# ledM.turnOn()#]
+ 	}
+ 	Transition t0 whenTime 250 -> blink_off
+ 					whenEvent update_led -> handle_update
+ 					
+ 	State blink_off {
+ 		printCurrentMessage
+ 		updateResource [# "led(blink_off,${newState})" #]
+ 		[# unibo.actor22comm.utils.ColorsOut.outappl("${name} - off (blinking)", unibo.actor22comm.utils.ColorsOut.GREEN)#]
+ 		//println("Blinking off")
+ 		[# ledM.turnOff()#]
+ 	}
+ 	Transition t0 whenTime 250 -> blink_on
+ 					whenEvent update_led -> handle_update
 }
 

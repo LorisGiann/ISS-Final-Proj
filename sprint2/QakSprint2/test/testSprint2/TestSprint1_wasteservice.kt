@@ -41,7 +41,7 @@ internal class TestSprint1_wasteservice {
     fun up() {
         CommSystemConfig.tracing = false
         try {
-            /*TestUtils.terminateProcOnPort(8095); //making sure that the port is free
+            TestUtils.terminateProcOnPort(8095); //making sure that the port is free
             TestUtils.terminateProcOnPort(8096); //making sure that the port is free
             TestUtils.terminateProcOnPort(8097); //making sure that the port is free
 
@@ -50,7 +50,7 @@ internal class TestSprint1_wasteservice {
             val (prS, processHandleS) = TestUtils.runCtx("build/libs/it.unibo.ctxserver.MainCtxserverCustomKt-1.0.jar")
             prServer=prS; processHandleServer=processHandleS
             val (prA, processHandleA) = TestUtils.runCtx("build/libs/it.unibo.ctxalarm.MainCtxalarmCustomKt-1.0.jar")
-            prAlarm=prA; processHandleAlarm=processHandleA*/
+            prAlarm=prA; processHandleAlarm=processHandleA
 
 /*
 gradle -PmainClass=it.unibo.ctxrobot.MainCtxrobotCustomKt jar
@@ -101,9 +101,9 @@ java -jar build/libs/it.unibo.ctxalarm.MainCtxalarmCustomKt-1.0.jar
 
 
     @Test
-    @Timeout(30)
+    @Timeout(45)
     fun test_2_accepted() {
-        assertTimeoutPreemptively<Unit>(Duration.ofSeconds(25)) {
+        assertTimeoutPreemptively<Unit>(Duration.ofSeconds(45)) {
             CommUtils.delay(100)
             var truckRequestStr = "msg(depositrequest, request,python,wasteservice,depositrequest(GLASS,2),1)"
             try {
