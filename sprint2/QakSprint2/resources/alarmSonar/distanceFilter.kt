@@ -1,10 +1,10 @@
+package alarmSonar
 
 import it.unibo.kactor.MsgUtil
 import it.unibo.kactor.ActorBasic
 import alice.tuprolog.Term
 import alice.tuprolog.Struct
 import it.unibo.kactor.IApplMessage
-
 
 class distanceFilter (name : String ) : ActorBasic( name ) {
 val LimitDistance = 50

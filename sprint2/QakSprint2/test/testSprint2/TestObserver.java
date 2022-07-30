@@ -15,7 +15,7 @@ public class TestObserver implements CoapHandler{
     @Override
     public synchronized void onLoad(CoapResponse response) {
         history.add(response.getResponseText());
-        ColorsOut.outappl("history=" + history, ColorsOut.MAGENTA);
+        //ColorsOut.outappl("history=" + history, ColorsOut.MAGENTA);
     }
 
     public List<String> getHistory(){

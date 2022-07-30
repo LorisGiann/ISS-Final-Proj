@@ -1,3 +1,4 @@
+package alarmSonar
 
 import it.unibo.kactor.ApplMessage
 import alice.tuprolog.Struct
@@ -6,7 +7,6 @@ import java.io.PrintWriter
 import java.io.FileWriter
 import it.unibo.kactor.ActorBasic
 import it.unibo.kactor.IApplMessage
-
 
 class dataLogger(name : String) : ActorBasic(name){
 	var pw : PrintWriter

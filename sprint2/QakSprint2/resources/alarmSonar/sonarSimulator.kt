@@ -1,15 +1,10 @@
-//package rx
+package alarmSonar
+
 import it.unibo.kactor.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 
-/*
--------------------------------------------------------------------------------------------------
- 
--------------------------------------------------------------------------------------------------
- */
-
-class sonarSimulatorTesting (name : String ) : ActorBasic( name ) {
+class sonarSimulator (name : String ) : ActorBasic( name ) {
 	var goon = true
 	var i = 0
 	lateinit var m1 : String
@@ -35,7 +30,7 @@ class sonarSimulatorTesting (name : String ) : ActorBasic( name ) {
 				i=0
 			}
 			//println(m1)
-			val event = MsgUtil.buildEvent( "sonar","sonardistance",m1)
+			val event = MsgUtil.buildEvent( name ,"sonar", m1)
 			println("$tt $name | generates $event")
 			emit(event)  //APPROPRIATE ONLY IF NOT INCLUDED IN A PIPE
 

@@ -5,6 +5,7 @@ import it.unibo.kactor.QakContext
 import org.eclipse.californium.core.CoapHandler
 import org.junit.Assert
 import org.junit.jupiter.api.*
+import testSprint2.TestUtils
 import unibo.comm22.coap.CoapConnection
 import unibo.comm22.utils.ColorsOut
 import unibo.comm22.utils.CommSystemConfig
@@ -23,10 +24,9 @@ internal class TestSprint2_enable_disable {
     private var processHandleServer: ProcessHandle? = null
     private var processHandleRobot: ProcessHandle? = null
 	private var processHandleAlarm: ProcessHandle? = null
-    private var prAlarm: Process? = null
     private var prServer: Process? = null
     private var prRobot: Process? = null
-    private var serverThread: Thread? = null
+    private var prAlarm: Process? = null
 
     companion object {
         @JvmStatic

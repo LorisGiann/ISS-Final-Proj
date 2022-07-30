@@ -17,16 +17,15 @@ gradle -PmainClass=it.unibo.ctxalarm.MainCtxalarmCustomKt jar
 SAVEIFS=$IFS   # Save current IFS (Internal Field Separator)
 IFS=$'\n'      # Change IFS to newline char
 declare -a TEST_METHODS=(
-    "testSprint2.TestSprint2_simple.test_2_accepted"
-    "testSprint2.TestSprint2_simple.test_1_accepted_1_rejected"
-#
-    "testSprint2.TestSprint2_hystory.test_accepted"
-    "testSprint2.TestSprint2_hystory.test_rejected"
-    "testSprint2.TestSprint2_hystory.test_2_accepted_while_in_operation"
-    "testSprint2.TestSprint2_hystory.test_1_accepted_1_rejected_while_in_operation"
-    "testSprint2.TestSprint2_hystory.test_2_accepted_while_returning_home"
-    "testSprint2.TestSprint2_hystory.test_1_accepted_1_rejected_while_returning_home"
-    "testSprint2.TestSprint2_hystory.test_1_accepted_1_rejected_while_returning_home_1_accepted"
+    "testSprint2.TestSprint1_wasteservice.test_2_accepted"
+    "testSprint2.TestSprint1_wasteservice.test_1_accepted_1_rejected"
+
+    "testSprint2.TestSprint1_hystory.test_accepted"
+    "testSprint2.TestSprint1_hystory.test_rejected"
+    "testSprint2.TestSprint1_hystory.test_2_accepted_while_in_operation"
+    "testSprint2.TestSprint1_hystory.test_1_accepted_1_rejected_while_in_operation"
+    "testSprint2.TestSprint1_hystory.test_2_accepted_while_returning_home"
+    "testSprint2.TestSprint1_hystory.test_1_accepted_1_rejected_while_returning_home"
 )
 
 IFS=$SAVEIFS   # Restore original IFS

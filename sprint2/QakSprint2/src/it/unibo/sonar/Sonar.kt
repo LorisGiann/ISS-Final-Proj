@@ -21,10 +21,10 @@ class Sonar ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scop
 				state("s0") { //this:State
 					action { //it:State
 						println("$name in ${currentState.stateName} | $currentMsg")
-						sonarConfig.configureTheSonar( simulate, sonarActorName, usingDomain  )
+						alarmSonar.configureSonarSubsystem.configureTheSonar( simulate, sonarActorName, usingDomain  )
 					}
-					 transition(edgeName="t038",targetState="activateTheSonar",cond=whenDispatch("sonaractivate"))
-					transition(edgeName="t039",targetState="deactivateTheSonar",cond=whenDispatch("sonardeactivate"))
+					 transition(edgeName="t045",targetState="activateTheSonar",cond=whenDispatch("sonaractivate"))
+					transition(edgeName="t046",targetState="deactivateTheSonar",cond=whenDispatch("sonardeactivate"))
 				}	 
 				state("activateTheSonar") { //this:State
 					action { //it:State
@@ -32,14 +32,14 @@ class Sonar ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scop
 						updateResourceRep( "sonar(activateTheSonar,${`it.unibo`.radarSystem22.domain.utils.DomainSystemConfig.simulation})"  
 						)
 						if(   `it.unibo`.radarSystem22.domain.utils.DomainSystemConfig.simulation  
-						 ){forward("sonaractivate", "info(ok)" ,"sonarsimulatortesting" ) 
+						 ){forward("sonaractivate", "info(ok)" ,"sonarsimulator" ) 
 						}
 						else
 						 {forward("sonaractivate", "info(ok)" ,"sonardatasource" ) 
 						 }
 					}
-					 transition(edgeName="t040",targetState="handleSonarData",cond=whenEvent("sonardistance"))
-					transition(edgeName="t041",targetState="deactivateTheSonar",cond=whenDispatch("sonardeactivate"))
+					 transition(edgeName="t047",targetState="handleSonarData",cond=whenEvent("sonar"))
+					transition(edgeName="t048",targetState="deactivateTheSonar",cond=whenDispatch("sonardeactivate"))
 				}	 
 				state("deactivateTheSonar") { //this:State
 					action { //it:State
@@ -47,7 +47,7 @@ class Sonar ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scop
 						updateResourceRep( "sonar(deactivateTheSonar,${`it.unibo`.radarSystem22.domain.utils.DomainSystemConfig.simulation}"  
 						)
 						if(   `it.unibo`.radarSystem22.domain.utils.DomainSystemConfig.simulation  
-						 ){forward("sonardeactivate", "info(ok)" ,"sonarsimulatortesting" ) 
+						 ){forward("sonardeactivate", "info(ok)" ,"sonarsimulator" ) 
 						}
 						else
 						 {forward("sonardeactivate", "info(ok)" ,"sonardatasource" ) 
@@ -66,8 +66,8 @@ class Sonar ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scop
 								emit("sonardata", "distance($D)" ) 
 						}
 					}
-					 transition(edgeName="t042",targetState="handleSonarData",cond=whenEvent("sonardistance"))
-					transition(edgeName="t043",targetState="deactivateTheSonar",cond=whenDispatch("sonardeactivate"))
+					 transition(edgeName="t049",targetState="handleSonarData",cond=whenEvent("sonar"))
+					transition(edgeName="t050",targetState="deactivateTheSonar",cond=whenDispatch("sonardeactivate"))
 				}	 
 				state("end") { //this:State
 					action { //it:State

@@ -1,6 +1,6 @@
-package sonarConfig
+package alarmSonar.configureSonarSubsystem
 
-import DistanceObserver
+import alarmSonar.DistanceObserver
 import it.unibo.kactor.ActorBasic
 import it.unibo.kactor.sysUtil
 import it.unibo.radarSystem22.domain.interfaces.ISonarForObs
