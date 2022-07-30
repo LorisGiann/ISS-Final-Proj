@@ -136,7 +136,7 @@ class Depositaction ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( na
 				state("chk_dropout") { //this:State
 					action { //it:State
 						println("$name in ${currentState.stateName} | $currentMsg")
-						updateResourceRep( "depositaction(chk_pickup,$MATERIAL)"  
+						updateResourceRep( "depositaction(chk_dropout,$MATERIAL)"  
 						)
 						if( checkMsgContent( Term.createTerm("dropoutanswer(RESULT)"), Term.createTerm("dropoutanswer(RES)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList

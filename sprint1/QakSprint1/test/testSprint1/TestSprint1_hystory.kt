@@ -16,6 +16,10 @@ import kotlin.test.Test
 internal class TestSprint1_hystory {
     private var connTransportTrolley: CoapConnection? = null
     private var connWasteService: CoapConnection? = null
+    private var connDepositAction: CoapConnection? = null
+    private var connMover: CoapConnection? = null
+    private var connPickupdropouthandler: CoapConnection? = null
+    //private var connBasicrobotwrapper: CoapConnection? = null
     private var to: TestObserver? = null
     private var processHandleServer: ProcessHandle? = null
     private var processHandleRobot: ProcessHandle? = null
@@ -81,6 +85,10 @@ internal class TestSprint1_hystory {
         //s.close()
         connTransportTrolley!!.close()
         connWasteService!!.close()
+        connDepositAction!!.close()
+        //connBasicrobotwrapper!!.close()
+        connMover!!.close()
+        connPickupdropouthandler!!.close()
     }
 
 
@@ -102,26 +110,40 @@ internal class TestSprint1_hystory {
                 val answer = connTcp.request(truckRequestStr)
                 ColorsOut.outappl("test_accepted answer=$answer", ColorsOut.GREEN)
                 Assert.assertTrue(answer.contains("loadaccept"))
-                while (!coapCheckWasteService("wait")) {
+                connTcp.close()
+                while (!coapCheckMover("mover(wait,HOME,HOME)")) {
                     CommUtils.delay(1000)
                 }
-                connTcp.close()
                 ColorsOut.outappl(to!!.getHistory().toString(), ColorsOut.MAGENTA)
-                //assertTrue(to.checkNextContents(new String[]{"wasteservice(wait,0,0)", "transporttrolley(wait,HOME,HOME)"}) > 0);
+                //POSITION INITIAL
+                Assert.assertTrue(to!!.checkNextContents(arrayOf(
+                    "mover(wait,HOME,HOME)",
+                    "transporttrolley(wait)",
+                    "pickupdropouthandler(wait)",
+                    "wasteservice(wait,0.0,0.0)",
+                    "depositaction(wait)"))>0)
+                //PICKUP
                 Assert.assertTrue(to!!.checkNextSequence(arrayOf(
-                        "wasteservice(handle_req,0.0,0.0)",
-                        "transporttrolley(wait,HOME,INDOOR)",
-                        "transporttrolley(wait,INDOOR,INDOOR)",
-                        "transporttrolley(picking_up,INDOOR,INDOOR)"
+                    "wasteservice(handle_req,0.0,0.0)",
+                    "wasteservice(req_depositaction,0.0,2.0)",
+                    "transporttrolley(req_move,INDOOR)",
+                    "transporttrolley(req_pickup)",
+                    "depositaction(reply,GLASS)"
                 )))
-                Assert.assertTrue(to!!.checkNextContents(arrayOf("wasteservice(handle_pickup_answer,0.0,2.0)", "transporttrolley(wait,INDOOR,GLASSBOX)")) > 0) //check container load update. (handle_pickup_answer also moves the robot to the container)
+                //DROPOUT
                 Assert.assertTrue(to!!.checkNextSequence(arrayOf(
-                        "transporttrolley(wait,PLASTICBOX,GLASSBOX)",
-                        "transporttrolley(wait,GLASSBOX,GLASSBOX)",
-                        "transporttrolley(dropping_down,GLASSBOX,GLASSBOX)"
+                    "transporttrolley(req_move,GLASSBOX)",
+                    "transporttrolley(req_dropout)"
                 )))
-                Assert.assertTrue(to!!.checkNextContents(arrayOf("wasteservice(handle_move_home,0.0,2.0)", "transporttrolley(wait,GLASSBOX,HOME)")) > 0)
-                Assert.assertTrue(to!!.checkNextContents(arrayOf("wasteservice(wait,0.0,2.0)", "transporttrolley(wait,HOME,HOME)")) > 0)
+                //RETURN IN HOME
+                Assert.assertTrue(to!!.checkNextSequence(arrayOf(
+                    "transporttrolley(req_move,HOME)",
+                )))
+                //POSITION FINAL
+                Assert.assertTrue(to!!.checkNextContents(arrayOf(
+                    "transporttrolley(wait)",
+                    "mover(wait,HOME,HOME)"
+                ))>0)
                 //to.setStartPosition(0);*/
             } catch (e: Exception) {
                 Assert.fail("test_accepted ERROR:" + e.message)
@@ -140,16 +162,18 @@ internal class TestSprint1_hystory {
                 ColorsOut.outappl("test_rejected answer=$answer", ColorsOut.GREEN)
                 Assert.assertTrue(answer.contains("loadrejected"))
                 CommUtils.delay(1000)
-                while (!coapCheckWasteService("wait")) {
+                connTcp.close()
+                while (!coapCheckMover("mover(wait,HOME,HOME)")) {
                     CommUtils.delay(1000)
                 }
-                connTcp.close()
                 ColorsOut.outappl(to!!.getHistory().toString(), ColorsOut.MAGENTA)
-                //Assert.assertTrue(to!!.checkNextContents(arrayOf("wasteservice(wait,0,0)", "transporttrolley(wait,HOME,HOME)")) > 0)
+
                 Assert.assertTrue(to!!.checkNextSequence(arrayOf(
                         "wasteservice(handle_req,0.0,0.0)",
+                        "wasteservice(rejected,0.0,0.0)",
                         "wasteservice(wait,0.0,0.0)"
                 )))
+
             } catch (e: java.lang.Exception) {
                 Assert.fail("test_rejected ERROR:" + e.message)
             }
@@ -167,35 +191,47 @@ internal class TestSprint1_hystory {
                 var answer = connTcp.request(truckRequestStr)
                 ColorsOut.outappl("testFirstRequest answer=$answer", ColorsOut.GREEN)
                 Assert.assertTrue(answer.contains("loadaccept"))
-                while (!coapCheckWasteService("handle_move_container")) {
+                while (!coapCheckMover("mover(req_forward,PLASTICBOX,HOME)")) {
                     CommUtils.delay(800)
                 }
                 CommUtils.delay(100)
                 //SECONDO REQUEST
+                ColorsOut.outappl("launch second request", ColorsOut.GREEN)
                 truckRequestStr = "msg(depositrequest, request,python,wasteservice,depositrequest(GLASS,7),1)"
                 answer = connTcp.request(truckRequestStr)
                 ColorsOut.outappl("testSecondRequest answer=$answer", ColorsOut.GREEN)
                 Assert.assertTrue(answer.contains("loadaccept"))
-                while (!coapCheckWasteService("wait")) {
+                connTcp.close()
+                while (!coapCheckMover("mover(wait,HOME,HOME)")) {
                     CommUtils.delay(1000)
                 }
-                connTcp.close()
-                //Assert.assertTrue(to!!.checkNextContents(arrayOf("wasteservice(wait,0,0)", "transporttrolley(wait,HOME,HOME)")) > 0)
+                ColorsOut.outappl(to!!.getHistory().toString(), ColorsOut.MAGENTA)
+                //POSITION INITIAL
+                Assert.assertTrue(to!!.checkNextContents(arrayOf(
+                    "mover(wait,HOME,HOME)",
+                    "transporttrolley(wait)",
+                    "pickupdropouthandler(wait)",
+                    "wasteservice(wait,0.0,0.0)",
+                    "depositaction(wait)"))>0)
+                //PICKUP
                 Assert.assertTrue(to!!.checkNextSequence(arrayOf(
-                        "wasteservice(handle_req,0.0,0.0)",
-                        "transporttrolley(wait,HOME,INDOOR)",
-                        "transporttrolley(wait,INDOOR,INDOOR)",
-                        "transporttrolley(picking_up,INDOOR,INDOOR)"
+                    "wasteservice(handle_req,0.0,0.0)",
+                    "wasteservice(req_depositaction,2.0,0.0)",
+                    "transporttrolley(req_move,INDOOR)",
+                    "transporttrolley(req_pickup)",
+                    "depositaction(reply,PLASTIC)"
                 )))
-                Assert.assertTrue(to!!.checkNextContents(arrayOf("wasteservice(handle_pickup_answer,2.0,0.0)", "transporttrolley(wait,INDOOR,PLASTICBOX)")) > 0) //check container load update. (handle_pickup_answer also moves the robot to the container)
+                //DROPOUT
                 Assert.assertTrue(to!!.checkNextSequence(arrayOf(
-                        "transporttrolley(wait,PLASTICBOX,PLASTICBOX)",
-                        "transporttrolley(dropping_down,PLASTICBOX,PLASTICBOX)"
+                    "transporttrolley(req_move,PLASTICBOX)",
+                    "transporttrolley(req_dropout)"
                 )))
-                Assert.assertTrue(to!!.checkNextContents(arrayOf("wasteservice(handle_new_req,2.0,0.0)", "transporttrolley(wait,PLASTICBOX,INDOOR)")) > 0)
-                Assert.assertTrue(to!!.checkNextContent("wasteservice(handle_move_indoor,2.0,7.0)") > 0)
-                //second request management...
-                Assert.assertTrue(to!!.checkNextContent("wasteservice(wait,2.0,7.0)") > 0)
+                //CHECK SECOND REQUEST
+                Assert.assertTrue(to!!.checkNextContent("wasteservice(wait,2.0,7.0)")>0)
+                //POSITION FINAL
+                Assert.assertTrue(to!!.checkNextContents(arrayOf(
+                    "transporttrolley(wait)",
+                    "mover(wait,HOME,HOME)")) > 0)
             } catch (e: java.lang.Exception) {
                 Assert.fail("test_2_accepted_while_in_operation ERROR:" + e.message)
             }
@@ -213,7 +249,7 @@ internal class TestSprint1_hystory {
                 var answer = connTcp.request(truckRequestStr)
                 ColorsOut.outappl("testFirstRequest answer=$answer", ColorsOut.GREEN)
                 Assert.assertTrue(answer.contains("loadaccept"))
-                while (!coapCheckWasteService("handle_move_container")) {
+                while (!coapCheckMover("mover(req_forward,PLASTICBOX,HOME)")) {
                     CommUtils.delay(800)
                 }
                 CommUtils.delay(100)
@@ -222,25 +258,42 @@ internal class TestSprint1_hystory {
                 answer = connTcp.request(truckRequestStr)
                 ColorsOut.outappl("testSecondRequest answer=$answer", ColorsOut.GREEN)
                 Assert.assertTrue(answer.contains("loadrejected"))
-                while (!coapCheckWasteService("wait")) {
+                connTcp.close()
+                while (!coapCheckMover("mover(wait,HOME,HOME)")) {
                     CommUtils.delay(1000)
                 }
-                connTcp.close()
-                //Assert.assertTrue(to!!.checkNextContents(arrayOf("wasteservice(wait,0,0)", "transporttrolley(wait,HOME,HOME)")) > 0)
+                ColorsOut.outappl(to!!.getHistory().toString(), ColorsOut.MAGENTA)
+
+                //POSITION INITIAL
+                Assert.assertTrue(to!!.checkNextContents(arrayOf(
+                    "mover(wait,HOME,HOME)",
+                    "transporttrolley(wait)",
+                    "pickupdropouthandler(wait)",
+                    "wasteservice(wait,0.0,0.0)",
+                    "depositaction(wait)"))>0)
+                //PICKUP
                 Assert.assertTrue(to!!.checkNextSequence(arrayOf(
-                        "wasteservice(handle_req,0.0,0.0)",
-                        "transporttrolley(wait,HOME,INDOOR)",
-                        "transporttrolley(wait,INDOOR,INDOOR)",
-                        "transporttrolley(picking_up,INDOOR,INDOOR)"
+                    "wasteservice(handle_req,0.0,0.0)",
+                    "wasteservice(req_depositaction,2.0,0.0)",
+                    "transporttrolley(req_move,INDOOR)",
+                    "transporttrolley(req_pickup)",
+                    "depositaction(reply,PLASTIC)"
                 )))
-                Assert.assertTrue(to!!.checkNextContents(arrayOf("wasteservice(handle_pickup_answer,2.0,0.0)", "transporttrolley(wait,INDOOR,PLASTICBOX)")) > 0) //check container load update. (handle_pickup_answer also moves the robot to the container)
+                //DROPOUT
                 Assert.assertTrue(to!!.checkNextSequence(arrayOf(
-                        "transporttrolley(wait,PLASTICBOX,PLASTICBOX)",
-                        "transporttrolley(dropping_down,PLASTICBOX,PLASTICBOX)"
+                    "transporttrolley(req_move,PLASTICBOX)",
+                    "transporttrolley(req_dropout)"
                 )))
-                Assert.assertTrue(to!!.checkNextContents(arrayOf("wasteservice(handle_new_req,2.0,0.0)", "transporttrolley(wait,PLASTICBOX,HOME)", "wasteservice(handle_move_home,2.0,0.0)")) > 0)
-                //robot moves towards home
-                Assert.assertTrue(to!!.checkNextContent("wasteservice(wait,2.0,0.0)") > 0)
+                //CHECK SECOND REQUEST
+                Assert.assertTrue(to!!.checkNextSequence(arrayOf(
+                    "wasteservice(handle_req,2.0,0.0)",
+                    "wasteservice(rejected,2.0,0.0)",
+                    "wasteservice(wait,2.0,0.0)"
+                )))
+                //POSITION FINAL
+                Assert.assertTrue(to!!.checkNextContents(arrayOf(
+                    "transporttrolley(wait)",
+                    "mover(wait,HOME,HOME)")) > 0)
             } catch (e: java.lang.Exception) {
                 Assert.fail("test_1_accepted_1_rejected_while_in_operation ERROR:" + e.message)
             }
@@ -258,7 +311,7 @@ internal class TestSprint1_hystory {
                 var answer = connTcp.request(truckRequestStr)
                 ColorsOut.outappl("testFirstRequest answer=$answer", ColorsOut.GREEN)
                 Assert.assertTrue(answer.contains("loadaccept"))
-                while (!coapCheckWasteService("handle_move_home")) {
+                while (!coapCheckDepositAction("depositaction(move_home,PLASTIC)")) {
                     CommUtils.delay(800)
                 }
                 CommUtils.delay(100)
@@ -267,27 +320,37 @@ internal class TestSprint1_hystory {
                 answer = connTcp.request(truckRequestStr)
                 ColorsOut.outappl("testSecondRequest answer=$answer", ColorsOut.GREEN)
                 Assert.assertTrue(answer.contains("loadaccept"))
-                while (!coapCheckWasteService("wait")) {
+                connTcp.close()
+                while (!coapCheckMover("mover(wait,HOME,HOME)")) {
                     CommUtils.delay(1000)
                 }
-                connTcp.close()
-                //Assert.assertTrue(to!!.checkNextContents(arrayOf("wasteservice(wait,0,0)", "transporttrolley(wait,HOME,HOME)")) > 0)
+                ColorsOut.outappl(to!!.getHistory().toString(), ColorsOut.MAGENTA)
+                //POSITION INITIAL
+                Assert.assertTrue(to!!.checkNextContents(arrayOf(
+                    "mover(wait,HOME,HOME)",
+                    "transporttrolley(wait)",
+                    "pickupdropouthandler(wait)",
+                    "wasteservice(wait,0.0,0.0)",
+                    "depositaction(wait)"))>0)
+                //PICKUP
                 Assert.assertTrue(to!!.checkNextSequence(arrayOf(
-                        "wasteservice(handle_req,0.0,0.0)",
-                        "transporttrolley(wait,HOME,INDOOR)",
-                        "transporttrolley(wait,INDOOR,INDOOR)",
-                        "transporttrolley(picking_up,INDOOR,INDOOR)"
+                    "wasteservice(handle_req,0.0,0.0)",
+                    "wasteservice(req_depositaction,2.0,0.0)",
+                    "transporttrolley(req_move,INDOOR)",
+                    "transporttrolley(req_pickup)",
+                    "depositaction(reply,PLASTIC)"
                 )))
-                Assert.assertTrue(to!!.checkNextContents(arrayOf("wasteservice(handle_pickup_answer,2.0,0.0)", "transporttrolley(wait,INDOOR,PLASTICBOX)")) > 0) //check container load update. (handle_pickup_answer also moves the robot to the container)
+                //DROPOUT
                 Assert.assertTrue(to!!.checkNextSequence(arrayOf(
-                        "transporttrolley(wait,PLASTICBOX,PLASTICBOX)",
-                        "transporttrolley(dropping_down,PLASTICBOX,PLASTICBOX)"
+                    "transporttrolley(req_move,PLASTICBOX)",
+                    "transporttrolley(req_dropout)"
                 )))
-                Assert.assertTrue(to!!.checkNextContents(arrayOf("wasteservice(handle_move_home,2.0,0.0)", "transporttrolley(wait,PLASTICBOX,HOME)")) > 0)
-                Assert.assertTrue(to!!.checkNextContent("wasteservice(home,2.0,0.0)") < 0) //wasteservice shouldnt pass through wait...
-                Assert.assertTrue(to!!.checkNextContent("wasteservice(handle_req,2.0,0.0)") > 0) //...it should go directly to handle_req
-                //second request management...
-                Assert.assertTrue(to!!.checkNextContent("wasteservice(wait,2.0,7.0)") > 0)
+                //CHECK SECOND REQUEST
+                Assert.assertTrue(to!!.checkNextContent("wasteservice(wait,2.0,7.0)")>0)
+                //POSITION FINAL
+                Assert.assertTrue(to!!.checkNextContents(arrayOf(
+                    "transporttrolley(wait)",
+                    "mover(wait,HOME,HOME)")) > 0)
             } catch (e: java.lang.Exception) {
                 Assert.fail("test_2_accepted_while_returning_home ERROR:" + e.message)
             }
@@ -305,7 +368,7 @@ internal class TestSprint1_hystory {
                 var answer = connTcp.request(truckRequestStr)
                 ColorsOut.outappl("testFirstRequest answer=$answer", ColorsOut.GREEN)
                 Assert.assertTrue(answer.contains("loadaccept"))
-                while (!coapCheckWasteService("handle_move_home")) {
+                while (!coapCheckDepositAction("depositaction(move_home,PLASTIC)")) {
                     CommUtils.delay(800)
                 }
                 CommUtils.delay(100)
@@ -314,30 +377,42 @@ internal class TestSprint1_hystory {
                 answer = connTcp.request(truckRequestStr)
                 ColorsOut.outappl("testSecondRequest answer=$answer", ColorsOut.GREEN)
                 Assert.assertTrue(answer.contains("loadrejected"))
-                while (!coapCheckWasteService("wait")) {
-                    CommUtils.delay(1000)
-                }
-                //this is a special case: we are in wait even if the robot is still moving towards home. Gire the robot some extra more time
-                while (!coapCheckconnTransportTrolley("wait")) { //wait for the robot to reach home
-                    CommUtils.delay(1000)
-                }
                 connTcp.close()
-                //Assert.assertTrue(to!!.checkNextContents(arrayOf("wasteservice(wait,0,0)", "transporttrolley(wait,HOME,HOME)")) > 0)
+                while (!coapCheckMover("mover(wait,HOME,HOME)")) {
+                    CommUtils.delay(1000)
+                }
+                ColorsOut.outappl(to!!.getHistory().toString(), ColorsOut.MAGENTA)
+
+                //POSITION INITIAL
+                Assert.assertTrue(to!!.checkNextContents(arrayOf(
+                    "mover(wait,HOME,HOME)",
+                    "transporttrolley(wait)",
+                    "pickupdropouthandler(wait)",
+                    "wasteservice(wait,0.0,0.0)",
+                    "depositaction(wait)"))>0)
+                //PICKUP
                 Assert.assertTrue(to!!.checkNextSequence(arrayOf(
-                        "wasteservice(handle_req,0.0,0.0)",
-                        "transporttrolley(wait,HOME,INDOOR)",
-                        "transporttrolley(wait,INDOOR,INDOOR)",
-                        "transporttrolley(picking_up,INDOOR,INDOOR)"
+                    "wasteservice(handle_req,0.0,0.0)",
+                    "wasteservice(req_depositaction,2.0,0.0)",
+                    "transporttrolley(req_move,INDOOR)",
+                    "transporttrolley(req_pickup)",
+                    "depositaction(reply,PLASTIC)"
                 )))
-                Assert.assertTrue(to!!.checkNextContents(arrayOf("wasteservice(handle_pickup_answer,2.0,0.0)", "transporttrolley(wait,INDOOR,PLASTICBOX)")) > 0) //check container load update. (handle_pickup_answer also moves the robot to the container)
+                //DROPOUT
                 Assert.assertTrue(to!!.checkNextSequence(arrayOf(
-                        "transporttrolley(wait,PLASTICBOX,PLASTICBOX)",
-                        "transporttrolley(dropping_down,PLASTICBOX,PLASTICBOX)"
+                    "transporttrolley(req_move,PLASTICBOX)",
+                    "transporttrolley(req_dropout)"
                 )))
-                Assert.assertTrue(to!!.checkNextContents(arrayOf("wasteservice(handle_move_home,2.0,0.0)", "transporttrolley(wait,PLASTICBOX,HOME)")) > 0)
-                //assertTrue(to.checkNextContent("wasteservice(home,2,0)") < 0); //wasteservice shouldnt pass through wait...
-                Assert.assertTrue(to!!.checkNextContent("wasteservice(handle_req,2.0,0.0)") > 0) //...it should go directly to handle_req
-                Assert.assertTrue(to!!.checkNextContent("wasteservice(wait,2.0,0.0)") > 0) //then it goes into wait, since request is rejected
+                //CHECK SECOND REQUEST
+                Assert.assertTrue(to!!.checkNextSequence(arrayOf(
+                    "wasteservice(handle_req,2.0,0.0)",
+                    "wasteservice(rejected,2.0,0.0)",
+                    "wasteservice(wait,2.0,0.0)"
+                )))
+                //POSITION FINAL
+                Assert.assertTrue(to!!.checkNextContents(arrayOf(
+                    "transporttrolley(wait)",
+                    "mover(wait,HOME,HOME)")) > 0)
             } catch (e: java.lang.Exception) {
                 Assert.fail("test_1_accepted_1_rejected_while_returning_home ERROR:" + e.message)
             }
@@ -345,6 +420,7 @@ internal class TestSprint1_hystory {
     }
 
     //this test is important, because an
+    /*
     @Test
     fun test_1_accepted_1_rejected_while_returning_home_1_accepted() { //the second request is made while the robot is still in operation, while returning home
         assertTimeoutPreemptively<Unit>(Duration.ofSeconds(45)){
@@ -368,11 +444,11 @@ internal class TestSprint1_hystory {
                 ColorsOut.outappl("testSecondRequest answer=$answer", ColorsOut.GREEN)
                 Assert.assertTrue(answer.contains("loadrejected"))
                 //WasteService is in wait, but robot is still moving towards home (actually since this is critical let's check that)
-                if (!coapCheckconnTransportTrolley("forward")) {
+                if (!coapCheckTransportTrolley("forward")) {
                     fail("Unlucky test: Robot did reached home before wasteservice was in wait. This test is meaningful only if the robot is still moving while the wasteservice is in wait");
                 }
                 to!!.getHistory().clear()  //jump directly to the messages that will arrive from now onwards     //to!!.setStartPosition(to!!.getHistory().size);
-                while (!coapCheckconnTransportTrolley("wait")) { //now wait for the robot to reach home (move_answer received)
+                while (!coapCheckTransportTrolley("wait")) { //now wait for the robot to reach home (move_answer received)
                     CommUtils.delay(1000)
                 }
                 CommUtils.delay(100)
@@ -403,7 +479,7 @@ internal class TestSprint1_hystory {
             }
         }
     }
-
+    */
     //---------------------------------------------------
     protected fun coapCheckWasteService(check: String?): Boolean {
         val answer = connWasteService!!.request("")
@@ -411,8 +487,32 @@ internal class TestSprint1_hystory {
         return answer.contains(check!!)
     }
 
-    protected fun coapCheckconnTransportTrolley(check: String?): Boolean {
+    protected fun coapCheckTransportTrolley(check: String?): Boolean {
         val answer = connTransportTrolley!!.request("")
+        ColorsOut.outappl("coapCheck answer=$answer", ColorsOut.CYAN)
+        return answer.contains(check!!)
+    }
+
+    protected fun coapCheckDepositAction(check: String?): Boolean {
+        val answer = connDepositAction!!.request("")
+        ColorsOut.outappl("coapCheck answer=$answer", ColorsOut.CYAN)
+        return answer.contains(check!!)
+    }
+
+    protected fun coapCheckMover(check: String?): Boolean {
+        val answer = connMover!!.request("")
+        ColorsOut.outappl("coapCheck answer=$answer", ColorsOut.CYAN)
+        return answer.contains(check!!)
+    }
+
+    protected fun coapCheckBasicrobotwrapper(check: String?): Boolean {
+        val answer = connDepositAction!!.request("")
+        ColorsOut.outappl("coapCheck answer=$answer", ColorsOut.CYAN)
+        return answer.contains(check!!)
+    }
+
+    protected fun coapCheckconnPickupdropouthandler(check: String?): Boolean {
+        val answer = connDepositAction!!.request("")
         ColorsOut.outappl("coapCheck answer=$answer", ColorsOut.CYAN)
         return answer.contains(check!!)
     }
@@ -423,22 +523,56 @@ internal class TestSprint1_hystory {
                 try {
                     val qakdestination1 = "wasteservice"
                     val qakdestination2 = "transporttrolley"
+                    val qakdestination3 = "depositaction"
+                    val qakdestination4 = "mover"
+                    val qakdestination5 = "pickupdropouthandler"
+                    val qakdestination6 = "basicrobotwrapper"
                     val ctxqakdest1 = "ctxserver"
                     val ctxqakdest2 = "ctxrobot"
                     val applPort1 = "8095"
                     val applPort2 = "8096"
                     connWasteService = CoapConnection("$addr:$applPort1", "$ctxqakdest1/$qakdestination1")
                     connTransportTrolley = CoapConnection("$addr:$applPort2", "$ctxqakdest2/$qakdestination2")
+                    connDepositAction = CoapConnection("$addr:$applPort1", "$ctxqakdest1/$qakdestination3")
+                    //connBasicrobotwrapper = CoapConnection("$addr:$applPort2", "$ctxqakdest2/$qakdestination6")
+                    connMover = CoapConnection("$addr:$applPort2", "$ctxqakdest2/$qakdestination4")
+                    connPickupdropouthandler = CoapConnection("$addr:$applPort2", "$ctxqakdest2/$qakdestination5")
                     connWasteService!!.observeResource(handler)
                     connTransportTrolley!!.observeResource(handler)
+                    connDepositAction!!.observeResource(handler)
+                    //connBasicrobotwrapper!!.observeResource(handler)
+                    connMover!!.observeResource(handler)
+                    connPickupdropouthandler!!.observeResource(handler)
                     ColorsOut.outappl("connecting via Coap conn:$connWasteService", ColorsOut.CYAN)
                     ColorsOut.outappl("connecting via Coap conn:$connTransportTrolley", ColorsOut.CYAN)
+                    ColorsOut.outappl("connecting via Coap conn:$connDepositAction", ColorsOut.CYAN)
+                    //ColorsOut.outappl("connecting via Coap conn:$connBasicrobotwrapper", ColorsOut.CYAN)
+                    ColorsOut.outappl("connecting via Coap conn:$connMover", ColorsOut.CYAN)
+                    ColorsOut.outappl("connecting via Coap conn:$connPickupdropouthandler", ColorsOut.CYAN)
                     while (connWasteService!!.request("") === "0") {
                         ColorsOut.outappl("waiting for conn $connWasteService", ColorsOut.CYAN)
                         CommUtils.delay(500)
                     }
                     while (connTransportTrolley!!.request("") === "0") {
                         ColorsOut.outappl("waiting for conn $connTransportTrolley", ColorsOut.CYAN)
+                        CommUtils.delay(500)
+                    }
+                    while (connDepositAction!!.request("") === "0") {
+                        ColorsOut.outappl("waiting for conn $connDepositAction", ColorsOut.CYAN)
+                        CommUtils.delay(500)
+                    }
+                    /*
+                    while (connBasicrobotwrapper!!.request("") === "0") {
+                        ColorsOut.outappl("waiting for conn $connBasicrobotwrapper", ColorsOut.CYAN)
+                        CommUtils.delay(500)
+                    }
+                    */
+                    while (connMover!!.request("") === "0") {
+                        ColorsOut.outappl("waiting for conn $connMover", ColorsOut.CYAN)
+                        CommUtils.delay(500)
+                    }
+                    while (connPickupdropouthandler!!.request("") === "0") {
+                        ColorsOut.outappl("waiting for conn $connPickupdropouthandler", ColorsOut.CYAN)
                         CommUtils.delay(500)
                     }
                 } catch (e: Exception) {

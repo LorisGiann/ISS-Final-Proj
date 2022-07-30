@@ -221,7 +221,7 @@ QActor depositaction context ctxserver{
 	Transition t0 whenReply dropoutanswer -> chk_dropout
 	State chk_dropout{
 		printCurrentMessage
-		updateResource [# "depositaction(chk_pickup,$MATERIAL)" #] 
+		updateResource [# "depositaction(chk_dropout,$MATERIAL)" #] 
 		onMsg(dropoutanswer : dropoutanswer(RES)){
 			[# RES = payloadArg(0); #]
 		}

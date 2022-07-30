@@ -18,6 +18,13 @@ IFS=$'\n'      # Change IFS to newline char
 declare -a TEST_METHODS=(
     "testSprint1.TestSprint1_wasteservice.test_2_accepted"
     "testSprint1.TestSprint1_wasteservice.test_1_accepted_1_rejected"
+
+    "testSprint1.TestSprint1_hystory.test_accepted"
+    "testSprint1.TestSprint1_hystory.test_rejected"
+    "testSprint1.TestSprint1_hystory.test_2_accepted_while_in_operation"
+    "testSprint1.TestSprint1_hystory.test_1_accepted_1_rejected_while_in_operation"
+    "testSprint1.TestSprint1_hystory.test_2_accepted_while_returning_home"
+    "testSprint1.TestSprint1_hystory.test_1_accepted_1_rejected_while_returning_home"
 )
 
 IFS=$SAVEIFS   # Restore original IFS

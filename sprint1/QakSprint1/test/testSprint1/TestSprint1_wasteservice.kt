@@ -15,6 +15,7 @@ import kotlin.test.Test
 internal class TestSprint1_wasteservice {
     private var connTransportTrolley: CoapConnection? = null
     private var connWasteService: CoapConnection? = null
+    private var connMover: CoapConnection? = null
     private var to: TestObserver? = null
     private var processHandleServer: ProcessHandle? = null
     private var processHandleRobot: ProcessHandle? = null
@@ -71,8 +72,9 @@ internal class TestSprint1_wasteservice {
         //processHandleRobot!!.destroyForcibly()
         //processHandleServer!!.destroyForcibly()
 
-        //connTransportTrolley!!.close()
+        connTransportTrolley!!.close()
         connWasteService!!.close()
+        connMover!!.close()
     }
 
 
@@ -95,7 +97,7 @@ internal class TestSprint1_wasteservice {
                 var answer = connTcp.request(truckRequestStr)
                 ColorsOut.outappl("test_2_accepted answer=$answer", ColorsOut.GREEN)
                 Assert.assertTrue(answer.contains("loadaccept"))
-                while (!coapCheckWasteService("wait")) {
+                while (!coapCheckMover("mover(wait,HOME,HOME)")) {
                     CommUtils.delay(1000)
                 }
                 //SECONDO REQUEST
@@ -103,7 +105,7 @@ internal class TestSprint1_wasteservice {
                 answer = connTcp.request(truckRequestStr)
                 ColorsOut.outappl("testSecondRequest answer=$answer", ColorsOut.GREEN)
                 Assert.assertTrue(answer.contains("loadaccept"))
-                while (!coapCheckWasteService("wait")) {
+                while (!coapCheckMover("mover(wait,HOME,HOME)")) {
                     CommUtils.delay(1000)
                 }
                 connTcp.close()
@@ -125,7 +127,7 @@ internal class TestSprint1_wasteservice {
                 var answer = connTcp.request(truckRequestStr)
                 ColorsOut.outappl("testFirstRequest answer=$answer", ColorsOut.GREEN)
                 Assert.assertTrue(answer.contains("loadaccept"))
-                while (!coapCheckWasteService("wait")) {
+                while (!coapCheckMover("mover(wait,HOME,HOME)")) {
                     CommUtils.delay(1000)
                 }
                 //SECONDO REQUEST
@@ -133,7 +135,7 @@ internal class TestSprint1_wasteservice {
                 answer = connTcp.request(truckRequestStr)
                 ColorsOut.outappl("testSecondRequest answer=$answer", ColorsOut.GREEN)
                 Assert.assertTrue(answer.contains("loadrejected"))
-                while (!coapCheckWasteService("wait")) {
+                while (!coapCheckMover("mover(wait,HOME,HOME)")) {
                     CommUtils.delay(1000)
                 }
                 connTcp.close()
@@ -152,30 +154,44 @@ internal class TestSprint1_wasteservice {
         return answer.contains(check!!)
     }
 
+    protected fun coapCheckMover(check: String?): Boolean {
+        val answer = connMover!!.request("")
+        ColorsOut.outappl("coapCheck answer=$answer", ColorsOut.CYAN)
+        return answer.contains(check!!)
+    }
+
     protected fun startObserverCoap(addr: String, handler: CoapHandler?) {
         /*object : Thread() {
             override fun run() {*/
         try {
             val qakdestination1 = "wasteservice"
             val qakdestination2 = "transporttrolley"
+            val qakdestination3 = "mover"
             val ctxqakdest1 = "ctxserver"
             val ctxqakdest2 = "ctxrobot"
             val applPort1 = "8095"
             val applPort2 = "8096"
             connWasteService = CoapConnection("$addr:$applPort1", "$ctxqakdest1/$qakdestination1")
-            //connTransportTrolley = CoapConnection("$addr:$applPort2", "$ctxqakdest2/$qakdestination2")
+            connTransportTrolley = CoapConnection("$addr:$applPort2", "$ctxqakdest2/$qakdestination2")
+            connMover = CoapConnection("$addr:$applPort2", "$ctxqakdest2/$qakdestination3")
             connWasteService!!.observeResource(handler)
-            //connTransportTrolley!!.observeResource(handler)
+            connTransportTrolley!!.observeResource(handler)
+            connMover!!.observeResource(handler)
             ColorsOut.outappl("connecting via Coap conn:$connWasteService", ColorsOut.CYAN)
-            //ColorsOut.outappl("connecting via Coap conn:$connTransportTrolley", ColorsOut.CYAN)
+            ColorsOut.outappl("connecting via Coap conn:$connTransportTrolley", ColorsOut.CYAN)
+            ColorsOut.outappl("connecting via Coap conn:$connMover", ColorsOut.CYAN)
             while (connWasteService!!.request("") === "0") {
                 ColorsOut.outappl("waiting for conn $connWasteService", ColorsOut.CYAN)
                 CommUtils.delay(500)
             }
-            /*while (connTransportTrolley!!.request("") === "0") {
+            while (connTransportTrolley!!.request("") === "0") {
                 ColorsOut.outappl("waiting for conn $connTransportTrolley", ColorsOut.CYAN)
                 CommUtils.delay(500)
-            }*/
+            }
+            while (connMover!!.request("") === "0") {
+                ColorsOut.outappl("waiting for conn $connMover", ColorsOut.CYAN)
+                CommUtils.delay(500)
+            }
         } catch (e: Exception) {
             ColorsOut.outerr("connectUsingCoap ERROR:" + e.message)
             System.exit(2);
