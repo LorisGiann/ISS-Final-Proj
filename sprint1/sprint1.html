@@ -26,6 +26,11 @@ dd{
 }
 p { margin: 4px 0px; }
 dd{ margin-bottom: 8px;}
+.newDictWord{ color : purple; }
+h6{
+    font-size: 1em;
+    margin: 18px 0px 9px 0px;
+}
 </style>
 <head>
    
@@ -44,116 +49,20 @@ dd{ margin-bottom: 8px;}
 
 <h2>Requirements</h2>
 <div class="remark">
-    <a href="../docs_prof/html/TemaFinale22.html">Link alla pagina dei requisiti del committente</a>
-    <br>
-
-<A NAME="ScrumGoalWorkPlan"></A>
-<h2>Scrum Goal and Work Plan</h2>
-<div class="remark">
-    <p><b>Scrum goal</b>: obiettivo dello <u>SPRINT1</u> (oltre alla comprensione dei requisiti) è la creazione di una prima demo (su ambiente virtuale) che tenga presente dei soli punti 1 e 2 specificati dal committente (quelli che descrivono le <b>Deposit action</b> e la <b>Service area</b>)</p>
-    <p><b>Piano di lavoro:</b></p>
-    <ul>
-        <li>Comprensione dei requisiti del sistema</li>
-        <li>Prima valutazione dell'abstraction gap, anche in relazione al SW già sviluppato (possibile visitare la pagina riassuntiva <a href="../docs_prof/html/Applicazioni22.html">Applicazioni22</a> dei moduli sviluppati)</li>
-        <li>Analisi delle principali problematiche da affrontare nello sviluppo dei componenti di cui è composto il sistema</li>
-        <li>Definire i componenti e le interazioni fra di essi: realizzazione di una prima architettura logica</li>
-        <li>Realizzazione di modelli usando un linguaggio di modellazione che permetta di formalizzare e di creare modelli eseguibili. A tal proposito verrà utilizzato il metamodello <a href="../docs_common/Qak.html">QAK</a>.</li>
-        <li>Realizzazione di un primo test-plan</li>
-    </ul>
+    <a href="../docs_prof/html/TemaFinale22.html">Link alla pagina dei requisiti del committente</a> <br>
+    <a href="../sprint0/sprint0.html#Requirements">Requisiti sprint1</a>
 </div>
 
-
 <h2>Requirement analysis</h2>
-
-<A NAME="Dizionario"></A>
-<h3>Dizionario</h3>
 <div class="remark">
+    <A NAME="Dizionario"></A>
+    <h3>Dizionario</h3>
+    <p>Vengono qui riportati solo gli elementi nuovi o modificati rispetto al <a href="../sprint0/sprint0.html#Dizionario">dizionario dello sprint0.</a></p>
+    <p>Vengono segnati in <span class="newDictWord"><b>viola</b></span> i termini non presenti nei requisiti, ma introdotti in quanto utilizzati all'interno dei documenti prodotti</p>
+    <p>La formalizzazione avviene quando possibile con costrutti del linguaggio <a href="https://kotlinlang.org/">Kotlin</a>, mentre quando opportuno verrà utilizzato <a href="#Qak">QAK</a></p>
     <dl>
-        <dt><b>Waste-load:</b></dt> 
-        <dd>Termine generico per indicare il Materiale inizialmente presente sul <b>Waste-truck</b></dd>
-        <dt><b>TRUCKLOAD:</b></dt>
-        <dd>Numero di Kg di materiale <b>Waste-load</b>. Formalizzazine (<a href="./RequirementQakSprint1/src/requirementAnalysis/WasteServiceRequirement.qak">definito qui</a>):<br>
-            <code><pre>var TruckLoad : Float</pre></code>
-        </dd>
-        <dt><b>MATERIAL:</b></dt>
-        <dd>Tipo di materiale del <b>Waste-load</b>, che può essere plastica o vetro. Formalizzazine (<a href="./RequirementQakSprint1/resources/ws/Material.kt">definito qui</a>):<br>
-            <code><pre>enum class Material { PLASTIC, GLASS }</pre></code></dd>
-        <dt><b>WasteService:</b></dt> 
-        <dd>Il WasteService è un servizio che si occupa del coordinamento delle attività di raccolta e smistamento dei rifiuti. Contiene buona parte della business logic del sistema.<br> 
-            Viene formalizzato mediante un attore QAK che riceve le <i>depositrequest</i> e risponde con <i>loadaccept</i> o <i>loadrejected</i> in base al carico dei <b>Waste-truck</b> e allo spazio ancora disponibile in <b>PLASTICBOX</b> o <b>GLASSBOX</b>: <br>    
-            <code><pre>
-                //MATERIAL = PLASTIC | GLASS
-                //TRUCKLOAD =  float number
-                Request <b>depositrequest</b> : depositrequest(MATERIAL, TRUCKLOAD)
-                Reply <b>loadaccept</b>       : loadaccept(MATERIAL, TRUCKLOAD)
-                Reply <b>loadrejected</b>     : loadrejected(MATERIAL, TRUCKLOAD)
-
-                QActor wasteservice context ctxtest{  
-                    [# var Material  : ws.Material
-                       var TruckLoad : Float       #]
-                    
-                    State wait initial {
-                        printCurrentMessage
-                        discardMsg Off
-                    }
-                    Transition t0 whenRequest depositrequest -> handle_req
-                     
-                    State handle_req {
-                        printCurrentMessage
-                        onMsg(depositrequest : depositrequest(MATERIAL, TRUCKLOAD)) {
-                            [#   Material 	= ws.Material.valueOf(payloadArg(0))
-                                 TruckLoad 	= payloadArg(1).toFloat()   #]
-                            if[# ws.func.checkdepositpossible( Material, TruckLoad ) #]{
-                                [# ws.func.updateDeposit( Material, TruckLoad ) #]
-                                replyTo depositrequest with loadaccept : loadaccept($Material,$TruckLoad)
-                            }else{  
-                                replyTo depositrequest with loadrejected : loadrejected($Material,$TruckLoad)
-                            }
-                        }
-                    }
-                    Goto wait
-                }</pre>
-            </code>
-            Il componente invia comandi al <b>Transport trolley</b> per svolgere le azioni necessarie
-            <br><br>
-            Con il file <a href="./RequirementQakSprint1/src/requirementAnalysis/WasteServiceRequirement.qak">WasteServiceRequirement.qak</a> abbiamo potuto formalizzare interfaccia e comportamento di questo componente. <br>
-            Inoltre, al fine di meglio specificare il comportamento che ci si aspetta, sono stati predisposti alcuni semplici test in <a href="./RequirementQakSprint1/test/testSprint1/TestWasteservice.kt">TestWasteservice.kt</a>
-            <code><pre>
-                var truckRequestStr = "msg(depositrequest, request,python,wasteservice,depositrequest(GLASS,2),1)"
-                var answer = connTcp.request(truckRequestStr)
-                Assert.assertTrue(answer.contains("loadaccept"))
-
-                truckRequestStr = "msg(depositrequest, request,python,wasteservice,depositrequest(GLASS,9),1)"
-                answer = connTcp.request(truckRequestStr)
-                Assert.assertTrue(answer.contains("loadrejected"))</pre>
-            </code>
-        </dd>
-        <dt><b>Service area:</b></dt>
-        <dd>Superfice rettangolare, piana, priva di ostacoli nella quale il robot può muoversi, e nella quale sono presenti le zone <b>INDOOR</b>, <b>PLASTICBOX</b>, <b>GLASSBOX</b>, <b>HOME</b>.<br>
-            Le zone vengono rappresentate mediante l'enumerativo <a href="./RequirementQakSprint1/resources/ws/Position.kt">Position.kt</a>:<br>
-            <code><pre>enum class Position { INDOOR, PLASTICBOX, GLASSBOX, HOME }</pre></code></dd>
-        <dt><b>INDOOR:</b></dt>
-        <dd>Porta di ingresso adibita alla raccolta del <b>Waste-load</b> che dal <b>Waste-truck</b> va al <b>Transport trolley</b>. <br> 
-            Il termine viene anche usato per indicare la zona nella quale il robot deve trovarsi per effettuare l'operazione di carico</dd>
-        <dt><b>PLASTICBOX:</b></dt>
-        <dd>Container adibito al deposito di materiale plastico, con capienza massima pari a <b>MAXPB</b> Kg. <br> 
-            Il termine viene anche usato per indicare la zona nella quale il robot deve trovarsi per effettuare l'operazione di scarico della plastica.<br>
-            Formalizzazione: la variabile <b>contPB</b> (<a href="./RequirementQakSprint1/resources/ws/func.kt">definita qui</a>) corrispondente alla capienza attuale, la costante <b>MAXPB</b> (<a href="./RequirementQakSprint1/resources/ws/const.kt">definita qui</a>) corrispondente alla capienza massima (entrambi in Kg).<br>
-            <code><pre>var contPB : Float = 0F</pre></code>
-            <code><pre>val MAXPB : Float = 10.0F</pre></code>
-        </dd>
-        <dt><b>GLASSBOX:</b></dt> 
-        <dd>Container adibito al deposito di materiale vetroso, con capienza massima pari a <b>MAXGB</b> Kg. <br> 
-            Il termine viene anche usato per indicare la zona nella quale il robot deve trovarsi per effettuare l'operazione di scarico del vetro.<br>
-            Formalizzazione: la variabile <b>contGB</b> (<a href="./RequirementQakSprint1/resources/ws/func.kt">definita qui</a>) corrispondente alla capienza attuale, la costante <b>MAXGB</b> (<a href="./RequirementQakSprint1/resources/ws/const.kt">definita qui</a>) corrispondente alla capienza massima (entrambi in Kg).<br>
-            <code><pre>var contGB : Float = 0F</pre></code>
-            <code><pre>val MAXGB : Float = 10.0F</pre></code>
-        </dd>
-        <dt><b>HOME:</b></dt> 
-        <dd>Area nella quale risiede il robot quando non deve svolgere alcuna attività<br>
-            È inoltre l'area dove si trova inizialmente il robot.</dd>
         <dt><b>Transport trolley:</b></dt>
-        <dd>Rappresenta un'entità robotica astratta che riceve i comandi di alto livello relativi alla prossima destinazione da raggiungere, e i comandi relativi allo scarico e carico del materiale.<br>
+        <dd>In seguito alla relativa <a href="#DDR_robot_vs_Transport_trolley">analisi del problema</a> di questo sprint, <b>Transport trolley</b> rappresenta un'entità robotica astratta che riceve i comandi di alto livello relativi alla prossima destinazione da raggiungere, e i comandi di <b>Pickup</b> e <b>Dropout</b>.<br>
             Nota: il <b>Transport trolley</b> può ricevere una richiesta di nuova posizione prima che abbia raggiunto la destinazione precedente: la navigazione sarà impostata sulla nuova destinazione. In questo modo è possibile soddisfare direttamente nuove richieste anche mente il robot sta andando in home.<br>
             Formalizzazione: 
             <code><pre>
@@ -168,121 +77,32 @@ Reply   dropoutanswer  : dropoutanswer(RESULT)</pre>
             </code>
             File QAK <a href="./RequirementQakSprint1/src/requirementAnalysis/TransportTrolleyRequirement.qak">TransportTrolleyRequirement.qak</a></b>. Test per meglio specificarne il comportamento: <a href="./RequirementQakSprint1/test/testSprint1/TestTransporttrolley.kt">TestTransporttrolley.kt</a>.
         </dd>
-        </dd>
-        <dt><b>DDR Robot concreto</b> o "robot":</dt>
-        <dd>Con questo termine ci si riferisce al robot vero e proprio (fisico o simulato virtualmente). <br>
-            Il committente fornisce già un ambiente di simulazione che implementa un <b>DDR Robot concreto</b> virtuale. Documentazione: <a href="../docs_prof/html/VirtualRobot.html#wenv">WEnv</a>, Progetto: <a href="https://github.com/anatali/issLab2022/tree/main/it.unibo.virtualRobot2020">it.unibo.virtualRobot2020</a>. </dd>
-        <dt><b>DDR Robot:</b></dt>
-        <dd>Entità che riceve ed esegue i comandi di basso livello di spostamento del robot: <br>
-            <p>Il committente fornisce già molto software in grado di interfacciarsi al <b>DDR Robot concreto</b> di <a href="../docs_prof/html/VirtualRobot.html#wenv">WEnv</a>: <a href="https://github.com/anatali/issLab2022/tree/main/unibo.wenvUsage22">unibo.wenvUsage22</a>, <a href="https://github.com/anatali/issLab2022/tree/main/unibo.basicrobot22">unibo.basicRobot22</a>, <a href="https://github.com/anatali/issLab2022/tree/main/unibo.boundaryQak22">unibo.boundaryQak22</a> </p>
-            <p>Formalizzazione: utilizzeremo <a href="https://github.com/anatali/issLab2022/blob/main/unibo.basicrobot22/src/basicrobot.qak">l'attore QAK <i>basicrobot</i></a> presente in <i>basicrobot22</i>, che è in grado di interfacciarsi sia con il WEnv, che con altri robot reali.</p>
-            <p>Vengono qui brevemente illustrate le caratteristiche di <a href="https://github.com/anatali/issLab2022/blob/main/unibo.basicrobot22/src/basicrobot.qak">basicrobot</a>:</p>
-            <p>Possiamo comandare mosse elementari, inviando i messaggi:</p>
-            <code><pre>
-                //MOVE =  w | a | s | d | h
-                Dispatch cmd           : cmd(MOVE)</pre>
-            </code>
-            <p>Nel caso del robot virtuale, i comandi "w" e "s" sono inviati tramite una websocket in maniera asicrona. Tali comandi sono infatti concepiti per far muovere il robot finchè non verrà rilevata una collisione con una parete. <br> 
-                Quando vi è una collisione viene emesso un evento del tipo:</p>
-            <code><pre>
-                Event   info           : info( ARG )</pre>
-            </code>
-            <p>Gli altri comandi sono invece sincroni bloccanti, e vegnono infatti inviati sulla connessione tcp.</p>
-            <p>Grazie a questi comandi elementari, <i>basicrobot22</i> è anche in grado di far fare degli step al robot:</p>
-            <code><pre>
-                Request step       : step( TIME )	
-                Reply   stepdone   : stepdone(V)  
-                Reply   stepfail   : stepfail(DURATION, CAUSE)</pre>
-            </code>
-        </dd>
-        <dt><b>Deposit action:</b></dt>
-        <dd>Sequenza di azioni di:<br>
-            <ol>
-                <lI><b>Pickup:</b> raccolta di <b>Waste-load</b> dal <b>Waste-truck</b> che avviene in <b>INDOOR</b> </lI>
-                <lI>Trasporto del materiale da <b>INDOOR</b> a <b>PLASTICBOX</b> o <b>GLASSBOX</b> in base al tipo di materiale</lI>
-                <lI><b>Dropout:</b> deposito del materiale nel <b>PLASTICBOX</b> o <b>GLASSBOX</b> in base al tipo di materiale</lI>
-            </ol>
-        </dd>
-        <dt><b>Waste-truck:</b></dt> 
-        <dd>Entità che si presenta in <b>INDOOR</b>, e richiede lo scarico del materiale che trasporta attraverso l'uso dello <b>Smart device</b></dd>
-        <dt><b>Smart device:</b></dt> 
-        <dd>Dispositivo attraverso il quale il <b>Waste-truck</b> comunica al <b>WasteService</b>:
-            <ul>
-                <lI>Il tipo di materiale trasportato: 
-                    <ul>
-                        <lI>PLASTIC</lI>
-                        <lI>GLASS</lI>
-                    </ul>
-                </lI>
-                <lI>Kg di materiale</lI>
-            </ul>
-            E riceve dal <b>WasteService</b> l'esito, che può essere <i>loadaccept</i> o <i>loadrejected</i>:
-            <code><pre>
-                //MATERIAL = PLASTIC | GLASS
-                //TRUCKLOAD =  integer number
-                Request depositrequest : depositrequest(MATERIAL, TRUCKLOAD)
-                Reply loadaccept       : loadaccept(MATERIAL, TRUCKLOAD)
-                Reply loadrejected     : loadrejected(MATERIAL, TRUCKLOAD)</pre>
-            </code>
-        </dd>
-        <dt><b>Service-manager:</b></dt>
-        <dd>Operatore umano che supervisiona lo stato dell'area di servizio usando una <b>WasteServiceStatusGUI</b></dd>
-        <dt><b>WasteServiceStatusGUI:</b></dt>
-        <dd>Pannello di controllo che permette al <b>Service-manager</b> di monitorare:
-            <ul>
-                <lI>La posizione del <b>Transport trolley</b> (basta l'area nella quale si trova attualmente, non necessariamente delle coordinate spaziali)</lI>
-                <lI>Lo stato attuale del <b>Transport trolley</b></lI>
-                <lI>Il peso corrente <b>contPB</b> e <b>contGB</b> del materiale contenuto in <b>PLASTICBOX</b> e in <b>GLASSBOX</b></lI>
-                <lI>Lo stato del <b>LED</b></lI>
-            </ul>
-        </dd>
-        <dt><b>LED concreto:</b></dt> 
-        <dd>Dispositivo di output connesso al RaspberryPI (che NON è a bordo del <b>DDR Robot</b>)</dd>
-        <dt><b>LED:</b></dt>
-        <dd>Entità attiva e astratta che rappresenta il <b>LED concreto:</b>, è che può essere impostato secondo 3 modalità:
-            <ul>
-                <lI>Led Off: quando il <b>Transport trolley</b> è in <b>HOME</b> </lI>
-                <lI>Led On: quando il <b>Transport trolley</b> è fermo (quando distanza rilevata &lt DLIMIT)</lI>
-                <lI>Led Blink: quando il <b>Transport trolley</b> è in movimento, o sta scaricando/caricando materiale</lI>
-            </ul>
-            <p>Il committente fornisce già del software per relativo al led in <a href="https://github.com/anatali/issLab2022/tree/main/it.unibo.radarSystem22.domain">it.unibo.radarSystem22.domain</a></p>
-        </dd>
-        <dt><b>Sonar concreto:</b></dt> 
-        <dd>Dispositivo di input connesso al RaspberryPI (che NON è a bordo del <b>DDR Robot</b>)</dd>
-        <dt><b>Sonar:</b></dt> 
-        <dd>Entità che rappresenta il <b>sonar concreto</b>. <br>
-            <p>Il committente fornisce già del software relativo al sonar in <a href="https://github.com/anatali/issLab2022/tree/main/unibo.basicrobot22">unibo.basicrobot22</a>, <a href="https://github.com/anatali/issLab2022/tree/main/it.unibo.radarSystem22.domain">it.unibo.radarSystem22.domain</a>, <a href="https://github.com/anatali/issLab2022/tree/main/unibo.sonarqak22">unibo.sonarqak22</a></p>
-            <p>Formalizziamo il sonar con un attore QAK. In particolare nel progetto <a href="https://github.com/anatali/issLab2022/tree/main/unibo.sonarqak22">unibo.sonarqak22</a> esiste un attore <i>sonarqak22</i> in grado di emettere eventi in base alla distanza rilevata da sonar reale o simulato: </p>
-            <code><pre>
-                Dispatch sonaractivate   : info(ARG)
-                Dispatch sonardeactivate : info(ARG)
-                Event    sonar           : distance( V )   //emitted by sonarSimulator or sonardatasource</pre>
-            </code>
-            <p>I comandi <i>sonaractivate</i> e <i>sonardeactivate</i> servono rispettivamente per attivare e disattivare il sonar, mentre l'evento <i>sonar</i> viene emesso o da <i>sonarsimulator</i>, o da <i>sonardatasource</i> e inviato al prossimo attore della pipe. La pipe può essere configurata nel seguente modo:</p>
-            <code><pre>
-                if( simulate )  firstActorInPipe = sysUtil.getActor("sonarsimulator")!!  //generates simulated data
-                else firstActorInPipe           = sysUtil.getActor("sonardatasource")!!  //generates REAL data
-                firstActorInPipe.
-                    subscribeLocalActor("datacleaner"). 		//removes 'wrong' data''
-                    //subscribeLocalActor("datalogger").		    //logs (shows) the data generated by the sonar
-                    //subscribeLocalActor("sonar").				//handles sonarrobot but does not propagate ...
-                    //subscribeLocalActor("distancefilter").		//propagates the lcoal stream event obstacle
-                    subscribeLocalActor(sonarActorName)</pre>
-            </code>
-            <p>In particolare l'attore <i>distancefilter</i> si occupa di filtrare gli eventi e inviare al prossimo attore solo eventi di tipo obstacle:obstacle($distance) solo nel caso in cui la distanza rilevata sia minore di una distanza prefissata.</p>
-            <img src="../docs_prof/html/_images/sonarpipenano.png" class="centerimg" style="width: 800px;"/>
-        </dd>
-        <dt><b>DLIMT:</b></dt>
-        <dd>Misura in CM della distanza limite. Se la distanza attualmente misurata dal <b>Sonar concreto</b> è ≤ DLIMT, il robot deve essere nello stato stopped. Qunando la distanza misurata &gt DLIMIT il robot può muoversi<br>
-            Viene formalizzato tramite una costante <b>DLIMIT</b>.<br>
-            <code><pre>val DLIMIT : Float</pre></code></dd>
     </dl>
+</div>
+
+<A NAME="ScrumGoalWorkPlan"></A>
+<h2>Scrum Goal and Work Plan</h2>
+<div class="remark">
+    <h4>Scrum goal:</h4>
+    <p>Obiettivo dello <u>SPRINT1</u> è la creazione di una prima demo (su ambiente virtuale) che tenga presente dei soli punti 1 e 2 specificati dal committente, i punti principali che contengono la core business logic del problema (descrivono infatti le <b>Deposit action</b> e la <b>Service area</b>)</p>
+    <h4>Piano di lavoro:</h4>
+    <ul>
+        <li>Analisi del problema di come affrontare la navigazione, anche in relazione al SW già sviluppato (possibile visitare la pagina riassuntiva <a href="../docs_prof/html/Applicazioni22.html">Applicazioni22</a> dei moduli sviluppati)</li>
+        <li>Analisi di quali e quanti componenti è composto il problema, e definizione delle interazioni tra di essi</li>
+        <li>Sviluppo / adattamento di tali componenti</li>
+        <li>Realizzazione di un modello eseguibile (a tal proposito verrà utilizzato il metamodello <a href="../docs_common/Qak.html">QAK</a>).</li>
+        <li>Realizzazione di un (più completo) test-plan per il modello</li>
+    </ul>
 </div>
 
 <!--PROBLEM ANALYSIS-->
 <A NAME="ProblemAnalysis"></A>
 <h2>Problem analysis</h2>
 <div class="remark">
+    <h6><b>Architettura logica precedente:</b></h6>
+    <img class="centerimg" style="width: 450px;" src="./docs/_images/logic_architecure_0.png"/>
+    <p style="width: 100%; text-align: right;"><a href="../docs_common/Legenda.html">Legenda</a></p>
+    <br>
 
     <h3><b>Transport trolley</b></h3>
 
@@ -290,37 +110,46 @@ Reply   dropoutanswer  : dropoutanswer(RESULT)</pre>
     <ul>
         <li>
             Possibile una separazione dei due concetti: <br>
-            il <b>DDR robot</b> è concepita come una entità di basso livello che riceve comandi:
+            Il termine "DDR - Differential Drive Robot" rappresenta la tecnologia con la quale il robot si muove. Il <b>DDR robot</b> è quindi una entità di basso livello che riceve comandi base come "anvanti", "destra", "sisnitra", "halt", ecc.. <br>
+            Possiamo quindi identificare il <b>DDR robot</b> come l'attore QAK <a href="https://github.com/anatali/issLab2022/blob/main/unibo.basicrobot22/src/basicrobot.qak"><i>basicrobot</i></a> presente nel progetto <i>basicrobot22</i>, che infatti riceve comandi:
             <code><pre>
-                //MOVE =  w | a | s | d | h
-                Dispatch cmd           : cmd(MOVE)</pre>
+//MOVE =  w | a | s | d | h
+Dispatch cmd           : cmd(MOVE)</pre>
             </code>
         </li>
         <li>
-            Mentre il <b>Transport trolley</b> è concepita come entità astratta che si occpura di ricevere la destinazione generica<br>
+            Invece il <b>Transport trolley</b> è concepita come entità astratta di più alto livello che si occpura di ricevere la destinazione generica<br>
             <code><pre>
-                //POSITION =  <b>INDOOR</b>|<b>PLASTICBOX</b>|<b>GLASSBOX</b>|<b>HOME</b>
-                Request move           : move(POSITION)
-                Reply   moveanswer     : moveanswer(RESULT)</pre>
+//POSITION =  INDOOR | PLASTICBOX | GLASSBOX | HOME
+Request move           : move(POSITION)
+Reply   moveanswer     : moveanswer(RESULT)</pre>
             </code>
         </li>
     </ul>
     <b>Transport trolley</b> invierà quindi una serie di comandi elementari a <b>DDR robot</b> per raggiungere la nuova posizione. <br>
     La relazione che esiste tra <b>WasteService</b> e <b>Transport trolley</b> è quindi di tipo "use". <br>
-    Questa separazione tra in due layer rende il sistema più resitente ad eventuali future variazioni della tecnologia utilizzata per il robot (movimento a step con coordinate o meno, tipologia di hardware del robot). 
+    Questa separazione in due layer rende il sistema più resistente ad eventuali future variazioni della tecnologia utilizzata per il robot (movimento a step con coordinate o meno, tipologia di hardware del robot). 
     Il <b>WasteService</b> continuerà ad inviare al <b>Transport trolley</b> gli stessi comandi astratti, senza preoccuparsi di "in che modo" o "con quali mezzi" la destinazione viene raggiunta.
 
+    <h4>Dove collocare <b>Transport trolley</b>:</h4>
+    Risulta concettualmente sensato porre <b>Transport trolley</b> nello stesso contesto di <i>basicrobot</i>.<br>
+    <b>Transport trolley</b> potrebbe infatti necessitare di cambiamenti nel caso in cui cambi il <b>DDR Robot</b> e la tecnologia di movimento usata. <br>
+    Si noti tuttavia che, qualora tale componente debba fare utilizzo di un planner (che effettua una ricerca nello spazio degli stati), allora si dovrebbe considerare la possibilità 
+    di porre tale attore su un nodo computazionale più potente, dove il consumo di potenza non è un problema (mentre si presume che il robot sia alimentato a batteria). <br>
+    Alla luce delle osservazioni sinora fatte, l'architettura logica attuale è la seguente:
+    <img class="centerimg" style="width: 500px;" src="docs/_images/logic_architecure_1.png"/>
+    <p style="width: 100%; text-align: right;"><a href="../docs_common/Legenda.html">Legenda</a></p>
+
     <h4><b>Transport trolley</b> non gestisce autonomamente carico/scarico:</h4>
-    <p>Per questioni di flessibilità, abbiamo tenuto separate le operazioni di carico, scarico e movimento: l'idea è che se un domani si dovesse modificare il processo di smistamento,
-        basterà modificare la sequenza di comandi che vengono impartiti al <b>Transport trolley</b>, senza bisogno di modificare quest'ultimo. <br>
-        Inoltre, anche se il committente ha detto che le operazioni di carico e scarico possono essere modellate come semplici timeout, abbiamo ritenuto concettualmente corretto far 
-        gestire questa operazione all'entità <b>Transport trolley</b> (un domani potrebbe aver bisogno di inviare comandi ad altri componenti per fare azioni vere e proprie).</p>
+    <p>Per questioni di flessibilità, abbiamo tenuto separate le operazioni di carico, scarico e movimento. In questo modo se dovesse cambiare il processo di smistamento basterà modificare la 
+        sequenza di comandi che vengono impartiti al <b>Transport trolley</b>, senza bisogno di modificare quest'ultimo. Riteniamo inoltre corretto far gestire questa 
+        operazione a <b>Transport trolley</b>, siccome un domani potrebbe esser necessario inviare comandi o segnali a HW presente sul robot per compiere queste azioni.</p>
     <code><pre>
-        //RESULT =  OK | ERROR
-        Request pickup         : pickup(_)
-        Reply   pickupanswer   : pickupanswer(RESULT)
-        Request dropout        : dropout(_)
-        Reply   dropoutanswer  : dropoutanswer(RESULT)</pre>
+//RESULT =  OK | ERROR
+Request pickup         : pickup(_)
+Reply   pickupanswer   : pickupanswer(RESULT)
+Request dropout        : dropout(_)
+Reply   dropoutanswer  : dropoutanswer(RESULT)</pre>
     </code>
 
     <h4>Interazioni con il <b>Transport trolley</b>:</h4>
@@ -330,6 +159,15 @@ Reply   dropoutanswer  : dropoutanswer(RESULT)</pre>
         Questo perchè è possibile che arrivi un nuovo <b>Waste-truck</b> mentre il <b>Transport trolley</b> sta tornando a <b>HOME</b>. In questo modo è possibile soddisfare il requisito di gesione immediata della nuova richiesta senza aspettare che il <b>Transport trolley</b> raggiunga <b>HOME</b>. 
         Il nuovo comando annulla di fatto la <i>move</i> precedente, quindi si riceverà solo la risposta relativa all'ultimo comando.
     </p>
+
+
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+
 
     <h3>Principio di funzionamento del <b>Transport trolley</b>: 
         <br> Sistema a coordinate, o semplice macchina a stati che rileva impatto con i muri?</h3>
@@ -403,22 +241,7 @@ Reply   dropoutanswer  : dropoutanswer(RESULT)</pre>
         Abbiamo analizzato le funzionalità che il servizio <b>WasteService</b> deve offrire, e abbiamo quindi formalizzato tale entità con il modello qak. <br>
         Per una migliore comprensione il diagramma degli stati di questo attore viene qui riassunto con il seguente schema: </p>
     <img class="centerimg" src="docs/_images/wasteservice_actor_state_diagram_1.png"/>
-   
-    <hr>  
-
-    <h3>Impostazione di una prima architettura logica</h3>
-    <ul>
-        <li>Possiamo pensare il <b>WasteService</b> come il componente controller contenente business logic, ossia quello che contiene le azioni da svolgere per realizzare il processo di smistamento (le <b>Deposit action</b>)</li>
-        <li><b>DDR Robot</b> è collocato su un contesto collocato in un nodo a bordo del <b>DDR Robot concreto</b>. <br>
-            Risulta concettualmente sensato porre nello stesso contesto <b>Transport trolley</b>. <br>
-            <b>Transport trolley</b> potrebbe infatti necessitare di cambiamenti nel caso in cui cambi il <b>DDR Robot concreto</b> e la tecnologia di movimento usata. <br>
-            Si noti tuttavia che, qualora tale componente debba fare utilizzo di un planner (che effettua una ricerca nello spazio degli stati), allora si dovrebbe considerare la possibilità 
-            di porre tale attore su un nodo computazionale più potente, dove il consumo di potenza non è un problema (mentre si presume che il robot sia alimentato a batteria)</li>
-        <li><b>LED concreto</b> e <b>Sonar concreto</b> sono collegati al RPI, e sono quindi su un contesto a parte: analizzeremo in sprint successivi tali componenti. Anche la GUI verrà analizzata successivamente</li> 
-    </ul>
-    Alla luce delle osservazioni sinora fatte, un primo modello di architettura logica del sistema è il seguente:
-    <img class="centerimg" style="width: 500px;" src="docs/_images/logic_architecure_1.png"/>
-    Per maggiore comprensione della architettura logica si faccia riferimento al simbolismo della <a href="../docs_common/Legenda.html">legenda</a>
+    
     
 
 </div>

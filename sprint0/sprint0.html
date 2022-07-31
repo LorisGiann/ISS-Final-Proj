@@ -51,6 +51,7 @@ h6{
     <p>In questo sprint preliminare ci occupiamo dell'analisi dei requisiti, ossi della comprensione dei requisiti forniti dal committente e della loro formalizzazione.</p>
 </div>
 
+<A NAME="Requirements"></A>
 <h2>Requirements</h2>
 <div class="remark">
     <a href="../docs_prof/html/TemaFinale22.html">Link alla pagina dei requisiti del committente</a>
@@ -101,10 +102,11 @@ h6{
     <p>Farebbe inoltre comodo avere un terzo nodo nel quale risiede il componente che riceve le richieste e coordina le attività che devono essere svolte.
         Dunque una prima architettura logica, nella quale per il momento vengono collocati solo i componenti di base, è la seguente:</p>
     <img src="./docs/_images/logic_architecture_1.png" style="max-width: 650px;" class="centerimg"/>
+    <p style="width: 100%; text-align: right;"><a href="../docs_common/Legenda.html">Legenda</a></p>
 
     <A NAME="Dizionario"></A>
     <h3>Dizionario</h3>
-    <p>Ci serviamo del dizionario come strumento per definire (e formalizzare quando possibile) i diversi termini</p>
+    <p>Ci serviamo del dizionario come strumento per definire (e formalizzare quando possibile) i diversi termini.</p>
     <p>Vengono segnati in <span class="newDictWord"><b>viola</b></span> i termini non presenti nei requisiti, ma introdotti in quanto utilizzati all'interno dei documenti prodotti</p>
     <p>La formalizzazione avviene quando possibile con costrutti del linguaggio <a href="https://kotlinlang.org/">Kotlin</a>, mentre quando opportuno verrà utilizzato <a href="#Qak">QAK</a></p>
     <dl>
@@ -198,7 +200,7 @@ Assert.assertTrue(answer.contains("loadrejected"))</pre>
         <dt><b>Transport trolley:</b></dt>
         <dd>Rappresenta robotica generica/astratta che riceve comandi affinchè possa essere utilizzata per lo svolgimento di una <b>Deposit action</b>.</dd>
         <dt><b>DDR Robot:</b></dt>
-        <dd>Entità robotica concreta che riceve ed esegue comandi base di spostamento del robot: <br>
+        <dd>Entità robotica che riceve ed esegue comandi base di spostamento del robot: <br>
             <p>Il committente fornisce già molto software in grado di interfacciarsi al <b>DDR Robot concreto</b> di <a href="../docs_prof/html/VirtualRobot.html#wenv">WEnv</a>: <a href="https://github.com/anatali/issLab2022/tree/main/unibo.wenvUsage22">unibo.wenvUsage22</a>, <a href="https://github.com/anatali/issLab2022/tree/main/unibo.basicrobot22">unibo.basicRobot22</a>, <a href="https://github.com/anatali/issLab2022/tree/main/unibo.boundaryQak22">unibo.boundaryQak22</a> </p>
             <p>Formalizzazione: utilizzeremo <a href="https://github.com/anatali/issLab2022/blob/main/unibo.basicrobot22/src/basicrobot.qak">l'attore QAK <i>basicrobot</i></a> presente in <i>basicrobot22</i>, che è in grado di interfacciarsi sia con il WEnv, che con altri robot reali.</p>
             <p>Vengono qui brevemente illustrate le caratteristiche di <a href="https://github.com/anatali/issLab2022/blob/main/unibo.basicrobot22/src/basicrobot.qak">basicrobot</a>:</p>
@@ -312,6 +314,7 @@ firstActorInPipe.
     <h3>Riassunto situazione attuale:</h3>
     <h6>Architettura logica:</h6>
     <img src="./docs/_images/logic_architecture_2.png" style="max-width: 650px;" class="centerimg"/>
+    <p style="width: 100%; text-align: right;"><a href="../docs_common/Legenda.html">Legenda</a></p>
     <p style="font-size: 0.8rem;">N.B: Rimandiamo all'analisi del problema dello sprint successivo la collocazione del componente <b>Transport trolley</b></p>
     <h6><p>Testplan (derivante dalla user story):</p></h6>
     <p><a href="./RequirementQakSprint0/test/testSprint0/TestWasteservice.kt">TestWasteservice.kt</a></p>
