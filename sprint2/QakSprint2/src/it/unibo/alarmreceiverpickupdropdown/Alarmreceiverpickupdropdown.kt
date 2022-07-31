@@ -17,6 +17,9 @@ class Alarmreceiverpickupdropdown ( name: String, scope: CoroutineScope  ) : Act
 		return { //this:ActionBasciFsm
 				state("wait") { //this:State
 					action { //it:State
+						println("$name in ${currentState.stateName} | $currentMsg")
+						updateResourceRep( "alarmreceiverpickupdropdown(wait)"  
+						)
 						if( checkMsgContent( Term.createTerm("disable(_)"), Term.createTerm("disable(BOOL)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								if(  payloadArg(0).toBoolean()  

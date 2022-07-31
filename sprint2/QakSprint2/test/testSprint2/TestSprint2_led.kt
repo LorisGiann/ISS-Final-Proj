@@ -9,6 +9,7 @@ import unibo.comm22.coap.CoapConnection
 import unibo.comm22.utils.ColorsOut
 import unibo.comm22.utils.CommSystemConfig
 import unibo.comm22.utils.CommUtils
+import ws.LedState
 import java.io.IOException
 import java.time.Duration
 import kotlin.test.Test
@@ -16,12 +17,13 @@ import kotlin.test.Test
 internal class TestSprint2_led {
     private var connTransportTrolley: CoapConnection? = null
     private var connLed: CoapConnection? = null
-    private var connAlarmControl: CoapConnection? = null
     private var connSonar : CoapConnection? = null
+    private var connMover : CoapConnection? = null
     private var to: TestObserver? = null
     private var processHandleServer: ProcessHandle? = null
     private var processHandleRobot: ProcessHandle? = null
 	private var processHandleAlarm: ProcessHandle? = null
+    private var connBasicrobotwrapper: CoapConnection? = null
     private var prAlarm: Process? = null
     private var prServer: Process? = null
     private var prRobot: Process? = null
@@ -83,9 +85,10 @@ internal class TestSprint2_led {
 		processHandleAlarm!!.destroyForcibly()
         connTransportTrolley!!.close()
         //connWasteService!!.close()
-        connAlarmControl!!.close()
         connSonar!!.close()
         connLed!!.close()
+        connMover!!.close()
+        connBasicrobotwrapper!!.close()
     }
 
 
@@ -106,7 +109,7 @@ internal class TestSprint2_led {
 
                 //deactive sonar: this test will directly provide AlarmControl the distance events
                 CommUtils.delay(100)
-                connTcpAlarmControl.forward(MsgUtil.buildDispatch("alarmcontrol","sonardeactivate","info(ok)","alarmcontrol").toString())
+                connTcpAlarmControl.forward(MsgUtil.buildDispatch("sonar","sonardeactivate","info(ok)","sonar").toString())
                 CommUtils.delay(100)
                 //command an halt while in home
 
@@ -114,7 +117,7 @@ internal class TestSprint2_led {
                 //ColorsOut.outappl("test_accepted answer=$answer", ColorsOut.GREEN)
                 //Assert.assertTrue(answer.contains("loadaccept"))
 
-                while (!coapCheckTransportTrolley("transporttrolley(wait,HOME,HOME)")) {
+                while (!coapCheckTransportTrolley("transporttrolley(wait)")) {
                     CommUtils.delay(100)
                 }
 
@@ -130,9 +133,7 @@ internal class TestSprint2_led {
                 //connTcpTrasportTrolley.close()
 
                 Assert.assertTrue(to!!.checkNextSequence(arrayOf(
-                    "sonar(end,*)",
-                    "transporttrolley(halt,HOME,HOME)",
-                    "transporttrolley(wait_check_disable,HOME,HOME)"
+                    "sonar(deactivateTheSonar,true)"
                 )))
                 to!!.setStartPosition(0);
                 //during the whole test the led have to stay off:
@@ -145,6 +146,65 @@ internal class TestSprint2_led {
         }
     }
 
+    @Test
+    //@Order(1)
+    fun test_led_moving() {
+        assertTimeoutPreemptively<Unit>(Duration.ofSeconds(25)){
+            CommUtils.delay(1000)
+            ColorsOut.outappl("test_halt_forward STARTS", ColorsOut.BLUE)
+            val truckRequestStr = "msg(depositrequest, request,python,wasteservice,depositrequest(GLASS,2),1)"
+            try {
+                val connTcpWasteService = ConnTcp("localhost", 8095)
+                val connTcpAlarmControl = ConnTcp("127.0.0.1", 8097)
+
+                //deactive sonar and launch manually value
+                CommUtils.delay(100)
+                ColorsOut.outappl("Deactivate the sonar", ColorsOut.BLUE)
+                connTcpAlarmControl.forward(MsgUtil.buildDispatch("sonar","sonardeactivate","info(ok)","sonar").toString())
+                CommUtils.delay(1000)
+                ColorsOut.outappl("Truck request", ColorsOut.BLUE)
+                ColorsOut.outappl(to!!.getHistory().toString(), ColorsOut.MAGENTA)
+                //truck request
+                val answer = connTcpWasteService.request(truckRequestStr)
+                ColorsOut.outappl("test_accepted answer=$answer", ColorsOut.GREEN)
+                Assert.assertTrue(answer.contains("loadaccept"))
+
+                while (!coapCheckMover("mover(req_forward,GLASSBOX,HOME)" )) {
+                    CommUtils.delay(500)
+                }
+                ColorsOut.outappl("Disable", ColorsOut.GREEN)
+                connTcpAlarmControl.forward(MsgUtil.buildEvent("sonar","sonardata","distance(0)").toString())
+                CommUtils.delay(1000)
+                ColorsOut.outappl("Enable", ColorsOut.GREEN)
+                connTcpAlarmControl.forward(MsgUtil.buildEvent("sonar","sonardata","distance(20)").toString())
+                while (!coapCheckMover("mover(wait,HOME,HOME)" )) {
+                    CommUtils.delay(500)
+                }
+                connTcpAlarmControl.close()
+                connTcpWasteService.close()
+
+                ColorsOut.outappl(to!!.getHistory().toString(), ColorsOut.MAGENTA)
+                Assert.assertTrue(to!!.checkNextSequence(arrayOf(
+                    "sonar(deactivateTheSonar,true)",
+                    "led(*,${LedState.BLINK})",
+                    "basicrobotwrapper(forward_halt)",
+                    "led(*,${LedState.ON})",
+                    "basicrobotwrapper(forward_cmd)",
+                    "led(*,${LedState.BLINK})"
+                )))
+                ColorsOut.outappl("FINISH", ColorsOut.GREEN)
+                //to.setStartPosition(0);*/
+            } catch (e: Exception) {
+                Assert.fail("test_halt_forward ERROR:" + e.message)
+            }
+        }
+    }
+
+    protected fun coapCheckMover(check: String?): Boolean {
+        val answer = connMover!!.request("")
+        ColorsOut.outappl("coapCheck answer=$answer", ColorsOut.CYAN)
+        return answer.contains(check!!)
+    }
 
     protected fun coapCheckTransportTrolley(check: String?): Boolean {
         val answer = connTransportTrolley!!.request("")
@@ -158,9 +218,10 @@ internal class TestSprint2_led {
                 try {
                     val qakdestination1 = "wasteservice"
                     val qakdestination2 = "transporttrolley"
-                    val qakdestination3 = "alarmcontrol"
+                    val qakdestination3 = "mover"
                     val qakdestination4 = "sonar"
                     val qakdestination5 = "led"
+                    val qakdestination6 = "basicrobotwrapper"
                     val ctxqakdest1 = "ctxserver"
                     val ctxqakdest2 = "ctxrobot"
                     val ctxqakdest3 = "ctxalarm"
@@ -171,26 +232,31 @@ internal class TestSprint2_led {
                     //connWasteService = CoapConnection("$addr1:$applPort1", "$ctxqakdest1/$qakdestination1")
                     connTransportTrolley = CoapConnection("$addr2:$applPort2", "$ctxqakdest2/$qakdestination2")
                     CommUtils.delay(100)
-                    connAlarmControl = CoapConnection("$addr3:$applPort3", "$ctxqakdest3/$qakdestination3")
-                    CommUtils.delay(100)
                     connSonar = CoapConnection("$addr3:$applPort3", "$ctxqakdest3/$qakdestination4")
                     CommUtils.delay(100)
                     connLed = CoapConnection("$addr3:$applPort3", "$ctxqakdest3/$qakdestination5")
                     CommUtils.delay(100)
+                    connMover = CoapConnection("$addr2:$applPort2", "$ctxqakdest2/$qakdestination3")
+                    CommUtils.delay(100)
+                    connBasicrobotwrapper = CoapConnection("$addr2:$applPort2", "$ctxqakdest2/$qakdestination6")
+                    CommUtils.delay(100)
                     //connWasteService!!.observeResource(handler)
                     connTransportTrolley!!.observeResource(handler)
-                    CommUtils.delay(100)
-                    connAlarmControl!!.observeResource(handler)
                     CommUtils.delay(100)
                     connSonar!!.observeResource(handler)
                     CommUtils.delay(100)
                     connLed!!.observeResource(handler)
                     CommUtils.delay(100)
+                    connMover!!.observeResource(handler)
+                    CommUtils.delay(100)
+                    connBasicrobotwrapper!!.observeResource(handler)
+                    CommUtils.delay(100)
                     //ColorsOut.outappl("connecting via Coap conn:$connWasteService", ColorsOut.CYAN)
                     ColorsOut.outappl("connecting via Coap conn:$connTransportTrolley", ColorsOut.CYAN)
-                    ColorsOut.outappl("connecting via Coap conn:$connAlarmControl", ColorsOut.CYAN)
                     ColorsOut.outappl("connecting via Coap conn:$connSonar", ColorsOut.CYAN)
                     ColorsOut.outappl("connecting via Coap conn:$connLed", ColorsOut.CYAN)
+                    ColorsOut.outappl("connecting via Coap conn:$connMover", ColorsOut.CYAN)
+                    ColorsOut.outappl("connecting via Coap conn:$connBasicrobotwrapper", ColorsOut.CYAN)
                     /*
                     while (connWasteService!!.request("") === "0") {
                         ColorsOut.outappl("waiting for conn $connWasteService", ColorsOut.CYAN)
@@ -201,8 +267,8 @@ internal class TestSprint2_led {
                         ColorsOut.outappl("waiting for conn $connTransportTrolley", ColorsOut.CYAN)
                         CommUtils.delay(500)
                     }
-                    while (connAlarmControl!!.request("") === "0") {
-                        ColorsOut.outappl("waiting for conn $connAlarmControl", ColorsOut.CYAN)
+                    while (connMover!!.request("") === "0") {
+                        ColorsOut.outappl("waiting for conn $connMover", ColorsOut.CYAN)
                         CommUtils.delay(500)
                     }
                     while (connSonar!!.request("") === "0") {
@@ -211,6 +277,10 @@ internal class TestSprint2_led {
                     }
                     while (connLed!!.request("") === "0") {
                         ColorsOut.outappl("waiting for conn $connLed", ColorsOut.CYAN)
+                        CommUtils.delay(500)
+                    }
+                    while (connBasicrobotwrapper!!.request("") === "0") {
+                        ColorsOut.outappl("waiting for conn $connBasicrobotwrapper", ColorsOut.CYAN)
                         CommUtils.delay(500)
                     }
 

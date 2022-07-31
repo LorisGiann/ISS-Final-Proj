@@ -17,6 +17,9 @@ class Alarmreceiverbasicrobot ( name: String, scope: CoroutineScope  ) : ActorBa
 		return { //this:ActionBasciFsm
 				state("wait") { //this:State
 					action { //it:State
+						println("$name in ${currentState.stateName} | $currentMsg")
+						updateResourceRep( "alarmreceiverbasicrobot(wait)"  
+						)
 						if( checkMsgContent( Term.createTerm("disable(_)"), Term.createTerm("disable(BOOL)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								if(  payloadArg(0).toBoolean()  
