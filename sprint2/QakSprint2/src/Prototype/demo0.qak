@@ -358,6 +358,8 @@ QActor transporttrolley context ctxrobot{
 
 QActor alarmreceiverpickupdropdown context ctxrobot{
 	State wait initial {
+		printCurrentMessage
+		updateResource [# "alarmreceiverpickupdropdown(wait)" #] 
 		onMsg(disable : disable(BOOL)){
 			if[# payloadArg(0).toBoolean() #]{
 				forward pickupdropouthandler -m disable : disable(_)
@@ -488,6 +490,8 @@ QActor mover context ctxrobot{
 
 QActor alarmreceiverbasicrobot context ctxrobot{
 	State wait initial {
+		printCurrentMessage
+		updateResource [# "alarmreceiverbasicrobot(wait)" #] 
 		onMsg(disable : disable(BOOL)){
 			if[# payloadArg(0).toBoolean() #]{
 				forward basicrobotwrapper -m disable : disable(_)
@@ -719,7 +723,7 @@ QActor sonar context ctxalarm {
 	
 	State deactivateTheSonar{
 		printCurrentMessage
-		updateResource [# "sonar(deactivateTheSonar,${`it.unibo`.radarSystem22.domain.utils.DomainSystemConfig.simulation}" #]
+		updateResource [# "sonar(deactivateTheSonar,${`it.unibo`.radarSystem22.domain.utils.DomainSystemConfig.simulation})" #]
 		if[#  `it.unibo`.radarSystem22.domain.utils.DomainSystemConfig.simulation #]{
 			//println("sonar simulator")
 			forward sonarsimulator -m sonardeactivate : info(ok) 

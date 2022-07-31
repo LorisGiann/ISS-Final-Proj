@@ -43,7 +43,7 @@ class Sonar ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scop
 				state("deactivateTheSonar") { //this:State
 					action { //it:State
 						println("$name in ${currentState.stateName} | $currentMsg")
-						updateResourceRep( "sonar(deactivateTheSonar,${`it.unibo`.radarSystem22.domain.utils.DomainSystemConfig.simulation}"  
+						updateResourceRep( "sonar(deactivateTheSonar,${`it.unibo`.radarSystem22.domain.utils.DomainSystemConfig.simulation})"  
 						)
 						if(   `it.unibo`.radarSystem22.domain.utils.DomainSystemConfig.simulation  
 						 ){forward("sonardeactivate", "info(ok)" ,"sonarsimulator" ) 
