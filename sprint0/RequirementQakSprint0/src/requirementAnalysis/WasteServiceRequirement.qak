@@ -1,4 +1,4 @@
-//https://dl.bintray.com/jetbrains/kotlin/eclipse-plugin/0.8.19/ 
+//https://dl.bintray.com/jetbrains/kotlin/eclipse-plugin/0.8.19/
   
 System demowasteservice 
 // --------------- wasteservice msgs --------------------
@@ -8,7 +8,7 @@ Request depositrequest : depositrequest(MATERIAL, TRUCKLOAD)
 Reply loadaccept     : loadaccept(MATERIAL, TRUCKLOAD)
 Reply loadrejected     : loadrejected(MATERIAL, TRUCKLOAD)
 // ------------------------------------------------------ 
-
+    
 // ---------------------- CONTEXTS -----------------------
 Context ctxwasteservice ip [host="localhost" port=8095]
 // ------------------------------------------------------

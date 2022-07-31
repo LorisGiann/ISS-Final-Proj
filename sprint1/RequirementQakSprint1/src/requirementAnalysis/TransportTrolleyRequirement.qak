@@ -3,7 +3,7 @@
 System demotransporttrolley    
 //mqttBroker "localhost" : 1883 eventTopic "demo0/events"
 //mqttBroker "broker.hivemq.com" : 1883 eventTopic "demo0/events"
-   
+
 
 //richiesta al wasteservice 
 //MATERIAL = PLASTIC | GLASS
@@ -25,29 +25,50 @@ Context ctxtransporttrolley ip [host="localhost" port=8095]
  
 
 QActor transporttrolley context ctxtransporttrolley{
-	[# lateinit var tmp : String #]
+	[# lateinit var tmp : String 
+		
+	val actor = this@Transporttrolley;
+		suspend fun transitNow(stateName : String){
+			var res = actor.handleCurrentMessage(NoMsg,actor.getStateByName(stateName));
+			if(res) actor.elabMsgInState( );
+			else println("ERROR: transition was not possible")
+		}
+	#]
 	
 	State s0 initial { 	    
 		discardMsg On
 		printCurrentMessage
 		[# sysUtil.logMsgs=true #]
- 	}
- 	Transition t0 whenRequest move -> handle_cmd
- 	 
- 	State handle_cmd {
+	}
+	Goto handle_cmd
+	 
+	State handle_cmd {
 		onMsg( move:move(ARG) ){
 			[# tmp = payloadArg(0) #]
- 			println("move(${tmp})")
- 			forward transporttrolley -m noMsg : noMsg(_)
+			println("move(${tmp})")
+			[# val stateName = when(ws.Position.valueOf(tmp)) {
+					ws.Position.HOME -> "moving_home"
+					ws.Position.INDOOR -> "moving_indoor"
+					ws.Position.PLASTICBOX -> "moving_plasticbox"
+					ws.Position.GLASSBOX -> "moving_glassbox"
+				}
+				transitNow(stateName)
+			#]
+ 		}
+ 		onMsg( pickup:pickup(_) ){
+ 			println("PICKUP")
+ 			[# transitNow("pickUp") #]
+ 		}
+ 		onMsg( dropout:dropout(_) ){
+ 			println("DROPOUT")
+ 			[# transitNow("dropOut") #]
  		}
  	}
- 	Transition toNewState whenMsg noMsg and [# tmp=="HOME" #] -> moving_home
- 						whenMsg noMsg and [# tmp=="INDOOR" #] -> moving_indoor
- 						whenMsg noMsg and [# tmp=="PLASTICBOX" #] -> moving_plasticbox
- 						whenMsg noMsg and [# tmp=="GLASSBOX" #] -> moving_glassbox
+ 	Transition t0 whenRequest move -> handle_cmd
+ 					whenRequest pickup -> handle_cmd
+ 					whenRequest dropout -> handle_cmd
  	
  	State moving_home {
- 		
  	}
  	Transition t0 whenTime 1000 -> moved_home    //per il momento simulo lo spostamento con un delay
  					whenRequest move -> handle_cmd
@@ -57,7 +78,8 @@ QActor transporttrolley context ctxtransporttrolley{
  		println("robot reached HOME")
  	}
  	Transition t0 whenRequest move -> handle_cmd
- 	
+ 					whenRequest pickup -> handle_cmd
+ 					whenRequest dropout -> handle_cmd
  	
  	State moving_indoor {
  	}
@@ -69,7 +91,8 @@ QActor transporttrolley context ctxtransporttrolley{
  		println("robot reached INDOOR")
  	}
  	Transition t0 whenRequest move -> handle_cmd
-					whenRequest pickup -> pickUp
+ 					whenRequest pickup -> handle_cmd
+ 					whenRequest dropout -> handle_cmd
  					
  	State moving_plasticbox {
  	}
@@ -81,7 +104,8 @@ QActor transporttrolley context ctxtransporttrolley{
  		println("robot reached PLASTICBOX")
  	}
  	Transition t0 whenRequest move -> handle_cmd
- 					whenRequest dropout -> dropOut 	
+ 					whenRequest pickup -> handle_cmd
+ 					whenRequest dropout -> handle_cmd
  	
  	State moving_glassbox {
  	}
@@ -93,7 +117,8 @@ QActor transporttrolley context ctxtransporttrolley{
  		println("robot reached GLASSBOX")
  	}
  	Transition t0 whenRequest move -> handle_cmd
- 					whenRequest dropout -> dropOut
+ 					whenRequest pickup -> handle_cmd
+ 					whenRequest dropout -> handle_cmd
  					
  	State pickUp {
  		delay 1000
@@ -101,6 +126,8 @@ QActor transporttrolley context ctxtransporttrolley{
  		println("robot pickedUp")
  	}
  	Transition t0 whenRequest move -> handle_cmd
+ 					whenRequest pickup -> handle_cmd
+ 					whenRequest dropout -> handle_cmd
  	
  	State dropOut {
  		delay 1000
@@ -108,59 +135,6 @@ QActor transporttrolley context ctxtransporttrolley{
  		println("robot droppedOut")
  	}
  	Transition t0 whenRequest move -> handle_cmd
+ 					whenRequest pickup -> handle_cmd
+ 					whenRequest dropout -> handle_cmd
 }
-
- 
-//transportTrolley TEST
-/*QActor test_trasporttrolley context ctxTransportTrolley{
-	[# lateinit var RES : String #]
-	
-	State s0 initial { 	    
-		discardMsg On
-		//[# sysUtil.logMsgs=true #]
-		request transporttrolley -m move : move(INDOOR)
- 	}
- 	Transition t0 whenReply moveanswer -> s1
- 	
- 	State s1 {
- 		onMsg(moveanswer : moveanswer(RESULT)) {
-			[# RES = payloadArg(0); #]
-			if[# RES == "OK" #]{
-				println("move indoor")
-				request transporttrolley -m pickup : pickup(_)
-			}else{
-				println("error")
-			}
-		
-		}	
- 	}
- 	Transition t0 whenReply  pickupanswer -> s2
- 	
- 	State s2 {
- 		onMsg(pickupanswer : pickupanswer(RESULT)) {
-			request transporttrolley -m move : move(PLASTICBOX)
-		}	
- 	}
- 	Transition t0 whenReply  moveanswer -> s3
- 	
- 	State s3 {
- 		onMsg(moveanswer : moveanswer(RESULT)) {
-			[# RES = payloadArg(0); #]
-			if[# RES == "OK" #]{
-				println("move plastic box")
-				request transporttrolley -m dropout : dropout(_)
-			}else{
-				println("error")
-			}
-		
-		}	
- 	}
- 	Transition t0 whenReply  dropoutanswer -> s4
- 	
- 	State s4 {
- 		println("dropout")
- 		println("finish")
- 	}
- 	
-
-}*/

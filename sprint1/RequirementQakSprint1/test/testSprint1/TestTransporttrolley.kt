@@ -61,9 +61,7 @@ internal class TestTransporttrolley {
     @Timeout(30)
     fun test_1_move() {
         assertTimeoutPreemptively<Unit>(Duration.ofSeconds(25)) {
-            CommUtils.delay(100)
             try {
-                //FIRST REQUEST
                 val connTcp = ConnTcp("localhost", 8095)
                 var RequestStr = "msg(move, request,python,transporttrolley,move(INDOOR),1)"
                 var answer = connTcp.request(RequestStr)
@@ -81,17 +79,22 @@ internal class TestTransporttrolley {
     @Timeout(30)
     fun test_2_move() {
         assertTimeoutPreemptively<Unit>(Duration.ofSeconds(25)) {
-            CommUtils.delay(100)
             try {
-                //FIRST REQUEST
                 val connTcp = ConnTcp("localhost", 8095)
+                
+                //FIRST REQUEST
                 var RequestStr1 = "msg(move, request,python,transporttrolley,move(INDOOR),1)"
-                connTcp.request(RequestStr1)
+                connTcp.forward(RequestStr1) //do non wait for a reply
+                ColorsOut.outappl("FIRST REQUEST SENT", ColorsOut.GREEN)
+                CommUtils.delay(100)
+                
+                //SECOND REQUEST
+                ColorsOut.outappl("SENDING SECOND REQUEST", ColorsOut.GREEN)
                 var RequestStr2 = "msg(move, request,python,transporttrolley,move(PLASTICBOX),1)"
                 var answer = connTcp.request(RequestStr2)
+                
                 ColorsOut.outappl("answer=$answer", ColorsOut.GREEN)
                 Assert.assertTrue(answer.contains("moveanswer(OK)"))
-
                 connTcp.close()
             } catch (e: java.lang.Exception) {
                 ColorsOut.outerr("test_2_move ERROR:" + e.message)
@@ -103,17 +106,15 @@ internal class TestTransporttrolley {
     @Test
     @Timeout(30)
     fun test_pickup() {
+			CommUtils.delay(1000)
             assertTimeoutPreemptively<Unit>(Duration.ofSeconds(25)) {
-            CommUtils.delay(100)
             try {
                 val connTcp = ConnTcp("localhost", 8095)
-                var RequestStr1 = "msg(move, request,python,transporttrolley,move(INDOOR),1)"
-                var answer1 = connTcp.request(RequestStr1)
-                ColorsOut.outappl("answer=$answer1", ColorsOut.GREEN)
-                var RequestStr2 = "msg(pickup, request,python,transporttrolley,pickuo(OK),1)"
-                var answer2 = connTcp.request(RequestStr2)
-                ColorsOut.outappl("answer=$answer2", ColorsOut.GREEN)
-                Assert.assertTrue(answer2.contains("pickupanswer(OK)"))
+                
+                var RequestStr = "msg(pickup, request,python,transporttrolley,pickup(_),1)"
+                var answer = connTcp.request(RequestStr)
+                ColorsOut.outappl("answer=$answer", ColorsOut.GREEN)
+                Assert.assertTrue(answer.contains("pickupanswer(OK)"))
                 connTcp.close()
             } catch (e: java.lang.Exception) {
                 ColorsOut.outerr("test_pickup ERROR:" + e.message)
@@ -126,16 +127,13 @@ internal class TestTransporttrolley {
     @Timeout(30)
     fun test_dropout() {
         assertTimeoutPreemptively<Unit>(Duration.ofSeconds(25)) {
-            CommUtils.delay(100)
             try {
                 val connTcp = ConnTcp("localhost", 8095)
-                var RequestStr1 = "msg(move, request,python,transporttrolley,move(PLASTICBOX),1)"
-                var answer1 = connTcp.request(RequestStr1)
-                ColorsOut.outappl("answer=$answer1", ColorsOut.GREEN)
-                var RequestStr2 = "msg(dropout, request,python,transporttrolley,dropout(OK),1)"
-                var answer2 = connTcp.request(RequestStr2)
-                ColorsOut.outappl("answer=$answer2", ColorsOut.GREEN)
-                Assert.assertTrue(answer2.contains("dropoutanswer(OK)"))
+                
+                var RequestStr = "msg(dropout, request,python,transporttrolley,dropout(_),1)"
+                var answer = connTcp.request(RequestStr)
+                ColorsOut.outappl("answer=$answer", ColorsOut.GREEN)
+                Assert.assertTrue(answer.contains("dropoutanswer(OK)"))
                 connTcp.close()
             } catch (e: java.lang.Exception) {
                 ColorsOut.outerr("test_dropout ERROR:" + e.message)

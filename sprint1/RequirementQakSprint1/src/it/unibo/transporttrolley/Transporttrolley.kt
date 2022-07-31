@@ -14,7 +14,14 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 		return "s0"
 	}
 	override fun getBody() : (ActorBasicFsm.() -> Unit){
-		 lateinit var tmp : String  
+		 lateinit var tmp : String 
+				
+			val actor = this@Transporttrolley;
+				suspend fun transitNow(stateName : String){
+					var res = actor.handleCurrentMessage(NoMsg,actor.getStateByName(stateName));
+					if(res) actor.elabMsgInState( );
+					else println("ERROR: transition was not possible")
+				}
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
@@ -22,7 +29,7 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 						println("$name in ${currentState.stateName} | $currentMsg")
 						 sysUtil.logMsgs=true  
 					}
-					 transition(edgeName="t00",targetState="handle_cmd",cond=whenRequest("move"))
+					 transition( edgeName="goto",targetState="handle_cmd", cond=doswitch() )
 				}	 
 				state("handle_cmd") { //this:State
 					action { //it:State
@@ -30,32 +37,45 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 tmp = payloadArg(0)  
 								println("move(${tmp})")
-								forward("noMsg", "noMsg(_)" ,"transporttrolley" ) 
+								 val stateName = when(ws.Position.valueOf(tmp)) {
+													ws.Position.HOME -> "moving_home"
+													ws.Position.INDOOR -> "moving_indoor"
+													ws.Position.PLASTICBOX -> "moving_plasticbox"
+													ws.Position.GLASSBOX -> "moving_glassbox"
+												}
+												transitNow(stateName)
+						}
+						if( checkMsgContent( Term.createTerm("pickup(_)"), Term.createTerm("pickup(_)"), 
+						                        currentMsg.msgContent()) ) { //set msgArgList
+								println("PICKUP")
+								 transitNow("pickUp")  
+						}
+						if( checkMsgContent( Term.createTerm("dropout(_)"), Term.createTerm("dropout(_)"), 
+						                        currentMsg.msgContent()) ) { //set msgArgList
+								println("DROPOUT")
+								 transitNow("dropOut")  
 						}
 					}
-					 transition(edgeName="toNewState1",targetState="moving_home",cond=whenDispatchGuarded("noMsg",{ tmp=="HOME"  
-					}))
-					transition(edgeName="toNewState2",targetState="moving_indoor",cond=whenDispatchGuarded("noMsg",{ tmp=="INDOOR"  
-					}))
-					transition(edgeName="toNewState3",targetState="moving_plasticbox",cond=whenDispatchGuarded("noMsg",{ tmp=="PLASTICBOX"  
-					}))
-					transition(edgeName="toNewState4",targetState="moving_glassbox",cond=whenDispatchGuarded("noMsg",{ tmp=="GLASSBOX"  
-					}))
+					 transition(edgeName="t00",targetState="handle_cmd",cond=whenRequest("move"))
+					transition(edgeName="t01",targetState="handle_cmd",cond=whenRequest("pickup"))
+					transition(edgeName="t02",targetState="handle_cmd",cond=whenRequest("dropout"))
 				}	 
 				state("moving_home") { //this:State
 					action { //it:State
 						stateTimer = TimerActor("timer_moving_home", 
 							scope, context!!, "local_tout_transporttrolley_moving_home", 1000.toLong() )
 					}
-					 transition(edgeName="t05",targetState="moved_home",cond=whenTimeout("local_tout_transporttrolley_moving_home"))   
-					transition(edgeName="t06",targetState="handle_cmd",cond=whenRequest("move"))
+					 transition(edgeName="t03",targetState="moved_home",cond=whenTimeout("local_tout_transporttrolley_moving_home"))   
+					transition(edgeName="t04",targetState="handle_cmd",cond=whenRequest("move"))
 				}	 
 				state("moved_home") { //this:State
 					action { //it:State
 						answer("move", "moveanswer", "moveanswer(OK)"   )  
 						println("robot reached HOME")
 					}
-					 transition(edgeName="t07",targetState="handle_cmd",cond=whenRequest("move"))
+					 transition(edgeName="t05",targetState="handle_cmd",cond=whenRequest("move"))
+					transition(edgeName="t06",targetState="handle_cmd",cond=whenRequest("pickup"))
+					transition(edgeName="t07",targetState="handle_cmd",cond=whenRequest("dropout"))
 				}	 
 				state("moving_indoor") { //this:State
 					action { //it:State
@@ -71,39 +91,42 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 						println("robot reached INDOOR")
 					}
 					 transition(edgeName="t010",targetState="handle_cmd",cond=whenRequest("move"))
-					transition(edgeName="t011",targetState="pickUp",cond=whenRequest("pickup"))
+					transition(edgeName="t011",targetState="handle_cmd",cond=whenRequest("pickup"))
+					transition(edgeName="t012",targetState="handle_cmd",cond=whenRequest("dropout"))
 				}	 
 				state("moving_plasticbox") { //this:State
 					action { //it:State
 						stateTimer = TimerActor("timer_moving_plasticbox", 
 							scope, context!!, "local_tout_transporttrolley_moving_plasticbox", 1000.toLong() )
 					}
-					 transition(edgeName="t012",targetState="moved_plasticbox",cond=whenTimeout("local_tout_transporttrolley_moving_plasticbox"))   
-					transition(edgeName="t013",targetState="handle_cmd",cond=whenRequest("move"))
+					 transition(edgeName="t013",targetState="moved_plasticbox",cond=whenTimeout("local_tout_transporttrolley_moving_plasticbox"))   
+					transition(edgeName="t014",targetState="handle_cmd",cond=whenRequest("move"))
 				}	 
 				state("moved_plasticbox") { //this:State
 					action { //it:State
 						answer("move", "moveanswer", "moveanswer(OK)"   )  
 						println("robot reached PLASTICBOX")
 					}
-					 transition(edgeName="t014",targetState="handle_cmd",cond=whenRequest("move"))
-					transition(edgeName="t015",targetState="dropOut",cond=whenRequest("dropout"))
+					 transition(edgeName="t015",targetState="handle_cmd",cond=whenRequest("move"))
+					transition(edgeName="t016",targetState="handle_cmd",cond=whenRequest("pickup"))
+					transition(edgeName="t017",targetState="handle_cmd",cond=whenRequest("dropout"))
 				}	 
 				state("moving_glassbox") { //this:State
 					action { //it:State
 						stateTimer = TimerActor("timer_moving_glassbox", 
 							scope, context!!, "local_tout_transporttrolley_moving_glassbox", 1000.toLong() )
 					}
-					 transition(edgeName="t016",targetState="moved_glassbox",cond=whenTimeout("local_tout_transporttrolley_moving_glassbox"))   
-					transition(edgeName="t017",targetState="handle_cmd",cond=whenRequest("move"))
+					 transition(edgeName="t018",targetState="moved_glassbox",cond=whenTimeout("local_tout_transporttrolley_moving_glassbox"))   
+					transition(edgeName="t019",targetState="handle_cmd",cond=whenRequest("move"))
 				}	 
 				state("moved_glassbox") { //this:State
 					action { //it:State
 						answer("move", "moveanswer", "moveanswer(OK)"   )  
 						println("robot reached GLASSBOX")
 					}
-					 transition(edgeName="t018",targetState="handle_cmd",cond=whenRequest("move"))
-					transition(edgeName="t019",targetState="dropOut",cond=whenRequest("dropout"))
+					 transition(edgeName="t020",targetState="handle_cmd",cond=whenRequest("move"))
+					transition(edgeName="t021",targetState="handle_cmd",cond=whenRequest("pickup"))
+					transition(edgeName="t022",targetState="handle_cmd",cond=whenRequest("dropout"))
 				}	 
 				state("pickUp") { //this:State
 					action { //it:State
@@ -111,7 +134,9 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 						answer("pickup", "pickupanswer", "pickupanswer(OK)"   )  
 						println("robot pickedUp")
 					}
-					 transition(edgeName="t020",targetState="handle_cmd",cond=whenRequest("move"))
+					 transition(edgeName="t023",targetState="handle_cmd",cond=whenRequest("move"))
+					transition(edgeName="t024",targetState="handle_cmd",cond=whenRequest("pickup"))
+					transition(edgeName="t025",targetState="handle_cmd",cond=whenRequest("dropout"))
 				}	 
 				state("dropOut") { //this:State
 					action { //it:State
@@ -119,7 +144,9 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 						answer("dropout", "dropoutanswer", "dropoutanswer(OK)"   )  
 						println("robot droppedOut")
 					}
-					 transition(edgeName="t021",targetState="handle_cmd",cond=whenRequest("move"))
+					 transition(edgeName="t026",targetState="handle_cmd",cond=whenRequest("move"))
+					transition(edgeName="t027",targetState="handle_cmd",cond=whenRequest("pickup"))
+					transition(edgeName="t028",targetState="handle_cmd",cond=whenRequest("dropout"))
 				}	 
 			}
 		}

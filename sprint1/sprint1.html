@@ -45,21 +45,7 @@ dd{ margin-bottom: 8px;}
 <h2>Requirements</h2>
 <div class="remark">
     <a href="../docs_prof/html/TemaFinale22.html">Link alla pagina dei requisiti del committente</a>
-    <br><br>
-    <p>Ulteriori requisiti scaturiti da colloqui con committente:</p>
-    <ul>
-        <lI>Può esserci solo un camion alla volta in INDOOR? SI</lI>
-        <li>Il Waste-truck deve essere liberato non appena il materiale viene scaricato? SI</li>
-        <li>La GUI deve mostrare le coordine del robot o basta l'area nella quale si trova attualmente? basta l'area nella quale si trova attualmente</li>
-        <li>A cosa serve il sonar se la stanza è priva di ostacoli? Il sonar non è a bordo del robot, è un dispositivo esterno (così come il RPI). Se si mette una mano davanti al dispositivo, il robot si ferma.</li>
-        <li>Ci deve essere il contatto con la parete per il carico/scarico dei materiali? SI (o comunque il più vicino possibile)</li>
-        <li>Supponiamo che il robot si stia dirigendo verso HOME (perché ha scaricato l'ultimo carico di materiale e non ci sono altri Waste truck sull'INDOOR). Se arriva un Waste truck prima che il trolley raggiunga la base, il robot deve cambiare rotta immediatamente o può raggiungere la base e poi dirigersi presso l'Indoor? CAMBIA IMMEDIATAMENTE ROTTA per dirigersi su indoor</li>
-        <li>È il robot a determinare quando avviene la fine di una azione di carico/scarico? In che modo tale evento può essere rilevato dal sistema da noi sviluppato? Modellare l'operazione con un SEMPLICE DELAY di durata fissa</li>
-        <li>Il nodo sul quale la GUI va installata e un nodo fisso? O si tratta forse di palmari posseduti dai Service-manager stessi? Il NODO è FISSO </li>
-        <li>In cosa consiste lo smart device? Quanti sono (viene usato sempre lo stesso dispositivo o ve ne è uno per ogni conducente)? Come si relaziona con il nostro sistema? Un dispositivo per ogni conducente, "alieno" invia un messaggio</li>
-        <li>Committente ha server aziendali disponibili? È possibile usare la RPI come server (nodo sempre attivo mentre il sistema è operativo)? E' possibile usare la raspberry, ma si può anche mettere sul PC che usiamo.</li>
-    </ul>
-</div>
+    <br>
 
 <A NAME="ScrumGoalWorkPlan"></A>
 <h2>Scrum Goal and Work Plan</h2>
@@ -71,21 +57,9 @@ dd{ margin-bottom: 8px;}
         <li>Prima valutazione dell'abstraction gap, anche in relazione al SW già sviluppato (possibile visitare la pagina riassuntiva <a href="../docs_prof/html/Applicazioni22.html">Applicazioni22</a> dei moduli sviluppati)</li>
         <li>Analisi delle principali problematiche da affrontare nello sviluppo dei componenti di cui è composto il sistema</li>
         <li>Definire i componenti e le interazioni fra di essi: realizzazione di una prima architettura logica</li>
-        <li>Realizzazione di modelli usando un linguaggio di modellazione che permetta di formalizzare e di creare modelli eseguibili. A tal proposito verrà utilizzato il metamodello <a href="../Qak.html">QAK</a>.</li>
+        <li>Realizzazione di modelli usando un linguaggio di modellazione che permetta di formalizzare e di creare modelli eseguibili. A tal proposito verrà utilizzato il metamodello <a href="../docs_common/Qak.html">QAK</a>.</li>
         <li>Realizzazione di un primo test-plan</li>
     </ul>
-
-    <h4>Perchè QAK:</h4>
-    <p>Il metamodello <a href="../Qak.html">QAK</a> viene qui utilizzato sia perchè parte del software disponibile è stato sviluppato uando questo linguaggio, sia perchè data la natura distribuita dell'applicazione, l'utilizzo di attori contribuisce a ridurre l'abstraction gap, il che a sua volta permette:</p>
-    <ul>
-        <li>Definire fin da subito in maniera formale diversi aspetti</li>
-        <li>Definire modelli eseguibili e giungere ad una archittetura logica di riferimento non ambigua</li>
-        <li>Definire piano di lavoro e impostare i primi SPRINT</li>
-        <li>Avere un’interazione più produttiva con il cliente al fine di comprendere meglio i requisiti</li>
-    </ul>
-    <h3>Documentazione QAK</h3>
-    <a href="../Qak.html">Quick notes QAK</a> <br>
-    <a href="../docs_prof/html/QakIntro.html">Full documentation</a>
 </div>
 
 
@@ -179,21 +153,21 @@ dd{ margin-bottom: 8px;}
         <dd>Area nella quale risiede il robot quando non deve svolgere alcuna attività<br>
             È inoltre l'area dove si trova inizialmente il robot.</dd>
         <dt><b>Transport trolley:</b></dt>
-        <dd>In seguito alla relativa <a href="#DDR_robot_vs_Transport_trolley">analisi del problema</a>, <b>Transport trolley</b> è l'attore rappresentante un'entità robotica astratta che riceve i comandi relativi alla prossima destinazione da raggiungere. Esso riceve anche i comandi relativi allo scarico e carico del materiale:<br>
+        <dd>Rappresenta un'entità robotica astratta che riceve i comandi di alto livello relativi alla prossima destinazione da raggiungere, e i comandi relativi allo scarico e carico del materiale.<br>
+            Nota: il <b>Transport trolley</b> può ricevere una richiesta di nuova posizione prima che abbia raggiunto la destinazione precedente: la navigazione sarà impostata sulla nuova destinazione. In questo modo è possibile soddisfare direttamente nuove richieste anche mente il robot sta andando in home.<br>
+            Formalizzazione: 
             <code><pre>
-                //POSITION = INDOOR | PLASTICBOX | GLASSBOX | HOME
-                //RESULT =  OK | ERROR
-                Request move           : move(POSITION)    
-                Reply   moveanswer     : moveanswer(RESULT)
-                Request pickup         : pickup(_)
-                Reply   pickupanswer   : pickupanswer(RESULT)
-                Request dropout        : dropout(_)
-                Reply   dropoutanswer  : dropoutanswer(RESULT)</pre>
+//POSITION = INDOOR | PLASTICBOX | GLASSBOX | HOME
+//RESULT =  OK | ERROR
+Request move           : move(POSITION)    
+Reply   moveanswer     : moveanswer(RESULT)
+Request pickup         : pickup(_)
+Reply   pickupanswer   : pickupanswer(RESULT)
+Request dropout        : dropout(_)
+Reply   dropoutanswer  : dropoutanswer(RESULT)</pre>
             </code>
-            Nota: il <b>Transport trolley</b> può ricevere una richiesta di nuova posizione prima che abbia raggiunto la destinazione precedente: la navigazione sarà impostata sulla nuova destinazione.
-            <br><br>
-            File QAK: <a href="./RequirementQakSprint1/src/requirementAnalysis/TransportTrolleyRequirement.qak">TransportTrolleyRequirement.qak</a></b>. Test per specificarne il comportamento: <a href="./RequirementQakSprint1/test/testSprint1/TestTransporttrolley.kt">TestTransporttrolley.kt</a>.
-        
+            File QAK <a href="./RequirementQakSprint1/src/requirementAnalysis/TransportTrolleyRequirement.qak">TransportTrolleyRequirement.qak</a></b>. Test per meglio specificarne il comportamento: <a href="./RequirementQakSprint1/test/testSprint1/TestTransporttrolley.kt">TestTransporttrolley.kt</a>.
+        </dd>
         </dd>
         <dt><b>DDR Robot concreto</b> o "robot":</dt>
         <dd>Con questo termine ci si riferisce al robot vero e proprio (fisico o simulato virtualmente). <br>
@@ -230,8 +204,8 @@ dd{ margin-bottom: 8px;}
             </ol>
         </dd>
         <dt><b>Waste-truck:</b></dt> 
-        <dd>Entità che si presenta in <b>INDOOR</b>, e richiede lo scarico del materiale che trasporta attraverso l'uso dello <b>SmartDevice</b></dd>
-        <dt><b>SmartDevice:</b></dt> 
+        <dd>Entità che si presenta in <b>INDOOR</b>, e richiede lo scarico del materiale che trasporta attraverso l'uso dello <b>Smart device</b></dd>
+        <dt><b>Smart device:</b></dt> 
         <dd>Dispositivo attraverso il quale il <b>Waste-truck</b> comunica al <b>WasteService</b>:
             <ul>
                 <lI>Il tipo di materiale trasportato: 
@@ -444,7 +418,7 @@ dd{ margin-bottom: 8px;}
     </ul>
     Alla luce delle osservazioni sinora fatte, un primo modello di architettura logica del sistema è il seguente:
     <img class="centerimg" style="width: 500px;" src="docs/_images/logic_architecure_1.png"/>
-    Per maggiore comprensione della architettura logica si faccia riferimento al simbolismo della <a href="../Legenda.html">legenda</a>
+    Per maggiore comprensione della architettura logica si faccia riferimento al simbolismo della <a href="../docs_common/Legenda.html">legenda</a>
     
 
 </div>

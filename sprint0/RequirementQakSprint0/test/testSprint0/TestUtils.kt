@@ -1,4 +1,4 @@
-package testSprint1
+package testSprint0
 
 import org.apache.log4j.Logger
 import org.apache.log4j.PatternLayout

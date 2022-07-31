@@ -1,0 +1,79 @@
+//https://dl.bintray.com/jetbrains/kotlin/eclipse-plugin/0.8.19/ 
+  
+System demoled
+//-------------------------------------- LED --------------------------------------------
+Event    update_led 	 : update_led(LEDSTATE) // LEDSTATE = ON | OFF | BLINK
+// ---------------------------------------------------------------------------------------
+    
+// ---------------------- CONTEXTS -----------------------
+Context ctxalarm ip [host="localhost" port=8095]
+// ------------------------------------------------------
+
+QActor led context ctxalarm{ 
+	[#	var newState = ws.LedState.OFF
+		
+		val actor = this@Led;
+		suspend fun transitNow(stateName : String){
+			var res = actor.handleCurrentMessage(NoMsg,actor.getStateByName(stateName));
+			if(res) actor.elabMsgInState( );
+			else println("ERROR: transition was not possible")
+		}
+	#]
+	
+	State s0 initial {
+		discardMsg On
+		printCurrentMessage
+		updateResource [# "led(initial,${newState})" #]
+		//println("${name} STARTS")
+		//[# sysUtil.logMsgs=true #]
+		println("led off")
+	}
+	Transition t0 whenEvent update_led -> handle_update
+	
+	State handle_update {
+		printCurrentMessage
+		onMsg( update_led:update_led(ARG) ){
+			[# newState = ws.LedState.valueOf(payloadArg(0)) #]
+			//println("update_led(${newState})")
+			[# val stateName = when(newState) {
+						ws.LedState.OFF -> "off"
+						ws.LedState.ON -> "on"
+						ws.LedState.BLINK -> "blink_on"
+					}
+				transitNow(stateName)
+			#]
+		}
+		updateResource [# "led(handle_update,${newState})" #]
+	}
+	
+	State off {
+		printCurrentMessage
+		updateResource [# "led(off,${newState})" #]
+		println("led off")
+	}
+	Transition t0 whenEvent update_led -> handle_update
+	
+	State on {
+		printCurrentMessage
+		updateResource [# "led(on,${newState})" #]
+		println("led on")
+	}
+	Transition t0 whenEvent update_led -> handle_update
+	
+	State blink_on {
+		printCurrentMessage
+		updateResource [# "led(blink_on,${newState})" #]
+		println("led on (blinking)")
+	}
+	Transition t0 whenTime 250 -> blink_off
+					whenEvent update_led -> handle_update
+					
+	State blink_off {
+		printCurrentMessage
+		updateResource [# "led(blink_off,${newState})" #]
+		println("led off (blinking)")
+	}
+	Transition t0 whenTime 250 -> blink_on
+					whenEvent update_led -> handle_update
+}
+
