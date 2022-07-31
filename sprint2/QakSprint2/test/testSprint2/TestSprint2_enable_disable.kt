@@ -152,7 +152,7 @@ internal class TestSprint2_enable_disable {
                 Assert.assertTrue(to!!.checkNextSequence(arrayOf(
                     "sonar(deactivateTheSonar,true)",
                     "basicrobotwrapper(forward_halt)",
-                    "mover(req_forward,*,*)"
+                    "basicrobotwrapper(forward_cmd)"
                 )))
                 ColorsOut.outappl("FINISH", ColorsOut.GREEN)
                 //to.setStartPosition(0);*/
@@ -164,10 +164,10 @@ internal class TestSprint2_enable_disable {
 
     @Test
     //@Order(1)
-    fun test_halt_forward_cmd() {
+    fun test_halt_while_in_forward() {
         assertTimeoutPreemptively<Unit>(Duration.ofSeconds(25)){
             CommUtils.delay(1000)
-            ColorsOut.outappl("test_halt_forward_cmd STARTS", ColorsOut.BLUE)
+            ColorsOut.outappl("test_halt_while_in_forward STARTS", ColorsOut.BLUE)
             val truckRequestStr = "msg(depositrequest, request,python,wasteservice,depositrequest(GLASS,2),1)"
             try {
                 val connTcpWasteService = ConnTcp("localhost", 8095)
@@ -210,7 +210,7 @@ internal class TestSprint2_enable_disable {
                 ColorsOut.outappl("FINISH", ColorsOut.GREEN)
                 //to.setStartPosition(0);*/
             } catch (e: Exception) {
-                Assert.fail("test_halt_forward_cmd ERROR:" + e.message)
+                Assert.fail("test_halt_while_in_forward ERROR:" + e.message)
             }
         }
     }

@@ -18,6 +18,10 @@ SAVEIFS=$IFS   # Save current IFS (Internal Field Separator)
 IFS=$'\n'      # Change IFS to newline char
 declare -a TEST_METHODS=(
     "testSprint2.TestSprint2_enable_disable.test_halt_forward"
+    "testSprint2.TestSprint2_enable_disable.test_halt_while_in_forward"
+    "testSprint2.TestSprint2_enable_disable.test_halt_pickup"
+    "testSprint2.TestSprint2_enable_disable.test_halt_dropout"
+    "testSprint2.TestSprint2_enable_disable.test_halt_turn"
 )
 
 IFS=$SAVEIFS   # Restore original IFS
