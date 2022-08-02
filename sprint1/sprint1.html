@@ -50,7 +50,7 @@ h6{
 <h2>Requirements</h2>
 <div class="remark">
     <a href="../docs_prof/html/TemaFinale22.html">Link alla pagina dei requisiti del committente</a> <br>
-    <a href="../sprint0/sprint0.html#Requirements">Requisiti sprint1</a>
+    <a href="../sprint0/sprint0.html#Requirements">Requisiti sprint0</a>
 </div>
 
 <h2>Requirement analysis</h2>
@@ -63,7 +63,7 @@ h6{
     <dl>
         <dt><b>Transport trolley:</b></dt>
         <dd>In seguito alla relativa <a href="#DDR_robot_vs_Transport_trolley">analisi del problema</a> di questo sprint, <b>Transport trolley</b> rappresenta un'entità robotica astratta che riceve i comandi di alto livello relativi alla prossima destinazione da raggiungere, e i comandi di <b>Pickup</b> e <b>Dropout</b>.<br>
-            Nota: il <b>Transport trolley</b> può ricevere una richiesta di nuova posizione prima che abbia raggiunto la destinazione precedente: la navigazione sarà impostata sulla nuova destinazione. In questo modo è possibile soddisfare direttamente nuove richieste anche mente il robot sta andando in home.<br>
+            Nota: il <b>Transport trolley</b> può ricevere una richiesta di nuova posizione prima che abbia raggiunto la destinazione precedente: la navigazione sarà impostata sulla nuova destinazione. In questo modo è possibile soddisfare direttamente una nuova richiesta anche se essa arriva mentre il robot sta tornando in home.<br>
             Formalizzazione: 
             <code><pre>
 //POSITION = INDOOR | PLASTICBOX | GLASSBOX | HOME
@@ -84,11 +84,13 @@ Reply   dropoutanswer  : dropoutanswer(RESULT)</pre>
 <h2>Scrum Goal and Work Plan</h2>
 <div class="remark">
     <h4>Scrum goal:</h4>
-    <p>Obiettivo dello <u>SPRINT1</u> è la creazione di una prima demo (su ambiente virtuale) che tenga presente dei soli punti 1 e 2 specificati dal committente, i punti principali che contengono la core business logic del problema (descrivono infatti le <b>Deposit action</b> e la <b>Service area</b>)</p>
+    <p>Obiettivo dello SPRINT1 è la creazione di una prima demo (su ambiente virtuale) che tenga presente dei soli punti 1 e 2 specificati dal committente, siccome sono i punti principali che 
+        contengono la core business logic del problema (descrivono infatti la <b>Service area</b> e le <b>Deposit action</b>)</p>
     <h4>Piano di lavoro:</h4>
     <ul>
-        <li>Analisi del problema di come affrontare la navigazione, anche in relazione al SW già sviluppato (possibile visitare la pagina riassuntiva <a href="../docs_prof/html/Applicazioni22.html">Applicazioni22</a> dei moduli sviluppati)</li>
-        <li>Analisi di quali e quanti componenti è composto il problema, e definizione delle interazioni tra di essi</li>
+        <li>Analisi del problema di come affrontare la navigazione, anche in relazione al SW già sviluppato <br>
+            (possibile visitare la pagina riassuntiva <a href="../docs_prof/html/Applicazioni22.html">Applicazioni22</a> dei moduli sviluppati)</li>
+        <li>Analisi di quali e quanti componenti è composto il sistema, e definizione delle interazioni tra di essi</li>
         <li>Sviluppo / adattamento di tali componenti</li>
         <li>Realizzazione di un modello eseguibile (a tal proposito verrà utilizzato il metamodello <a href="../docs_common/Qak.html">QAK</a>).</li>
         <li>Realizzazione di un (più completo) test-plan per il modello</li>
@@ -110,7 +112,7 @@ Reply   dropoutanswer  : dropoutanswer(RESULT)</pre>
     <ul>
         <li>
             Possibile una separazione dei due concetti: <br>
-            Il termine "DDR - Differential Drive Robot" rappresenta la tecnologia con la quale il robot si muove. Il <b>DDR robot</b> è quindi una entità di basso livello che riceve comandi base come "anvanti", "destra", "sisnitra", "halt", ecc.. <br>
+            Il termine "DDR - Differential Drive Robot" rappresenta la tecnologia con la quale il robot si muove. Il <b>DDR robot</b> è quindi una entità di basso livello che riceve comandi base come "anvanti", "destra", "sinistra", "halt", ecc.. <br>
             Possiamo quindi identificare il <b>DDR robot</b> come l'attore QAK <a href="https://github.com/anatali/issLab2022/blob/main/unibo.basicrobot22/src/basicrobot.qak"><i>basicrobot</i></a> presente nel progetto <i>basicrobot22</i>, che infatti riceve comandi:
             <code><pre>
 //MOVE =  w | a | s | d | h
@@ -140,19 +142,51 @@ Reply   moveanswer     : moveanswer(RESULT)</pre>
     <img class="centerimg" style="width: 500px;" src="docs/_images/logic_architecure_1.png"/>
     <p style="width: 100%; text-align: right;"><a href="../docs_common/Legenda.html">Legenda</a></p>
 
-    <h4><b>Transport trolley</b> non gestisce autonomamente carico/scarico:</h4>
-    <p>Per questioni di flessibilità, abbiamo tenuto separate le operazioni di carico, scarico e movimento. In questo modo se dovesse cambiare il processo di smistamento basterà modificare la 
-        sequenza di comandi che vengono impartiti al <b>Transport trolley</b>, senza bisogno di modificare quest'ultimo. Riteniamo inoltre corretto far gestire questa 
-        operazione a <b>Transport trolley</b>, siccome un domani potrebbe esser necessario inviare comandi o segnali a HW presente sul robot per compiere queste azioni.</p>
-    <code><pre>
+    <h4>Operazioni eseguite dal <b>Transport trolley</b>:</h4>
+    <p>Per questioni di flessibilità, abbiamo previsto che possano essere comandate al <b>Transport trolley</b> separatamente le operazioni di carico, scarico e movimento. <br>
+        In questo modo se dovesse cambiare il processo di smistamento basterà modificare la sequenza di comandi che vengono impartiti al <b>Transport trolley</b>, senza bisogno di 
+        modificare quest'ultimo. Riteniamo inoltre corretto far gestire questa operazione a <b>Transport trolley</b>, siccome un domani potrebbe esser necessario inviare comandi o 
+        segnali a HW presente sul robot per compiere queste azioni.</p>
+    <p>Allo stesso tempo sarebbe bene mantenenre separate la parte che implementa la navigazione del robot verso la prossima destinazione dalla parte che implementa le azioni di 
+        <b>Pickup</b> e <b>Dropout</b>. Per questo motivo si è scelto di far si che il <b>Transport trolley</b> funga da semplice "dispatcher" di comandi verso 2 componenti che si occupano
+        separatamente di implementare separatamente quanto detto prima:</p>
+    <ul>
+        <li>
+            <p>Attore <i>pickupdropdownhandler</i> per implementare le operazioni di <b>Pickup</b> e <b>Dropout</b>.</p>
+            <code><pre>
 //RESULT =  OK | ERROR
 Request pickup         : pickup(_)
 Reply   pickupanswer   : pickupanswer(RESULT)
 Request dropout        : dropout(_)
 Reply   dropoutanswer  : dropoutanswer(RESULT)</pre>
-    </code>
+            </code>
+        </li>
+        <li>
+            <p>Attore <i>mover</i> per implementare la logica di navigazione del robot verso la prossima destinazione:</p>
+            <code><pre>
+//POSITION =  INDOOR | PLASTICBOX | GLASSBOX | HOME
+Request move           : move(POSITION)
+Reply   moveanswer     : moveanswer(RESULT)</pre>
+            </code>
+        </li>
+    </ul>
 
-    <h4>Interazioni con il <b>Transport trolley</b>:</h4>
+    <p>Inoltre, al fine di uniformare i comandi che vengono inviati verso il robot, è utile introdurre un "wrapper" al <i>basicrobot</i> che esponga solo comandi sincroni bloccanti verso l'esterno. 
+        In particolare il wrapper si occupa di rispondere al comando di andata avanti solo quando si vede arrivare l'evento <i>info</i> da <i>basicrobot</i>. <br>
+        <i>Basicrobotwrapper</i> riceverà e risponderà con messaggi del tipo:</p>
+        <code><pre>
+//RESULT =  OK | ERROR 
+//MOVE =  w | l | r | h     //the command end when the reply is sent
+Request cmdsync   	: cmdsync(MOVE)
+Reply cmdanswer   	: cmdanswer(RESULT)</pre>
+        </code>
+        <p>La scelta di introdurre questo componente potrebbe poi rilevarsi strategica per la gestione dell'halt quando la distanza misurata dal <b>Sonar</b> è ≤ DLIMT. <br>
+            Potremmo infatti introdurre a questo livello due operazioni che bloccano e fanno riprendere al robot la mossa attualmente in esecuzione, il tutto in maniera trasparente ai 
+            componenti già sviluppati. Esploreremo meglio questa opportunità negli sprint successivi.<br>
+        Ora l'architettura è questa: </p>
+    <img class="centerimg" style="width: 700px;" src="docs/_images/logic_architecure_2.png"/>
+    <p style="width: 100%; text-align: right;"><a href="../docs_common/Legenda.html">Legenda</a></p>
+
     <p>Si noti come le interazioni con il <b>Transport trolley</b> siano tutte delle request-response. <br>
         Colui che comanda il <b>Transport trolley</b> (cioè una visione astratta e ad alto livello del robot) si aspetta una interazione sincrona bloccante, e si aspetta una risposta con l'esito dell'operazione.<br>
         Tuttavia, solo per il comando <i>move(POSITION)</i>, è possibile comandare una nuova destinazione anche se quella precedente non è stata ancora raggiunta. <br>
@@ -160,89 +194,66 @@ Reply   dropoutanswer  : dropoutanswer(RESULT)</pre>
         Il nuovo comando annulla di fatto la <i>move</i> precedente, quindi si riceverà solo la risposta relativa all'ultimo comando.
     </p>
 
+    <h4>Il problema della navigazione: <br>
+        <p>Uso di un sistema di coordinate  o  boundary walker che raggiunge gli angoli rilevando il contatto con i muri?</p>
+    </h4>
+    <p>La particolare collocazione delle zone <b>INDOOR</b>, <b>PLASTICBOX</b>, <b>GLASSBOX</b>, <b>HOME</b> e la presenza di un sonar o sensore di impatto sul robot rendono attuabile una 
+        soluzione che non richiede l'utilizzo di coordinate: 
+        il robot può infatti muoversi all'interno della <b>Service area</b> lungo le pareti, orientandosi semplicemente rilevando le collisioni con le pareti. <br>
+        In questa sezione analizziamo i punti a favore dell'utilizzo di un sistema a coordinate e uno senza coordinate:</p>
+    <br>
 
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-
-
-    <h3>Principio di funzionamento del <b>Transport trolley</b>: 
-        <br> Sistema a coordinate, o semplice macchina a stati che rileva impatto con i muri?</h3>
-    <p>La particolare collocazione delle zone <b>INDOOR</b>, <b>PLASTICBOX</b>, <b>GLASSBOX</b>, <b>HOME</b> rende attuabile una soluzione che non richiede l'utilizzo di coordinate: il robot può infatti muoversi all'interno della <b>Service area</b> lungo le pareti, orientandosi semplicemente rilevando le collisioni con le pareti. <br>
-        In questa sezione analizziamo i punti a favore dell'utilizzo un sistema a coordinate e uno senza coordinate:</p>
     <p>I vantaggi nell'utilizzo di un sistema a coordinate:</p>
     <ul>
+        <li>Maggiore flessibilità. Ad esempio nel caso in cui la posizione dei siti non sia più negli angoli, o nel caso il robot debba seguire un percorso ottimo, se ci sono ostacoli nella <b>Service area</b>, ecc... .</li>
         <li>Potenziale riuso di moduli che già abbiamo sviluppato (mapper, planner)</li>
-        <li>Maggiore flessibilità (posizione dei siti non è più negli angoli, robot deve seguire un percorso ottimo, ostacoli nel percorso, gestione più semplice del cambio di destinazione mentre il robot è in movimento)</li>
     </ul>
     <p>I vantaggi nell'utilizzo di un sistema senza coordinate:</p>
     <ul>
         <li>Minor complessità, minor costo</li>
-        <li>Maggior velocità negli spostamenti, e maggior velocità di reazione a comandi di halt</li>
-        <li>Possibile miglior reazione (piuttosto che a singoli step) da parte di robot reali che non fatto uso di sistemi in feedback o altro hardware per controllare meglio la propria posizione</li>
+        <li>Maggior velocità negli spostamenti, e maggior velocità di reazione a comandi di halt mentre ci si muove in avanti</li>
+        <li>Possibile miglior reazione da parte di robot reali che non fatto uso di sistemi in feedback o altro hardware per controllare meglio i propri spostamenti: <br>
+            L'errore potrebbe aumentare ad ogni singolo step, mentre la prima soluzione (siccome utilizza il segnale di contatto con il muro) non soffre di questo problema</li>
     </ul>
     <br>
-    <p>Per la realizzazione del <b>Transport trolley</b> sono state analizzate 3 diverse opzioni, che vengono qui descritte: </p>
-
-    <h4>OPZIONE 1</h4>
-    <p>Si tratta di una semplice macchina a stati che è in grado di raggiungere la destinazione facendo fare al robot sempre un giro in senso antiorario. <br>
-        Se viene cambiata la destinazione mentre il robot è in movimento, esso non cambia direzione, perchè comunque per raggiugere ogni altro sito procede in senso antiorario, e quindi il prossimo sito deve comunque essere raggiunto.
-    </p>
-    <img class="centerimg" style="width: 400px;" src="docs/_images/transporttrolley_option1_explaination.png"/>
-    <p>Pro e Contro:</p>
-    <ul>
-        <li>+ semplicità</li>
-        <li>+ possibile estendere la soluzione appena mostrata per attenere l'opzione successiva</li>
-        <li>- poca flessibilità</li>
-        <li>- politica non molto efficiente</li>
-    </ul>
-    <p>La macchina a stati che deve essere implementata all'interno di <b>Transport trolley</b> se si vuole percorrere questa soluzione è la seguente:</p>
-    <img class="centerimg" src="docs/_images/transporttrolley_option1_verbose_state_machine.png"/>
-    <p>Tuttavia è possibile implementarla in maniera più sintetica e compatta nel seguente modo:</p>
-    <img class="centerimg" style="width: 500px;" src="docs/_images/transporttrolley_option1_compact_state_machine.png"/>
-    
-    <h4>OPZIONE 2</h4>
-    <p>Si tratta di un'estensione dell'opzione 1: il robot è in grado di raggiungere la prossiama destinazione procedendo sia in senso orario che in senso antiorario (in base a cosa è più conveniente in quel momento). 
-        Inoltre il robot può cambiare rotta anche mentre si sta muovendo in avanti. </p>
-    <img class="centerimg" style="width: 400px;" src="docs/_images/transporttrolley_option2_explaination.png"/>
-    <p>Pro e Contro:</p>
-    <ul>
-        <li>+ più veloce in alcuni casi</li>
-        <li>- più complesso</li>
-    </ul>
-    <p>La macchina a stati che deve essere implementata all'interno di <b>Transport trolley</b> si complica, perchè tra ogni "macro stato" e l'altro il ramo ha molti più stati:</p>
-    <img class="centerimg" src="docs/_images/transporttrolley_option2_verbose_state_machine.png"/>
-    <p>E' pur sempre possibile una implementazione più sintetica e compatta:</p>
-    <img class="centerimg" style="max-width: 1100px;" src="docs/_images/transporttrolley_option2_compact_state_machine.png"/>
-
-    <hr>
-
-    <h4>OPZIONE 3</h4>
-    <p>Il modulo, data la posizione corrente e l'orientamento del robot, fa un certo numero di step per raggiungere le coordinate di destinazione.</p>
-    <img class="centerimg" style="width: 400px;" src="docs/_images/transporttrolley_option3_explaination.png"/>
-    <p>Pro e Contro:</p>
-    <ul>
-        <li>+ flessibilità</li>
-        <li>+ esiste sw per mappare le dimensioni della stanza (<a href="https://github.com/anatali/issLab2022/tree/main/unibo.mapperQak22">unibo.mapperQak22</a>) e per trovare path (<a href="https://github.com/anatali/issLab2022/tree/main/unibo.planner22">unibo.planner22</a>)</li>
-        <li>- rischiesto mapping iniziale della servicearea</li>
-        <li>- le dimensioni della servicearea potrebbero non essere multiple di RD. È dunque necessaria una logica che (una volta raggiunte le coordinate di destinazione) faccia andare il robot a contatto con la porta, per poter effettuare le operazioni di carico/scarico.</li>
-    </ul>
-         
-    <h4>Scelta: OPZIONE 1</h4>
-    <p>Scegliamo la prima soluzione perché è la più semplice e quindi economica, fermo restando che a partire da questa è possibile estenderla per ottenere la seconda versione.<br>
-        Inoltre se un giorno nuovi requisiti dovessero imporre l'utilizzo di un sistema di coordinate, verrebbe modificato soltanto il componente "transporttrolley".</p>
-    <hr>
+    <p>Per arrivare ad una decisione in merito ad una decisione così importante per la realizzazione del <b>Mover</b>, sono state state analizzate 3 diverse opzioni, che vengono descritte in <a href="grid_or_boundary_analysis.html">grid_or_boundary_analysis.html</a>. </p>
+    <p>Come riportato nel relativo documento, optimao per l'utilizzo di una soluzione senza utilizzo di coordinate, facendo solamente uso di una FSM</p>
 
     <h3><b>WasteService</b></h3>
-    <p>Possiamo pensare il <b>WasteService</b> come il componente controller, ossia quello che contiene la business logic del sistema.<br>
-        Abbiamo analizzato le funzionalità che il servizio <b>WasteService</b> deve offrire, e abbiamo quindi formalizzato tale entità con il modello qak. <br>
-        Per una migliore comprensione il diagramma degli stati di questo attore viene qui riassunto con il seguente schema: </p>
-    <img class="centerimg" src="docs/_images/wasteservice_actor_state_diagram_1.png"/>
-    
-    
+    <p>Possiamo pensare il <b>WasteService</b> come il componente controller, ossia quello che contiene la business logic del sistema.</p>
+    <p>In particolare possiamo identificare due "macro-parti" di questo servizio, che abbiamo diviso in 2 distinti attori:</p>
+    <ul>
+        <li>La prima è quella che si occupa di ricevere le richieste, vedere se è possibile prendere in carico il manteriale e mantenere aggiornati i volumi presenti all'interno dei container (di questo se ne occupa l'attore <i>wasteservice</i>)</li>
+        <li>La seconda è quella che invia i comandi per effettuare la <b>Deposit action</b> (compito delegato all'attore <i>depositaction</i>).</li>
+    </ul>
+    <p>Architettura:</p>
+    <img class="centerimg" style="max-width: 700px;" src="docs/_images/logic_architecure_2.png"/>
+    <p style="width: 100%; text-align: right;"><a href="../docs_common/Legenda.html">Legenda</a></p>
+
+    <p>Oltre al modello QAK, riportiamo qui il diagramma degli stati di </p>Abbiamo analizzato le funzionalità che il servizio <b>WasteService</b> deve offrire, e abbiamo quindi formalizzato tale entità con il modello qak. <br>
+        Per una migliore comprensione, viene riportato il diagramma degli stati di <i>wasteservice</i> e <i>depositaction</i>. </p>
+    <br>
+    <p>Attore <i>wasteservice</i>:</p>
+    <img class="centerimg" style="max-width: 700px;" src="docs/_images/wasteservice_actor_state_diagram_1.png"/>
+    <p><i>Wasteservice</i> rimane in attesa di nuove richieste quando è nello stato wait. Quando arriva la prima richiesta si decide se viene accettata o meno (stato <i>handle_req</i>). Se viene 
+        accettata si richiede all'attore <i>depositaction</i> di effettuare l'operazione, e si attende la risposta <i>pickupdone</i> (<i>stato req_depositaction</i>). Il truck riceve la <b>loadaccept</b> 
+        subito dopo l'operazione di <b>Pickup</b>, mentre riceve <b>loadrejected</b> appena fatta la richiesta.</p>
+    <br>
+    <p>Attore <i>depositaction</i>:</p>
+    <img class="centerimg" style="max-width: 1000px;" src="docs/_images/depositaction_actor_state_diagram_1.png"/>
+    <p>Quando arriva una richiesta di <b>Deposit action</b>, il robot viene inviato in <b>INDOOR</b>, effettua il <b>Pickup</b>, risponde con <i>pickupdone</i> a <i>wasteservice</i>, si posiziona 
+        sul container di destinazione ed effettua la <b>Dropout</b>. Poi controlla che non vi siano altre richieste (stato <i>next_move</i>), se non ci sono si sposta verso <b>HOME</b> (stato 
+        <i>move_home</i>), altrimenti le gestisce subito. Se mentre ci si sta muovendo verso <b>HOME</b> arriva una nuova richiesta, questa viene gestita immediatamente.
+    </p>
+    <br>
+    <p>Si noti come <i>wasteservice</i> sia pronto per elaborare una nuova richiesta nonappena gli arriva da <i>depositaction</i> la risposta <i>pickupdone</i>. <i>Wasteservice</i> quindi 
+        elabora parzialmente nuove richieste prima ancora che il robot abbia finito di gestire il carico precedente.<br>
+        Nello specifico, se non sarebbe comunque possibile soddisfare tale richiesta per l'insufficiente spazio rimanente nei container, viene inviata immediatamente (potenzialmente appena dopo la <b>Pickup</b> 
+        relativa alla precedente richiesta) una <b>loadrejected</b>. <br>
+        Se invece la richiesta può essere soddisfatta, <i>wasteservice</i> invierà subito la richiesta di <i>depositaction</i> verso l'omonimo attore, anche se il robot deve ancora depositare
+        il carico della richesta precedente. Tuttavia l'attore <i>depositaction</i> risponderà con una <i>pickupdone</i> solo quando verrà fatta la <b>Pickup</b> relativa alla nuova richiesta.
+        Quindi, nel caso di due richieste consecutive che possono essere entrambe soddisfatte, la FSM di <i>wasteservice</i> aspetterà nello stato <i>req_depositaction</i> prima di poter processare 
+        (anche solo parzialmente) una terza richiesta: essa verrebbe infatti accodata nella coda interna dell'attore</p>
 
 </div>
     
