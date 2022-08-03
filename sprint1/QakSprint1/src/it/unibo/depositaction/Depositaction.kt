@@ -151,7 +151,7 @@ class Depositaction ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( na
 				state("next_move") { //this:State
 					action { //it:State
 						println("$name in ${currentState.stateName} | $currentMsg")
-						updateResourceRep( "depositaction(nextmove,$MATERIAL)"  
+						updateResourceRep( "depositaction(next_move,$MATERIAL)"  
 						)
 						stateTimer = TimerActor("timer_next_move", 
 							scope, context!!, "local_tout_depositaction_next_move", 10.toLong() )

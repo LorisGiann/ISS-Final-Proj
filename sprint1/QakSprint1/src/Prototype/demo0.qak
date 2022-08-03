@@ -230,7 +230,7 @@ QActor depositaction context ctxserver{
 
 	State next_move{
 		printCurrentMessage
-		updateResource [# "depositaction(nextmove,$MATERIAL)" #] 
+		updateResource [# "depositaction(next_move,$MATERIAL)" #] 
 	}
 	Transition t0 whenTime 10 -> move_home
 				  whenRequest depositaction -> req_move_indoor
@@ -315,6 +315,7 @@ QActor transporttrolley context ctxrobot{
  		updateResource [# "transporttrolley(req_move,$Pos)" #] 
  	}
  	Transition toNewState whenReply moveanswer -> chk_move
+ 							whenRequest move -> req_move //cancel current destination and set the new one
  	State chk_move {
  		printCurrentMessage
  		updateResource [# "transporttrolley(chk_move)" #] 
@@ -424,7 +425,8 @@ QActor mover context ctxrobot{
 		}
 		updateResource [# "mover(reply,$CURRPOS,$DEST)" #]
 	}
-	Goto handle
+	Transition t0 whenTime 10 -> handle //no messages, go to handle
+					whenRequest move -> handle //new destination, consume the message while going to handle
 	//-----------------------------------------------------------------------------------------
 	
 	State error{

@@ -9,9 +9,13 @@
 
 JAR_OUPUT_PATH=build/libs
 
-#first generate the jar files
-gradle -PmainClass=it.unibo.ctxrobot.MainCtxrobotCustomKt jar
-gradle -PmainClass=it.unibo.ctxserver.MainCtxserverCustomKt jar
+#first generate the jar files (but if an argument is present compilation is skipped)
+if [ -z "$1" ] ; then
+    gradle -PmainClass=it.unibo.ctxrobot.MainCtxrobotCustomKt jar
+    gradle -PmainClass=it.unibo.ctxserver.MainCtxserverCustomKt jar
+else
+  echo "skipping compilation"
+fi
 
 SAVEIFS=$IFS   # Save current IFS (Internal Field Separator)
 IFS=$'\n'      # Change IFS to newline char
@@ -19,12 +23,12 @@ declare -a TEST_METHODS=(
     "testSprint1.TestSprint1_wasteservice.test_2_accepted"
     "testSprint1.TestSprint1_wasteservice.test_1_accepted_1_rejected"
 
-    "testSprint1.TestSprint1_hystory.test_accepted"
-    "testSprint1.TestSprint1_hystory.test_rejected"
-    "testSprint1.TestSprint1_hystory.test_2_accepted_while_in_operation"
-    "testSprint1.TestSprint1_hystory.test_1_accepted_1_rejected_while_in_operation"
-    "testSprint1.TestSprint1_hystory.test_2_accepted_while_returning_home"
-    "testSprint1.TestSprint1_hystory.test_1_accepted_1_rejected_while_returning_home"
+    "testSprint1.TestSprint1_integration_test.test_accepted"
+    "testSprint1.TestSprint1_integration_test.test_rejected"
+    "testSprint1.TestSprint1_integration_test.test_2_accepted_while_in_operation"
+    "testSprint1.TestSprint1_integration_test.test_1_accepted_1_rejected_while_in_operation"
+    "testSprint1.TestSprint1_integration_test.test_2_accepted_while_returning_home"
+    "testSprint1.TestSprint1_integration_test.test_1_accepted_1_rejected_while_returning_home"
 )
 
 IFS=$SAVEIFS   # Restore original IFS
@@ -35,7 +39,7 @@ i=0
 numFail=0
 for t in ${TEST_METHODS[@]} ; do
     echo "---------------------------- TEST " ${TEST_METHODS[$i]} " ------------------------------"
-    gradle test --tests ${TEST_METHODS[$i]}
+    gradle test --tests ${TEST_METHODS[$i]} -i
     TEST_RESULTS[$i]=$?
     if [[ ${TEST_RESULTS[$i]} -ne 0 ]] ; then
         ((numFail++))
@@ -58,9 +62,9 @@ echo ""
 i=0
 for t in ${TEST_METHODS[@]} ; do
     if [[ ${TEST_RESULTS[$i]} -eq 0 ]] ; then
-        printf "${GREEN}gradle test --tests ${TEST_METHODS[$i]}${NC}\n"
+        printf "${GREEN}gradle test --tests ${TEST_METHODS[$i]} -i ${NC}\n"
     else
-        printf "${RED}gradle test --tests ${TEST_METHODS[$i]}${NC}\n"
+        printf "${RED}gradle test --tests ${TEST_METHODS[$i]} -i ${NC}\n"
     fi
     ((i++))
 done

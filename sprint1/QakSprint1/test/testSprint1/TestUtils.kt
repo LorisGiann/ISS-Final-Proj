@@ -1,13 +1,38 @@
 package testSprint1
 
+import org.apache.log4j.Logger
+import org.apache.log4j.PatternLayout
+import org.apache.log4j.RollingFileAppender
 import unibo.comm22.utils.ColorsOut
 import unibo.comm22.utils.CommUtils
 import java.io.BufferedReader
 import java.io.InputStreamReader
 
+
 class TestUtils {
 
     companion object {
+
+        private var logger: Logger? = null
+        private var appender: RollingFileAppender? = null
+
+        private fun initlogger(fname : String){
+            val logger = Logger.getLogger(TestUtils.javaClass)
+            val appender = RollingFileAppender()
+            appender.setLayout(PatternLayout("%d %-5p %c{1}:%L - %m%n"));
+            appender.setFile("logs/$fname.txt");
+            appender.setAppend(false);
+            appender.setMaxFileSize("100MB");
+            appender.setMaxBackupIndex(10);
+            appender.activateOptions();
+
+            logger.setAdditivity(false);
+            logger.addAppender(appender);
+
+            this.appender=appender
+            this.logger=logger
+        }
+
         /**
          * Terminate all the process listening fo TCP connections on the specified port
          */
@@ -32,7 +57,7 @@ class TestUtils {
         }
 
         fun runCtx(jarPath : String) : Pair<Process, ProcessHandle> {
-            ColorsOut.outappl("lauching JAR" + jarPath, ColorsOut.BLUE)
+            ColorsOut.outappl("lauching JAR " + jarPath, ColorsOut.BLUE)
             val rt = Runtime.getRuntime()
             //prRobot = rtRobot.exec("gradle -PmainClass=it.unibo.ctxrobot.MainCtxrobotKt execute");   //problem with this is that every time it recompiles everithing: this takes ages if dome for every single test
             val pr = rt.exec("java -jar " + jarPath)
@@ -50,12 +75,23 @@ class TestUtils {
                 ColorsOut.outappl(line, ColorsOut.YELLOW)
                 if (line!!.contains("WAIT/RETRY TO SET PROXY TO")) break
                 if (line!!.contains("PROXY DONE TO")) break
+                if (line!!.contains("msg(")) break //one context only, application already started
                 if (line!!.contains("WARNING: Address already in use (Bind failed)")){
                     ColorsOut.outappl("JAR launch failed, process already running", ColorsOut.RED)
                     System.exit(1)
                 }
             }
-            br.close()
+            //br.close()
+            object : Thread(){
+                override fun run(){
+                    initlogger(jarPath.substringAfterLast('/'))
+                    while (br.readLine().also { line = it } != null) {
+                        //ColorsOut.outappl(line, ColorsOut.YELLOW)
+                        logger!!.info(line)
+                    }
+                    logger!!.removeAppender(appender);
+                }
+            }.start()
             return Pair(pr,processHandle)
         }
 

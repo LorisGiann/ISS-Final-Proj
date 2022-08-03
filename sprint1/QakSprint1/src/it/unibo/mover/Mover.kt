@@ -24,7 +24,7 @@ class Mover ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scop
 						updateResourceRep( "mover(wait,$CURRPOS,$DEST)"  
 						)
 					}
-					 transition(edgeName="t021",targetState="handle",cond=whenRequest("move"))
+					 transition(edgeName="t022",targetState="handle",cond=whenRequest("move"))
 				}	 
 				state("handle") { //this:State
 					action { //it:State
@@ -48,7 +48,7 @@ class Mover ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scop
 						)
 						request("cmdsync", "cmdsync(w)" ,"basicrobotwrapper" )  
 					}
-					 transition(edgeName="t022",targetState="chk_forward",cond=whenReply("cmdanswer"))
+					 transition(edgeName="t023",targetState="chk_forward",cond=whenReply("cmdanswer"))
 				}	 
 				state("chk_forward") { //this:State
 					action { //it:State
@@ -72,7 +72,7 @@ class Mover ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scop
 						)
 						request("cmdsync", "cmdsync(l)" ,"basicrobotwrapper" )  
 					}
-					 transition(edgeName="t023",targetState="chk_turn",cond=whenReply("cmdanswer"))
+					 transition(edgeName="t024",targetState="chk_turn",cond=whenReply("cmdanswer"))
 				}	 
 				state("chk_turn") { //this:State
 					action { //it:State
@@ -98,8 +98,11 @@ class Mover ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scop
 						}
 						updateResourceRep( "mover(reply,$CURRPOS,$DEST)"  
 						)
+						stateTimer = TimerActor("timer_reply", 
+							scope, context!!, "local_tout_mover_reply", 10.toLong() )
 					}
-					 transition( edgeName="goto",targetState="handle", cond=doswitch() )
+					 transition(edgeName="t025",targetState="handle",cond=whenTimeout("local_tout_mover_reply"))   
+					transition(edgeName="t026",targetState="handle",cond=whenRequest("move"))
 				}	 
 				state("error") { //this:State
 					action { //it:State

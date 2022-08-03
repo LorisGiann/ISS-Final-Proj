@@ -99,6 +99,7 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 						)
 					}
 					 transition(edgeName="toNewState18",targetState="chk_move",cond=whenReply("moveanswer"))
+					transition(edgeName="toNewState19",targetState="req_move",cond=whenRequest("move"))
 				}	 
 				state("chk_move") { //this:State
 					action { //it:State

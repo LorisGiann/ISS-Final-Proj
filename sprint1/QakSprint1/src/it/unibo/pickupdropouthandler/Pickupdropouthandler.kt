@@ -22,8 +22,8 @@ class Pickupdropouthandler ( name: String, scope: CoroutineScope  ) : ActorBasic
 						updateResourceRep( "pickupdropouthandler(wait)"  
 						)
 					}
-					 transition(edgeName="t019",targetState="do_dropout",cond=whenRequest("dropout"))
-					transition(edgeName="t020",targetState="do_pickup",cond=whenRequest("pickup"))
+					 transition(edgeName="t020",targetState="do_dropout",cond=whenRequest("dropout"))
+					transition(edgeName="t021",targetState="do_pickup",cond=whenRequest("pickup"))
 				}	 
 				state("do_dropout") { //this:State
 					action { //it:State
