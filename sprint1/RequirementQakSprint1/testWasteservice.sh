@@ -9,8 +9,13 @@
 
 JAR_OUPUT_PATH=build/libs
 
-#first generate the jar files
-gradle -PmainClass=it.unibo.ctxwasteservice.MainCtxwasteserviceKt jar
+#first generate the jar files (but if an argument is present compilation is skipped)
+if [ -z "$1" ] ; then
+    gradle -PmainClass=it.unibo.ctxwasteservice.MainCtxwasteserviceKt jar
+else
+  echo "skipping compilation"
+fi
+
 
 SAVEIFS=$IFS   # Save current IFS (Internal Field Separator)
 IFS=$'\n'      # Change IFS to newline char

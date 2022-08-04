@@ -1,0 +1,81 @@
+//https://dl.bintray.com/jetbrains/kotlin/eclipse-plugin/0.8.19/
+
+System demogui
+//-------------------------------------- LED --------------------------------------------
+Event    update_led 	  : update_led(LEDSTATE) // LEDSTATE = ON | OFF | BLINK
+// ---------------------------------------------------------------------------------------
+
+// ------------------------------------ OTHER GUI -------------------------------------
+Event    update_tt_state  : update_tt_state(TTSTATE) // TTSTATE = IDLE | MOVING | PICKINGUP | DROPPINGDOWN | HALT
+Event    update_position  : update_position(POSITION) //POSITION = INDOOR, PLASTICBOX, GLASSBOX, HOME
+Event    update_container : update_container(PLASTIC,GLASS) // PLASTIC & GLASS float numbers (respectively ${ws.func.contPB},${ws.func.contGB})")
+// ------------------------------------------------------------------------------------
+
+// ---------------------- CONTEXTS -----------------------
+Context ctxgui ip [host="localhost" port=8095]
+// --------------------------------------------------------
+
+QActor gui context ctxgui{ 
+	[#	var ttState = ws.Transporttrolleystate.IDLE
+		var position = ws.Position.HOME
+		var plasticCont = 0.0F
+		var glassCont = 0.0F
+		var ledState = ws.LedState.OFF
+		
+		val actor = this@Gui;
+		suspend fun transitNow(stateName : String){
+			var res = actor.handleCurrentMessage(NoMsg,actor.getStateByName(stateName));
+			if(res) actor.elabMsgInState( );
+			else println("ERROR: transition was not possible")
+		}
+	#]
+	
+	State wait initial {
+		discardMsg Off
+		printCurrentMessage
+		updateResource [# "gui(wait,${ttState},${position},${ledState},${plasticCont},${glassCont})" #]
+		//[# sysUtil.logMsgs=true #]
+	}
+	Transition t0 whenEvent update_tt_state -> handle_update_tt_state
+					whenEvent update_position -> handle_update_position
+					whenEvent update_container -> handle_update_container
+					whenEvent update_led -> handle_update_led
+	
+	State handle_update_tt_state {
+		printCurrentMessage
+		onMsg( update_tt_state:update_tt_state(ARG) ){
+			[# ttState = ws.Transporttrolleystate.valueOf(payloadArg(0)) #]
+		}
+		updateResource [# "gui(handle_update_tt_state,${ttState},${position},${ledState},${plasticCont},${glassCont})" #]
+	}
+	Goto wait
+	
+	State handle_update_position {
+		printCurrentMessage
+		onMsg( update_position:update_position(ARG) ){
+			[# position = ws.Position.valueOf(payloadArg(0)) #]
+		}
+		updateResource [# "gui(handle_update_position,${ttState},${position},${ledState},${plasticCont},${glassCont})" #]
+	}
+	Goto wait
+	
+	State handle_update_container {
+		printCurrentMessage
+		onMsg( update_position:update_position(PLASTIC,GLASS) ){
+			[# plasticCont = payloadArg(0).toFloat()
+				glassCont = payloadArg(1).toFloat() #]
+		}
+		updateResource [# "gui(handle_update_container,${ttState},${position},${ledState},${plasticCont},${glassCont})" #]
+	}
+	Goto wait
+	
+	State handle_update_led {
+		printCurrentMessage
+		onMsg( update_position:update_position(ARG) ){
+			[# ledState = ws.LedState.valueOf(payloadArg(0)) #]
+		}
+		updateResource [# "gui(handle_update_led,${ttState},${position},${ledState},${plasticCont},${glassCont})" #]
+	}
+	Goto wait
+}
+

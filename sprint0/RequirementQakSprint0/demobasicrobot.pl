@@ -1,5 +1,6 @@
 %====================================================================================
-% demotransporttrolley description   
+% demobasicrobot description   
 %====================================================================================
 context(ctxrobot, "localhost",  "TCP", "8095").
- qactor( transporttrolley, ctxrobot, "it.unibo.transporttrolley.Transporttrolley").
+ qactor( distancefilter, ctxrobot, "rx.distanceFilter").
+  qactor( basicrobot, ctxrobot, "it.unibo.basicrobot.Basicrobot").

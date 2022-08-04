@@ -1,4 +1,4 @@
-//https://dl.bintray.com/jetbrains/kotlin/eclipse-plugin/0.8.19/ 
+//https://dl.bintray.com/jetbrains/kotlin/eclipse-plugin/0.8.19/
 
 System demotransporttrolley    
 //mqttBroker "localhost" : 1883 eventTopic "demo0/events"
@@ -21,10 +21,10 @@ Reply   moveanswer     : moveanswer(RESULT)
 Dispatch noMsg : noMsg(_)
 
  
-Context ctxtransporttrolley ip [host="localhost" port=8095]
+Context ctxrobot ip [host="localhost" port=8095]
  
 
-QActor transporttrolley context ctxtransporttrolley{
+QActor transporttrolley context ctxrobot{
 	[# lateinit var tmp : String 
 		
 	val actor = this@Transporttrolley;
@@ -43,6 +43,8 @@ QActor transporttrolley context ctxtransporttrolley{
 	Goto handle_cmd
 	 
 	State handle_cmd {
+		updateResource [# "transporttrolley(handle_cmd)" #]
+		printCurrentMessage
 		onMsg( move:move(ARG) ){
 			[# tmp = payloadArg(0) #]
 			println("move(${tmp})")
@@ -69,11 +71,14 @@ QActor transporttrolley context ctxtransporttrolley{
  					whenRequest dropout -> handle_cmd
  	
  	State moving_home {
+ 		updateResource [# "transporttrolley(moving_home)" #]
+ 		printCurrentMessage
  	}
  	Transition t0 whenTime 1000 -> moved_home    //per il momento simulo lo spostamento con un delay
  					whenRequest move -> handle_cmd
- 					
  	State moved_home {
+ 		updateResource [# "transporttrolley(moved_home)" #]
+ 		printCurrentMessage
  		replyTo move with moveanswer : moveanswer(OK)
  		println("robot reached HOME")
  	}
@@ -82,11 +87,14 @@ QActor transporttrolley context ctxtransporttrolley{
  					whenRequest dropout -> handle_cmd
  	
  	State moving_indoor {
+ 		updateResource [# "transporttrolley(moving_indoor)" #]
+ 		printCurrentMessage
  	}
  	Transition t0 whenTime 1000 -> moved_indoor    //per il momento simulo lo spostamento con un delay
  					whenRequest move -> handle_cmd
- 	
  	State moved_indoor {
+ 		updateResource [# "transporttrolley(moved_indoor)" #]
+ 		printCurrentMessage
  		replyTo move with moveanswer : moveanswer(OK)
  		println("robot reached INDOOR")
  	}
@@ -95,11 +103,14 @@ QActor transporttrolley context ctxtransporttrolley{
  					whenRequest dropout -> handle_cmd
  					
  	State moving_plasticbox {
+ 		updateResource [# "transporttrolley(moving_plasticbox)" #]
+ 		printCurrentMessage
  	}
  	Transition t0 whenTime 1000 -> moved_plasticbox    //per il momento simulo lo spostamento con un delay
  					whenRequest move -> handle_cmd
- 					
  	State moved_plasticbox {
+ 		updateResource [# "transporttrolley(moved_plasticbox)" #]
+ 		printCurrentMessage
  		replyTo move with moveanswer : moveanswer(OK)
  		println("robot reached PLASTICBOX")
  	}
@@ -108,11 +119,14 @@ QActor transporttrolley context ctxtransporttrolley{
  					whenRequest dropout -> handle_cmd
  	
  	State moving_glassbox {
+ 		updateResource [# "transporttrolley(moving_glassbox)" #]
+ 		printCurrentMessage
  	}
  	Transition t0 whenTime 1000 -> moved_glassbox    //per il momento simulo lo spostamento con un delay
  					whenRequest move -> handle_cmd
- 					
  	State moved_glassbox {
+ 		updateResource [# "transporttrolley(moved_glassbox)" #]
+ 		printCurrentMessage
  		replyTo move with moveanswer : moveanswer(OK)
  		println("robot reached GLASSBOX")
  	}
@@ -121,6 +135,8 @@ QActor transporttrolley context ctxtransporttrolley{
  					whenRequest dropout -> handle_cmd
  					
  	State pickUp {
+ 		updateResource [# "transporttrolley(pickUp)" #]
+ 		printCurrentMessage
  		delay 1000
  		replyTo pickup with pickupanswer : pickupanswer(OK)
  		println("robot pickedUp")
@@ -130,6 +146,8 @@ QActor transporttrolley context ctxtransporttrolley{
  					whenRequest dropout -> handle_cmd
  	
  	State dropOut {
+ 		updateResource [# "transporttrolley(dropOut)" #]
+ 		printCurrentMessage
  		delay 1000
  		replyTo dropout with dropoutanswer : dropoutanswer(OK)
  		println("robot droppedOut")

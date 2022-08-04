@@ -1,5 +1,5 @@
 %====================================================================================
-% demotransporttrolley description   
+% demogui description   
 %====================================================================================
-context(ctxrobot, "localhost",  "TCP", "8095").
- qactor( transporttrolley, ctxrobot, "it.unibo.transporttrolley.Transporttrolley").
+context(ctxgui, "localhost",  "TCP", "8095").
+ qactor( gui, ctxgui, "it.unibo.gui.Gui").

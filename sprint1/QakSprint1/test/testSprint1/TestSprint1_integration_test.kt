@@ -44,7 +44,6 @@ internal class TestSprint1_integration_test {
             System.exit(1)
         }
 
-        //waitForApplStarted()
         val to = TestObserver()
         to.establishCoapConn("wasteservice");
         to.establishCoapConn("depositaction");

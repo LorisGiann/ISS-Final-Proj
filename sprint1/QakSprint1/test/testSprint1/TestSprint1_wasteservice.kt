@@ -66,7 +66,8 @@ internal class TestSprint1_wasteservice {
             processHandleRobot!!.destroyForcibly()
             processHandleServer!!.destroyForcibly()
         }catch(_:  NullPointerException){ }
-
+        
+        to!!.closeAllConnections()
     }
 
 

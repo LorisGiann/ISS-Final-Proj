@@ -63,11 +63,11 @@ h6{
         <ul>
             <li>Minor complessità, minor costo</li>
             <li>Maggior velocità negli spostamenti, e maggior velocità di reazione a comandi di halt mentre ci si muove in avanti</li>
-            <li>Possibile miglior reazione da parte di robot reali che non fatto uso di sistemi in feedback o altro hardware per controllare meglio i propri spostamenti: <br>
+            <li>Possibile miglior reazione da parte di robot reali che non fanno uso di sistemi in feedback o altro hardware per controllare meglio i propri spostamenti: <br>
                 L'errore potrebbe aumentare ad ogni singolo step, mentre la prima soluzione (siccome utilizza il segnale di contatto con il muro) non soffre di questo problema</li>
         </ul>
         <br>
-        <p>Per arrivare ad una decisione in merito ad una decisione così importante per la realizzazione del <i>Mover</i>, sono state state analizzate 3 diverse opzioni, che vengono qui descritte: </p>
+        <p>Per scegliere in merito ad una decisione così importante per la realizzazione del <b>Mover</b>, sono state analizzate 3 diverse opzioni, che vengono qui descritte: </p>
         
         <h4>OPZIONE 0 - senza coordinate</h4>
         <p>La prima soluzione è anche quella più semplice da comprendere: la strategia sarebbe infatti quella di attivare la giusta macchia a stati, che si occuperà di muovere il robot da una 
@@ -75,9 +75,9 @@ h6{
         <p>Pro e Contro:</p>
         <ul>
             <li>+ possibile far gestire ogni singolo caso ad un attore dedicato, dalla semplice implementazione</li>
-            <li>- Numero considerevole di casi: supponendo la destinazione sempre diversa dalla posizione attuale sarebbero 3 X 3 = 9 casi. <br>
+            <li>- Numero considerevole di casi: supponendo la destinazione sempre diversa dalla posizione attuale sarebbero 3×3 = 9 casi. <br>
                 Si potrebbe pensare di implementare solo i casi che vengono effettivamente utilizzati dall'applicazione (7: inutile implementare PB→GB e GB→PB), ma la soluzione sarebbe poco riusabile</li>
-            <li>- poca flessibilità, potrebbe essere necessario nodificare e testare un gran numero di casi se viene camabiato qualcosa</li>
+            <li>- poca flessibilità, potrebbe essere necessario modificare e testare un gran numero di casi se viene cambiato qualcosa</li>
         </ul> 
         
 
@@ -88,7 +88,7 @@ h6{
             L'idea è quella di prevedere 4 macrostati, nei quali di volta in volta si decide se il prossimo sito deve essere raggiunto o meno: in pratica si raggiuge il prossimo sito solo se 
             la destinazione non è ancora stata raggiunta. I siti possono essere visti come delle specie di "macrostati" della FSM che implementa il <b>mover</b>.
         </p>
-        <img class="centerimg" style="max-width: 700px;" src="docs/_images/transporttrolley_option1_explaination.png"/>
+        <img class="centerimg" style="max-width: 700px;" src="docs/_images/mover_option1_explaination.png"/>
         <p>Pro e Contro:</p>
         <ul>
             <li>+ semplicità</li>
@@ -97,23 +97,23 @@ h6{
             <li>- politica non molto efficiente</li>
         </ul>
         <p>A livello concettuale la macchina a stati che deve essere implementata all'interno di <b>mover</b> sarebbe la seguente:</p>
-        <img class="centerimg" src="docs/_images/transporttrolley_option1_verbose_state_machine.png"/>
+        <img class="centerimg" src="docs/_images/mover_option1_verbose_state_machine.png"/>
         <p>È anche possibile implementare lo stesso comportamento mantenendo la posizione corrente all'interno di una variabile (così come per la variabile contenente la posizione di destinazione). 
             In tal caso la macchina verrebbe semplificata parecchio:</p>
-        <img class="centerimg" src="docs/_images/transporttrolley_option1_compact_state_machine.png"/>
+        <img class="centerimg" src="docs/_images/mover_option1_compact_state_machine.png"/>
         
         <h4>OPZIONE 2 - senza coordinate</h4>
         <p>Si tratta di un'estensione dell'opzione 1: il robot è in grado di raggiungere la prossiama destinazione procedendo sia in senso orario che in senso antiorario (sulla base di quello 
             che in quel momento risulta più conveniente). 
             Inoltre il robot può cambiare rotta anche mentre si sta muovendo in avanti. </p>
-        <img class="centerimg" style="width: 400px;" src="docs/_images/transporttrolley_option2_explaination.png"/>
+        <img class="centerimg" style="width: 400px;" src="docs/_images/mover_option2_explaination.png"/>
         <p>Pro e Contro:</p>
         <ul>
             <li>+ più veloce in alcuni casi. Nello specifico dominio applicativo risulterebbe più vantaggioso solo nel caso in cui vi sia una richiesta dopo aver depositato la plastica</li>
             <li>- più complesso</li>
         </ul>
         <p>La macchina a stati che deve essere implementata all'interno di <b>Transport trolley</b> si complica, perchè tra ogni "macro stato" e l'altro vi sono molti più stati:</p>
-        <img class="centerimg" style="max-width: 1100px;" src="docs/_images/transporttrolley_option2_verbose_state_machine.png"/>
+        <img class="centerimg" style="max-width: 1100px;" src="docs/_images/mover_option2_verbose_state_machine.png"/>
         <p>Nell'immagine viene mostrato solo il ramo da <b>HOME</b> a <b>INDOOR</b> e viceversa. Prendiamo il caso in cui si voglia andare da <b>INDOOR</b> a <b>HOME</b>. Per ipotesi il robot, 
             una volta raggiunto un macro stato, si trova sempre orientato verso il prossimo sito in senso antiorario. Siccome conviene in questo caso procedere in senso orario,giriamo il robot verso 
             sinistra per puntarlo verso verso <b>HOME</b>, poi lo facciamo andare avanti (stato <i>forward_clk</i>). Se non arrivano altre destinazioni e rileviamo il contatto con la parete, vuol 
@@ -121,7 +121,7 @@ h6{
             Se invece, mentre si procede da <b>INDOOR</b> a <b>HOME</b> arriva una destinazione per la quale conviene tornare indietro (<b>INDOOR</b> o <b>PLASTICBOX</b>), allora si fa una sorta di 
             inversione ad U (stato <i> u_turn_clk</i>) per tornare al macrostato in cui si era prima.</p>
         <p>E' pur sempre possibile una implementazione più sintetica e compatta se manteniamo la posizione corrente in una variabile:</p>
-        <img class="centerimg" style="max-width: 1100px;" src="docs/_images/transporttrolley_option2_compact_state_machine.png"/>
+        <img class="centerimg" style="max-width: 1100px;" src="docs/_images/mover_option2_compact_state_machine.png"/>
         <p>Anche in questo caso verifichiamo se, mentre si sta procedendo, arriva una nuova destinazione. Se non arriva si procede fino al raggiungimento del sito. Se invece arriva e risulta più 
             conveniente cambiare direzione, si fa una inversione ad U e si torna allo stesso sito dal qaule si è partiti.</p>    
     
@@ -134,7 +134,7 @@ h6{
             <li>- rischiesto mapping iniziale della servicearea</li>
             <li>- le dimensioni della servicearea potrebbero non essere multiple di RD. È dunque necessaria una logica che (una volta raggiunte le coordinate di destinazione) faccia andare il robot a contatto con la porta, per poter effettuare le operazioni di carico/scarico.</li>
         </ul>
-        <img class="centerimg" style="width: 400px;" src="docs/_images/transporttrolley_option3_explaination.png"/>
+        <img class="centerimg" style="width: 400px;" src="docs/_images/mover_option3_explaination.png"/>
         <p>Nell'esempio mostrato bisogna</p>
         <ol>
             <li>Eseguire il path che il planner ha trovato</li>

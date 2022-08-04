@@ -58,12 +58,12 @@ h6{
     <A NAME="Dizionario"></A>
     <h3>Dizionario</h3>
     <p>Vengono qui riportati solo gli elementi nuovi o modificati rispetto al <a href="../sprint0/sprint0.html#Dizionario">dizionario dello sprint0.</a></p>
-    <p>Vengono segnati in <span class="newDictWord"><b>viola</b></span> i termini non presenti nei requisiti, ma introdotti in quanto utilizzati all'interno dei documenti prodotti</p>
-    <p>La formalizzazione avviene quando possibile con costrutti del linguaggio <a href="https://kotlinlang.org/">Kotlin</a>, mentre quando opportuno verrà utilizzato <a href="#Qak">QAK</a></p>
+    <p>Vengono segnati in <b class="newDictWord">viola</b> i termini non presenti nei requisiti, ma introdotti in quanto utilizzati all'interno dei documenti prodotti</p>
+    <p>La formalizzazione avviene quando possibile con costrutti del linguaggio <a href="https://kotlinlang.org/">Kotlin</a>, mentre quando opportuno verrà utilizzato <a href="../docs_common/Qak.html">QAK</a></p>
     <dl>
         <dt><b>Transport trolley:</b></dt>
         <dd>In seguito alla relativa <a href="#DDR_robot_vs_Transport_trolley">analisi del problema</a> di questo sprint, <b>Transport trolley</b> rappresenta un'entità robotica astratta che riceve i comandi di alto livello relativi alla prossima destinazione da raggiungere, e i comandi di <b>Pickup</b> e <b>Dropout</b>.<br>
-            Nota: il <b>Transport trolley</b> può ricevere una richiesta di nuova posizione prima che abbia raggiunto la destinazione precedente: la navigazione sarà impostata sulla nuova destinazione. In questo modo è possibile soddisfare direttamente una nuova richiesta anche se essa arriva mentre il robot sta tornando in home.<br>
+            Nota: il <b>Transport trolley</b> può ricevere una richiesta di spostamento su nuova posizione prima che abbia raggiunto la destinazione precedente: la navigazione sarà impostata sulla nuova destinazione. In questo modo è possibile soddisfare direttamente una nuova richiesta anche se essa arriva mentre il robot sta tornando in home.<br>
             Formalizzazione: 
             <code><pre>
 //POSITION = INDOOR | PLASTICBOX | GLASSBOX | HOME
@@ -102,7 +102,7 @@ Reply   dropoutanswer  : dropoutanswer(RESULT)</pre>
 <h2>Problem analysis</h2>
 <div class="remark">
     <h6><b>Architettura logica precedente:</b></h6>
-    <img class="centerimg" style="width: 450px;" src="./docs/_images/logic_architecure_0.png"/>
+    <img class="centerimg" style="width: 450px;" src="./docs/_images/logic_architecture_0.png"/>
     <p style="width: 100%; text-align: right;"><a href="../docs_common/Legenda.html">Legenda</a></p>
     <br>
 
@@ -112,10 +112,10 @@ Reply   dropoutanswer  : dropoutanswer(RESULT)</pre>
     <ul>
         <li>
             Possibile una separazione dei due concetti: <br>
-            Il termine "DDR - Differential Drive Robot" rappresenta la tecnologia con la quale il robot si muove. Il <b>DDR robot</b> è quindi una entità di basso livello che riceve comandi base come "anvanti", "destra", "sinistra", "halt", ecc.. <br>
-            Possiamo quindi identificare il <b>DDR robot</b> come l'attore QAK <a href="https://github.com/anatali/issLab2022/blob/main/unibo.basicrobot22/src/basicrobot.qak"><i>basicrobot</i></a> presente nel progetto <i>basicrobot22</i>, che infatti riceve comandi:
+            Il termine "DDR - Differential Drive Robot" rappresenta la tecnologia con la quale il robot si muove. Il <b>DDR robot</b> è quindi una entità di basso livello che riceve comandi base come "avanti", "destra", "sinistra", "halt", ecc.. <br>
+            Possiamo quindi identificare il <b>DDR robot</b> come l'attore QAK <a href="../sprint0/RequirementQakSprint0/src/requirementAnalysis/BasicRobotRequirement.qak"><i>basicrobot</i></a> presente in <a href="https://github.com/anatali/issLab2022/tree/main/unibo.basicrobot22">unibo.basicRobot22</a>, che infatti riceve comandi:
             <code><pre>
-//MOVE =  w | a | s | d | h
+//MOVE =  w | a | s | d | h    | l | r
 Dispatch cmd           : cmd(MOVE)</pre>
             </code>
         </li>
@@ -139,7 +139,7 @@ Reply   moveanswer     : moveanswer(RESULT)</pre>
     Si noti tuttavia che, qualora tale componente debba fare utilizzo di un planner (che effettua una ricerca nello spazio degli stati), allora si dovrebbe considerare la possibilità 
     di porre tale attore su un nodo computazionale più potente, dove il consumo di potenza non è un problema (mentre si presume che il robot sia alimentato a batteria). <br>
     Alla luce delle osservazioni sinora fatte, l'architettura logica attuale è la seguente:
-    <img class="centerimg" style="width: 500px;" src="docs/_images/logic_architecure_1.png"/>
+    <img class="centerimg" style="width: 500px;" src="docs/_images/logic_architecture_1.png"/>
     <p style="width: 100%; text-align: right;"><a href="../docs_common/Legenda.html">Legenda</a></p>
 
     <h4>Operazioni eseguite dal <b>Transport trolley</b>:</h4>
@@ -147,12 +147,12 @@ Reply   moveanswer     : moveanswer(RESULT)</pre>
         In questo modo se dovesse cambiare il processo di smistamento basterà modificare la sequenza di comandi che vengono impartiti al <b>Transport trolley</b>, senza bisogno di 
         modificare quest'ultimo. Riteniamo inoltre corretto far gestire questa operazione a <b>Transport trolley</b>, siccome un domani potrebbe esser necessario inviare comandi o 
         segnali a HW presente sul robot per compiere queste azioni.</p>
-    <p>Allo stesso tempo sarebbe bene mantenenre separate la parte che implementa la navigazione del robot verso la prossima destinazione dalla parte che implementa le azioni di 
+    <p>Allo stesso tempo sarebbe bene mantenere separate la parte che implementa la navigazione del robot verso la prossima destinazione dalla parte che implementa le azioni di 
         <b>Pickup</b> e <b>Dropout</b>. Per questo motivo si è scelto di far si che il <b>Transport trolley</b> funga da semplice "dispatcher" di comandi verso 2 componenti che si occupano
-        separatamente di implementare separatamente quanto detto prima:</p>
+        separatamente di implementare separatamente i due aspetti prima citati:</p>
     <ul>
         <li>
-            <p>Attore <i>pickupdropdownhandler</i> per implementare le operazioni di <b>Pickup</b> e <b>Dropout</b>.</p>
+            <p>Attore <i>pickupdropouthandler</i> per implementare le operazioni di <b>Pickup</b> e <b>Dropout</b>.</p>
             <code><pre>
 //RESULT =  OK | ERROR
 Request pickup         : pickup(_)
@@ -176,21 +176,20 @@ Reply   moveanswer     : moveanswer(RESULT)</pre>
         <i>Basicrobotwrapper</i> riceverà e risponderà con messaggi del tipo:</p>
         <code><pre>
 //RESULT =  OK | ERROR 
-//MOVE =  w | l | r | h     //the command end when the reply is sent
+//MOVE =  w | l | r | h 
 Request cmdsync   	: cmdsync(MOVE)
 Reply cmdanswer   	: cmdanswer(RESULT)</pre>
         </code>
         <p>La scelta di introdurre questo componente potrebbe poi rilevarsi strategica per la gestione dell'halt quando la distanza misurata dal <b>Sonar</b> è ≤ DLIMT. <br>
             Potremmo infatti introdurre a questo livello due operazioni che bloccano e fanno riprendere al robot la mossa attualmente in esecuzione, il tutto in maniera trasparente ai 
-            componenti già sviluppati. Esploreremo meglio questa opportunità negli sprint successivi.<br>
+            componenti di più alto livello. Esploreremo meglio questa opportunità negli sprint successivi.<br>
         Ora l'architettura è questa: </p>
-    <img class="centerimg" style="width: 700px;" src="docs/_images/logic_architecure_2.png"/>
+    <img class="centerimg" style="width: 700px;" src="docs/_images/logic_architecture_2.png"/>
     <p style="width: 100%; text-align: right;"><a href="../docs_common/Legenda.html">Legenda</a></p>
 
-    <p>Si noti come le interazioni con il <b>Transport trolley</b> siano tutte delle request-response. <br>
-        Colui che comanda il <b>Transport trolley</b> (cioè una visione astratta e ad alto livello del robot) si aspetta una interazione sincrona bloccante, e si aspetta una risposta con l'esito dell'operazione.<br>
-        Tuttavia, solo per il comando <i>move(POSITION)</i>, è possibile comandare una nuova destinazione anche se quella precedente non è stata ancora raggiunta. <br>
-        Questo perchè è possibile che arrivi un nuovo <b>Waste-truck</b> mentre il <b>Transport trolley</b> sta tornando a <b>HOME</b>. In questo modo è possibile soddisfare il requisito di gesione immediata della nuova richiesta senza aspettare che il <b>Transport trolley</b> raggiunga <b>HOME</b>. 
+    <p>Si noti come le interazioni con il <b>Transport trolley</b> siano tutte delle request-response sincrone bloccanti. 
+        Tuttavia, solo per il comando <i>move(POSITION)</i>, è possibile comandare una nuova destinazione anche se quella precedente non era stata ancora raggiunta. <br>
+        Questo perchè è possibile che arrivi un nuovo <b>Waste-truck</b> mentre il <b>Transport trolley</b> sta tornando a <b>HOME</b>. In questo modo è possibile la gestione immediata della nuova richiesta senza aspettare che il <b>Transport trolley</b> raggiunga <b>HOME</b>. 
         Il nuovo comando annulla di fatto la <i>move</i> precedente, quindi si riceverà solo la risposta relativa all'ultimo comando.
     </p>
 
@@ -212,32 +211,32 @@ Reply cmdanswer   	: cmdanswer(RESULT)</pre>
     <ul>
         <li>Minor complessità, minor costo</li>
         <li>Maggior velocità negli spostamenti, e maggior velocità di reazione a comandi di halt mentre ci si muove in avanti</li>
-        <li>Possibile miglior reazione da parte di robot reali che non fatto uso di sistemi in feedback o altro hardware per controllare meglio i propri spostamenti: <br>
+        <li>Possibile miglior reazione da parte di robot reali che non fanno uso di sistemi in feedback o altro hardware per controllare meglio i propri spostamenti: <br>
             L'errore potrebbe aumentare ad ogni singolo step, mentre la prima soluzione (siccome utilizza il segnale di contatto con il muro) non soffre di questo problema</li>
     </ul>
     <br>
-    <p>Per arrivare ad una decisione in merito ad una decisione così importante per la realizzazione del <b>Mover</b>, sono state state analizzate 3 diverse opzioni, che vengono descritte in <a href="grid_or_boundary_analysis.html">grid_or_boundary_analysis.html</a>. </p>
-    <p>Come riportato nel relativo documento, optimao per l'utilizzo di una soluzione senza utilizzo di coordinate, facendo solamente uso di una FSM</p>
+    <p>Per scegliere in merito ad una decisione così importante per la realizzazione del <b>Mover</b>, sono state analizzate 3 diverse opzioni, che vengono descritte in </p>
+    <p style="width: 100%; text-align: center; padding: 1rem"> <a href="grid_or_boundary_analysis.html">grid_or_boundary_analysis.html</a> </p>
+    <p>Come riportato nel relativo documento, optiamo per l'utilizzo di una soluzione senza utilizzo di coordinate, facendo solamente uso di una FSM</p>
 
     <h3><b>WasteService</b></h3>
-    <p>Possiamo pensare il <b>WasteService</b> come il componente controller, ossia quello che contiene la business logic del sistema.</p>
-    <p>In particolare possiamo identificare due "macro-parti" di questo servizio, che abbiamo diviso in 2 distinti attori:</p>
+    <p>Il <b>WasteService</b> contiene buona parte della business logic del sistema. Possiamo identificare due "macro-parti" di questo servizio, che abbiamo diviso in 2 distinti attori:</p>
     <ul>
         <li>La prima è quella che si occupa di ricevere le richieste, vedere se è possibile prendere in carico il manteriale e mantenere aggiornati i volumi presenti all'interno dei container (di questo se ne occupa l'attore <i>wasteservice</i>)</li>
         <li>La seconda è quella che invia i comandi per effettuare la <b>Deposit action</b> (compito delegato all'attore <i>depositaction</i>).</li>
     </ul>
     <p>Architettura:</p>
-    <img class="centerimg" style="max-width: 700px;" src="docs/_images/logic_architecure_2.png"/>
+    <img class="centerimg" style="max-width: 750px;" src="docs/_images/logic_architecture_3.png"/>
     <p style="width: 100%; text-align: right;"><a href="../docs_common/Legenda.html">Legenda</a></p>
 
-    <p>Oltre al modello QAK, riportiamo qui il diagramma degli stati di </p>Abbiamo analizzato le funzionalità che il servizio <b>WasteService</b> deve offrire, e abbiamo quindi formalizzato tale entità con il modello qak. <br>
+    <p>Abbiamo analizzato le funzionalità che il servizio <b>WasteService</b> deve offrire, e abbiamo quindi formalizzato tale entità includendola nel <a href="QakSprint1/src/Prototype/demo0.qak">file QAK di questo sprint</a>.<br>
         Per una migliore comprensione, viene riportato il diagramma degli stati di <i>wasteservice</i> e <i>depositaction</i>. </p>
     <br>
     <p>Attore <i>wasteservice</i>:</p>
     <img class="centerimg" style="max-width: 700px;" src="docs/_images/wasteservice_actor_state_diagram_1.png"/>
     <p><i>Wasteservice</i> rimane in attesa di nuove richieste quando è nello stato wait. Quando arriva la prima richiesta si decide se viene accettata o meno (stato <i>handle_req</i>). Se viene 
-        accettata si richiede all'attore <i>depositaction</i> di effettuare l'operazione, e si attende la risposta <i>pickupdone</i> (<i>stato req_depositaction</i>). Il truck riceve la <b>loadaccept</b> 
-        subito dopo l'operazione di <b>Pickup</b>, mentre riceve <b>loadrejected</b> appena fatta la richiesta.</p>
+        accettata si richiede all'attore <i>depositaction</i> di effettuare l'operazione (stato <i>req_depositaction</i>) e si attende la risposta <i>pickupdone</i>. <br>
+        Il truck riceve quindi la <b>loadaccept</b> subito dopo l'operazione di <b>Pickup</b> (stato <i>chk_depositaction</i>), mentre riceve <b>loadrejected</b> appena fatta la richiesta (stato <i>rejected</i>).</p>
     <br>
     <p>Attore <i>depositaction</i>:</p>
     <img class="centerimg" style="max-width: 1000px;" src="docs/_images/depositaction_actor_state_diagram_1.png"/>
@@ -246,12 +245,10 @@ Reply cmdanswer   	: cmdanswer(RESULT)</pre>
         <i>move_home</i>), altrimenti le gestisce subito. Se mentre ci si sta muovendo verso <b>HOME</b> arriva una nuova richiesta, questa viene gestita immediatamente.
     </p>
     <br>
-    <p>Si noti come <i>wasteservice</i> sia pronto per elaborare una nuova richiesta nonappena gli arriva da <i>depositaction</i> la risposta <i>pickupdone</i>. <i>Wasteservice</i> quindi 
-        elabora parzialmente nuove richieste prima ancora che il robot abbia finito di gestire il carico precedente.<br>
-        Nello specifico, se non sarebbe comunque possibile soddisfare tale richiesta per l'insufficiente spazio rimanente nei container, viene inviata immediatamente (potenzialmente appena dopo la <b>Pickup</b> 
-        relativa alla precedente richiesta) una <b>loadrejected</b>. <br>
-        Se invece la richiesta può essere soddisfatta, <i>wasteservice</i> invierà subito la richiesta di <i>depositaction</i> verso l'omonimo attore, anche se il robot deve ancora depositare
-        il carico della richesta precedente. Tuttavia l'attore <i>depositaction</i> risponderà con una <i>pickupdone</i> solo quando verrà fatta la <b>Pickup</b> relativa alla nuova richiesta.
+    <p>Si noti come <i>wasteservice</i> sia pronto per elaborare una nuova richiesta non appena gli arriva da <i>depositaction</i> la risposta <i>pickupdone</i>. <i>Wasteservice</i> può quindi 
+        elaborare parzialmente nuove richieste prima ancora che il robot abbia finito di gestire quella precedente (potenzialmente già dalla conclusione della <b>Pickup</b> della richiesta attualmente in gestione).<br>
+        Nello specifico, se non sarebbe comunque possibile soddisfare tale richiesta per l'insufficiente spazio rimanente nei container, viene inviata una <b>loadrejected</b> e si analizza la prossima richiesta.
+        Se invece la richiesta può essere soddisfatta, <i>wasteservice</i> invierà la richiesta di <i>depositaction</i> verso l'omonimo attore, tuttavia questo gli risponderà con una <i>pickupdone</i> solo quando verrà fatta la <b>Pickup</b> relativa alla nuova richiesta.
         Quindi, nel caso di due richieste consecutive che possono essere entrambe soddisfatte, la FSM di <i>wasteservice</i> aspetterà nello stato <i>req_depositaction</i> prima di poter processare 
         (anche solo parzialmente) una terza richiesta: essa verrebbe infatti accodata nella coda interna dell'attore</p>
 
@@ -259,37 +256,78 @@ Reply cmdanswer   	: cmdanswer(RESULT)</pre>
     
 
 
-<!--<h2>Project</h2> 
-</div>-->
+<h2>Project</h2>
+<div class="remark">
+    <p>Procediamo con lo sviluppo vero e proprio dei componenti. Essi sono tutti presenti nel <a href="QakSprint1/src/Prototype/demo0.qak">file QAK di questo sprint</a>, ma vengono qui riportate e spiegate le macchine a stati che li implementano.</p>
+    
+    <h3><i>wasteservice</i></h3>
+    <p>La macchina a stati non differisce da quella dell'analisi del problema, se non per l'aggiunta dello stato di errore.</p>
+    <img class="centerimg" style="max-width: 700px;" src="./docs/_images/wasteservice_actor_state_diagram_2.png" />
+
+    <h3><i>depositaction</i></h3>
+    <p>Rispetto all'analisi del problema vengono aggiunti gli stati che servono per controllare l'esito dell'operazione e lo stato di errore. Per il resto la macchina a stati non differisce da quella dell'analisi del problema</p>
+    <img class="centerimg" style="max-width: 1150px;" src="./docs/_images/depositaction_actor_state_diagram_2.png" />
+
+    <h3><i>trasporttrolley</i></h3>
+    <p>Come anticipato, si tratta di un semplice dispatcher di comandi. Si noti come per l'operazione di <i>move</i> sia possibile comandare una nuova <i>move(POS)</i> senza che la precedente sia necessariamente terminata.</p>
+    <img class="centerimg" style="max-width: 550px;" src="./docs/_images/transporttrolley_state_machine.png"/>
+
+    <h3><i>pickupdropouthandler</i></h3>
+    <p>Si tratta di un componente il cui compito è semplicemente quello di contenere le routine di gestione delle operazioni di <b>Pickup</b> e <b>Dropout</b> (che attualmente consistono semplicemente in delle delay).</p>
+    <img class="centerimg" style="max-width: 300px;" src="./docs/_images/pickupdropouthandler_state_machine.png"/>
+
+    <h3><i>mover</i></h3>
+    <p>La logica di base del componente rimane quella analizzata nell'opzione 1 di <a href="grid_or_boundary_analysis.html">grid_or_boundary_analysis</a>. Tuttavia per poterlo implementare efficacemente con QAK la struttura è stata riorganizzata nel seguente modo:</p>
+    <img class="centerimg" style="max-width: 800px;" src="./docs/_images/mover_actor_state_diagram_1.png"/>
+    <p>In particolare lo stato <i>handle</i> conterrà un blocco onMsg() che permetterà di settare la variabile di destinazione solo quando arriva un messaggio <i>move(POS)</i>, mentre la guardia 
+        permetterà di capire se è necessario continuare per raggiungere la prossima <b>Position</b> o fermarsi. Inoltre la transizione che va da <i>reply</i> a <i>wait</i> potrebbe avvenire sia in assenza 
+        di messaggi (transizione spontanea), sia consumando un ulteriore messaggio <i>move(POS)</i>, il che avviene quando si cambia la destinazione prima ancora di aver raggiunto quella precedente.</p>
+    <p>La macchina a stati completa sarebbe quindi la seguente:</p>
+    <img class="centerimg" style="max-width: 800px;" src="./docs/_images/mover_actor_state_diagram_2.png"/>
+
+    <h3><i>basicrobotwrapper</i></h3>
+    <p>Un semplice wrapper che permette di comandare il robot facendo uso di semplici comandi sincroni bloccanti. Per il comando di andata avanti (<i>cmdsync(w)</i>) la risposta viene ricevuta dopo aver rilevato l'impatto con il muro (evento <i>info</i>): </p>
+    <img class="centerimg" style="max-width: 750px;" src="./docs/_images/basicrobotwrapper_state_machine.png"/>
+</div>
 
 
 <h2>Test plans</h2> 
 <div class="remark">
-    Per il <b>Test plan</b> sono state definite due classi JUnit <b><a href="QakSprint1/test/testSprint1/TestSprint1_simple.kt">TestSprint1_simple</a></b> e <b><a href="QakSprint1/test/testSprint1/TestSprint1_hystory.kt">TestSprint1_hystory</a></b><br>
-    Sono stati resi osservabili tramite Coap gli attori WasteService e TrasportTrolley.<br>
-    <p>Sono state inoltre create due classi di utilità <b><a href="QakSprint1/test/testSprint1/TestObserver.java">TestObserver</a></b> e <b><a href="QakSprint1/test/testSprint1/TestUtils.kt">TestUtils</a></b>  in grado di leggere lo storico delle informazioni di WasteService e TrasportTrolley
-    e poterne valutare il corretto funzionamento nei test<br></p>
+    <p>Per il <b>Test plan</b> sono state definite le classi di test JUnit <a href="QakSprint1/test/testSprint1/TestSprint1_wasteservice.kt">TestSprint1_wasteservice</a> e 
+        <a href="QakSprint1/test/testSprint1/TestSprint1_integration_test.kt">TestSprint1_integration_test</a> </p>
+    <p>Per un testing adeguato, viene sfruttata la possibilità di rendere gli attori osservabili mediate CoAP. I test registrano sistematicamente ogni cambiamento di stato degli attori osservati, dopo di che 
+        si controlla che la sequenza di cambiamenti di stato sia compatibile con quello che ci si aspetta che accada. Al fine di rendere il testing più agevole sono state realizzate le classi di utilità
+        <a href="QakSprint1/test/testSprint1/TestObserver.kt">TestObserver</a> e <a href="QakSprint1/test/testSprint1/TestUtils.kt">TestUtils</a>.</p>
 
     <h4><p>Test effettuati:</p></h4>
     <ul>
-        <h5>TestSprint1_simple.kt:</h5>
-        <li><b>test_2_accepted()</b>: Test due richieste accettate</li>
-        <li><b>test_1_accepted_1_rejected()</b>: Test due richieste una accettata e una rifiutata</li>
-        <h5>Classe di test TestSprint1_hystory.kt:</h5>
-        <p>La seguente classe di test verifica inoltre i cambiamenti di stato che avvengono negli attori <b>WasteService</b> e <b>TrasportTrolley</b> mediante un <u>Observer CoAP</u>.</p><br>
-        <lI><b>test_accepted()</b>: Test singola richiesta accettata</lI>
-        <li><b>test_rejected()</b>: Test singola richiesta rifiutata</li>
-        <li><b>test_2_accepted_while_in_operation()</b>: Test due richieste (la seconda inviata mentre la prima richiesta non era ancora conclusa) accettate</li>
-        <li><b>test_1_accepted_1_rejected_while_in_operation()</b>: Test due richieste (la seconda inviata mentre la prima richiesta non era ancora conclusa) una accettata e una rifiutata</li>
-        <li><b>test_2_accepted_while_returning_home()</b>: Test due richieste (la seconda inviata mentre il robot stava tornando a casa dalla prima richiesta) accettate</li>
-        <li><b>test_1_accepted_1_rejected_while_returning_home</b>: Test due richieste (la seconda inviata mentre il robot stava tornando a casa dalla prima richiesta) una accettata e una rifiutata</li>
-        <li><b>test_1_accepted_1_rejected_while_returning_home_1_accepted()</b>: Test dove se si riceva una depositrequest, ed essa è poi rifiutata, viene consumato il messaggio mediante un autoanello nello stato di wait</li>
-    
+        <h6>TestSprint1_wasteservice.kt:</h6>
+        <p>Si tratta essenzialmente degli stessi test già individuati in fase di analisi dei requisiti</p>
+        <li><u>test_2_accepted()</u>: Invio al <i>wasteservice</i> di due richieste, che devono essere accettate</li>
+        <li><u>test_1_accepted_1_rejected()</u>: Invio al <i>wasteservice</i> di due richieste, la prima deve essere accettata, la seconda no per mancanza di spazio</li>
+        <h6>Classe di test TestSprint1_integration_test.kt:</h6>
+        <p>Verifica i cambiamenti di stato che avvengono negli attori <i>wasteservice</i>, <i>depositaction</i>, <i>transporttrolley</i>, <i>pickupdropouthandler</i> e <i>mover</i>.</p>
+        <lI><u>test_accepted()</u>: Test singola richiesta che deve essere accettata</lI>
+        <li><u>test_rejected()</u>: Test singola richiesta che deve essere rifiutata</li>
+        <li><u>test_2_accepted_while_in_operation()</u>: Test due richieste (la seconda inviata appena iniziate le operazioni di <b>Dropout</b> della richiesta precedente): il robot va direttamente in INDOOR per soddisfare la seconda richiesta, che viene accettata</li>
+        <li><u>test_1_accepted_1_rejected_while_in_operation()</u>: Test due richieste (la seconda inviata appena iniziate le operazioni di <b>Dropout</b> della richiesta precedente): il robot va comunque in HOME, siccome la seconda richiesta deve essere rifiutata</li>
+        <li><u>test_2_accepted_while_returning_home()</u>: Test due richieste (la seconda inviata mentre il robot stava tornando a casa): il robot deve reimpostare la sua destinazione verso INDOOR per soddisfare la seconda richiesta, che viene accettata</li>
+        <li><u>test_1_accepted_1_rejected_while_returning_home()</u>: Test due richieste (la seconda inviata mentre il robot stava tornando a casa): il robot deve continuare ad andare verso HOME, siccome la seconda richiesta deve essere rifiutata</li>
     </ul>
 
 </div>
 
-<h3><a href="QakSprint1/src/Prototype/demo0.qak">Metamodello eseguibile QAK</a></h3>
+<div class="remark" style="background-color: #c3fbe8;">
+    <h3>Riassunto situazione attuale:</h3>
+    <h6>Architettura logica:</h6>
+    <img class="centerimg" style="width: 700px;" src="docs/_images/logic_architecture_2.png"/>
+    <p style="width: 100%; text-align: right;"><a href="../docs_common/Legenda.html">Legenda</a></p>
+    <h6>QAK</h6>
+    <a href="QakSprint1/src/Prototype/demo0.qak">Metamodello eseguibile QAK</a>
+    <h6><p>Testplan:</p></h6>
+    <p><a href="QakSprint1/test/testSprint1/TestSprint1_wasteservice.kt">TestSprint1_wasteservice</a> <br>
+        <a href="QakSprint1/test/testSprint1/TestSprint1_integration_test.kt">TestSprint1_integration_test</a></p>
+</div>
  
 <!-- USEFUL
 <table style="width:100%" border="1">

@@ -7,12 +7,13 @@ import unibo.comm22.coap.CoapConnection
 import unibo.comm22.utils.ColorsOut
 import unibo.comm22.utils.CommSystemConfig
 import unibo.comm22.utils.CommUtils
+import ws.LedState
 import java.io.IOException
 import java.time.Duration
 import kotlin.test.Test
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation::class)
-internal class TestWasteservice {
+internal class TestLed {
     private var to: TestObserver? = null
     private var processHandleServer: ProcessHandle? = null
     private var prServer: Process? = null
@@ -40,7 +41,7 @@ internal class TestWasteservice {
         }
 
         val to = TestObserver()
-        to.establishCoapConn("wasteservice");
+        to.establishCoapConn("led");
         this.to = to
         ColorsOut.outappl("INITIALIZATION DONE", ColorsOut.BLUE)
     }
@@ -69,54 +70,58 @@ internal class TestWasteservice {
 
     @Test
     @Timeout(30)
-    fun test_2_accepted() {
+    fun test_led_at_home() {
         assertTimeoutPreemptively<Unit>(Duration.ofSeconds(25)) {
-            CommUtils.delay(100)
             try {
                 val connTcp = ConnTcp("localhost", 8095)
 
-                //FIRST REQUEST
-                var truckRequestStr = "msg(depositrequest, request,python,wasteservice,depositrequest(GLASS,2),1)"
-                var answer = connTcp.request(truckRequestStr)
-                ColorsOut.outappl("test_2_accepted answer=$answer", ColorsOut.GREEN)
-                Assertions.assertTrue(answer.contains("loadaccept"))
+                var RequestStr = "msg(obstacle, event,distanceFilter,wasteservice,obstacle(1),1)" //simulate a close object to the sonar
+                connTcp.forward(RequestStr)
+                CommUtils.delay(1000)
+                RequestStr = "msg(obstacle, event,distanceFilter,wasteservice,obstacle(20),1)" //simulate a far object to the sonar
+                connTcp.forward(RequestStr)
+                CommUtils.delay(1000)
 
-                //SECONDO REQUEST
-                truckRequestStr = "msg(depositrequest, request,python,wasteservice,depositrequest(GLASS,7),1)"
-                answer = connTcp.request(truckRequestStr)
-                ColorsOut.outappl("testSecondRequest answer=$answer", ColorsOut.GREEN)
-                Assertions.assertTrue(answer.contains("loadaccept"))
+                //history should contain only OFF messages
+                Assertions.assertTrue(to!!.checkNextContent("led(*,${LedState.OFF})") >= 0);
+                //ON and BLINK should never occur
+                Assertions.assertFalse( to!!.checkNextContent("led(*,${ws.LedState.ON})") >= 0);
+                Assertions.assertFalse( to!!.checkNextContent("led(*,${ws.LedState.BLINK})") >= 0);
 
                 connTcp.close()
             } catch (e: java.lang.Exception) {
-                ColorsOut.outerr("test_2_accepted ERROR:" + e.message)
+                ColorsOut.outerr("test_led_at_home ERROR:" + e.message)
                 Assertions.fail();
             }
         }
     }
 
     @Test
-    fun test_1_accepted_1_rejected() {
+    fun test_led_moving() {
         assertTimeoutPreemptively<Unit>(Duration.ofSeconds(15)){
-            CommUtils.delay(100)
             try {
                 val connTcp = ConnTcp("localhost", 8095)
 
-                //FIRST REQUEST
-                var truckRequestStr = "msg(depositrequest, request,python,wasteservice,depositrequest(GLASS,2),1)"
-                var answer = connTcp.request(truckRequestStr)
-                ColorsOut.outappl("testFirstRequest answer=$answer", ColorsOut.GREEN)
-                Assertions.assertTrue(answer.contains("loadaccept"))
+                //REQUEST
+                var RequestStr = "msg(depositrequest, request,python,wasteservice,depositrequest(GLASS,2),1)"
+                connTcp.forward(RequestStr)
 
-                //SECONDO REQUEST
-                truckRequestStr = "msg(depositrequest, request,python,wasteservice,depositrequest(GLASS,9),1)"
-                answer = connTcp.request(truckRequestStr)
-                ColorsOut.outappl("testSecondRequest answer=$answer", ColorsOut.GREEN)
-                Assertions.assertTrue(answer.contains("loadrejected"))
+                CommUtils.delay(1000)
+                RequestStr = "msg(obstacle, event,distanceFilter,wasteservice,obstacle(1),1)" //simulate a close object to the sonar
+                connTcp.forward(RequestStr)
+                CommUtils.delay(1000)
+                RequestStr = "msg(obstacle, event,distanceFilter,wasteservice,obstacle(20),1)" //simulate a far object to the sonar
+
+                //the led should first blink when the robot starts, then it stays on when the robot is blocked, then it blinks again
+                Assert.assertTrue(to!!.checkNextSequence(arrayOf(
+                    "led(*,${LedState.BLINK})",
+                    "led(*,${LedState.ON})",
+                    "led(*,${LedState.BLINK})"
+                )))
 
                 connTcp.close()
             } catch (e: java.lang.Exception) {
-                ColorsOut.outerr("test_1_accepted_1_rejected ERROR:" + e.message)
+                ColorsOut.outerr("test_led_moving ERROR:" + e.message)
                 Assertions.fail();
             }
         }

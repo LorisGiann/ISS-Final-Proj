@@ -2,21 +2,18 @@ package testSprint1
 
 import org.junit.Assert
 import org.junit.jupiter.api.*
-import unibo.comm22.coap.CoapConnection
 import unibo.comm22.utils.ColorsOut
 import unibo.comm22.utils.CommSystemConfig
 import unibo.comm22.utils.CommUtils
-import java.io.BufferedReader
 import java.io.IOException
-import java.io.InputStreamReader
-import java.net.ServerSocket
 import java.time.Duration
 import kotlin.test.Test
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation::class)
 internal class TestTransporttrolley {
-    private var processHandleServer: ProcessHandle? = null
-    private var prServer: Process? = null
+    private var to: TestObserver? = null
+    private var processHandlRobot: ProcessHandle? = null
+    private var prRobot: Process? = null
 
     companion object {
         @JvmStatic
@@ -33,26 +30,38 @@ internal class TestTransporttrolley {
         CommSystemConfig.tracing = false
         try {
             TestUtils.terminateProcOnPort(8095); //making sure that the port is free
-            val (prS, processHandleS) = TestUtils.runCtx("build/libs/it.unibo.ctxtransporttrolley.MainCtxtransporttrolleyKt-1.0.jar")
-            prServer=prS; processHandleServer=processHandleS
+            val (prR, processHandleR) = TestUtils.runCtx("build/libs/it.unibo.ctxrobot.MainCtxrobotKt-1.0.jar")
+            prRobot=prR; processHandlRobot=processHandleR
         } catch (e: IOException) {
             ColorsOut.outappl("Errore launch ", ColorsOut.RED)
             System.exit(1)
         }
 
-        CommUtils.delay(2000)
+        val to = TestObserver()
+        to.establishCoapConn("transporttrolley");
+        this.to = to
         ColorsOut.outappl("INITIALIZATION DONE", ColorsOut.BLUE)
     }
 
     @AfterEach
     fun down() {
+        ColorsOut.outappl(to!!.getHistory().toString(), ColorsOut.MAGENTA)
+        try {
+            //FIRSTLY, try to be nice and make the program exit "normally"
+            processHandlRobot!!.destroy()
+            prRobot!!.destroy()
+            CommUtils.delay(1000)
+            //since sometime this isn't enough, do it the heavy way...
+            processHandlRobot!!.destroyForcibly()
+        }catch(_:  NullPointerException){ }
 
+        to!!.closeAllConnections()
     }
 
 
     @Test
     fun dummy() {
-        Assert.assertTrue(true)
+        Assertions.assertTrue(true)
     }
 
 
@@ -66,11 +75,11 @@ internal class TestTransporttrolley {
                 var RequestStr = "msg(move, request,python,transporttrolley,move(INDOOR),1)"
                 var answer = connTcp.request(RequestStr)
                 ColorsOut.outappl("answer=$answer", ColorsOut.GREEN)
-                Assert.assertTrue(answer.contains("moveanswer(OK)"))
+                Assertions.assertTrue(answer.contains("moveanswer(OK)"))
                 connTcp.close()
             } catch (e: java.lang.Exception) {
                 ColorsOut.outerr("test_1_move ERROR:" + e.message)
-                Assert.fail();
+                Assertions.fail();
             }
         }
     }
@@ -81,24 +90,34 @@ internal class TestTransporttrolley {
         assertTimeoutPreemptively<Unit>(Duration.ofSeconds(25)) {
             try {
                 val connTcp = ConnTcp("localhost", 8095)
+                to!!.waitUntilState("transporttrolley","handle_cmd")
                 
                 //FIRST REQUEST
-                var RequestStr1 = "msg(move, request,python,transporttrolley,move(INDOOR),1)"
+                val RequestStr1 = "msg(move, request,python,transporttrolley,move(INDOOR),1)"
                 connTcp.forward(RequestStr1) //do non wait for a reply
                 ColorsOut.outappl("FIRST REQUEST SENT", ColorsOut.GREEN)
                 CommUtils.delay(100)
                 
                 //SECOND REQUEST
                 ColorsOut.outappl("SENDING SECOND REQUEST", ColorsOut.GREEN)
-                var RequestStr2 = "msg(move, request,python,transporttrolley,move(PLASTICBOX),1)"
-                var answer = connTcp.request(RequestStr2)
+                val RequestStr2 = "msg(move, request,python,transporttrolley,move(PLASTICBOX),1)"
+                val answer = connTcp.request(RequestStr2)
                 
                 ColorsOut.outappl("answer=$answer", ColorsOut.GREEN)
-                Assert.assertTrue(answer.contains("moveanswer(OK)"))
+                Assertions.assertTrue(answer.contains("moveanswer(OK)"))
                 connTcp.close()
+
+                Assertions.assertTrue(to!!.checkNextSequence(arrayOf(
+                    "transporttrolley(moving_indoor)",
+                    "transporttrolley(moving_plasticbox)",
+                    "transporttrolley(moved_plasticbox)"
+                )))
+                to!!.nextCheckIndex = 0
+                Assertions.assertFalse(to!!.checkNextContent("transporttrolley(moved_indoor)") >= 0)
+
             } catch (e: java.lang.Exception) {
                 ColorsOut.outerr("test_2_move ERROR:" + e.message)
-                Assert.fail();
+                Assertions.fail();
             }
         }
     }
@@ -111,14 +130,14 @@ internal class TestTransporttrolley {
             try {
                 val connTcp = ConnTcp("localhost", 8095)
                 
-                var RequestStr = "msg(pickup, request,python,transporttrolley,pickup(_),1)"
-                var answer = connTcp.request(RequestStr)
+                val RequestStr = "msg(pickup, request,python,transporttrolley,pickup(_),1)"
+                val answer = connTcp.request(RequestStr)
                 ColorsOut.outappl("answer=$answer", ColorsOut.GREEN)
-                Assert.assertTrue(answer.contains("pickupanswer(OK)"))
+                Assertions.assertTrue(answer.contains("pickupanswer(OK)"))
                 connTcp.close()
             } catch (e: java.lang.Exception) {
                 ColorsOut.outerr("test_pickup ERROR:" + e.message)
-                Assert.fail();
+                Assertions.fail();
             }
         }
     }
@@ -130,14 +149,14 @@ internal class TestTransporttrolley {
             try {
                 val connTcp = ConnTcp("localhost", 8095)
                 
-                var RequestStr = "msg(dropout, request,python,transporttrolley,dropout(_),1)"
-                var answer = connTcp.request(RequestStr)
+                val RequestStr = "msg(dropout, request,python,transporttrolley,dropout(_),1)"
+                val answer = connTcp.request(RequestStr)
                 ColorsOut.outappl("answer=$answer", ColorsOut.GREEN)
-                Assert.assertTrue(answer.contains("dropoutanswer(OK)"))
+                Assertions.assertTrue(answer.contains("dropoutanswer(OK)"))
                 connTcp.close()
             } catch (e: java.lang.Exception) {
                 ColorsOut.outerr("test_dropout ERROR:" + e.message)
-                Assert.fail();
+                Assertions.fail();
             }
         }
     }

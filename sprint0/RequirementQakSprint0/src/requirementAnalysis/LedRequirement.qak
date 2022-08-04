@@ -1,5 +1,5 @@
-//https://dl.bintray.com/jetbrains/kotlin/eclipse-plugin/0.8.19/ 
-  
+//https://dl.bintray.com/jetbrains/kotlin/eclipse-plugin/0.8.19/
+
 System demoled
 //-------------------------------------- LED --------------------------------------------
 Event    update_led 	 : update_led(LEDSTATE) // LEDSTATE = ON | OFF | BLINK

@@ -509,19 +509,19 @@ QActor basicrobot context ctxrobot{
   		//run unibo.robot.robotSupport.move( "l" )    //synch
  		//run unibo.robot.robotSupport.move( "r" )	//synch
     		//run unibo.robot.robotSupport.move( "w" )    //asynch 
- 		updateResource [# "basicrobot(start)" #]
- 	} 
+ 		updateResource [# "basicrobot(s0)" #]
+ 	}
 	Goto work
-	
-	State work{ 
-		println("basicrobot | waiting .............. ")  
-	} 
+
+	State work{
+		println("basicrobot | waiting .............. ")
+	}
 	Transition t1   whenMsg     cmd       -> execcmd
-					whenRequest step      -> doStep			
+					whenRequest step      -> doStep
 					whenMsg    obstacle   -> handleObstacle  //in virtualrobot caused by the move w/s
 					//whenEvent sonar       -> handleSonar
-				  	whenMsg     end       -> endwork			  
-	
+				  	whenMsg     end       -> endwork
+
 	State execcmd{
 		printCurrentMessage
 		onMsg( cmd : cmd(MOVE) ){
@@ -530,11 +530,11 @@ QActor basicrobot context ctxrobot{
   			[# if(Move=="w") ExpectingCollision=true #]
   			println("basicrobot | executing '${Move}'")
 			run unibo.robot.robotSupport.move( Move )
-			updateResource [# "moveactivated(Move)" #]
+			updateResource [# "basicrobot(execcmd,$Move)" #]
 		}
 	 }
-	 Goto work  
-	 
+	 Goto work
+
 	State handleObstacle{
 		printCurrentMessage
 		//println("basicrobot | handleObstacle")
@@ -542,67 +542,67 @@ QActor basicrobot context ctxrobot{
 			[# ExpectingCollision=false #]
 			run unibo.robot.robotSupport.move( "h" )
 			delay 600
-			updateResource [# "obstacle(${CurrentMove})" #]
+			updateResource [# "basicrobot(handleObstacle,${CurrentMove})" #]
 			/*if[# CurrentMove == "w"#]{
 			//back to avoid emission of obstacle again if real robot moving forward !!!
 			//if[# RobotType != "virtual" #]{	//is it better to embed this behavior in the support?
 				run unibo.robot.robotSupport.move( "s" )
-				delay 100 
-				run unibo.robot.robotSupport.move( "h" ) 
+				delay 100
+				run unibo.robot.robotSupport.move( "h" )
 	 		}*/
 	 		emit info : info( obstacledoing(w) )
 	 		//forward transporttrolley -m wall : wall( obstacledoing(w) )
 		}
 	}
-	Goto work 
- 
+	Goto work
+
 	/*State handleSonar{
 		printCurrentMessage
 	}
 	Goto work*/
-		
-   	State doStep{ 
- 		printCurrentMessage  
-		onMsg( step : step( T ) ){  
-			[#	StepTime = payloadArg(0).toLong() 	#]  
-			updateResource [# "step(${StepTime})" #]
-  		}  
-        memoCurrentTime StartTime  
-        println("basicrobot | doStep StepTime =$StepTime  ")        
+
+   	State doStep{
+ 		printCurrentMessage
+		onMsg( step : step( T ) ){
+			[#	StepTime = payloadArg(0).toLong() 	#]
+			updateResource [# "basicrobot(doStep,${StepTime})" #]
+  		}
+        memoCurrentTime StartTime
+        println("basicrobot | doStep StepTime =$StepTime  ")
         run unibo.robot.robotSupport.move( "w" )  //moves a real robot forever !!!
-	}  
-	Transition t0 
-		whenTimeVar StepTime  -> stepDone  	 
- 		whenMsg  obstacle     -> stepFail		
-    	 
-	
-	State stepDone{   
+	}
+	Transition t0
+		whenTimeVar StepTime  -> stepDone
+ 		whenMsg  obstacle     -> stepFail
+
+
+	State stepDone{
  		run unibo.robot.robotSupport.move( "h" )  //stop the real robot already done ???
-		updateResource [# "stepDone($StepTime)" #]
+		updateResource [# "basicrobot(stepDone,$StepTime)" #]
    		//emit info : info( stepdone($StepTime) )
    		replyTo step with stepdone : stepdone(ok)
 		println("basicrobot | stepDone reply done")
   	}
-	Goto work  
- 
-	State stepFail{  		
+	Goto work
+
+	State stepFail{
 		setDuration Duration from StartTime
 		run unibo.robot.robotSupport.move( "h" )  //stop the (real) robot
-		[# var TunedDuration = Duration;  
+		[# var TunedDuration = Duration;
 			TunedDuration = Duration * 5 / 6
 		#]
 		println("basicrobot | stepFail duration=$Duration TunedDuration=$TunedDuration")
 			run unibo.robot.robotSupport.move( "s" )
-			delayVar TunedDuration 
-			run unibo.robot.robotSupport.move( "h" ) 
- 		updateResource [# "stepFail($Duration)" #] 
+			delayVar TunedDuration
+			run unibo.robot.robotSupport.move( "h" )
+ 		updateResource [# "basicrobot(stepFail,$Duration)" #]
  		//emit info : info( stepFail($Duration) )
  		replyTo step with stepfail : stepfail($Duration, obst)
     }
 	Goto work
-	
-	State endwork{ 
-		updateResource [# "basicrobot(end)" #]	 		
+
+	State endwork{
+		updateResource [# "basicrobot(endwork)" #]
  		terminate 1
 	}
 }

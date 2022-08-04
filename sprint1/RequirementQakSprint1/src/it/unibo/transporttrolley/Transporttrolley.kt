@@ -33,6 +33,9 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 				}	 
 				state("handle_cmd") { //this:State
 					action { //it:State
+						updateResourceRep( "transporttrolley(handle_cmd)"  
+						)
+						println("$name in ${currentState.stateName} | $currentMsg")
 						if( checkMsgContent( Term.createTerm("move(POSITION)"), Term.createTerm("move(ARG)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 tmp = payloadArg(0)  
@@ -62,6 +65,9 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 				}	 
 				state("moving_home") { //this:State
 					action { //it:State
+						updateResourceRep( "transporttrolley(moving_home)"  
+						)
+						println("$name in ${currentState.stateName} | $currentMsg")
 						stateTimer = TimerActor("timer_moving_home", 
 							scope, context!!, "local_tout_transporttrolley_moving_home", 1000.toLong() )
 					}
@@ -70,6 +76,9 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 				}	 
 				state("moved_home") { //this:State
 					action { //it:State
+						updateResourceRep( "transporttrolley(moved_home)"  
+						)
+						println("$name in ${currentState.stateName} | $currentMsg")
 						answer("move", "moveanswer", "moveanswer(OK)"   )  
 						println("robot reached HOME")
 					}
@@ -79,6 +88,9 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 				}	 
 				state("moving_indoor") { //this:State
 					action { //it:State
+						updateResourceRep( "transporttrolley(moving_indoor)"  
+						)
+						println("$name in ${currentState.stateName} | $currentMsg")
 						stateTimer = TimerActor("timer_moving_indoor", 
 							scope, context!!, "local_tout_transporttrolley_moving_indoor", 1000.toLong() )
 					}
@@ -87,6 +99,9 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 				}	 
 				state("moved_indoor") { //this:State
 					action { //it:State
+						updateResourceRep( "transporttrolley(moved_indoor)"  
+						)
+						println("$name in ${currentState.stateName} | $currentMsg")
 						answer("move", "moveanswer", "moveanswer(OK)"   )  
 						println("robot reached INDOOR")
 					}
@@ -96,6 +111,9 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 				}	 
 				state("moving_plasticbox") { //this:State
 					action { //it:State
+						updateResourceRep( "transporttrolley(moving_plasticbox)"  
+						)
+						println("$name in ${currentState.stateName} | $currentMsg")
 						stateTimer = TimerActor("timer_moving_plasticbox", 
 							scope, context!!, "local_tout_transporttrolley_moving_plasticbox", 1000.toLong() )
 					}
@@ -104,6 +122,9 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 				}	 
 				state("moved_plasticbox") { //this:State
 					action { //it:State
+						updateResourceRep( "transporttrolley(moved_plasticbox)"  
+						)
+						println("$name in ${currentState.stateName} | $currentMsg")
 						answer("move", "moveanswer", "moveanswer(OK)"   )  
 						println("robot reached PLASTICBOX")
 					}
@@ -113,6 +134,9 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 				}	 
 				state("moving_glassbox") { //this:State
 					action { //it:State
+						updateResourceRep( "transporttrolley(moving_glassbox)"  
+						)
+						println("$name in ${currentState.stateName} | $currentMsg")
 						stateTimer = TimerActor("timer_moving_glassbox", 
 							scope, context!!, "local_tout_transporttrolley_moving_glassbox", 1000.toLong() )
 					}
@@ -121,6 +145,9 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 				}	 
 				state("moved_glassbox") { //this:State
 					action { //it:State
+						updateResourceRep( "transporttrolley(moved_glassbox)"  
+						)
+						println("$name in ${currentState.stateName} | $currentMsg")
 						answer("move", "moveanswer", "moveanswer(OK)"   )  
 						println("robot reached GLASSBOX")
 					}
@@ -130,6 +157,9 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 				}	 
 				state("pickUp") { //this:State
 					action { //it:State
+						updateResourceRep( "transporttrolley(pickUp)"  
+						)
+						println("$name in ${currentState.stateName} | $currentMsg")
 						delay(1000) 
 						answer("pickup", "pickupanswer", "pickupanswer(OK)"   )  
 						println("robot pickedUp")
@@ -140,6 +170,9 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 				}	 
 				state("dropOut") { //this:State
 					action { //it:State
+						updateResourceRep( "transporttrolley(dropOut)"  
+						)
+						println("$name in ${currentState.stateName} | $currentMsg")
 						delay(1000) 
 						answer("dropout", "dropoutanswer", "dropoutanswer(OK)"   )  
 						println("robot droppedOut")

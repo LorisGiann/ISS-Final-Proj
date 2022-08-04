@@ -60,31 +60,26 @@ h6{
     <ul>
         <lI>Può esserci solo un camion alla volta in INDOOR? SI</lI>
         <li>Il Waste-truck deve essere liberato non appena il materiale viene scaricato? SI</li>
-        <li>La GUI deve mostrare le coordine del robot o basta l'area nella quale si trova attualmente? basta l'area nella quale si trova attualmente</li>
+        <li>La GUI deve mostrare le coordinate del robot o basta l'area nella quale si trova attualmente? basta l'area nella quale si trova attualmente</li>
         <li>A cosa serve il sonar se la stanza è priva di ostacoli? Il sonar non è a bordo del robot, è un dispositivo esterno (così come il RPI). Se si mette una mano davanti al dispositivo, il robot si ferma.</li>
         <li>Ci deve essere il contatto con la parete per il carico/scarico dei materiali? SI (o comunque il più vicino possibile)</li>
         <li>Supponiamo che il robot si stia dirigendo verso HOME (perché ha scaricato l'ultimo carico di materiale e non ci sono altri Waste truck sull'INDOOR). Se arriva un Waste truck prima che il trolley raggiunga la base, il robot deve cambiare rotta immediatamente o può raggiungere la base e poi dirigersi presso l'Indoor? CAMBIA IMMEDIATAMENTE ROTTA per dirigersi su indoor</li>
         <li>È il robot a determinare quando avviene la fine di una azione di carico/scarico? In che modo tale evento può essere rilevato dal sistema da noi sviluppato? Modellare l'operazione con un SEMPLICE DELAY di durata fissa</li>
         <li>Il nodo sul quale la GUI va installata e un nodo fisso? O si tratta forse di palmari posseduti dai Service-manager stessi? Il NODO è FISSO </li>
         <li>In cosa consiste lo smart device? Quanti sono (viene usato sempre lo stesso dispositivo o ve ne è uno per ogni conducente)? Come si relaziona con il nostro sistema? Un dispositivo per ogni conducente, "alieno" invia un messaggio</li>
-        <li>Committente ha server aziendali disponibili? È possibile usare la RPI come server (nodo sempre attivo mentre il sistema è operativo)? E' possibile usare la raspberry, ma si può anche mettere sul PC che usiamo.</li>
+        <li>Committente ha server aziendali disponibili? È possibile usare la RPI come server (nodo sempre attivo mentre il sistema è operativo)? E' possibile usare la Raspberry, ma si può anche mettere sul PC che usiamo.</li>
     </ul>
 </div>
 
 <A NAME="Qak"></A>
 <h2>Uso del linguaggio di modellazione QAK:</h2>
 <div class="remark">
-    <p>In questo progetto verrà utilizzato il metamodello <a href="../docs_common/Qak.html">QAK</a> viene qui utilizzato per le seguenti ragioni:</p>
+    <p>In questo progetto verrà utilizzato il metamodello <a href="../docs_common/Qak.html">QAK</a> per le seguenti ragioni:</p>
     <ul>
-        <li>Parte del software già disponibile è stato sviluppato uando questo linguaggio</li>
+        <li>Parte del software già disponibile è stato sviluppato usando questo linguaggio (ad esempio <a href="https://github.com/anatali/issLab2022/tree/main/unibo.basicrobot22">unibo.basicRobot22</a> e <a href="https://github.com/anatali/issLab2022/tree/main/unibo.sonarqak22">unibo.sonarqak22</a> è sviluppato con un modello QAK)</li>
         <li>Definire fin da subito in maniera formale aspetti altrimenti non esprimibili con costrutti nativi di linguaggi general purpose (es: concetto di richiesta, risposta, evento)</li>
         <li>Flessibilità nello sviluppo e nel collocamento dei componenti dell'applicazione distribuita</li>
-        <li>Definire modelli eseguibili e giungere ad una archittetura logica di riferimento non ambigua</li>
-    </ul>
-    A sua volta questo permetterà di:
-    <ul>
-        <li>Definire piano di lavoro e impostare i primi SPRINT</li>
-        <li>Avere un’interazione più produttiva con il cliente al fine di comprendere meglio i requisiti</li>
+        <li>Definire modelli eseguibili e giungere ad una architettura logica di riferimento non ambigua</li>
     </ul>
     <h3>Documentazione QAK</h3>
     <a href="../docs_common/Qak.html">Quick notes</a> <br>
@@ -107,28 +102,28 @@ h6{
     <A NAME="Dizionario"></A>
     <h3>Dizionario</h3>
     <p>Ci serviamo del dizionario come strumento per definire (e formalizzare quando possibile) i diversi termini.</p>
-    <p>Vengono segnati in <span class="newDictWord"><b>viola</b></span> i termini non presenti nei requisiti, ma introdotti in quanto utilizzati all'interno dei documenti prodotti</p>
+    <p>Vengono segnati in <b class="newDictWord">viola</b> i termini non presenti nei requisiti, ma introdotti in quanto utilizzati all'interno dei documenti prodotti</p>
     <p>La formalizzazione avviene quando possibile con costrutti del linguaggio <a href="https://kotlinlang.org/">Kotlin</a>, mentre quando opportuno verrà utilizzato <a href="#Qak">QAK</a></p>
     <dl>
         <dt><b>Waste-load:</b></dt> 
         <dd>Termine generico per indicare il Materiale inizialmente presente sul <b>Waste-truck</b></dd>
         <dt><b>Truckload:</b></dt>
-        <dd>Numero di Kg di materiale <b>Waste-load</b>. Formalizzazine (<a href="./RequirementQakSprint1/src/requirementAnalysis/WasteServiceRequirement.qak">definito qui</a>):<br>
+        <dd>Numero di Kg di materiale del <b>Waste-load</b>. Formalizzazione (<a href="./RequirementQakSprint0/src/requirementAnalysis/WasteServiceRequirement.qak">definito qui</a>):<br>
             <code><pre>var TruckLoad : Float</pre></code>
         </dd>
         <dt><b>Material:</b></dt>
-        <dd>Tipo di materiale del <b>Waste-load</b>, che può essere plastica o vetro. Formalizzazine (<a href="./RequirementQakSprint1/resources/ws/Material.kt">definito qui</a>):<br>
+        <dd>Tipo di materiale del <b>Waste-load</b>, che può essere plastica o vetro. Formalizzazione con enumerativo <a href="./RequirementQakSprint0/resources/ws/Material.kt">Material.kt</a>:<br>
             <code><pre>enum class Material { PLASTIC, GLASS }</pre></code></dd>
         <dt><b>depositrequest:</b></dt> 
-        <dd>Richiesta di deposito di meteriale, effettuata dal guidatore del <b>Waste-truck</b> tramite lo <b>Smart device</b> e ricevuta dal <b>WasteService</b>. Formalizzazione:<br>
+        <dd>Richiesta di deposito di meteriale, effettuata dal guidatore del <b>Waste-truck</b> tramite lo <b>Smart device</b> e ricevuta dal <b>WasteService</b>. Formalizzazione  (<a href="./RequirementQakSprint0/src/requirementAnalysis/WasteServiceRequirement.qak">definito qui</a>):<br>
             <code><pre>Request depositrequest : depositrequest(MATERIAL, TRUCKLOAD)</pre></code>
         </dd>
         <dt><b>loadaccept:</b></dt> 
-        <dd>Possibile risposta data dal <b>WasteService</b> alla richiesta di <b>depositrequest</b>. Avviene quando vi è ancora posto per quel materiale nel container dedicato. Formalizzazione:<br>
+        <dd>Possibile risposta data dal <b>WasteService</b> alla richiesta di <b>depositrequest</b>. Avviene quando vi è ancora posto per quel materiale nel container dedicato. Formalizzazione  (<a href="./RequirementQakSprint0/src/requirementAnalysis/WasteServiceRequirement.qak">definito qui</a>):<br>
             <code><pre>Reply loadaccept       : loadaccept(MATERIAL, TRUCKLOAD)</pre></code>
         </dd>
         <dt><b>loadrejected:</b></dt> 
-        <dd>Possibile risposta data dal <b>WasteService</b> alla richiesta di <b>depositrequest</b>. Avviene quando non vi è più posto per quel materiale nel container dedicato. Formalizzazione:<br>
+        <dd>Possibile risposta data dal <b>WasteService</b> alla richiesta di <b>depositrequest</b>. Avviene quando non vi è più posto per quel materiale nel container dedicato. Formalizzazione (<a href="./RequirementQakSprint0/src/requirementAnalysis/WasteServiceRequirement.qak">definito qui</a>):<br>
             <code><pre>Reply loadrejected     : loadrejected(MATERIAL, TRUCKLOAD)</pre></code>
         </dd>
         <dt><b>WasteService:</b></dt>
@@ -174,8 +169,9 @@ Assert.assertTrue(answer.contains("loadrejected"))</pre>
             </code>
         </dd>
         <dt><b>Service area:</b></dt>
-        <dd>Superfice rettangolare, piana, priva di ostacoli nella quale il robot può muoversi, e nella quale sono presenti le zone <b>INDOOR</b>, <b>PLASTICBOX</b>, <b>GLASSBOX</b>, <b>HOME</b>.<br>
-            Le zone vengono rappresentate mediante l'enumerativo <a href="./RequirementQakSprint0/resources/ws/Position.kt">Position.kt</a>:<br>
+        <dd>Superfice rettangolare, piana, priva di ostacoli nella quale il robot può muoversi, e nella quale sono presenti le zone <b>INDOOR</b>, <b>PLASTICBOX</b>, <b>GLASSBOX</b>, <b>HOME</b> (corrispondenti al concetto di <b>Position</b>).</p></dd>
+        <dt><b>Position:</b></dt>
+        <dd>Le zone vengono rappresentate mediante l'enumerativo <a href="./RequirementQakSprint0/resources/ws/Position.kt">Position.kt</a>:<br>
             <code><pre>enum class Position { INDOOR, PLASTICBOX, GLASSBOX, HOME }</pre></code></dd>
         <dt><b>INDOOR:</b></dt>
         <dd>Porta di ingresso adibita alla raccolta del <b>Waste-load</b> che dal <b>Waste-truck</b> viene trasferito sul <b>Transport trolley</b>. <br> 
@@ -183,14 +179,14 @@ Assert.assertTrue(answer.contains("loadrejected"))</pre>
         <dt><b>PLASTICBOX:</b></dt>
         <dd>Container adibito al deposito di materiale plastico, con capienza massima pari a <b>MAXPB</b> Kg. <br> 
             Il termine viene anche usato per indicare la zona nella quale il robot deve trovarsi per effettuare l'operazione di scarico della plastica.<br>
-            Formalizzazione: la variabile <b>contPB</b> (<a href="./RequirementQakSprint0/resources/ws/func.kt">definita qui</a>) corrispondente alla capienza attuale, la costante <b>MAXPB</b> (<a href="./RequirementQakSprint0/resources/ws/const.kt">definita qui</a>) corrispondente alla capienza massima (entrambi in Kg).<br>
+            Formalizzazione: variabile <b class="newDictWord">contPB</b> (<a href="./RequirementQakSprint0/resources/ws/func.kt">definita qui</a>) corrispondente alla capienza attuale, e costante <b>MAXPB</b> (<a href="./RequirementQakSprint0/resources/ws/const.kt">definita qui</a>) corrispondente alla capienza massima (entrambi in Kg).<br>
             <code><pre>var contPB : Float = 0F</pre></code>
             <code><pre>val MAXPB : Float = 10.0F</pre></code>
         </dd>
         <dt><b>GLASSBOX:</b></dt> 
         <dd>Container adibito al deposito di materiale vetroso, con capienza massima pari a <b>MAXGB</b> Kg. <br> 
             Il termine viene anche usato per indicare la zona nella quale il robot deve trovarsi per effettuare l'operazione di scarico del vetro.<br>
-            Formalizzazione: la variabile <b>contGB</b> (<a href="./RequirementQakSprint0/resources/ws/func.kt">definita qui</a>) corrispondente alla capienza attuale, la costante <b>MAXGB</b> (<a href="./RequirementQakSprint0/resources/ws/const.kt">definita qui</a>) corrispondente alla capienza massima (entrambi in Kg).<br>
+            Formalizzazione: variabile <b class="newDictWord">contGB</b> (<a href="./RequirementQakSprint0/resources/ws/func.kt">definita qui</a>) corrispondente alla capienza attuale, e costante <b>MAXGB</b> (<a href="./RequirementQakSprint0/resources/ws/const.kt">definita qui</a>) corrispondente alla capienza massima (entrambi in Kg).<br>
             <code><pre>var contGB : Float = 0F</pre></code>
             <code><pre>val MAXGB : Float = 10.0F</pre></code>
         </dd>
@@ -198,12 +194,12 @@ Assert.assertTrue(answer.contains("loadrejected"))</pre>
         <dd>Area nella quale risiede il robot quando non deve svolgere alcuna attività<br>
             È inoltre l'area dove si trova inizialmente il robot.</dd>
         <dt><b>Transport trolley:</b></dt>
-        <dd>Rappresenta robotica generica/astratta che riceve comandi affinchè possa essere utilizzata per lo svolgimento di una <b>Deposit action</b>.</dd>
+        <dd>Rappresenta un'entità robotica generica/astratta che riceve comandi affinchè possa essere utilizzata per lo svolgimento di una <b>Deposit action</b>.</dd>
         <dt><b>DDR Robot:</b></dt>
         <dd>Entità robotica che riceve ed esegue comandi base di spostamento del robot: <br>
-            <p>Il committente fornisce già molto software in grado di interfacciarsi al <b>DDR Robot concreto</b> di <a href="../docs_prof/html/VirtualRobot.html#wenv">WEnv</a>: <a href="https://github.com/anatali/issLab2022/tree/main/unibo.wenvUsage22">unibo.wenvUsage22</a>, <a href="https://github.com/anatali/issLab2022/tree/main/unibo.basicrobot22">unibo.basicRobot22</a>, <a href="https://github.com/anatali/issLab2022/tree/main/unibo.boundaryQak22">unibo.boundaryQak22</a> </p>
-            <p>Formalizzazione: utilizzeremo <a href="https://github.com/anatali/issLab2022/blob/main/unibo.basicrobot22/src/basicrobot.qak">l'attore QAK <i>basicrobot</i></a> presente in <i>basicrobot22</i>, che è in grado di interfacciarsi sia con il WEnv, che con altri robot reali.</p>
-            <p>Vengono qui brevemente illustrate le caratteristiche di <a href="https://github.com/anatali/issLab2022/blob/main/unibo.basicrobot22/src/basicrobot.qak">basicrobot</a>:</p>
+            <p>Il committente fornisce già molto software in grado di interfacciarsi al <b>DDR Robot concreto</b> di <a href="../docs_prof/html/VirtualRobot.html#wenv">WEnv</a>: <a href="https://github.com/anatali/issLab2022/tree/main/unibo.wenvUsage22">unibo.wenvUsage22</a>, <a href="https://github.com/anatali/issLab2022/tree/main/unibo.basicrobot22">unibo.basicRobot22</a>, <a href="https://github.com/anatali/issLab2022/tree/main/unibo.boundaryQak22">unibo.boundaryQak22</a>. </p>
+            <p>Formalizzazione: utilizzeremo <a href="./RequirementQakSprint0/src/requirementAnalysis/BasicRobotRequirement.qak">l'attore QAK <i>basicrobot</i></a> presente in <a href="https://github.com/anatali/issLab2022/tree/main/unibo.basicrobot22">unibo.basicRobot22</a>, che è in grado di interfacciarsi sia con il WEnv, che con altri robot reali.</p>
+            <p>Vengono qui brevemente illustrate le caratteristiche di <a href="./RequirementQakSprint0/src/requirementAnalysis/BasicRobotRequirement.qak"><i>basicrobot</i></a>:</p>
             <p>Possiamo comandare mosse elementari, inviando i messaggi:</p>
             <code><pre>
                 //MOVE =  w | a | s | d | h   | l | r
@@ -214,15 +210,15 @@ Assert.assertTrue(answer.contains("loadrejected"))</pre>
             <code><pre>
                 Event   info           : info( ARG )</pre>
             </code>
-            <p>Gli altri comandi sono invece sincroni bloccanti, e vegnono infatti inviati sulla connessione tcp.</p>
-            <p>Grazie a questi comandi elementari, <i>basicrobot22</i> è anche in grado di far fare degli step al robot:</p>
+            <p>Gli altri comandi sono invece sincroni bloccanti, e vegnono infatti inviati tramite Http.</p>
+            <p>Grazie a questi comandi elementari, <i>basicrobot</i> è anche in grado di far fare degli step al robot:</p>
             <code><pre>
                 Request step       : step( TIME )	
                 Reply   stepdone   : stepdone(V)  
                 Reply   stepfail   : stepfail(DURATION, CAUSE)</pre>
             </code>
         </dd>
-        <dt><b>DDR Robot concreto</b> o "robot":</dt>
+        <dt><b class="newDictWord">DDR Robot concreto</b> o "robot":</dt>
         <dd>Con questo termine ci si riferisce al robot vero e proprio (fisico o simulato virtualmente). <br>
             Il committente fornisce già un ambiente di simulazione che implementa un <b>DDR Robot concreto</b> virtuale. Documentazione: <a href="../docs_prof/html/VirtualRobot.html#wenv">WEnv</a>, Progetto: <a href="https://github.com/anatali/issLab2022/tree/main/it.unibo.virtualRobot2020">it.unibo.virtualRobot2020</a>.
         </dd>
@@ -239,7 +235,7 @@ Assert.assertTrue(answer.contains("loadrejected"))</pre>
         <dt><b>Smart device:</b></dt> 
         <dd>Dispositivo attraverso il quale il <b>Waste-truck</b> invia una <b>depositrequest</b> comunicando al <b>WasteService</b>:
             <ul>
-                <lI><b>Material</b>, ossia il tipo di materiale da depostirare</lI>
+                <lI><b>Material</b>, ossia il tipo di materiale da depositare</lI>
                 <lI><b>Waste-load</b>, ossia i Kg di materiale</lI>
             </ul>
             E riceve dal <b>WasteService</b> l'esito, che può essere o una <b>loadaccept</b> o una <b>loadrejected</b>
@@ -249,16 +245,19 @@ Assert.assertTrue(answer.contains("loadrejected"))</pre>
         <dt><b>WasteServiceStatusGUI:</b></dt>
         <dd>Pannello di controllo che permette al <b>Service-manager</b> di monitorare:
             <ul>
-                <lI>La posizione del <b>Transport trolley</b> (non necessariamente la posizione precisa di un sistema di coordinate, basta l'area nella quale si trova attualmente)</lI>
-                <lI>Lo stato attuale del <b>Transport trolley</b></lI>
+                <lI>La <b>Position</b> del <b>Transport trolley</b> (non serve la posizione precisa di un sistema di coordinate)</lI>
+                <lI>Il <b class="newDictWord">Transporttrolleystate</b>, ossia lo stato attuale del <b>Transport trolley</b>. Formalizziamo lo stato con l'enumerativo <a href="./RequirementQakSprint0/resources/ws/Transporttrolleystate.kt">Transporttrolleystate.kt</a>:<br>
+                    <code><pre>enum class Transporttrolleystate { IDLE, MOVING, PICKINGUP, DROPPINGDOWN, HALT }</pre></code></lI>
                 <lI>Il peso corrente <b>contPB</b> e <b>contGB</b> del materiale contenuto in <b>PLASTICBOX</b> e in <b>GLASSBOX</b></lI>
                 <lI>Lo stato del <b>LED</b></lI>
             </ul>
+            <p>Nel sistema sarà necessario avere un componente che riceva tutti gli aggiornamenti relativi a questi valori. Esso provvederà (in qualche modo) ad inviare tali dati aggiornati verso l'interfaccia grafica. <br>
+                Formalizziamo tale componente con il file <a href="./RequirementQakSprint0/src/requirementAnalysis/GuiRequirement.qak">GuiRequirement.qak</a></p>
         </dd>
-        <dt><b>LED concreto:</b></dt> 
+        <dt><b class="newDictWord">LED concreto:</b></dt> 
         <dd>Dispositivo di output connesso al RaspberryPI (che NON è a bordo del <b>DDR Robot</b>)</dd>
         <dt><b>LED:</b></dt>
-        <dd>Servizio reppresentate il <b>LED concreto</b>, che può essere impostato secondo 3 modalità:
+        <dd>Servizio rappresentante il <b>LED concreto</b>, che può essere impostato secondo 3 modalità:
             <ul>
                 <lI>Led Off: quando il <b>Transport trolley</b> è in <b>HOME</b> </lI>
                 <lI>Led On: quando il <b>Transport trolley</b> è fermo (quando distanza rilevata &lt DLIMIT)</lI>
@@ -266,17 +265,18 @@ Assert.assertTrue(answer.contains("loadrejected"))</pre>
             </ul>
             <p>Il committente fornisce già del software per relativo al led in <a href="https://github.com/anatali/issLab2022/tree/main/it.unibo.radarSystem22.domain">it.unibo.radarSystem22.domain</a>, e in <a href="https://github.com/anatali/issLab2022/tree/main/unibo.ledqak22">unibo.ledqak22</a>.</p>
             <p>Formalizzazione: <br>
-                Lo stato del led viene rappresentato mediatne l'enumerativo <a href="./RequirementQakSprint0/resources/ws/LedState.kt">LedState.kt</a></p>
+                Lo stato del led viene rappresentato mediante l'enumerativo <a href="./RequirementQakSprint0/resources/ws/LedState.kt">LedState.kt</a></p>
             <code><pre>enum class LedState { ON, OFF, BLINK }</pre></code>
             <p>Il servizio offerto dal led viene esplicitato mediante un attore QAK: <a href="./RequirementQakSprint0/src/requirementAnalysis/LedRequirement.qak">LedRequirement.qak</a>. Esso viene comandato per mezzo di eventi:</p>
             <code><pre>Event   update_led     : update_led(LEDSTATE)</pre></code>
+            <p>Per specificare in maniera più formale il comportamento del LED, è stata scritta la classe di test <a href="./RequirementQakSprint0/test/testSprint0/TestLed.kt">TestLed.kt</a> (non eseguibile in questo sprint).</p>
         </dd>
-        <dt><b>Sonar concreto:</b></dt> 
+        <dt><b class="newDictWord">Sonar concreto:</b></dt> 
         <dd>Dispositivo di input connesso al RaspberryPI (che NON è a bordo del <b>DDR Robot</b>)</dd>
         <dt><b>Sonar:</b></dt> 
         <dd>Entità che rappresenta il <b>sonar concreto</b>. <br>
             <p>Il committente fornisce già del software relativo al sonar in <a href="https://github.com/anatali/issLab2022/tree/main/unibo.basicrobot22">unibo.basicrobot22</a>, <a href="https://github.com/anatali/issLab2022/tree/main/it.unibo.radarSystem22.domain">it.unibo.radarSystem22.domain</a>, <a href="https://github.com/anatali/issLab2022/tree/main/unibo.sonarqak22">unibo.sonarqak22</a>.</p>
-            <p>Formalizzazione: consideriamo l'attore QAK <i>sonarqak22</i> del progetto <a href="https://github.com/anatali/issLab2022/tree/main/unibo.sonarqak22">unibo.sonarqak22</a>. Tale attore emettere eventi in base alla distanza rilevata da sonar reale o simulato: </p>
+            <p>Formalizzazione: consideriamo l'attore QAK <i>sonarqak22</i> del progetto <a href="https://github.com/anatali/issLab2022/tree/main/unibo.sonarqak22">unibo.sonarqak22</a>. Tale attore emette eventi in base alla distanza rilevata da sonar reale o simulato: </p>
             <code><pre>
 Dispatch sonaractivate   : info(ARG)
 Dispatch sonardeactivate : info(ARG)
@@ -293,31 +293,40 @@ firstActorInPipe.
     //subscribeLocalActor("distancefilter").		//propagates the lcoal stream event obstacle
     subscribeLocalActor(sonarActorName)</pre>
             </code>
-            <p>In particolare l'attore <i>distancefilter</i> si occupa di filtrare e inviare al prossimo attore solo eventi di tipo obstacle:obstacle(distance) solo nel caso in cui la distanza rilevata sia minore di una distanza prefissata:</p>
+            <p>In particolare l'attore <i>distancefilter</i> si occupa di filtrare e inviare al prossimo attore solo eventi di tipo <i>obstacle:obstacle(distance)</i> solo nel caso in cui la distanza rilevata sia minore di una distanza prefissata:</p>
             <img src="../docs_prof/html/_images/sonarpipenano.png" class="centerimg" style="max-width: 700px;"/>
         </dd>
         <dt><b>DLIMT:</b></dt>
-        <dd>Misura in CM della distanza limite. Se la distanza attualmente misurata dal <b>Sonar concreto</b> è ≤ DLIMT, il robot deve essere nello stato stopped. Qunando la distanza misurata &gt DLIMIT il robot può muoversi<br>
-            Formalizzazione: definiamo la costante <b>DLIMIT</b>:<br>
-            <code><pre>val DLIMIT : Float</pre></code></dd>
+        <dd>Misura in CM della distanza limite. Se la distanza attualmente misurata dal <b>Sonar concreto</b> è ≤ DLIMT, il robot deve essere fermato. Quando la distanza misurata è &gt DLIMIT il robot può muoversi.<br>
+            Formalizzazione: definiamo la costante <b>DLIMIT</b> (<a href="./RequirementQakSprint0/resources/ws/const.kt">definita qui</a>):<br>
+            <code><pre>val DLIMIT : Float</pre></code>
+            <p>Più precisamente, quello che ci si aspetta quando la distanza diventa ≤ DLIMT, è che:</p>
+            <ul>
+                <li>Se il robot sta andando avanti esso si ferma. Riprenderà ad andare in avanti una volta che la distanza torna &gt DLIMIT</li>
+                <li>Se il robot sta facendo qualche altra operazione (come una <b>Pickup</b> o si sta girando), l'operazione comunque termina. Una volta terminata si rimane fermi finchè la distanza non ridiventa &gt DLIMIT</li>
+            </ul>
+            <p>Parte di questo comportamento è descritto in maniera più formale nella classe di test <a href="./RequirementQakSprint0/test/testSprint0/Testhalt.kt">Testhalt.kt</a> (non eseguibile in questo sprint).</p>
+        </dd>
     </dl>
 </div>
 
 <!--PROBLEM ANALYSIS-->
-<A NAME="ProblemAnalysis"></A>
+<!--<A NAME="ProblemAnalysis"></A>
 <h2>Problem analysis</h2>
 <div class="remark">
-</div>
+</div>-->
 
 
-<div class="remark">
+<div class="remark" style="background-color: #c3fbe8;">
     <h3>Riassunto situazione attuale:</h3>
     <h6>Architettura logica:</h6>
     <img src="./docs/_images/logic_architecture_2.png" style="max-width: 650px;" class="centerimg"/>
     <p style="width: 100%; text-align: right;"><a href="../docs_common/Legenda.html">Legenda</a></p>
     <p style="font-size: 0.8rem;">N.B: Rimandiamo all'analisi del problema dello sprint successivo la collocazione del componente <b>Transport trolley</b></p>
-    <h6><p>Testplan (derivante dalla user story):</p></h6>
-    <p><a href="./RequirementQakSprint0/test/testSprint0/TestWasteservice.kt">TestWasteservice.kt</a></p>
+    <h6>Testplan:</h6>
+    <p><a href="./RequirementQakSprint0/test/testSprint0/TestWasteservice.kt">TestWasteservice.kt</a> (eseguibile, derivante dalla user story)</p>
+    <p><a href="./RequirementQakSprint0/test/testSprint0/TestLed.kt">TestLed.kt</a> (al momento non eseguibile, utile solo per specificarne il comportamento che ci si aspetta dal LED)</p>
+    <p><a href="./RequirementQakSprint0/test/testSprint0/Testhalt.kt">Testhalt.kt</a> (al momento non eseguibile, utile solo per specificarne il comportamento che ci si aspetta dal robot quando la distanza è ≤ DLIMT)</p>
 </div>
 	      	
 <br/><br/> 	
