@@ -1,5 +1,5 @@
 package ws
 
 enum class Transporttrolleystate {
-  IDLE, MOVING, PICKINGUP, DROPPINGDOWN, HALT
+  IDLE, MOVING, PICKINGUP, DROPPINGOUT, HALT
 }
