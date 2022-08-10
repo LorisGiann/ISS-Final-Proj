@@ -27,6 +27,16 @@ Reply   pickupdone	   : pickupdone(_)
 Dispatch err		   : err(_)
 // ------------------------------------------------------
 
+// ---------------- moveruturn messages -----------------
+Request moveruturn     : moveruturn(_)
+Reply moveruturnanswer : moveruturnanswer(RESULT) //RESULT =  OK | ERROR 
+// ------------------------------------------------------
+
+// --------------- mover180turn messages -----------------
+Request mover180turn     : mover180turn(_)
+Reply mover180turnanswer : mover180turnanswer(RESULT) //RESULT =  OK | ERROR 
+// ------------------------------------------------------
+
 // --------------- basicrobotwrapper msgs ---------------
 //RESULT =  OK | ERROR 
 //MOVE =  w | l | r | h     //the command end when the reply is sent
@@ -372,6 +382,7 @@ QActor mover context ctxrobot{
 	   lateinit var RES : String    #]
 	  
 	State wait initial {
+		discardMsg Off
 		printCurrentMessage
 		updateResource [# "mover(wait,$CURRPOS,$DEST)" #]
 	}
@@ -381,36 +392,288 @@ QActor mover context ctxrobot{
 		printCurrentMessage
 		onMsg( move:move(POS) ){
 			[# DEST = ws.Position.valueOf(payloadArg(0))#]
+			if [# DEST==CURRPOS#] {
+				replyTo move with moveanswer : moveanswer(OK)
+			}
 		}
 		updateResource [# "mover(handle,$CURRPOS,$DEST)" #]
 	}
-	Goto req_forward if [# DEST!=CURRPOS #] else wait //if the destinatio is different form the current position, reach next corner
+	Goto aclk_or_clk if [# DEST!=CURRPOS #] else wait //if the destination is different form the current position, reach next corner
 	
-	//-------- ROBOT PROCEEDS ALONG THE WALL, THEN IT TURNS WHEN AN OBSTABLE IS FOUND -------
+	State aclk_or_clk {
+		printCurrentMessage
+		updateResource [# "mover(aclk_or_clk,$CURRPOS,$DEST)" #]
+	}
+	Goto req_forward_aclk if [# DEST==ws.func.nextPos(CURRPOS) || DEST==ws.func.nextPos(ws.func.nextPos(CURRPOS)) #] else prepare_clk //decide which direction to take depending on the current position and destination
+	
+	//------------------------------- REACHING NEXT CORNER IN ANTICLOCKWISE DIRECTION -------------------------------
+	State req_forward_aclk {
+		printCurrentMessage
+		updateResource [# "mover(req_forward_aclk,$CURRPOS,$DEST)" #]
+		request basicrobotwrapper -m cmdsync : cmdsync(w)
+	}
+	Transition t0 whenReply cmdanswer -> chk_forward_aclk //wall reached
+					whenRequest move -> set_new_dest_aclk //new position arrived
+	State chk_forward_aclk {
+		printCurrentMessage
+		updateResource [# "mover(chk_forward_aclk,$CURRPOS,$DEST)" #]
+		onMsg( cmdanswer:cmdanswer(RES) ){
+			[# RES = payloadArg(0)#]
+		}
+	}
+	Goto req_turn_aclk if [# RES=="OK" #] else error
+	State set_new_dest_aclk { //set new position and decide if it's convenient to change direction
+		printCurrentMessage
+		onMsg( move:move(POS) ){
+			[# DEST = ws.Position.valueOf(payloadArg(0))#]
+		}
+		updateResource [# "mover(set_new_dest_aclk,$CURRPOS,$DEST)" #]
+	}
+	Goto req_forward_aclk if [# DEST==ws.func.nextPos(CURRPOS) || DEST==ws.func.nextPos(ws.func.nextPos(CURRPOS)) #] //continue with the current route if the destination is the position we are currently reaching ( nextPos(CURRPOS) ) or the next one ( nextPos(nextPos(CURRPOS)) )
+		else req_u_turn //otherwise it's more convenient to return back return back
+	
+	State req_turn_aclk {
+		printCurrentMessage
+		updateResource [# "mover(req_turn_aclk,$CURRPOS,$DEST)" #]
+		request basicrobotwrapper -m cmdsync : cmdsync(l)
+	}
+	Transition t0 whenReply cmdanswer -> chk_turn_aclk
+	State chk_turn_aclk {
+		printCurrentMessage
+		updateResource [# "mover(chk_turn_aclk,$CURRPOS,$DEST)" #]
+		onMsg( cmdanswer:cmdanswer(RES) ){
+			[# RES = payloadArg(0)#]
+		}
+	}
+	Goto update_aclk if [# RES=="OK" #] else error
+	
+	State update_aclk {
+		printCurrentMessage
+		[# CURRPOS=ws.func.nextPos(CURRPOS) #]
+		updateResource [# "mover(update_aclk,$CURRPOS,$DEST)" #]
+	}
+	Goto reply	
+	//---------------------------------------------------------------------------------------------------------------
+	
+	//--------------------------------- REACHING NEXT CORNER IN CLOCKWISE DIRECTION ---------------------------------
+	State prepare_clk {
+		printCurrentMessage
+		updateResource [# "mover(prepare_clk,$CURRPOS,$DEST)" #]
+		request basicrobotwrapper -m cmdsync : cmdsync(l)
+	}
+	Transition t0 whenReply cmdanswer -> chk_prepare_clk
+	State chk_prepare_clk {
+		printCurrentMessage
+		updateResource [# "mover(chk_prepare_clk,$CURRPOS,$DEST)" #]
+		onMsg( cmdanswer:cmdanswer(RES) ){
+			[# RES = payloadArg(0)#]
+		}
+	}
+	Goto req_forward_clk if [# RES=="OK" #] else error
+	
+	State req_forward_clk {
+		printCurrentMessage
+		updateResource [# "mover(req_forward_clk,$CURRPOS,$DEST)" #]
+		request basicrobotwrapper -m cmdsync : cmdsync(w)
+	}
+		Transition t0 whenReply cmdanswer -> chk_forward_clk //wall reached
+					whenRequest move -> set_new_dest_clk //new position arrived
+	State chk_forward_clk {
+		printCurrentMessage
+		updateResource [# "mover(chk_forward_clk,$CURRPOS,$DEST)" #]
+		onMsg( cmdanswer:cmdanswer(RES) ){
+			[# RES = payloadArg(0)#]
+		}
+	}
+	Goto req_turn_180_clk if [# RES=="OK" #] else error
+	State set_new_dest_clk { //set new position and decide if it's convenient to change direction
+		printCurrentMessage
+		onMsg( move:move(POS) ){
+			[# DEST = ws.Position.valueOf(payloadArg(0))#]
+		}
+		updateResource [# "mover(set_new_dest_clk,$CURRPOS,$DEST)" #]
+	}
+	Goto req_forward_clk if [# DEST==ws.func.prevPos(CURRPOS) || DEST==ws.func.prevPos(ws.func.prevPos(CURRPOS)) #] //continue with the current route if the destination is the position we are currently reaching ( nextPos(CURRPOS) ) or the next one ( nextPos(nextPos(CURRPOS)) )
+		else req_u_turn //otherwise it's more convenient to return back return back
+	
+	State req_turn_180_clk {
+		printCurrentMessage
+		updateResource [# "mover(req_turn_180_clk,$CURRPOS,$DEST)" #]
+		request mover180turn -m mover180turn : mover180turn(_)
+	}
+	Transition t0 whenReply mover180turnanswer -> chk_turn_180_clk
+	State chk_turn_180_clk {
+		printCurrentMessage
+		updateResource [# "mover(chk_turn_180_clk,$CURRPOS,$DEST)" #]
+		onMsg( mover180turnanswer:mover180turnanswer(RES) ){
+			[# RES = payloadArg(0)#]
+		}
+	}
+	Goto update_clk if [# RES=="OK" #] else error
+	
+	State update_clk {
+		printCurrentMessage
+		[# CURRPOS=ws.func.prevPos(CURRPOS) #]
+		updateResource [# "mover(update_clk,$CURRPOS,$DEST)" #]
+	}
+	Goto reply
+	//---------------------------------------------------------------------------------------------------------------
+	
+	//-------------------------------------- U TURN ------------------------------------------
+	State req_u_turn {
+		printCurrentMessage
+		request moveruturn -m moveruturn : moveruturn(_)
+		updateResource [# "mover(req_u_turn,$CURRPOS,$DEST)" #]
+	}
+	Transition t0 whenReply moveruturnanswer -> chk_u_turn
+					whenReply moveanswer -> req_u_turn //consume possible incoming moveanswer due to critical race condition (new position for witch u turn is needed arrived, but the robot reaches the wall: the basicrobotwrapper replies before receiving the new commands from moveruturn)
+	State chk_u_turn {
+		printCurrentMessage
+		updateResource [# "mover(chk_u_turn,$CURRPOS,$DEST)" #]
+		onMsg( moveruturnanswer:moveruturnanswer(RES) ){
+			[# RES = payloadArg(0)#]
+		}
+	}
+	Goto reply if [# RES=="OK" #] else error
+	//-----------------------------------------------------------------------------------------
+	
+	State reply {
+		printCurrentMessage
+		if[# CURRPOS==DEST #]{
+			replyTo move with moveanswer : moveanswer(OK)
+		}
+		updateResource [# "mover(reply,$CURRPOS,$DEST)" #]
+	}
+	Transition t0 whenTime 10 -> handle //no messages, go to handle
+					whenRequest move -> handle //new destination, consume the message while going to handle
+	
+	State error{
+		printCurrentMessage
+		updateResource [# "mover(error,$CURRPOS,$DEST)" #]
+		replyTo move with moveanswer : moveanswer(ERROR)
+		println("mover | ERROR STATE")
+	}
+}
+
+QActor moveruturn context ctxrobot{
+	[# lateinit var RES : String    #]
+	
+	State wait initial {
+		discardMsg On
+		printCurrentMessage
+		updateResource [# "moveruturn(wait)" #]
+	}
+	Transition t0 whenRequest moveruturn -> req_halt
+	
+	State req_halt {
+		printCurrentMessage
+		updateResource [# "moveruturn(req_halt)" #]
+		request basicrobotwrapper -m cmdsync : cmdsync(h)
+	}
+	Transition t0 whenReply cmdanswer -> chk_halt
+	State chk_halt {
+		printCurrentMessage
+		updateResource [# "moveruturn(chk_halt)" #]
+		onMsg( cmdanswer:cmdanswer(RES) ){
+			[# RES = payloadArg(0)#]
+		}
+	}
+	Goto req_turn_180_1 if [# RES=="OK" #] else error
+	
+	State req_turn_180_1 {
+		printCurrentMessage
+		updateResource [# "moveruturn(req_turn_180_1)" #]
+		request mover180turn -m mover180turn : mover180turn(_)
+	}
+	Transition t0 whenReply mover180turnanswer -> chk_turn_180_1
+	State chk_turn_180_1 {
+		printCurrentMessage
+		updateResource [# "moveruturn(chk_turn_180_1)" #]
+		onMsg( mover180turnanswer:mover180turnanswer(RES) ){
+			[# RES = payloadArg(0)#]
+		}
+	}
+	Goto req_forward if [# RES=="OK" #] else error
+	
 	State req_forward {
 		printCurrentMessage
-		updateResource [# "mover(req_forward,$CURRPOS,$DEST)" #]
+		updateResource [# "moveruturn(req_forward)" #]
 		request basicrobotwrapper -m cmdsync : cmdsync(w)
 	}
 	Transition t0 whenReply cmdanswer -> chk_forward
 	State chk_forward {
 		printCurrentMessage
-		updateResource [# "mover(chk_forward,$CURRPOS,$DEST)" #]
+		updateResource [# "moveruturn(chk_forward)" #]
 		onMsg( cmdanswer:cmdanswer(RES) ){
 			[# RES = payloadArg(0)#]
 		}
 	}
-	Goto req_turn if [# RES=="OK" #] else error
+	Goto req_turn_180_2 if [# RES=="OK" #] else error
 	
-	State req_turn {
+	State req_turn_180_2 {
 		printCurrentMessage
-		updateResource [# "mover(req_turn,$CURRPOS,$DEST)" #]
+		updateResource [# "moveruturn(req_turn_180_2)" #]
+		request mover180turn -m mover180turn : mover180turn(_)
+	}
+	Transition t0 whenReply mover180turnanswer -> chk_turn_180_2
+	State chk_turn_180_2 {
+		printCurrentMessage
+		updateResource [# "moveruturn(chk_turn_180_2)" #]
+		onMsg( mover180turnanswer:mover180turnanswer(RES) ){
+			[# RES = payloadArg(0)#]
+		}
+	}
+	Goto reply if [# RES=="OK" #] else error
+	
+	State reply {
+		printCurrentMessage
+		replyTo moveruturn with moveruturnanswer : moveruturnanswer(OK)
+		updateResource [# "moveruturn(reply)" #]
+	}
+	Goto wait
+	
+	State error{
+		printCurrentMessage
+		updateResource [# "moveruturn(error)" #]
+		replyTo move with moveruturnanswer : moveruturnanswer(ERROR)
+		println("moveruturn | ERROR STATE")
+	}
+}
+
+QActor mover180turn context ctxrobot{
+	[# lateinit var RES : String    #] 
+	
+	State wait initial {
+		//discardMsg Off
+		printCurrentMessage
+		updateResource [# "mover180turn(wait)" #]
+	}
+	Transition t0 whenRequest mover180turn -> req_turn_1
+	
+	State req_turn_1 {
+		printCurrentMessage
+		updateResource [# "mover180turn(req_turn_1)" #]
 		request basicrobotwrapper -m cmdsync : cmdsync(l)
 	}
-	Transition t0 whenReply cmdanswer -> chk_turn
-	State chk_turn {
+	Transition t0 whenReply cmdanswer -> chk_turn_1
+	State chk_turn_1 {
 		printCurrentMessage
-		updateResource [# "mover(chk_turn,$CURRPOS,$DEST)" #]
+		updateResource [# "mover180turn(chk_turn_1)" #]
+		onMsg( cmdanswer:cmdanswer(RES) ){
+			[# RES = payloadArg(0)#]
+		}
+	}
+	Goto req_turn_2 if [# RES=="OK" #] else error
+	
+	State req_turn_2 {
+		printCurrentMessage
+		updateResource [# "mover180turn(req_turn_2)" #]
+		request basicrobotwrapper -m cmdsync : cmdsync(l)
+	}
+	Transition t0 whenReply cmdanswer -> chk_turn_2
+	State chk_turn_2 {
+		printCurrentMessage
+		updateResource [# "mover180turn(chk_turn_2)" #]
 		onMsg( cmdanswer:cmdanswer(RES) ){
 			[# RES = payloadArg(0)#]
 		}
@@ -419,29 +682,24 @@ QActor mover context ctxrobot{
 	
 	State reply {
 		printCurrentMessage
-		[# CURRPOS=ws.func.nextPosition(CURRPOS) #]
-		if[# CURRPOS==DEST #]{
-			replyTo move with moveanswer : moveanswer(OK)
-		}
-		updateResource [# "mover(reply,$CURRPOS,$DEST)" #]
+		replyTo mover180turn with mover180turnanswer : mover180turnanswer(OK)
+		updateResource [# "mover180turn(reply)" #]
 	}
-	Transition t0 whenTime 10 -> handle //no messages, go to handle
-					whenRequest move -> handle //new destination, consume the message while going to handle
-	//-----------------------------------------------------------------------------------------
+	Goto wait
 	
 	State error{
 		printCurrentMessage
-		updateResource [# "mover(error,$CURRPOS,$DEST)" #]
-		println("mover | ERROR STATE")
+		updateResource [# "mover180turn(error)" #]
+		replyTo mover180turn with mover180turnanswer : mover180turnanswer(ERROR)
+		println("mover180turn | ERROR STATE")
 	}
 }
-
 
 QActor basicrobotwrapper context ctxrobot{
 	[# var MOVE : ws.Move? = null  #]
 	 
 	State wait initial {
-		discardMsg Off
+		discardMsg On
 	 	printCurrentMessage
 		updateResource [# "basicrobotwrapper(wait)" #] 
 	}
@@ -475,6 +733,7 @@ QActor basicrobotwrapper context ctxrobot{
 		forward basicrobot -m cmd : cmd(w)
 	}
 	Transition t0 whenEvent info -> collision
+					whenRequest cmdsync -> handle
 					
 	State collision {
 		printCurrentMessage

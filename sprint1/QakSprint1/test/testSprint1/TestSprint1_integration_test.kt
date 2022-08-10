@@ -147,8 +147,8 @@ internal class TestSprint1_integration_test {
                     "wasteservice(req_depositaction,0.0,2.0)",
                     "transporttrolley(req_move,INDOOR)",
                 )) >= 0)
-                Assertions.assertTrue(to!!.checkNextContent("mover(req_forward,HOME,INDOOR)") >= 0) //moving towards INDOOR
-                Assertions.assertTrue(to!!.checkNextContent("mover(req_turn,HOME,INDOOR)") >= 0) //moving towards INDOOR
+                Assertions.assertTrue(to!!.checkNextContent("mover(req_forward_aclk,HOME,INDOOR)") >= 0) //moving towards INDOOR
+                Assertions.assertTrue(to!!.checkNextContent("mover(req_turn_aclk,HOME,INDOOR)") >= 0) //moving towards INDOOR
                 Assertions.assertTrue(to!!.checkNextContents(arrayOf( //robot arrives to INDOOR, and does the pickup
                     "mover(wait,INDOOR,INDOOR)",
                     "pickupdropouthandler(do_pickup)",
@@ -157,12 +157,12 @@ internal class TestSprint1_integration_test {
                     "depositaction(reply,GLASS)",
                     "wasteservice(wait,0.0,2.0)",
                     "transporttrolley(req_move,GLASSBOX)",
-                    "mover(req_forward,INDOOR,GLASSBOX)"
+                    "mover(req_forward_aclk,INDOOR,GLASSBOX)"
                 )) >= 0)
-                //Assertions.assertTrue(to!!.checkNextContent("mover(req_forward,INDOOR,GLASSBOX)") >= 0) //moving towards GLASSBOX   -- HAS TO BE INCLUDED IN THE CASES ABOVE, as it happens simultaneously to the others
-                Assertions.assertTrue(to!!.checkNextContent("mover(req_turn,INDOOR,GLASSBOX)") >= 0) //moving towards GLASSBOX
-                Assertions.assertTrue(to!!.checkNextContent("mover(req_forward,PLASTICBOX,GLASSBOX)") >= 0) //moving towards GLASSBOX
-                Assertions.assertTrue(to!!.checkNextContent("mover(req_turn,PLASTICBOX,GLASSBOX)") >= 0) //moving towards GLASSBOX
+                //Assertions.assertTrue(to!!.checkNextContent("mover(req_forward_aclk,INDOOR,GLASSBOX)") >= 0) //moving towards GLASSBOX   -- HAS TO BE INCLUDED IN THE CASES ABOVE, as it happens simultaneously to the others
+                Assertions.assertTrue(to!!.checkNextContent("mover(req_turn_aclk,INDOOR,GLASSBOX)") >= 0) //moving towards GLASSBOX
+                Assertions.assertTrue(to!!.checkNextContent("mover(req_forward_aclk,PLASTICBOX,GLASSBOX)") >= 0) //moving towards GLASSBOX
+                Assertions.assertTrue(to!!.checkNextContent("mover(req_turn_aclk,PLASTICBOX,GLASSBOX)") >= 0) //moving towards GLASSBOX
                 Assertions.assertTrue(to!!.checkNextContents(arrayOf( //robot arrival to GLASSBOX, robot does the dropout
                     "mover(wait,GLASSBOX,GLASSBOX)",
                     "pickupdropouthandler(do_dropout)",
@@ -260,7 +260,7 @@ internal class TestSprint1_integration_test {
                 to!!.nextCheckIndex = nextCheckIndexBeforeSecondReq
                 Assertions.assertFalse(to!!.checkNextSequence(arrayOf( "depositaction(move_home*)", "depositaction(req_pickup*)"))) //depositaction should not pass through move_home state (should not be present before - for example - req_pickup of the second request)
                 to!!.nextCheckIndex = nextCheckIndexBeforeSecondReq
-                Assertions.assertFalse(to!!.checkNextSequence(arrayOf( "mover(handle,GLASSBOX,HOME)", "depositaction(req_pickup*)"))) //robot should not go directly to home after bein in glassbox (should not be present before - for example - req_pickup of the second request)
+                Assertions.assertFalse(to!!.checkNextSequence(arrayOf( "mover(handle,GLASSBOX,HOME)", "depositaction(req_pickup*)"))) //robot should not go directly to home after being in glassbox (should not be present before - for example - req_pickup of the second request)
 
             } catch (e: java.lang.Exception) {
                 Assertions.fail("test_2_accepted_while_in_operation ERROR:" + e.message)
@@ -285,7 +285,7 @@ internal class TestSprint1_integration_test {
                 to!!.waitUntilState("pickupdropouthandler","pickupdropouthandler(do_dropout)") //wait for dropout command
                 CommUtils.delay(50)  //concede a little extra time to the actors in the system to communicate and do their transition, before going ahead with the test requests
 
-                //SECONDO REQUEST
+                //SECOND REQUEST
                 ColorsOut.outappl("launch second request", ColorsOut.GREEN)
                 truckRequestStr = "msg(depositrequest, request,python,wasteservice,depositrequest(GLASS,11),1)"
                 answer = connTcp.request(truckRequestStr)
@@ -332,7 +332,7 @@ internal class TestSprint1_integration_test {
     /* the second request is made while the robot is still in operation, while it's returning to home
     After dropout it whould be observed a command to go to HOME, rather than INDOOR
     */
-    fun test_2_accepted_while_returning_home() { //the second request is made while the robot is still in operation, while returning to home
+    fun test_2_accepted_while_returning_home() { //the second request is made while the robot is still in operation, while returning to home. In the process a u turn is performed
         assertTimeoutPreemptively<Unit>(Duration.ofSeconds(45)){
             try {
                 val connTcp = ConnTcp("localhost", 8095)
@@ -342,10 +342,10 @@ internal class TestSprint1_integration_test {
                 var answer = connTcp.request(truckRequestStr)
                 ColorsOut.outappl("testFirstRequest answer=$answer", ColorsOut.GREEN)
                 Assertions.assertTrue(answer.contains("loadaccept"))
-                to!!.waitUntilState("mover","mover(req_forward,PLASTICBOX,HOME)") //wait for the robot to proceed from PLASTICBOX to HOME
-                CommUtils.delay(50)  //concede a little extra time to the actors in the system to communicate and do their transition, before going ahead with the test requests
+                to!!.waitUntilState("mover","mover(req_forward_aclk,PLASTICBOX,HOME)") //wait for the robot to proceed from PLASTICBOX to HOME
+                CommUtils.delay(250)  //wait to be roughly in the middle of the wall
 
-                //SECONDO REQUEST
+                //SECOND REQUEST
                 truckRequestStr = "msg(depositrequest, request,python,wasteservice,depositrequest(GLASS,7),1)"
                 answer = connTcp.request(truckRequestStr)
                 ColorsOut.outappl("testSecondRequest answer=$answer", ColorsOut.GREEN)
@@ -384,8 +384,10 @@ internal class TestSprint1_integration_test {
                     "wasteservice(req_depositaction,2.0,7.0)",
                     "depositaction(req_move_indoor*)",
                     "transporttrolley(req_move,INDOOR)",
-                    "mover(handle,GLASSBOX,INDOOR)",   //this actually happens a bit later since option 1 is used for the mover: at GLASSBOX the destination is updated
+                    "mover(set_new_dest_aclk,PLASTICBOX,INDOOR)",
                 )) >= 0)
+                Assertions.assertTrue(to!!.checkNextContent("mover(handle,PLASTICBOX,INDOOR)") >= 0)
+                Assertions.assertTrue(to!!.checkNextContent("mover(wait,INDOOR,INDOOR)") >= 0)
                 to!!.nextCheckIndex = nextCheckIndexBeforeSecondReq
                 Assertions.assertFalse(to!!.checkNextSequence(arrayOf("depositaction(wait*)", "depositaction(req_pickup*)"))) //depositaction should not trasit through wait, it should not go directly to req_move_indoor (should not be present before - for example - req_pickup of the second request)
 
@@ -406,10 +408,10 @@ internal class TestSprint1_integration_test {
                 var answer = connTcp.request(truckRequestStr)
                 ColorsOut.outappl("testFirstRequest answer=$answer", ColorsOut.GREEN)
                 Assertions.assertTrue(answer.contains("loadaccept"))
-                to!!.waitUntilState("mover","mover(req_forward,PLASTICBOX,HOME)") //wait for the robot to proceed from PLASTICBOX to HOME
-                CommUtils.delay(50)  //concede a little extra time to the actors in the system to communicate and do their transition, before going ahead with the test requests
+                to!!.waitUntilState("mover","mover(req_forward_aclk,PLASTICBOX,HOME)") //wait for the robot to proceed from PLASTICBOX to HOME
+                CommUtils.delay(250)  //wait to be roughly in the middle of the wall
 
-                //SECONDO REQUEST
+                //SECOND REQUEST
                 truckRequestStr = "msg(depositrequest, request,python,wasteservice,depositrequest(GLASS,11),1)"
                 answer = connTcp.request(truckRequestStr)
                 ColorsOut.outappl("testSecondRequest answer=$answer", ColorsOut.GREEN)

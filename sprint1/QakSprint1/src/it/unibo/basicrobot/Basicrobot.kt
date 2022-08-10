@@ -27,7 +27,7 @@ class Basicrobot ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 						discardMessages = false
 						println("basicrobot | START")
 						unibo.robot.robotSupport.create(myself ,"basicrobotConfig.json" )
-						updateResourceRep( "basicrobot(start)"  
+						updateResourceRep( "basicrobot(s0)"  
 						)
 					}
 					 transition( edgeName="goto",targetState="work", cond=doswitch() )
@@ -36,10 +36,10 @@ class Basicrobot ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 					action { //it:State
 						println("basicrobot | waiting .............. ")
 					}
-					 transition(edgeName="t129",targetState="execcmd",cond=whenDispatch("cmd"))
-					transition(edgeName="t130",targetState="doStep",cond=whenRequest("step"))
-					transition(edgeName="t131",targetState="handleObstacle",cond=whenDispatch("obstacle"))
-					transition(edgeName="t132",targetState="endwork",cond=whenDispatch("end"))
+					 transition(edgeName="t145",targetState="execcmd",cond=whenDispatch("cmd"))
+					transition(edgeName="t146",targetState="doStep",cond=whenRequest("step"))
+					transition(edgeName="t147",targetState="handleObstacle",cond=whenDispatch("obstacle"))
+					transition(edgeName="t148",targetState="endwork",cond=whenDispatch("end"))
 				}	 
 				state("execcmd") { //this:State
 					action { //it:State
@@ -50,7 +50,7 @@ class Basicrobot ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 								 if(Move=="w") ExpectingCollision=true  
 								println("basicrobot | executing '${Move}'")
 								unibo.robot.robotSupport.move( Move  )
-								updateResourceRep( "moveactivated(Move)"  
+								updateResourceRep( "basicrobot(execcmd,$Move)"  
 								)
 						}
 					}
@@ -63,7 +63,7 @@ class Basicrobot ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 						 ){ ExpectingCollision=false  
 						unibo.robot.robotSupport.move( "h"  )
 						delay(600) 
-						updateResourceRep( "obstacle(${CurrentMove})"  
+						updateResourceRep( "basicrobot(handleObstacle,${CurrentMove})"  
 						)
 						emit("info", "info(obstacledoing(w))" ) 
 						}
@@ -76,7 +76,7 @@ class Basicrobot ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 						if( checkMsgContent( Term.createTerm("step(TIME)"), Term.createTerm("step(T)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 									StepTime = payloadArg(0).toLong() 	 
-								updateResourceRep( "step(${StepTime})"  
+								updateResourceRep( "basicrobot(doStep,${StepTime})"  
 								)
 						}
 						StartTime = getCurrentTime()
@@ -85,13 +85,13 @@ class Basicrobot ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 						stateTimer = TimerActor("timer_doStep", 
 							scope, context!!, "local_tout_basicrobot_doStep", StepTime )
 					}
-					 transition(edgeName="t033",targetState="stepDone",cond=whenTimeout("local_tout_basicrobot_doStep"))   
-					transition(edgeName="t034",targetState="stepFail",cond=whenDispatch("obstacle"))
+					 transition(edgeName="t049",targetState="stepDone",cond=whenTimeout("local_tout_basicrobot_doStep"))   
+					transition(edgeName="t050",targetState="stepFail",cond=whenDispatch("obstacle"))
 				}	 
 				state("stepDone") { //this:State
 					action { //it:State
 						unibo.robot.robotSupport.move( "h"  )
-						updateResourceRep( "stepDone($StepTime)"  
+						updateResourceRep( "basicrobot(stepDone,$StepTime)"  
 						)
 						answer("step", "stepdone", "stepdone(ok)"   )  
 						println("basicrobot | stepDone reply done")
@@ -102,13 +102,13 @@ class Basicrobot ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 					action { //it:State
 						Duration = getDuration(StartTime)
 						unibo.robot.robotSupport.move( "h"  )
-						 var TunedDuration = Duration;  
+						 var TunedDuration = Duration;
 									TunedDuration = Duration * 5 / 6
 						println("basicrobot | stepFail duration=$Duration TunedDuration=$TunedDuration")
 						unibo.robot.robotSupport.move( "s"  )
 						delay(TunedDuration)
 						unibo.robot.robotSupport.move( "h"  )
-						updateResourceRep( "stepFail($Duration)"  
+						updateResourceRep( "basicrobot(stepFail,$Duration)"  
 						)
 						answer("step", "stepfail", "stepfail($Duration,obst)"   )  
 					}
@@ -116,7 +116,7 @@ class Basicrobot ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 				}	 
 				state("endwork") { //this:State
 					action { //it:State
-						updateResourceRep( "basicrobot(end)"  
+						updateResourceRep( "basicrobot(endwork)"  
 						)
 						terminate(1)
 					}

@@ -25,6 +25,8 @@ class TestObserver : CoapHandler {
             "depositaction" to "ctxserver",
             "transporttrolley" to "ctxrobot",
             "mover" to "ctxrobot",
+            "moveruturn" to "ctxrobot",
+            "mover180turn" to "ctxrobot",
             "pickupdropouthandler" to "ctxrobot",
             "basicrobotwrapper" to "ctxrobot",
         )
@@ -71,16 +73,24 @@ class TestObserver : CoapHandler {
      * @param stateContent look for the presence of this string inside the new state. If it's present the desired state is considered reached and the method returns
      */
     fun waitUntilState(actorName: String, stateContent: String): String {
-        var lastCheckedIndex = lock.withLock { history.size }
-        var last : String = getCurrentCoapState(actorName)
-
-        while(! (last.startsWith("$actorName(") && last.contains(stateContent))){
-            if(last.startsWith("$actorName(")) ColorsOut.outappl("actor $actorName current state is: '$last', waiting for it to contain '$stateContent'", ColorsOut.CYAN)
-            lock.withLock {
-                condition.await()
-                last = checkFrom(lastCheckedIndex, actorName, stateContent) //check the past missed updates
-                lastCheckedIndex = history.size
+        lateinit var last : String
+        //ColorsOut.outappl("waiting for $actorName($stateContent", ColorsOut.RED)
+        lock.withLock {
+            try {
+                last = history.last { it.startsWith("$actorName(") }
+                //ColorsOut.outappl("Last found:  '$last'", ColorsOut.CYAN)
+            }catch (_ : NoSuchElementException){
+                last = getCurrentCoapState(actorName)
             }
+            if (last.startsWith("$actorName(") && last.contains(stateContent)) return last //automatically release the lock
+
+            var lastCheckedIndex = history.size
+            do{
+                if(last.startsWith("$actorName(")) ColorsOut.outappl("actor $actorName current state is: '$last', waiting for it to contain '$stateContent'", ColorsOut.CYAN)
+                condition.await() //automatically release the lock
+                last = checkFrom(lastCheckedIndex, actorName, stateContent)
+                lastCheckedIndex = history.size
+            }while(! (last.startsWith("$actorName(") && last.contains(stateContent)))
         }
         ColorsOut.outappl("actor $actorName current state is: '$last', matching with content '$stateContent'", ColorsOut.CYAN)
         return last
@@ -121,11 +131,17 @@ class TestObserver : CoapHandler {
     fun debugSetHistory(history : MutableList<String>){
         this.history = history
     }
+    fun clearHistory() {
+        lock.withLock {
+            history.clear()
+            nextCheckIndex=0
+        }
+    }
 
     override fun onLoad(response: CoapResponse) {
         lock.withLock {
             history.add(response.responseText)
-            //ColorsOut.outappl("history=" + history, ColorsOut.MAGENTA);
+            //ColorsOut.outappl("history+=" + response.responseText, ColorsOut.MAGENTA);
             condition.signalAll()
         }
     }

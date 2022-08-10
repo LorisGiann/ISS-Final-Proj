@@ -20,6 +20,7 @@ class Mover ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scop
 		return { //this:ActionBasciFsm
 				state("wait") { //this:State
 					action { //it:State
+						discardMessages = false
 						println("$name in ${currentState.stateName} | $currentMsg")
 						updateResourceRep( "mover(wait,$CURRPOS,$DEST)"  
 						)
@@ -32,54 +33,215 @@ class Mover ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scop
 						if( checkMsgContent( Term.createTerm("move(POSITION)"), Term.createTerm("move(POS)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 DEST = ws.Position.valueOf(payloadArg(0)) 
+								if(  DEST==CURRPOS 
+								 ){answer("move", "moveanswer", "moveanswer(OK)"   )  
+								}
 						}
 						updateResourceRep( "mover(handle,$CURRPOS,$DEST)"  
 						)
 					}
-					 transition( edgeName="goto",targetState="req_forward", cond=doswitchGuarded({ DEST!=CURRPOS  
+					 transition( edgeName="goto",targetState="aclk_or_clk", cond=doswitchGuarded({ DEST!=CURRPOS  
 					}) )
 					transition( edgeName="goto",targetState="wait", cond=doswitchGuarded({! ( DEST!=CURRPOS  
 					) }) )
 				}	 
-				state("req_forward") { //this:State
+				state("aclk_or_clk") { //this:State
 					action { //it:State
 						println("$name in ${currentState.stateName} | $currentMsg")
-						updateResourceRep( "mover(req_forward,$CURRPOS,$DEST)"  
+						updateResourceRep( "mover(aclk_or_clk,$CURRPOS,$DEST)"  
+						)
+					}
+					 transition( edgeName="goto",targetState="req_forward_aclk", cond=doswitchGuarded({ DEST==ws.func.nextPos(CURRPOS) || DEST==ws.func.nextPos(ws.func.nextPos(CURRPOS))  
+					}) )
+					transition( edgeName="goto",targetState="prepare_clk", cond=doswitchGuarded({! ( DEST==ws.func.nextPos(CURRPOS) || DEST==ws.func.nextPos(ws.func.nextPos(CURRPOS))  
+					) }) )
+				}	 
+				state("req_forward_aclk") { //this:State
+					action { //it:State
+						println("$name in ${currentState.stateName} | $currentMsg")
+						updateResourceRep( "mover(req_forward_aclk,$CURRPOS,$DEST)"  
 						)
 						request("cmdsync", "cmdsync(w)" ,"basicrobotwrapper" )  
 					}
-					 transition(edgeName="t023",targetState="chk_forward",cond=whenReply("cmdanswer"))
+					 transition(edgeName="t023",targetState="chk_forward_aclk",cond=whenReply("cmdanswer"))
+					transition(edgeName="t024",targetState="set_new_dest_aclk",cond=whenRequest("move"))
 				}	 
-				state("chk_forward") { //this:State
+				state("chk_forward_aclk") { //this:State
 					action { //it:State
 						println("$name in ${currentState.stateName} | $currentMsg")
-						updateResourceRep( "mover(chk_forward,$CURRPOS,$DEST)"  
+						updateResourceRep( "mover(chk_forward_aclk,$CURRPOS,$DEST)"  
 						)
 						if( checkMsgContent( Term.createTerm("cmdanswer(RESULT)"), Term.createTerm("cmdanswer(RES)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 RES = payloadArg(0) 
 						}
 					}
-					 transition( edgeName="goto",targetState="req_turn", cond=doswitchGuarded({ RES=="OK"  
+					 transition( edgeName="goto",targetState="req_turn_aclk", cond=doswitchGuarded({ RES=="OK"  
 					}) )
 					transition( edgeName="goto",targetState="error", cond=doswitchGuarded({! ( RES=="OK"  
 					) }) )
 				}	 
-				state("req_turn") { //this:State
+				state("set_new_dest_aclk") { //this:State
 					action { //it:State
 						println("$name in ${currentState.stateName} | $currentMsg")
-						updateResourceRep( "mover(req_turn,$CURRPOS,$DEST)"  
+						if( checkMsgContent( Term.createTerm("move(POSITION)"), Term.createTerm("move(POS)"), 
+						                        currentMsg.msgContent()) ) { //set msgArgList
+								 DEST = ws.Position.valueOf(payloadArg(0)) 
+						}
+						updateResourceRep( "mover(set_new_dest_aclk,$CURRPOS,$DEST)"  
+						)
+					}
+					 transition( edgeName="goto",targetState="req_forward_aclk", cond=doswitchGuarded({ DEST==ws.func.nextPos(CURRPOS) || DEST==ws.func.nextPos(ws.func.nextPos(CURRPOS))  
+					}) )
+					transition( edgeName="goto",targetState="req_u_turn", cond=doswitchGuarded({! ( DEST==ws.func.nextPos(CURRPOS) || DEST==ws.func.nextPos(ws.func.nextPos(CURRPOS))  
+					) }) )
+				}	 
+				state("req_turn_aclk") { //this:State
+					action { //it:State
+						println("$name in ${currentState.stateName} | $currentMsg")
+						updateResourceRep( "mover(req_turn_aclk,$CURRPOS,$DEST)"  
 						)
 						request("cmdsync", "cmdsync(l)" ,"basicrobotwrapper" )  
 					}
-					 transition(edgeName="t024",targetState="chk_turn",cond=whenReply("cmdanswer"))
+					 transition(edgeName="t025",targetState="chk_turn_aclk",cond=whenReply("cmdanswer"))
 				}	 
-				state("chk_turn") { //this:State
+				state("chk_turn_aclk") { //this:State
 					action { //it:State
 						println("$name in ${currentState.stateName} | $currentMsg")
-						updateResourceRep( "mover(chk_turn,$CURRPOS,$DEST)"  
+						updateResourceRep( "mover(chk_turn_aclk,$CURRPOS,$DEST)"  
 						)
 						if( checkMsgContent( Term.createTerm("cmdanswer(RESULT)"), Term.createTerm("cmdanswer(RES)"), 
+						                        currentMsg.msgContent()) ) { //set msgArgList
+								 RES = payloadArg(0) 
+						}
+					}
+					 transition( edgeName="goto",targetState="update_aclk", cond=doswitchGuarded({ RES=="OK"  
+					}) )
+					transition( edgeName="goto",targetState="error", cond=doswitchGuarded({! ( RES=="OK"  
+					) }) )
+				}	 
+				state("update_aclk") { //this:State
+					action { //it:State
+						println("$name in ${currentState.stateName} | $currentMsg")
+						 CURRPOS=ws.func.nextPos(CURRPOS)  
+						updateResourceRep( "mover(update_aclk,$CURRPOS,$DEST)"  
+						)
+					}
+					 transition( edgeName="goto",targetState="reply", cond=doswitch() )
+				}	 
+				state("prepare_clk") { //this:State
+					action { //it:State
+						println("$name in ${currentState.stateName} | $currentMsg")
+						updateResourceRep( "mover(prepare_clk,$CURRPOS,$DEST)"  
+						)
+						request("cmdsync", "cmdsync(l)" ,"basicrobotwrapper" )  
+					}
+					 transition(edgeName="t026",targetState="chk_prepare_clk",cond=whenReply("cmdanswer"))
+				}	 
+				state("chk_prepare_clk") { //this:State
+					action { //it:State
+						println("$name in ${currentState.stateName} | $currentMsg")
+						updateResourceRep( "mover(chk_prepare_clk,$CURRPOS,$DEST)"  
+						)
+						if( checkMsgContent( Term.createTerm("cmdanswer(RESULT)"), Term.createTerm("cmdanswer(RES)"), 
+						                        currentMsg.msgContent()) ) { //set msgArgList
+								 RES = payloadArg(0) 
+						}
+					}
+					 transition( edgeName="goto",targetState="req_forward_clk", cond=doswitchGuarded({ RES=="OK"  
+					}) )
+					transition( edgeName="goto",targetState="error", cond=doswitchGuarded({! ( RES=="OK"  
+					) }) )
+				}	 
+				state("req_forward_clk") { //this:State
+					action { //it:State
+						println("$name in ${currentState.stateName} | $currentMsg")
+						updateResourceRep( "mover(req_forward_clk,$CURRPOS,$DEST)"  
+						)
+						request("cmdsync", "cmdsync(w)" ,"basicrobotwrapper" )  
+					}
+					 transition(edgeName="t027",targetState="chk_forward_clk",cond=whenReply("cmdanswer"))
+					transition(edgeName="t028",targetState="set_new_dest_clk",cond=whenRequest("move"))
+				}	 
+				state("chk_forward_clk") { //this:State
+					action { //it:State
+						println("$name in ${currentState.stateName} | $currentMsg")
+						updateResourceRep( "mover(chk_forward_clk,$CURRPOS,$DEST)"  
+						)
+						if( checkMsgContent( Term.createTerm("cmdanswer(RESULT)"), Term.createTerm("cmdanswer(RES)"), 
+						                        currentMsg.msgContent()) ) { //set msgArgList
+								 RES = payloadArg(0) 
+						}
+					}
+					 transition( edgeName="goto",targetState="req_turn_180_clk", cond=doswitchGuarded({ RES=="OK"  
+					}) )
+					transition( edgeName="goto",targetState="error", cond=doswitchGuarded({! ( RES=="OK"  
+					) }) )
+				}	 
+				state("set_new_dest_clk") { //this:State
+					action { //it:State
+						println("$name in ${currentState.stateName} | $currentMsg")
+						if( checkMsgContent( Term.createTerm("move(POSITION)"), Term.createTerm("move(POS)"), 
+						                        currentMsg.msgContent()) ) { //set msgArgList
+								 DEST = ws.Position.valueOf(payloadArg(0)) 
+						}
+						updateResourceRep( "mover(set_new_dest_clk,$CURRPOS,$DEST)"  
+						)
+					}
+					 transition( edgeName="goto",targetState="req_forward_clk", cond=doswitchGuarded({ DEST==ws.func.prevPos(CURRPOS) || DEST==ws.func.prevPos(ws.func.prevPos(CURRPOS))  
+					}) )
+					transition( edgeName="goto",targetState="req_u_turn", cond=doswitchGuarded({! ( DEST==ws.func.prevPos(CURRPOS) || DEST==ws.func.prevPos(ws.func.prevPos(CURRPOS))  
+					) }) )
+				}	 
+				state("req_turn_180_clk") { //this:State
+					action { //it:State
+						println("$name in ${currentState.stateName} | $currentMsg")
+						updateResourceRep( "mover(req_turn_180_clk,$CURRPOS,$DEST)"  
+						)
+						request("mover180turn", "mover180turn(_)" ,"mover180turn" )  
+					}
+					 transition(edgeName="t029",targetState="chk_turn_180_clk",cond=whenReply("mover180turnanswer"))
+				}	 
+				state("chk_turn_180_clk") { //this:State
+					action { //it:State
+						println("$name in ${currentState.stateName} | $currentMsg")
+						updateResourceRep( "mover(chk_turn_180_clk,$CURRPOS,$DEST)"  
+						)
+						if( checkMsgContent( Term.createTerm("mover180turnanswer(RESULT)"), Term.createTerm("mover180turnanswer(RES)"), 
+						                        currentMsg.msgContent()) ) { //set msgArgList
+								 RES = payloadArg(0) 
+						}
+					}
+					 transition( edgeName="goto",targetState="update_clk", cond=doswitchGuarded({ RES=="OK"  
+					}) )
+					transition( edgeName="goto",targetState="error", cond=doswitchGuarded({! ( RES=="OK"  
+					) }) )
+				}	 
+				state("update_clk") { //this:State
+					action { //it:State
+						println("$name in ${currentState.stateName} | $currentMsg")
+						 CURRPOS=ws.func.prevPos(CURRPOS)  
+						updateResourceRep( "mover(update_clk,$CURRPOS,$DEST)"  
+						)
+					}
+					 transition( edgeName="goto",targetState="reply", cond=doswitch() )
+				}	 
+				state("req_u_turn") { //this:State
+					action { //it:State
+						println("$name in ${currentState.stateName} | $currentMsg")
+						request("moveruturn", "moveruturn(_)" ,"moveruturn" )  
+						updateResourceRep( "mover(req_u_turn,$CURRPOS,$DEST)"  
+						)
+					}
+					 transition(edgeName="t030",targetState="chk_u_turn",cond=whenReply("moveruturnanswer"))
+					transition(edgeName="t031",targetState="req_u_turn",cond=whenReply("moveanswer"))
+				}	 
+				state("chk_u_turn") { //this:State
+					action { //it:State
+						println("$name in ${currentState.stateName} | $currentMsg")
+						updateResourceRep( "mover(chk_u_turn,$CURRPOS,$DEST)"  
+						)
+						if( checkMsgContent( Term.createTerm("moveruturnanswer(RESULT)"), Term.createTerm("moveruturnanswer(RES)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 RES = payloadArg(0) 
 						}
@@ -92,7 +254,6 @@ class Mover ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scop
 				state("reply") { //this:State
 					action { //it:State
 						println("$name in ${currentState.stateName} | $currentMsg")
-						 CURRPOS=ws.func.nextPosition(CURRPOS)  
 						if(  CURRPOS==DEST  
 						 ){answer("move", "moveanswer", "moveanswer(OK)"   )  
 						}
@@ -101,14 +262,15 @@ class Mover ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scop
 						stateTimer = TimerActor("timer_reply", 
 							scope, context!!, "local_tout_mover_reply", 10.toLong() )
 					}
-					 transition(edgeName="t025",targetState="handle",cond=whenTimeout("local_tout_mover_reply"))   
-					transition(edgeName="t026",targetState="handle",cond=whenRequest("move"))
+					 transition(edgeName="t032",targetState="handle",cond=whenTimeout("local_tout_mover_reply"))   
+					transition(edgeName="t033",targetState="handle",cond=whenRequest("move"))
 				}	 
 				state("error") { //this:State
 					action { //it:State
 						println("$name in ${currentState.stateName} | $currentMsg")
 						updateResourceRep( "mover(error,$CURRPOS,$DEST)"  
 						)
+						answer("move", "moveanswer", "moveanswer(ERROR)"   )  
 						println("mover | ERROR STATE")
 					}
 				}	 
