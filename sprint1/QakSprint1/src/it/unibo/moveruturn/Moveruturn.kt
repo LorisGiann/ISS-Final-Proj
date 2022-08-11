@@ -14,56 +14,89 @@ class Moveruturn ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 		return "wait"
 	}
 	override fun getBody() : (ActorBasicFsm.() -> Unit){
-		 lateinit var RES : String     
+		  lateinit var RES : String
+				var ENDDIR : String? = null  
 		return { //this:ActionBasciFsm
 				state("wait") { //this:State
 					action { //it:State
 						discardMessages = true
 						println("$name in ${currentState.stateName} | $currentMsg")
-						updateResourceRep( "moveruturn(wait)"  
+						updateResourceRep( "moveruturn(wait,$ENDDIR)"  
 						)
 					}
-					 transition(edgeName="t034",targetState="req_halt",cond=whenRequest("moveruturn"))
+					 transition(edgeName="t035",targetState="req_halt",cond=whenRequest("moveruturn"))
 				}	 
 				state("req_halt") { //this:State
 					action { //it:State
 						println("$name in ${currentState.stateName} | $currentMsg")
-						updateResourceRep( "moveruturn(req_halt)"  
+						if( checkMsgContent( Term.createTerm("moveruturn(_)"), Term.createTerm("moveruturn(DIR)"), 
+						                        currentMsg.msgContent()) ) { //set msgArgList
+								 ENDDIR = when(payloadArg(0)){
+												"ACLK" -> "CLK"
+												"CLK"  -> "ACLK"
+												else -> {println("moveruturn | error: unknow direction"); ""}
+											   }  
+						}
+						updateResourceRep( "moveruturn(req_halt,$ENDDIR)"  
 						)
 						request("cmdsync", "cmdsync(h)" ,"basicrobotwrapper" )  
 					}
-					 transition(edgeName="t035",targetState="chk_halt",cond=whenReply("cmdanswer"))
+					 transition(edgeName="t036",targetState="chk_halt",cond=whenReply("cmdanswer"))
 				}	 
 				state("chk_halt") { //this:State
 					action { //it:State
 						println("$name in ${currentState.stateName} | $currentMsg")
-						updateResourceRep( "moveruturn(chk_halt)"  
+						updateResourceRep( "moveruturn(chk_halt,$ENDDIR)"  
 						)
 						if( checkMsgContent( Term.createTerm("cmdanswer(RESULT)"), Term.createTerm("cmdanswer(RES)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 RES = payloadArg(0) 
 						}
 					}
-					 transition( edgeName="goto",targetState="req_turn_180_1", cond=doswitchGuarded({ RES=="OK"  
+					 transition( edgeName="goto",targetState="req_turn_1", cond=doswitchGuarded({ RES=="OK"  
 					}) )
 					transition( edgeName="goto",targetState="error", cond=doswitchGuarded({! ( RES=="OK"  
 					) }) )
 				}	 
-				state("req_turn_180_1") { //this:State
+				state("req_turn_1") { //this:State
 					action { //it:State
 						println("$name in ${currentState.stateName} | $currentMsg")
-						updateResourceRep( "moveruturn(req_turn_180_1)"  
+						updateResourceRep( "moveruturn(req_turn_1,$ENDDIR)"  
 						)
-						request("mover180turn", "mover180turn(_)" ,"mover180turn" )  
+						request("cmdsync", "cmdsync(l)" ,"basicrobotwrapper" )  
 					}
-					 transition(edgeName="t036",targetState="chk_turn_180_1",cond=whenReply("mover180turnanswer"))
+					 transition(edgeName="t037",targetState="chk_turn_1",cond=whenReply("cmdanswer"))
 				}	 
-				state("chk_turn_180_1") { //this:State
+				state("chk_turn_1") { //this:State
 					action { //it:State
 						println("$name in ${currentState.stateName} | $currentMsg")
-						updateResourceRep( "moveruturn(chk_turn_180_1)"  
+						updateResourceRep( "moveruturn(chk_turn_1,$ENDDIR)"  
 						)
-						if( checkMsgContent( Term.createTerm("mover180turnanswer(RESULT)"), Term.createTerm("mover180turnanswer(RES)"), 
+						if( checkMsgContent( Term.createTerm("cmdanswer(RESULT)"), Term.createTerm("cmdanswer(RES)"), 
+						                        currentMsg.msgContent()) ) { //set msgArgList
+								 RES = payloadArg(0) 
+						}
+					}
+					 transition( edgeName="goto",targetState="req_turn_2", cond=doswitchGuarded({ RES=="OK"  
+					}) )
+					transition( edgeName="goto",targetState="error", cond=doswitchGuarded({! ( RES=="OK"  
+					) }) )
+				}	 
+				state("req_turn_2") { //this:State
+					action { //it:State
+						println("$name in ${currentState.stateName} | $currentMsg")
+						updateResourceRep( "moveruturn(req_turn_2,$ENDDIR)"  
+						)
+						request("cmdsync", "cmdsync(l)" ,"basicrobotwrapper" )  
+					}
+					 transition(edgeName="t038",targetState="chk_turn_2",cond=whenReply("cmdanswer"))
+				}	 
+				state("chk_turn_2") { //this:State
+					action { //it:State
+						println("$name in ${currentState.stateName} | $currentMsg")
+						updateResourceRep( "moveruturn(chk_turn_2,$ENDDIR)"  
+						)
+						if( checkMsgContent( Term.createTerm("cmdanswer(RESULT)"), Term.createTerm("cmdanswer(RES)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 RES = payloadArg(0) 
 						}
@@ -76,42 +109,47 @@ class Moveruturn ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 				state("req_forward") { //this:State
 					action { //it:State
 						println("$name in ${currentState.stateName} | $currentMsg")
-						updateResourceRep( "moveruturn(req_forward)"  
+						updateResourceRep( "moveruturn(req_forward,$ENDDIR)"  
 						)
 						request("cmdsync", "cmdsync(w)" ,"basicrobotwrapper" )  
 					}
-					 transition(edgeName="t037",targetState="chk_forward",cond=whenReply("cmdanswer"))
+					 transition(edgeName="t039",targetState="chk_forward",cond=whenReply("cmdanswer"))
 				}	 
 				state("chk_forward") { //this:State
 					action { //it:State
 						println("$name in ${currentState.stateName} | $currentMsg")
-						updateResourceRep( "moveruturn(chk_forward)"  
+						updateResourceRep( "moveruturn(chk_forward,$ENDDIR)"  
 						)
 						if( checkMsgContent( Term.createTerm("cmdanswer(RESULT)"), Term.createTerm("cmdanswer(RES)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 RES = payloadArg(0) 
 						}
 					}
-					 transition( edgeName="goto",targetState="req_turn_180_2", cond=doswitchGuarded({ RES=="OK"  
+					 transition( edgeName="goto",targetState="req_final_turn", cond=doswitchGuarded({ RES=="OK"  
 					}) )
 					transition( edgeName="goto",targetState="error", cond=doswitchGuarded({! ( RES=="OK"  
 					) }) )
 				}	 
-				state("req_turn_180_2") { //this:State
+				state("req_final_turn") { //this:State
 					action { //it:State
 						println("$name in ${currentState.stateName} | $currentMsg")
-						updateResourceRep( "moveruturn(req_turn_180_2)"  
+						updateResourceRep( "moveruturn(req_final_turn,$ENDDIR)"  
 						)
-						request("mover180turn", "mover180turn(_)" ,"mover180turn" )  
+						if(  ENDDIR == "ACLK"  
+						 ){request("cmdsync", "cmdsync(l)" ,"basicrobotwrapper" )  
+						}
+						else
+						 {request("cmdsync", "cmdsync(r)" ,"basicrobotwrapper" )  
+						 }
 					}
-					 transition(edgeName="t038",targetState="chk_turn_180_2",cond=whenReply("mover180turnanswer"))
+					 transition(edgeName="t040",targetState="chk_final_turn",cond=whenReply("cmdanswer"))
 				}	 
-				state("chk_turn_180_2") { //this:State
+				state("chk_final_turn") { //this:State
 					action { //it:State
 						println("$name in ${currentState.stateName} | $currentMsg")
-						updateResourceRep( "moveruturn(chk_turn_180_2)"  
+						updateResourceRep( "moveruturn(chk_final_turn,$ENDDIR)"  
 						)
-						if( checkMsgContent( Term.createTerm("mover180turnanswer(RESULT)"), Term.createTerm("mover180turnanswer(RES)"), 
+						if( checkMsgContent( Term.createTerm("cmdanswer(RESULT)"), Term.createTerm("cmdanswer(RES)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 RES = payloadArg(0) 
 						}
@@ -125,7 +163,7 @@ class Moveruturn ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 					action { //it:State
 						println("$name in ${currentState.stateName} | $currentMsg")
 						answer("moveruturn", "moveruturnanswer", "moveruturnanswer(OK)"   )  
-						updateResourceRep( "moveruturn(reply)"  
+						updateResourceRep( "moveruturn(reply,$ENDDIR)"  
 						)
 					}
 					 transition( edgeName="goto",targetState="wait", cond=doswitch() )
@@ -133,7 +171,7 @@ class Moveruturn ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 				state("error") { //this:State
 					action { //it:State
 						println("$name in ${currentState.stateName} | $currentMsg")
-						updateResourceRep( "moveruturn(error)"  
+						updateResourceRep( "moveruturn(error,$ENDDIR)"  
 						)
 						answer("move", "moveruturnanswer", "moveruturnanswer(ERROR)"   )  
 						println("moveruturn | ERROR STATE")

@@ -26,7 +26,7 @@ class TestObserver : CoapHandler {
             "transporttrolley" to "ctxrobot",
             "mover" to "ctxrobot",
             "moveruturn" to "ctxrobot",
-            "mover180turn" to "ctxrobot",
+            //"mover180turn" to "ctxrobot",
             "pickupdropouthandler" to "ctxrobot",
             "basicrobotwrapper" to "ctxrobot",
         )
@@ -52,7 +52,7 @@ class TestObserver : CoapHandler {
         val conn = CoapConnection(addrPath.address, addrPath.path)
         conn.observeResource(this)
         ColorsOut.outappl("connecting via Coap to $actorName (conn: $conn)", ColorsOut.CYAN)
-        while (conn.request("") === "0") {
+        while (conn.request("") == "0") {
             ColorsOut.outappl("waiting for Coap conn to $actorName (conn: $conn)", ColorsOut.CYAN)
             CommUtils.delay(100)
         }
@@ -139,9 +139,9 @@ class TestObserver : CoapHandler {
     }
 
     override fun onLoad(response: CoapResponse) {
+        //ColorsOut.outappl("history+=" + response.responseText, ColorsOut.MAGENTA);
         lock.withLock {
             history.add(response.responseText)
-            //ColorsOut.outappl("history+=" + response.responseText, ColorsOut.MAGENTA);
             condition.signalAll()
         }
     }

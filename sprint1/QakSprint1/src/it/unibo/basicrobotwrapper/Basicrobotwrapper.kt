@@ -23,7 +23,7 @@ class Basicrobotwrapper ( name: String, scope: CoroutineScope  ) : ActorBasicFsm
 						updateResourceRep( "basicrobotwrapper(wait)"  
 						)
 					}
-					 transition(edgeName="t042",targetState="handle",cond=whenRequest("cmdsync"))
+					 transition(edgeName="t041",targetState="handle",cond=whenRequest("cmdsync"))
 				}	 
 				state("handle") { //this:State
 					action { //it:State
@@ -62,8 +62,8 @@ class Basicrobotwrapper ( name: String, scope: CoroutineScope  ) : ActorBasicFsm
 						)
 						forward("cmd", "cmd(w)" ,"basicrobot" ) 
 					}
-					 transition(edgeName="t043",targetState="collision",cond=whenEvent("info"))
-					transition(edgeName="t044",targetState="handle",cond=whenRequest("cmdsync"))
+					 transition(edgeName="t042",targetState="collision",cond=whenEvent("info"))
+					transition(edgeName="t043",targetState="handle",cond=whenRequest("cmdsync"))
 				}	 
 				state("collision") { //this:State
 					action { //it:State

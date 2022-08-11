@@ -82,11 +82,28 @@ class TestUtils {
                 }
             }
             //br.close()
-            object : Thread(){
+            initlogger(jarPath.substringAfterLast('/'))
+            object : Thread(){ //STDOUT
                 override fun run(){
-                    initlogger(jarPath.substringAfterLast('/'))
-                    while (br.readLine().also { line = it } != null) {
-                        //ColorsOut.outappl(line, ColorsOut.YELLOW)
+                    try{
+                        while (br.readLine().also { line = it } != null) {
+                            //ColorsOut.outappl(line, ColorsOut.YELLOW)
+                            logger!!.info(line)
+                        }
+                    }catch (e : Exception){
+                        logger!!.info(line)
+                    }
+                    logger!!.removeAppender(appender);
+                }
+            }.start()
+            object : Thread(){ //STDERR
+                override fun run(){
+                    try{
+                        while (BufferedReader(InputStreamReader(pr.errorStream)).readLine().also { line = it } != null) {
+                            ColorsOut.outappl(line, ColorsOut.RED)
+                            logger!!.info(line)
+                        }
+                    }catch (e : Exception){
                         logger!!.info(line)
                     }
                     logger!!.removeAppender(appender);

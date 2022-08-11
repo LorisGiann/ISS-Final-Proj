@@ -27,7 +27,6 @@ with Diagram('demo0Arch', show=False, outformat='png', graph_attr=graphattr) as 
           pickupdropouthandler=Custom('pickupdropouthandler','./qakicons/symActorSmall.png')
           mover=Custom('mover','./qakicons/symActorSmall.png')
           moveruturn=Custom('moveruturn','./qakicons/symActorSmall.png')
-          mover180turn=Custom('mover180turn','./qakicons/symActorSmall.png')
           basicrobotwrapper=Custom('basicrobotwrapper','./qakicons/symActorSmall.png')
           basicrobot=Custom('basicrobot','./qakicons/symActorSmall.png')
           distancefilter=Custom('distancefilter(coded)','./qakicons/codedQActor.png')
@@ -45,14 +44,15 @@ with Diagram('demo0Arch', show=False, outformat='png', graph_attr=graphattr) as 
      mover >> Edge(color='magenta', style='solid', xlabel='cmdsync') >> basicrobotwrapper
      mover >> Edge(color='magenta', style='solid', xlabel='cmdsync') >> basicrobotwrapper
      mover >> Edge(color='magenta', style='solid', xlabel='cmdsync') >> basicrobotwrapper
-     mover >> Edge(color='magenta', style='solid', xlabel='mover180turn') >> mover180turn
+     mover >> Edge(color='magenta', style='solid', xlabel='cmdsync') >> basicrobotwrapper
+     mover >> Edge(color='magenta', style='solid', xlabel='cmdsync') >> basicrobotwrapper
      mover >> Edge(color='magenta', style='solid', xlabel='moveruturn') >> moveruturn
      moveruturn >> Edge(color='magenta', style='solid', xlabel='cmdsync') >> basicrobotwrapper
-     moveruturn >> Edge(color='magenta', style='solid', xlabel='mover180turn') >> mover180turn
      moveruturn >> Edge(color='magenta', style='solid', xlabel='cmdsync') >> basicrobotwrapper
-     moveruturn >> Edge(color='magenta', style='solid', xlabel='mover180turn') >> mover180turn
-     mover180turn >> Edge(color='magenta', style='solid', xlabel='cmdsync') >> basicrobotwrapper
-     mover180turn >> Edge(color='magenta', style='solid', xlabel='cmdsync') >> basicrobotwrapper
+     moveruturn >> Edge(color='magenta', style='solid', xlabel='cmdsync') >> basicrobotwrapper
+     moveruturn >> Edge(color='magenta', style='solid', xlabel='cmdsync') >> basicrobotwrapper
+     moveruturn >> Edge(color='magenta', style='solid', xlabel='cmdsync') >> basicrobotwrapper
+     moveruturn >> Edge(color='magenta', style='solid', xlabel='cmdsync') >> basicrobotwrapper
      basicrobotwrapper >> Edge(color='blue', style='solid', xlabel='cmd') >> basicrobot
      basicrobotwrapper >> Edge(color='blue', style='solid', xlabel='cmd') >> basicrobot
      sys >> Edge(color='red', style='dashed', xlabel='info') >> basicrobotwrapper
