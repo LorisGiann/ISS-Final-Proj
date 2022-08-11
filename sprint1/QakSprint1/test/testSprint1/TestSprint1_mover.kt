@@ -113,11 +113,13 @@ internal class TestSprint1_mover {
 
     @Test
     fun dummy() {
-        while(true){
-            println(to!!.getCurrentCoapState("mover"))
-            println(to!!.getCurrentCoapState("moveruturn"))
-            println(to!!.getCurrentCoapState("basicrobotwrapper"))
-            CommUtils.delay(1000)
+        assertTimeoutPreemptively<Unit>(Duration.ofSeconds(10)) {
+            while (true) {
+                println(to!!.getCurrentCoapState("mover"))
+                println(to!!.getCurrentCoapState("moveruturn"))
+                println(to!!.getCurrentCoapState("basicrobotwrapper"))
+                CommUtils.delay(1000)
+            }
         }
         Assert.assertTrue(true)
         /*to!!.debugSetHistory(

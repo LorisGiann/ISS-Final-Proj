@@ -29,7 +29,7 @@ class Moveruturn ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 				state("req_halt") { //this:State
 					action { //it:State
 						println("$name in ${currentState.stateName} | $currentMsg")
-						if( checkMsgContent( Term.createTerm("moveruturn(_)"), Term.createTerm("moveruturn(DIR)"), 
+						if( checkMsgContent( Term.createTerm("moveruturn(CURRDIR)"), Term.createTerm("moveruturn(DIR)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 ENDDIR = when(payloadArg(0)){
 												"ACLK" -> "CLK"

@@ -32,13 +32,8 @@ Dispatch err		   : err(_)
 // ------------------------------------------------------
 
 // ---------------- moveruturn messages -----------------
-Request moveruturn     : moveruturn(_)
+Request moveruturn     : moveruturn(CURRDIR)  //CURRDIR = ACLK | CLK
 Reply moveruturnanswer : moveruturnanswer(RESULT) //RESULT =  OK | ERROR 
-// ------------------------------------------------------
-
-// --------------- mover180turn messages -----------------
-Request mover180turn     : mover180turn(_)
-Reply mover180turnanswer : mover180turnanswer(RESULT) //RESULT =  OK | ERROR 
 // ------------------------------------------------------
 
 // --------------- basicrobotwrapper msgs ---------------
