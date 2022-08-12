@@ -1,5 +1,5 @@
 %====================================================================================
 % demoled description   
 %====================================================================================
-context(ctxalarm, "localhost",  "TCP", "8095").
- qactor( led, ctxalarm, "it.unibo.led.Led").
+context(ctxalarmtest, "localhost",  "TCP", "8095").
+ qactor( led, ctxalarmtest, "it.unibo.led.Led").

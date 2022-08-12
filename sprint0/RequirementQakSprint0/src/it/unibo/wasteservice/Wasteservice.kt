@@ -34,6 +34,10 @@ class Wasteservice ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 								if(  ws.func.checkdepositpossible( Material, TruckLoad )  
 								 ){ ws.func.updateDeposit( Material, TruckLoad )  
 								answer("depositrequest", "loadaccept", "loadaccept($Material,$TruckLoad)"   )  
+								request("transporttrolleycmd", "transporttrolleycmd(_)" ,"transporttrolley" )  
+								 val Plastic = ws.func.contPB
+													val Glass = ws.func.contGB  
+								emit("update_container", "update_container($Plastic,$Glass)" ) 
 								}
 								else
 								 {answer("depositrequest", "loadrejected", "loadrejected($Material,$TruckLoad)"   )  

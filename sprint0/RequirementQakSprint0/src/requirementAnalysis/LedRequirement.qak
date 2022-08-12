@@ -6,10 +6,10 @@ Event    update_led 	 : update_led(LEDSTATE) // LEDSTATE = ON | OFF | BLINK
 // ---------------------------------------------------------------------------------------
     
 // ---------------------- CONTEXTS -----------------------
-Context ctxalarm ip [host="localhost" port=8095]
+Context ctxalarmtest ip [host="localhost" port=8095]
 // ------------------------------------------------------
 
-QActor led context ctxalarm{ 
+QActor led context ctxalarmtest{ 
 	[#	var newState = ws.LedState.OFF
 		
 		val actor = this@Led;

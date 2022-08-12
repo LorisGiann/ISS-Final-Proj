@@ -60,16 +60,17 @@ Dispatch disable		 : disable(_)
 Event disable : disable(BOOL)
 //-------------------------------------
 
-//LED 
+//--------------------------------------- LED --------------------------------------
 Event    update_led 	 : update_led(LEDSTATE) // LEDSTATE = ON | OFF | BLINK
+//----------------------------------------------------------------------------------
 
-//SONAR
+//-------------------------------------- SONAR -------------------------------------
 Dispatch sonaractivate   : info(ARG)
 Dispatch sonardeactivate : info(ARG)
 Event    sonardistance   : distance( V )   //emitted by sonarSimulator or sonardatasource
 Event    sonardata       : distance( V )   //for the application level	
 Event    obstacle        : obstacle( D )   //for the application level
-
+//----------------------------------------------------------------------------------
 
 
 

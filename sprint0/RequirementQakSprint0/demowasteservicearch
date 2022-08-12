@@ -1,0 +1,13 @@
+digraph demowasteserviceArch {
+	graph [fontcolor="#2D3436" fontname="Sans-Serif" fontsize=22 label=demowasteserviceArch nodesep=0.60 pad=2.0 rankdir=LR ranksep=0.75 splines=ortho]
+	node [fixedsize=true fontcolor="#2D3436" fontname="Sans-Serif" fontsize=13 height=1.4 imagescale=true labelloc=b shape=box style=rounded width=1.4]
+	edge [color="#7B8894"]
+	subgraph cluster_env {
+		graph [bgcolor="#E5F5FD" fontname="Sans-Serif" fontsize=12 label=env labeljust=l pencolor="#AEB6BE" rankdir=LR shape=box style=rounded]
+		"2743f108ca2a4c72815270e3787233cc" [label="" height=1.9 image="./qakicons/system.png" shape=none]
+		subgraph cluster_ctxserver {
+			graph [bgcolor=lightyellow fontname="Sans-Serif" fontsize=22 label=ctxserver labeljust=l pencolor="#AEB6BE" rankdir=LR shape=box style=rounded]
+			"5ce34d29ef4d4458bf3dcac002c55dda" [label=wasteservice height=1.9 image="./qakicons/symActorSmall.png" shape=none]
+		}
+	}
+}
