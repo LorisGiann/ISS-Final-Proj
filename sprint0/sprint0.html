@@ -35,13 +35,11 @@ h6{
     margin: 18px 0px 9px 0px;
 }
 </style>
-<head>
-   
-<title>WasteService SPRINT0</title></head>
+<head><title>WasteService SPRINT0</title></head>
     
 <body>
 <div id="top">
-<h1>ISS FINAL PROJECT </h1>
+<h1>ISS FINAL PROJECT</h1>
 </div>  
 
 <div class="body"> 
@@ -61,9 +59,9 @@ h6{
         <lI>Può esserci solo un camion alla volta in INDOOR? SI</lI>
         <li>Il Waste-truck deve essere liberato non appena il materiale viene scaricato? SI</li>
         <li>La GUI deve mostrare le coordinate del robot o basta l'area nella quale si trova attualmente? basta l'area nella quale si trova attualmente</li>
-        <li>A cosa serve il sonar se la stanza è priva di ostacoli? Il sonar non è a bordo del robot, è un dispositivo esterno (così come il RPI). Se si mette una mano davanti al dispositivo, il robot si ferma.</li>
+        <li>A cosa serve il sonar se la stanza è priva di ostacoli? Il sonar a cui si fa riferimento non è a bordo del robot, è un dispositivo esterno (così come il RPI). Se si mette una mano davanti al dispositivo, il robot si ferma. In aggiunta a questo è presente un sonar o sensore di impatto anche sul robot.</li>
         <li>Ci deve essere il contatto con la parete per il carico/scarico dei materiali? SI (o comunque il più vicino possibile)</li>
-        <li>Supponiamo che il robot si stia dirigendo verso HOME (perché ha scaricato l'ultimo carico di materiale e non ci sono altri Waste truck sull'INDOOR). Se arriva un Waste truck prima che il trolley raggiunga la base, il robot deve cambiare rotta immediatamente o può raggiungere la base e poi dirigersi presso l'Indoor? CAMBIA IMMEDIATAMENTE ROTTA per dirigersi su indoor</li>
+        <li>Supponiamo che il robot si stia dirigendo verso HOME (perché ha scaricato l'ultimo carico di materiale e non ci sono altri Waste truck sull'INDOOR). Se arriva un Waste truck prima che il trolley raggiunga la base, il robot deve cambiare rotta immediatamente o può raggiungere la base e poi dirigersi presso l'Indoor? CAMBIA IMMEDIATAMENTE ROTTA per dirigersi su indoor. In generale ir robot non deve "girovagare" troppo per la stanza</li>
         <li>È il robot a determinare quando avviene la fine di una azione di carico/scarico? In che modo tale evento può essere rilevato dal sistema da noi sviluppato? Modellare l'operazione con un SEMPLICE DELAY di durata fissa</li>
         <li>Il nodo sul quale la GUI va installata e un nodo fisso? O si tratta forse di palmari posseduti dai Service-manager stessi? Il NODO è FISSO </li>
         <li>In cosa consiste lo smart device? Quanti sono (viene usato sempre lo stesso dispositivo o ve ne è uno per ogni conducente)? Come si relaziona con il nostro sistema? Un dispositivo per ogni conducente, "alieno" invia un messaggio</li>

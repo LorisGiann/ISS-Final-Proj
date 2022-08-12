@@ -23,8 +23,11 @@ Reply   moveanswer     : moveanswer(RESULT)
 // ------------------------------------------------------
 
 // -------------------- mover msgs ----------------------
-Request move           : move(POSITION)    //POSITION = INDOOR | PLASTICBOX | GLASSBOX | HOME
-Reply   moveanswer     : moveanswer(RESULT)
+//   (same as transporttrolley)
+//Request move           : move(POSITION)    //POSITION = INDOOR | PLASTICBOX | GLASSBOX | HOME
+//Reply   moveanswer     : moveanswer(RESULT)
+// ------------------------------------------------------
+
 // --------------- depositaction msgs -------------------
 Request depositaction  : depositaction(MATERIAL) 
 Reply   pickupdone	   : pickupdone(_)
