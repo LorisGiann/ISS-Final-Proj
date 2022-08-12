@@ -76,7 +76,7 @@ h6{
             <li>- Numero considerevole di casi: supponendo la destinazione sempre diversa dalla posizione attuale sarebbero 3×3 = 9 casi. <br>
                 Si potrebbero implementare solo i casi che vengono effettivamente utilizzati dall'applicazione (sono 7: inutile implementare PB→GB e GB→PB), ma la soluzione sarebbe poco riusabile. <br>
                 Conseguente poca flessibilità, potrebbe essere necessario modificare e testare un gran numero di casi se viene cambiato qualcosa</li>
-            <li>- potrebbe risultare complesso implementare un cambio di rotta mentre il robot deve ancora raggiungere una destinazione (specialmente se si delega a singoli micro attori il raggiugimento di una destinazione)</li>
+            <li>- Potrebbe risultare complesso implementare un cambio di rotta mentre il robot deve ancora raggiungere una destinazione (specialmente se si delega a singoli micro attori il raggiungimento di una destinazione)</li>
         </ul> 
         
 
@@ -102,7 +102,7 @@ h6{
         <img class="centerimg" src="_images/mover_option1_compact_state_machine.png"/> -->
 
         
-        <h4>OPZIONE 2 - senza coordinate</h4>
+        <h4 id="OPTION2">OPZIONE 2 - senza coordinate</h4>
         <p>Si tratta di un'estensione dell'opzione 1: il robot è in grado di raggiungere la prossima destinazione procedendo sia in senso orario che in senso antiorario (in base a quello che risulta più conveniente in quel momento). 
             Inoltre il robot può cambiare rotta anche mentre si sta muovendo in avanti. </p>
         <img class="centerimg" style="width: 400px;" src="_images/mover_option2_explaination.png"/>
@@ -145,7 +145,7 @@ h6{
         </ol>
              
         <h4>Scelta: OPZIONE 2</h4>
-        <p>Scegliamo la soluzione senza coordiante, e in particolare la seconda soluzione, poichè sembra quella in grado di offrire il miglior rapporto benefici/costo considerato lo specifico dominio applicativo.<br>
+        <p>Scegliamo la soluzione senza coordinate, e in particolare la seconda soluzione, poichè sembra quella in grado di offrire il miglior rapporto benefici/costo considerato lo specifico dominio applicativo.<br>
             Se un giorno nuovi requisiti dovessero imporre l'utilizzo di un sistema di coordinate, all'interno del sistema dovrà essere modificato soltanto il componente <i>mover</i> (e <i>basicrobotwrapper</i> che verrebbe rimosso).</p>
     
     </div>

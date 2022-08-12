@@ -41,6 +41,7 @@ h6{
     
     <div class="body"> 
     <div class="remark">
+        <h3>Progettazione attore <i>mover</i></h3>
         <p>L'attore <i>mover</i> implementa la logica di navigazione del robot verso la prossima destinazione, seguendo la logica dell'opzione 2 descritta in <a href="grid_or_boundary_analysis.html">grid_or_boundary_analysis</a>.</p>
         <p>Interfaccia:</p>
         <code><pre>
@@ -71,7 +72,7 @@ Reply   moveanswer     : moveanswer(RESULT)</pre>
         
         <p>Scendendo ancor di più nel dettaglio, la FSM effettivamente implementata è la seguente (viene omesso per brevità lo stato di errore):</p>
         <img class="centerimg" style="max-width: 1300px;" src="_images/mover_option2_compact_state_machine_2.png"/>
-        <p>Si noti come, dopo lo stato di risposta <i>reply</i>, si torni in <i>handle</i> consumando un nuovo eventuale comando di <i>move(POS)</i> (se presente, altrimenti transizione spontanea)</p>
+        <p>Si noti come, dopo lo stato di risposta <i>reply</i>, si torni in <i>handle</i> consumando un nuovo eventuale comando di <i>move(POS)</i> (se presente, altrimenti transizione spontanea).</p>
         <p>Inoltre la gestione della manovra di <span style="color: #febb00;">inversione ad U</span> e di quello che segue è delegata ad un apposito attore <i>moveruturn</i>, la cui implementazione viene qui riportata:</p>
         <img class="centerimg" style="max-width: 750px;" src="_images/moveruturn_state_machine_1.png"/>
         <p>All'attore viene passato l'orientamento corrente del robot, in modo che una volta raggiunta la <b>Position</b> dalla quale si era partiti il robot si giri dalla parte giusta (stato <i>final_turn</i>). </p>
