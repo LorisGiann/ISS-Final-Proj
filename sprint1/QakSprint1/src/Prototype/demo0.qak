@@ -13,7 +13,7 @@ Reply loadrejected     : loadrejected(MATERIAL, TRUCKLOAD)
 // ------------------------------------------------------
    
 // ------------ transporttrolley msgs -------------------
-//RESULT =  OK | ERROR 
+//RESULT =  OK | ERROR
 Request pickup         : pickup(_)
 Reply   pickupanswer   : pickupanswer(RESULT)
 Request dropout        : dropout(_)
