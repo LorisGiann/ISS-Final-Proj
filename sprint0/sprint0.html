@@ -301,7 +301,7 @@ firstActorInPipe.
             <p>Più precisamente, quello che ci si aspetta quando la distanza diventa ≤ DLIMT, è che:</p>
             <ul>
                 <li>Se il robot sta andando avanti esso si ferma. Riprenderà ad andare in avanti una volta che la distanza torna &gt DLIMIT</li>
-                <li>Se il robot sta facendo qualche altra operazione (come una <b>Pickup</b> o si sta girando), l'operazione comunque termina. Una volta terminata si rimane fermi finchè la distanza non ridiventa &gt DLIMIT</li>
+                <li>Se il robot sta facendo qualche altra operazione (per esempio si sta girando), l'operazione comunque termina. Una volta terminata si rimane fermi finchè la distanza non ridiventa &gt DLIMIT</li>
             </ul>
             <p>Parte di questo comportamento è descritto in maniera più formale nella classe di test <a href="./RequirementQakSprint0/test/testSprint0/Testhalt.kt">Testhalt.kt</a> (non eseguibile in questo sprint).</p>
         </dd>
@@ -320,6 +320,12 @@ firstActorInPipe.
     <h6>Architettura logica:</h6>
     <img src="./RequirementQakSprint0/demosystemarchitecturearch.png" style="max-width: 800px;" class="centerimg"/>
     <p style="width: 100%; text-align: right;"><a href="../docs_common/Legenda.html">Legenda</a></p>
+    <ul>
+        <li>Lo <i>smartdevice</i> è già stato sviluppato</li>
+        <li>Il <i>basicrobot</i> è già stato sviluppato</li>
+        <li>Per il <i>sonar</i> e il <i>led</i> è già disponibile software che è possibile utilizzare/adattare</li>
+        <li>Il resto è da analizzare e sviluppare</li>
+    </ul>
     <h6>QAK</h6>
     <a href="./RequirementQakSprint0/src/requirementAnalysis/SystemAchitecture.qak">Primo metamodello QAK</a>
     <h6>Testplan:</h6>

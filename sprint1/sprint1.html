@@ -90,7 +90,7 @@ Reply   dropoutanswer  : dropoutanswer(RESULT)</pre>
     <ul>
         <li>Analisi del problema di come affrontare la navigazione, anche in relazione al SW già sviluppato <br>
             (possibile visitare la pagina riassuntiva <a href="../docs_prof/html/Applicazioni22.html">Applicazioni22</a> dei moduli sviluppati)</li>
-        <li>Analisi di quali e quanti componenti è composto il sistema, e definizione delle interazioni tra di essi</li>
+        <li>Analisi delle responsabilità e delle interazioni tra i componenti <i>wasteservice</i>, <i>trasporttrolley</i> e <i>basicrobot</i></li>
         <li>Sviluppo / adattamento di tali componenti</li>
         <li>Realizzazione di un modello eseguibile (a tal proposito verrà utilizzato il metamodello <a href="../docs_common/Qak.html">QAK</a>).</li>
         <li>Realizzazione di un (più completo) test-plan per il modello</li>
@@ -105,6 +105,12 @@ Reply   dropoutanswer  : dropoutanswer(RESULT)</pre>
     <img class="centerimg" style="width: 450px;" src="./docs/_images/logic_architecture_0.png"/>
     <p style="width: 100%; text-align: right;"><a href="../docs_common/Legenda.html">Legenda</a></p>
     <br>
+
+    <h3><b>Wasteservice</b></h3>
+
+    <h4>Quando rispondere allo <b>Smart device</b>?</h4>
+    <p>Come da requisiti aggiuntivi, se una richiesta può essere soddisfatta il driver deve essere liberato subito dopo il <b>Pickup</b> (inviando allo <b>Smart device</b> una <b>loadaccept</b>). 
+        Se invece la richiesta effettuata non può essere soddisfatta, è bene rispondere immediatamente con una <b>loadrejected</b> (qualunque cosa stia facendo il robot in quel momento).</p>
 
     <h3><b>Transport trolley</b></h3>
 
@@ -285,7 +291,7 @@ Reply cmdanswer   	: cmdanswer(RESULT)</pre>
     <img class="centerimg" style="max-width: 700px;" src="docs/_images/logic_architecture_3.png"/>
     <p style="width: 100%; text-align: right;"><a href="../docs_common/Legenda.html">Legenda</a></p>
 
-    <p>Viene riportato il diagramma degli stati di <i>wasteservice</i> e <i>depositaction</i>. </p>
+    <p>Viene riportato il diagramma degli stati di <i>wasteservice</i> e <i>depositaction</i>. </p> 
     <br>
     <h4><i>wasteservice</i></h4>
     <img class="centerimg" style="max-width: 700px;" src="docs/_images/wasteservice_actor_state_diagram_1.png"/>
@@ -303,7 +309,7 @@ Reply cmdanswer   	: cmdanswer(RESULT)</pre>
     <p>Vengono qui mostrati anche gli stati che servono per controllare l'esito dell'operazione e lo stato di errore:</p>
     <img class="centerimg" style="max-width: 1150px;" src="./docs/_images/depositaction_actor_state_diagram_2.png" />
 
-    <h4>note: wasteservice/depositaction</h4>
+    <h4>note: <i>wasteservice/depositaction</i></h4>
     <p>Si noti come <i>wasteservice</i> sia pronto per elaborare una nuova richiesta non appena gli arriva da <i>depositaction</i> la risposta <i>pickupdone</i>. <i>Wasteservice</i> può quindi 
         elaborare parzialmente nuove richieste prima ancora che il robot abbia finito di gestire quella precedente (potenzialmente già dalla conclusione della <b>Pickup</b> della richiesta attualmente in gestione).<br>
         Nello specifico, se non sarebbe comunque possibile soddisfare tale richiesta per l'insufficiente spazio rimanente nei container, viene inviata una <b>loadrejected</b> e si analizza la prossima richiesta.
