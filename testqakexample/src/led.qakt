@@ -1,0 +1,89 @@
+//https://dl.bintray.com/jetbrains/kotlin/eclipse-plugin/0.8.19/
+
+System demo0    
+//mqttBroker "localhost" : 1883 eventTopic "demo0/events"
+ 
+  
+  
+Event update_led : update_led(STATE) //STATE = on | off | blink
+
+Dispatch noMsg : noMsg(_)
+ 
+Context ctxtest ip [host="localhost" port=8095]
+ 
+
+QActor led context ctxtest{
+	[# lateinit var newState : String #]
+	
+	State s0 initial {
+		printCurrentMessage   
+		discardMsg On
+		//[# sysUtil.logMsgs=true #]
+ 	}
+ 	Transition t0 whenEvent update_led -> handle_update
+ 	
+ 	State handle_update {
+ 		printCurrentMessage
+		onMsg( update_led:update_led(ARG) ){
+			[# newState = payloadArg(0) #]
+ 			println("update_led(${newState})")
+ 			//forward led -m noMsg : noMsg(_)
+ 			[# val actor = this@Led; 
+ 				var res = false;
+ 			#]
+ 			[# when(newState) {
+	 					"off" -> res=actor.handleCurrentMessage(NoMsg,actor.getStateByName("off"))
+	 					"on" -> res=actor.handleCurrentMessage(NoMsg,actor.getStateByName("on"))
+	 					"blink" -> res=actor.handleCurrentMessage(NoMsg,actor.getStateByName("blink_on"))
+	 			   }
+			   if(res) actor.elabMsgInState( );
+			#]
+ 		}
+ 	}
+ 	//Transition to else Goto off
+ 	/*Transition toNewState whenMsg noMsg and [# newState=="off" #] -> off
+ 					whenMsg noMsg and [# newState=="on" #] -> on
+ 					whenMsg noMsg and [# newState=="blink" #] -> blink_on*/
+ 	
+ 	State off {
+ 		printCurrentMessage
+ 		println("Led off")
+ 	}
+ 	Transition t0 whenEvent update_led -> handle_update
+ 	
+ 	State on {
+ 		printCurrentMessage
+ 		println("Led on")
+ 	}
+ 	Transition t0 whenEvent update_led -> handle_update
+ 	
+ 	State blink_on {
+ 		printCurrentMessage
+ 		println("Blinking on")
+ 	}
+ 	Transition t0 whenTime 500 -> blink_off
+ 					whenEvent update_led -> handle_update
+ 					
+ 	State blink_off {
+ 		printCurrentMessage
+ 		println("Blinking off")
+ 	}
+ 	Transition t0 whenTime 500 -> blink_on
+ 					whenEvent update_led -> handle_update
+ 					
+}
+
+   
+//led TEST
+QActor test_led context ctxtest{
+	State s0 initial { 	    
+		discardMsg On
+		//[# sysUtil.logMsgs=true #]
+		emit update_led : update_led(off)
+		delay 2000
+		emit update_led : update_led(on)
+		delay 2000
+		emit update_led : update_led(blink)
+		delay 2000
+ 	}
+}
