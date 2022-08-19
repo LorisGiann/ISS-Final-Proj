@@ -14,6 +14,7 @@ class Guiserver ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, 
 		return "wait"
 	}
 	override fun getBody() : (ActorBasicFsm.() -> Unit){
+		val interruptedStateTransitions = mutableListOf<Transition>()
 			var ttState = ws.Transporttrolleystate.IDLE
 				var position = ws.Position.HOME
 				var plasticCont = 0.0F

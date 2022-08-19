@@ -45,9 +45,5 @@ with Diagram('demosystemarchitectureArch', show=False, outformat='png', graph_at
      sys >> Edge(color='red', style='dashed', xlabel='update_container') >> guiserver
      sys >> Edge(color='red', style='dashed', xlabel='update_led') >> guiserver
      sys >> Edge(color='red', style='dashed', xlabel='update_led') >> led
-     sys >> Edge(color='red', style='dashed', xlabel='update_led') >> led
-     sys >> Edge(color='red', style='dashed', xlabel='update_led') >> led
-     sys >> Edge(color='red', style='dashed', xlabel='update_led') >> led
-     sys >> Edge(color='red', style='dashed', xlabel='update_led') >> led
      sonar >> Edge( xlabel='obstacle', **eventedgeattr) >> sys
 diag

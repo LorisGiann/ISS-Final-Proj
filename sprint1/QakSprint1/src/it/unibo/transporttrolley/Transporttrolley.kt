@@ -14,12 +14,8 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 		return "wait"
 	}
 	override fun getBody() : (ActorBasicFsm.() -> Unit){
-		 val actor = this@Transporttrolley;
-				suspend fun transitNow(stateName : String){
-					var res = actor.handleCurrentMessage(NoMsg,actor.getStateByName(stateName));
-					if(res) actor.elabMsgInState( );
-					else println("ERROR: transition was not possible")
-				}
+		val interruptedStateTransitions = mutableListOf<Transition>()
+		
 				lateinit var RES : String
 		return { //this:ActionBasciFsm
 				state("wait") { //this:State

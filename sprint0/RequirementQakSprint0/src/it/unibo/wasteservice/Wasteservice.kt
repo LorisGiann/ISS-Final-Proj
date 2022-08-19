@@ -14,6 +14,7 @@ class Wasteservice ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 		return "wait"
 	}
 	override fun getBody() : (ActorBasicFsm.() -> Unit){
+		val interruptedStateTransitions = mutableListOf<Transition>()
 		 var Material  : ws.Material
 			   var TruckLoad : Float        
 		return { //this:ActionBasciFsm
