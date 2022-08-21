@@ -15,7 +15,9 @@ class Led ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scope 
 	}
 	override fun getBody() : (ActorBasicFsm.() -> Unit){
 		val interruptedStateTransitions = mutableListOf<Transition>()
-			var newState = ws.LedState.OFF  
+		 lateinit var ledM : `it.unibo`.radarSystem22.domain.interfaces.ILed
+				`it.unibo`.radarSystem22.domain.utils.DomainSystemConfig.ledGui=true
+				var newState = ws.LedState.OFF
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
@@ -23,9 +25,11 @@ class Led ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scope 
 						println("$name in ${currentState.stateName} | $currentMsg")
 						updateResourceRep( "led(initial,${newState})"  
 						)
-						println("led off")
+						 ledM = `it.unibo`.radarSystem22.domain.models.LedModel.create()  
+						 ledM.turnOff() 
+						forward("autoStartSysMsg", "autoStartSysMsg(_)" ,"ledalarmcontrol" ) 
 					}
-					 transition(edgeName="t067",targetState="handle_update",cond=whenEvent("update_led"))
+					 transition(edgeName="t082",targetState="handle_update",cond=whenEvent("update_led"))
 				}	 
 				state("handle_update") { //this:State
 					action { //it:State
@@ -63,42 +67,46 @@ class Led ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scope 
 						println("$name in ${currentState.stateName} | $currentMsg")
 						updateResourceRep( "led(off,${newState})"  
 						)
-						println("led off")
+						 unibo.actor22comm.utils.ColorsOut.outappl("${name} - off", unibo.actor22comm.utils.ColorsOut.GREEN) 
+						 ledM.turnOff() 
 					}
-					 transition(edgeName="t068",targetState="handle_update",cond=whenEvent("update_led"))
+					 transition(edgeName="t083",targetState="handle_update",cond=whenEvent("update_led"))
 				}	 
 				state("on") { //this:State
 					action { //it:State
 						println("$name in ${currentState.stateName} | $currentMsg")
 						updateResourceRep( "led(on,${newState})"  
 						)
-						println("led on")
+						 unibo.actor22comm.utils.ColorsOut.outappl("${name} - on", unibo.actor22comm.utils.ColorsOut.GREEN) 
+						 ledM.turnOn() 
 					}
-					 transition(edgeName="t069",targetState="handle_update",cond=whenEvent("update_led"))
+					 transition(edgeName="t084",targetState="handle_update",cond=whenEvent("update_led"))
 				}	 
 				state("blink_on") { //this:State
 					action { //it:State
 						println("$name in ${currentState.stateName} | $currentMsg")
 						updateResourceRep( "led(blink_on,${newState})"  
 						)
-						println("led on (blinking)")
+						 unibo.actor22comm.utils.ColorsOut.outappl("${name} - on (blinking)", unibo.actor22comm.utils.ColorsOut.GREEN) 
+						 ledM.turnOn() 
 						stateTimer = TimerActor("timer_blink_on", 
 							scope, context!!, "local_tout_led_blink_on", 250.toLong() )
 					}
-					 transition(edgeName="t070",targetState="blink_off",cond=whenTimeout("local_tout_led_blink_on"))   
-					transition(edgeName="t071",targetState="handle_update",cond=whenEvent("update_led"))
+					 transition(edgeName="t085",targetState="blink_off",cond=whenTimeout("local_tout_led_blink_on"))   
+					transition(edgeName="t086",targetState="handle_update",cond=whenEvent("update_led"))
 				}	 
 				state("blink_off") { //this:State
 					action { //it:State
 						println("$name in ${currentState.stateName} | $currentMsg")
 						updateResourceRep( "led(blink_off,${newState})"  
 						)
-						println("led off (blinking)")
+						 unibo.actor22comm.utils.ColorsOut.outappl("${name} - off (blinking)", unibo.actor22comm.utils.ColorsOut.GREEN) 
+						 ledM.turnOff() 
 						stateTimer = TimerActor("timer_blink_off", 
 							scope, context!!, "local_tout_led_blink_off", 250.toLong() )
 					}
-					 transition(edgeName="t072",targetState="blink_on",cond=whenTimeout("local_tout_led_blink_off"))   
-					transition(edgeName="t073",targetState="handle_update",cond=whenEvent("update_led"))
+					 transition(edgeName="t087",targetState="blink_on",cond=whenTimeout("local_tout_led_blink_off"))   
+					transition(edgeName="t088",targetState="handle_update",cond=whenEvent("update_led"))
 				}	 
 			}
 		}

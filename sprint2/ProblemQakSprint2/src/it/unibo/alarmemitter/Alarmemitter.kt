@@ -24,9 +24,11 @@ class Alarmemitter ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 				}	 
 				state("handle_sonardata") { //this:State
 					action { //it:State
+						println("$name in ${currentState.stateName} | $currentMsg")
 						emit("alarm", "alarm(_)" ) 
 						emit("alarmceased", "alarmceased(_)" ) 
 					}
+					 transition(edgeName="t075",targetState="handle_sonardata",cond=whenEvent("local_sonardata"))
 				}	 
 			}
 		}

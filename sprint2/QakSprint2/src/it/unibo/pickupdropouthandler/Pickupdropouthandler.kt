@@ -16,16 +16,17 @@ class Pickupdropouthandler ( name: String, scope: CoroutineScope  ) : ActorBasic
 	override fun getBody() : (ActorBasicFsm.() -> Unit){
 		val interruptedStateTransitions = mutableListOf<Transition>()
 		return { //this:ActionBasciFsm
-				state("wait") { //this:State
+				state("handle_prio") { //this:State
 					action { //it:State
-						discardMessages = false
 						println("$name in ${currentState.stateName} | $currentMsg")
-						updateResourceRep( "pickupdropouthandler(wait)"  
+						updateResourceRep( "pickupdropouthandler(handle_prio)"  
 						)
+						stateTimer = TimerActor("timer_handle_prio", 
+							scope, context!!, "local_tout_pickupdropouthandler_handle_prio", 10.toLong() )
 					}
-					 transition(edgeName="t020",targetState="do_dropout",cond=whenRequest("dropout"))
-					transition(edgeName="t021",targetState="do_pickup",cond=whenRequest("pickup"))
-					transition(edgeName="t022",targetState="alarm",cond=whenEvent("alarm"))
+					 transition(edgeName="t022",targetState="wait",cond=whenTimeout("local_tout_pickupdropouthandler_handle_prio"))   
+					transition(edgeName="t023",targetState="alarm",cond=whenDispatch("alarm"))
+					transition(edgeName="t024",targetState="handle_prio",cond=whenDispatch("alarmceased"))
 				}	 
 				state("alarm") { //this:State
 					action { //it:State
@@ -33,7 +34,18 @@ class Pickupdropouthandler ( name: String, scope: CoroutineScope  ) : ActorBasic
 						updateResourceRep( "pickupdropouthandler(alarm)"  
 						)
 					}
-					 transition(edgeName="t023",targetState="wait",cond=whenEvent("alarmceased"))
+					 transition(edgeName="t025",targetState="handle_prio",cond=whenDispatch("alarmceased"))
+				}	 
+				state("wait") { //this:State
+					action { //it:State
+						discardMessages = false
+						println("$name in ${currentState.stateName} | $currentMsg")
+						updateResourceRep( "pickupdropouthandler(wait)"  
+						)
+					}
+					 transition(edgeName="t026",targetState="do_dropout",cond=whenRequest("dropout"))
+					transition(edgeName="t027",targetState="do_pickup",cond=whenRequest("pickup"))
+					transition(edgeName="t028",targetState="alarm",cond=whenDispatch("alarm"))
 				}	 
 				state("do_dropout") { //this:State
 					action { //it:State
@@ -43,8 +55,8 @@ class Pickupdropouthandler ( name: String, scope: CoroutineScope  ) : ActorBasic
 						stateTimer = TimerActor("timer_do_dropout", 
 							scope, context!!, "local_tout_pickupdropouthandler_do_dropout", 1000.toLong() )
 					}
-					 transition(edgeName="t024",targetState="done_dropout",cond=whenTimeout("local_tout_pickupdropouthandler_do_dropout"))   
-					transition(edgeName="t025",targetState="halt_dropout",cond=whenEvent("alarm"))
+					 transition(edgeName="t029",targetState="done_dropout",cond=whenTimeout("local_tout_pickupdropouthandler_do_dropout"))   
+					transition(edgeName="t030",targetState="halt_dropout",cond=whenDispatch("alarm"))
 				}	 
 				state("halt_dropout") { //this:State
 					action { //it:State
@@ -52,7 +64,7 @@ class Pickupdropouthandler ( name: String, scope: CoroutineScope  ) : ActorBasic
 						updateResourceRep( "pickupdropouthandler(halt_dropout)"  
 						)
 					}
-					 transition(edgeName="t026",targetState="resume_dropout",cond=whenEvent("alarmceased"))
+					 transition(edgeName="t031",targetState="resume_dropout",cond=whenDispatch("alarmceased"))
 				}	 
 				state("resume_dropout") { //this:State
 					action { //it:State
@@ -62,16 +74,7 @@ class Pickupdropouthandler ( name: String, scope: CoroutineScope  ) : ActorBasic
 						stateTimer = TimerActor("timer_resume_dropout", 
 							scope, context!!, "local_tout_pickupdropouthandler_resume_dropout", 1000.toLong() )
 					}
-					 transition(edgeName="t027",targetState="done_dropout",cond=whenTimeout("local_tout_pickupdropouthandler_resume_dropout"))   
-				}	 
-				state("done_dropout") { //this:State
-					action { //it:State
-						println("$name in ${currentState.stateName} | $currentMsg")
-						updateResourceRep( "pickupdropouthandler(done_dropout)"  
-						)
-						answer("dropout", "dropoutanswer", "dropoutanswer(OK)"   )  
-					}
-					 transition( edgeName="goto",targetState="wait", cond=doswitch() )
+					 transition(edgeName="t032",targetState="done_dropout",cond=whenTimeout("local_tout_pickupdropouthandler_resume_dropout"))   
 				}	 
 				state("do_pickup") { //this:State
 					action { //it:State
@@ -81,8 +84,8 @@ class Pickupdropouthandler ( name: String, scope: CoroutineScope  ) : ActorBasic
 						stateTimer = TimerActor("timer_do_pickup", 
 							scope, context!!, "local_tout_pickupdropouthandler_do_pickup", 1000.toLong() )
 					}
-					 transition(edgeName="t028",targetState="done_pickup",cond=whenTimeout("local_tout_pickupdropouthandler_do_pickup"))   
-					transition(edgeName="t029",targetState="halt_pickup",cond=whenEvent("alarm"))
+					 transition(edgeName="t033",targetState="done_pickup",cond=whenTimeout("local_tout_pickupdropouthandler_do_pickup"))   
+					transition(edgeName="t034",targetState="halt_pickup",cond=whenDispatch("alarm"))
 				}	 
 				state("halt_pickup") { //this:State
 					action { //it:State
@@ -90,7 +93,7 @@ class Pickupdropouthandler ( name: String, scope: CoroutineScope  ) : ActorBasic
 						updateResourceRep( "pickupdropouthandler(halt_pickup)"  
 						)
 					}
-					 transition(edgeName="t030",targetState="resume_pickup",cond=whenEvent("alarmceased"))
+					 transition(edgeName="t035",targetState="resume_pickup",cond=whenDispatch("alarmceased"))
 				}	 
 				state("resume_pickup") { //this:State
 					action { //it:State
@@ -100,7 +103,16 @@ class Pickupdropouthandler ( name: String, scope: CoroutineScope  ) : ActorBasic
 						stateTimer = TimerActor("timer_resume_pickup", 
 							scope, context!!, "local_tout_pickupdropouthandler_resume_pickup", 1000.toLong() )
 					}
-					 transition(edgeName="t031",targetState="done_pickup",cond=whenTimeout("local_tout_pickupdropouthandler_resume_pickup"))   
+					 transition(edgeName="t036",targetState="done_pickup",cond=whenTimeout("local_tout_pickupdropouthandler_resume_pickup"))   
+				}	 
+				state("done_dropout") { //this:State
+					action { //it:State
+						println("$name in ${currentState.stateName} | $currentMsg")
+						updateResourceRep( "pickupdropouthandler(done_dropout)"  
+						)
+						answer("dropout", "dropoutanswer", "dropoutanswer(OK)"   )  
+					}
+					 transition( edgeName="goto",targetState="wait", cond=doswitch() )
 				}	 
 				state("done_pickup") { //this:State
 					action { //it:State
