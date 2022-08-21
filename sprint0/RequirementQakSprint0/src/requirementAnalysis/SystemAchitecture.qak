@@ -34,11 +34,7 @@ Event    update_container : update_container(PLASTIC,GLASS) // PLASTIC & GLASS f
 // ------------------------------------------------------------------------------------
 
 //-------------------------------------- SONAR -------------------------------------
-Dispatch sonaractivate   : info(ARG)
-Dispatch sonardeactivate : info(ARG)
-Event    sonardistance   : distance( V )   //emitted by sonarSimulator or sonardatasource
-Event    sonardata       : distance( V )   //for the application level	
-Event    obstacle        : obstacle( D )   //for the application level
+Event    obstacle        : obstacle( D )
 //----------------------------------------------------------------------------------
 
 // ---------------------------------- transporttrolley commands (to be defined in next sprints) ---------------------------
