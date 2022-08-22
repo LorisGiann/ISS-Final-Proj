@@ -204,10 +204,10 @@ Reply   moveanswer     : moveanswer(RESULT)</pre>
         <p style="width: 100%; text-align: right;"><a href="../docs_common/Legenda.html">Legenda</a></p>
         <h6>QAK</h6>
         <a href="ProblemQakSprint1/src/problemAnalysis/SystemAchitecture.qak">Modello del sistema QAK</a> <br>
-        <a href="ProblemQakSprint1/src/problemAnalysis/WasteService.qak">Primo metamodello QAK <i>wasteservice</i></a> <br>
+        <a href="ProblemQakSprint1/src/problemAnalysis/WasteService.qak">Primo metamodello QAK <i>wasteservice</i></a> <small>(= a sprint0)</small><br>
         <a href="ProblemQakSprint1/src/problemAnalysis/TransportTrolley.qak">Primo metamodello QAK <i>transporttrolley</i></a> <br>
         <h6><p>Testplan:</p></h6>
-        <p><a href="ProblemQakSprint1/test/testSprint1/TestWasteservice.kt">TestWasteservice.kt</a> <br>
+        <p><a href="ProblemQakSprint1/test/testSprint1/TestWasteservice.kt">TestWasteservice.kt</a> <small>(= a sprint0)</small><br>
             <a href="ProblemQakSprint1/test/testSprint1/TestTransporttrolley.kt">TestTransporttrolley.kt</a></p>
     </div>
 
@@ -309,8 +309,9 @@ Reply cmdanswer   	: cmdanswer(RESULT)</pre>
     <h4><i>wasteservice</i></h4>
     <img class="centerimg" style="max-width: 700px;" src="docs/_images/wasteservice_actor_state_diagram_1.png"/>
     <p><i>Wasteservice</i> rimane in attesa di nuove richieste quando è nello stato wait. Quando arriva la prima richiesta si decide se viene accettata o meno (stato <i>handle_req</i>). Se viene 
-        accettata si richiede all'attore <i>depositaction</i> di effettuare l'operazione (stato <i>req_depositaction</i>) e si attende la risposta <i>pickupdone</i>. <br>
-        Il truck riceve quindi la <b>loadaccept</b> subito dopo l'operazione di <b>Pickup</b> (stato <i>chk_depositaction</i>), mentre riceve <b>loadrejected</b> appena fatta la richiesta (stato <i>rejected</i>).</p>
+        accettata si richiede all'attore <i>depositaction</i> di effettuare l'operazione (stato <i>req_depositaction</i>) e si attende la risposta <i>pickupdone</i>. Il truck riceve la <b>loadaccept</b> 
+        subito dopo il completamento del <b>Pickup</b> (stato <i>chk_depositaction</i>). <br>
+        Se invece (nello stato <i>chk_depositaction</i>) ci si rende conto che non c'è spazio, il truck riceve <b>loadrejected</b> (stato <i>rejected</i>) subito dopo aver fatto la richiesta.</p>
     <br>
     <h4><i>depositaction</i></h4>
     <img class="centerimg" style="max-width: 1000px;" src="docs/_images/depositaction_actor_state_diagram_1.png"/>
@@ -325,7 +326,7 @@ Reply cmdanswer   	: cmdanswer(RESULT)</pre>
     <h4>note: <i>wasteservice/depositaction</i></h4>
     <p>Si noti come <i>wasteservice</i> sia pronto per elaborare una nuova richiesta non appena gli arriva da <i>depositaction</i> la risposta <i>pickupdone</i>. <i>Wasteservice</i> può quindi 
         elaborare parzialmente nuove richieste prima ancora che il robot abbia finito di gestire quella precedente (potenzialmente già dalla conclusione della <b>Pickup</b> della richiesta attualmente in gestione).<br>
-        Nello specifico, se non sarebbe comunque possibile soddisfare tale richiesta per l'insufficiente spazio rimanente nei container, viene inviata una <b>loadrejected</b> e si analizza la prossima richiesta.
+        Nello specifico, se non sarebbe comunque possibile soddisfare tale richiesta, viene inviata una <b>loadrejected</b> e si analizza la prossima richiesta.
         Se invece la richiesta può essere soddisfatta, <i>wasteservice</i> invierà la richiesta di <i>depositaction</i> verso l'omonimo attore, tuttavia questo gli risponderà con una <i>pickupdone</i> solo quando verrà fatta la <b>Pickup</b> relativa alla nuova richiesta.
         Quindi, nel caso di due richieste consecutive che possono essere entrambe soddisfatte, la FSM di <i>wasteservice</i> aspetterà nello stato <i>req_depositaction</i> prima di poter processare 
         (anche solo parzialmente) una terza richiesta: essa verrebbe infatti accodata nella coda interna dell'attore</p>
@@ -376,8 +377,9 @@ Reply cmdanswer   	: cmdanswer(RESULT)</pre>
     <h6>QAK</h6>
     <a href="QakSprint1/src/Prototype/demo0.qak">Metamodello eseguibile QAK</a>
     <h6><p>Testplan:</p></h6>
-    <p><a href="QakSprint1/test/testSprint1/TestSprint1_wasteservice.kt">TestSprint1_wasteservice</a> <br>
-        <a href="QakSprint1/test/testSprint1/TestSprint1_integration_test.kt">TestSprint1_integration_test</a></p>
+    <p><a href="QakSprint1/test/testSprint1/TestSprint1_wasteservice.kt">TestSprint1_wasteservice.kt</a> <small>(= a sprint0)</small> <br>
+        <a href="QakSprint1/test/testSprint1/TestSprint1_mover.kt">TestSprint1_mover.kt</a> <br>
+        <a href="QakSprint1/test/testSprint1/TestSprint1_integration_test.kt">TestSprint1_integration_test.kt</a></p>
 </div>
  
 <!-- USEFUL
