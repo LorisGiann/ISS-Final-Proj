@@ -14,6 +14,7 @@ class Led ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scope 
 		return "s0"
 	}
 	override fun getBody() : (ActorBasicFsm.() -> Unit){
+		val interruptedStateTransitions = mutableListOf<Transition>()
 			var newState = ws.LedState.OFF
 				
 				val actor = this@Led;
@@ -31,7 +32,7 @@ class Led ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scope 
 						)
 						println("led off")
 					}
-					 transition(edgeName="t00",targetState="handle_update",cond=whenEvent("update_led"))
+					 transition(edgeName="t014",targetState="handle_update",cond=whenEvent("update_led"))
 				}	 
 				state("handle_update") { //this:State
 					action { //it:State
@@ -57,7 +58,7 @@ class Led ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scope 
 						)
 						println("led off")
 					}
-					 transition(edgeName="t01",targetState="handle_update",cond=whenEvent("update_led"))
+					 transition(edgeName="t015",targetState="handle_update",cond=whenEvent("update_led"))
 				}	 
 				state("on") { //this:State
 					action { //it:State
@@ -66,7 +67,7 @@ class Led ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scope 
 						)
 						println("led on")
 					}
-					 transition(edgeName="t02",targetState="handle_update",cond=whenEvent("update_led"))
+					 transition(edgeName="t016",targetState="handle_update",cond=whenEvent("update_led"))
 				}	 
 				state("blink_on") { //this:State
 					action { //it:State
@@ -77,8 +78,8 @@ class Led ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scope 
 						stateTimer = TimerActor("timer_blink_on", 
 							scope, context!!, "local_tout_led_blink_on", 250.toLong() )
 					}
-					 transition(edgeName="t03",targetState="blink_off",cond=whenTimeout("local_tout_led_blink_on"))   
-					transition(edgeName="t04",targetState="handle_update",cond=whenEvent("update_led"))
+					 transition(edgeName="t017",targetState="blink_off",cond=whenTimeout("local_tout_led_blink_on"))   
+					transition(edgeName="t018",targetState="handle_update",cond=whenEvent("update_led"))
 				}	 
 				state("blink_off") { //this:State
 					action { //it:State
@@ -89,8 +90,8 @@ class Led ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scope 
 						stateTimer = TimerActor("timer_blink_off", 
 							scope, context!!, "local_tout_led_blink_off", 250.toLong() )
 					}
-					 transition(edgeName="t05",targetState="blink_on",cond=whenTimeout("local_tout_led_blink_off"))   
-					transition(edgeName="t06",targetState="handle_update",cond=whenEvent("update_led"))
+					 transition(edgeName="t019",targetState="blink_on",cond=whenTimeout("local_tout_led_blink_off"))   
+					transition(edgeName="t020",targetState="handle_update",cond=whenEvent("update_led"))
 				}	 
 			}
 		}

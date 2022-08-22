@@ -32,7 +32,7 @@ internal class TestWasteservice {
         CommSystemConfig.tracing = false
         try {
             TestUtils.terminateProcOnPort(8095); //making sure that the port is free
-            val (prS, processHandleS) = TestUtils.runCtx("build/libs/it.unibo.ctxwasteservice.MainCtxwasteserviceKt-1.0.jar")
+            val (prS, processHandleS) = TestUtils.runCtx("build/libs/it.unibo.ctxservertest.MainCtxservertestKt-1.0.jar")
             prServer=prS; processHandleServer=processHandleS
         } catch (e: IOException) {
             ColorsOut.outappl("Errore launch ", ColorsOut.RED)

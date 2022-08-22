@@ -19,10 +19,17 @@ object func {
         }
     }
 	
-	fun nextPosition(CURRPOS:ws.Position) : ws.Position = when(CURRPOS){
+	fun nextPos(CURRPOS:ws.Position) : ws.Position = when(CURRPOS){
 		   Position.HOME -> Position.INDOOR
 		   Position.INDOOR -> Position.PLASTICBOX
 		   Position.PLASTICBOX -> Position.GLASSBOX
 		   Position.GLASSBOX -> Position.HOME
-   }	
+   }
+	
+	fun prevPos(CURRPOS:ws.Position) : ws.Position = when(CURRPOS){
+		   Position.HOME -> Position.GLASSBOX
+		   Position.INDOOR -> Position.HOME
+		   Position.PLASTICBOX -> Position.INDOOR
+		   Position.GLASSBOX -> Position.PLASTICBOX
+   }
 }

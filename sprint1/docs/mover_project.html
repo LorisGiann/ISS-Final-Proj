@@ -1,0 +1,103 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+    <!--
+<link rel="stylesheet" type="text/css" href="../css/issStyle1.css">
+<script type="text/javascript" src="../css/issStyle.js"></script>
+-->
+<link rel="stylesheet" type="text/css" href="../../docs_common/defaultTemplateStyle.css">
+<style>
+code>pre { 
+    font-family: monospace;
+}
+dd{
+    margin-bottom: 7px;
+}
+.todo{
+    color: orange
+}
+.centerimg{
+    display: block;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 90%;
+    max-width: 800px;
+}
+p { margin: 4px 0px; }
+dd{ margin-bottom: 8px;}
+.newDictWord{ color : purple; }
+h6{
+    font-size: 1em;
+    margin: 18px 0px 9px 0px;
+}
+</style>
+<head><title>mover project</title></head>
+
+<body>
+    <div id="top">
+    <h1>ISS FINAL PROJECT</h1>
+    </div>  
+    
+    <div class="body"> 
+    <div class="remark">
+        <h3>Progettazione attore <i>mover</i></h3>
+        <p>L'attore <i>mover</i> implementa la logica di navigazione del robot verso la prossima destinazione, seguendo la logica dell'opzione 2 descritta in <a href="grid_or_boundary_analysis.html">grid_or_boundary_analysis</a>.</p>
+        <p>Interfaccia:</p>
+        <code><pre>
+//POSITION =  INDOOR | PLASTICBOX | GLASSBOX | HOME
+Request move           : move(POSITION)
+Reply   moveanswer     : moveanswer(RESULT)</pre>
+        </code></p>
+
+        <p>Le 4 <b>Position</b> possono essere viste come delle specie di "macrostati" della FSM che implementa il <b>mover</b>. L'idea è quella di prevedere 4 macrostati, nei quali di 
+        volta in volta si decide se è necessario dirigersi verso la prossima (o la precedente) <b>Position</b>. Il robot è in grado di raggiungere la prossima destinazione procedendo
+        sia in senso orario che in senso antiorario (in base a quello che risulta più conveniente in quel momento), e anche di cambiare rotta mentre si sta muovendo in avanti.</p>
+        
+        <img class="centerimg" style="max-width: 1100px;" src="_images/mover_option2_verbose_state_machine.png"/>
+
+        <p>Nell'immagine viene mostrato solo il ramo da <b>HOME</b> a <b>INDOOR</b> e viceversa. Prendiamo il caso in cui si voglia andare da I→H. Siccome conviene in questo caso procedere in senso orario, giriamo (se necessario)
+            il robot per puntarlo verso nord (ossia verso <b>HOME</b>)(stato <i>pre_turn_clk</i>), poi lo facciamo andare avanti (stato <i>forward_clk</i>). Se non arrivano comandi di modifica di destinazione, quando rileviamo 
+            il contatto con la parete vuol dire che siamo arrivati in <b>HOME</b>: giriamo quindi il robot (stato <i>turn_clk</i>). 
+            Se invece, mentre si procede da <b>INDOOR</b> a <b>HOME</b> arriva un comando di nuova destinazione per la quale conviene tornare indietro (nel caso corrente o <b>INDOOR</b> o <b>PLASTICBOX</b>), allora si fa una sorta di 
+            inversione ad U (stato <i>u_turn_clk</i>) per tornare verso la <b>Position</b> dalla quale si era partiti.</p>
+        <p>È possibile una implementazione più sintetica e compatta se manteniamo la posizione corrente in una variabile (così come per la variabile contenente la posizione di destinazione):</p>
+        <img class="centerimg" style="max-width: 1100px;" src="_images/mover_option2_compact_state_machine_1.png"/>
+        <p>Inizialmente ci si trova nello stato di <i>wait</i>, quando si riceve una nuova posizione si passa allo stato di <i>handle</i>, che setta la variabile di destinazione <i>DEST</i> e la confronta con <i>CURRPOS</i> (contenente 
+            la posizione attuale). Se non siamo nella destinazione finale, decidiamo se procedere in senso orario o antiorario. Anche in questo caso <span style="color: #45d0ff;">verifichiamo se è necessario cambiare l'orientamento del 
+            robot</span>, poi si <span style="color: #f55b07;">procede in avanti</span> fino al raggiungimento della nuova <b>Position</b>. Se però arriva un nuovo comando di <i>move(POS)</i> e risulta più vantaggioso cambiare direzione, 
+            si fa una <span style="color: #febb00;">inversione ad U</span> per tornare verso la <b>Position</b> dalla quale si era partiti. Se invece la nuova <b>Position</b> è stata raggiunta, si aggiorna la variabile <i>CURRPOS</i> 
+            e si <span style="color: #5ac600;">gira il robot</span>.<br>
+            Ogni volta che si giunge presso una <b>Position</b> si verifica se siamo arrivati a destinazione: ci si continua a muovere fino a che questo non accade.</p>
+        
+        <p>Scendendo ancor di più nel dettaglio, la FSM effettivamente implementata è la seguente (viene omesso per brevità lo stato di errore):</p>
+        <img class="centerimg" style="max-width: 1300px;" src="_images/mover_option2_compact_state_machine_2.png"/>
+        <p>Si noti come, dopo lo stato di risposta <i>reply</i>, si torni in <i>handle</i> consumando un nuovo eventuale comando di <i>move(POS)</i> (se presente, altrimenti transizione spontanea).</p>
+        <p>Inoltre la gestione della manovra di <span style="color: #febb00;">inversione ad U</span> e di quello che segue è delegata ad un apposito attore <i>moveruturn</i>, la cui implementazione viene qui riportata:</p>
+        <img class="centerimg" style="max-width: 750px;" src="_images/moveruturn_state_machine_1.png"/>
+        <p>All'attore viene passato l'orientamento corrente del robot, in modo che una volta raggiunta la <b>Position</b> dalla quale si era partiti il robot si giri dalla parte giusta (stato <i>final_turn</i>). </p>
+        
+        <br>
+        <p>Architettura logica:</p>
+        <img class="centerimg" style="max-width: 700px;" src="_images/logic_architecture_2.5.png"/>
+    <p style="width: 100%; text-align: right;"><a href="../../docs_common/Legenda.html">Legenda</a></p>
+    </div>
+
+    <div style="background-color:rgba(86, 56, 253, 0.9); width:100%;text-align:left;color:white">
+        <table style="border: 0px solid transparent; margin: 0 auto;">
+            <tr>
+                <td>
+                    <p style="font-weight: bold;">Loris Giannatempo <br>
+                    Email: loris.giannatempo@studio.unibo.it</p>
+                    <img class="centerimg" src="../../docs_common/lorisgiannatempo.jpg" style="width: 30%; height: 30%; border: 0px">
+                </td>
+                <td>
+                    <p style="font-weight: bold;">Davide Guidetti <br>
+                    Email: davide.guidetti3@studio.unibo.it</p>
+                    <img class="centerimg" src="../../docs_common/davideguidetti.jpg" style="width: 30%; height: 30%; border: 0px">
+                </td>
+            </tr>
+        </table>
+    </div> 
+    </body>
+</html>

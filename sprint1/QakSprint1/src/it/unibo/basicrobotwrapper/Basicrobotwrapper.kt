@@ -14,16 +14,17 @@ class Basicrobotwrapper ( name: String, scope: CoroutineScope  ) : ActorBasicFsm
 		return "wait"
 	}
 	override fun getBody() : (ActorBasicFsm.() -> Unit){
+		val interruptedStateTransitions = mutableListOf<Transition>()
 		 var MOVE : ws.Move? = null   
 		return { //this:ActionBasciFsm
 				state("wait") { //this:State
 					action { //it:State
-						discardMessages = false
+						discardMessages = true
 						println("$name in ${currentState.stateName} | $currentMsg")
 						updateResourceRep( "basicrobotwrapper(wait)"  
 						)
 					}
-					 transition(edgeName="t027",targetState="handle",cond=whenRequest("cmdsync"))
+					 transition(edgeName="t041",targetState="handle",cond=whenRequest("cmdsync"))
 				}	 
 				state("handle") { //this:State
 					action { //it:State
@@ -62,7 +63,8 @@ class Basicrobotwrapper ( name: String, scope: CoroutineScope  ) : ActorBasicFsm
 						)
 						forward("cmd", "cmd(w)" ,"basicrobot" ) 
 					}
-					 transition(edgeName="t028",targetState="collision",cond=whenEvent("info"))
+					 transition(edgeName="t042",targetState="collision",cond=whenEvent("info"))
+					transition(edgeName="t043",targetState="handle",cond=whenRequest("cmdsync"))
 				}	 
 				state("collision") { //this:State
 					action { //it:State

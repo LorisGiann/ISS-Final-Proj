@@ -1,0 +1,170 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+    <!--
+<link rel="stylesheet" type="text/css" href="../css/issStyle1.css">
+<script type="text/javascript" src="../css/issStyle.js"></script>
+-->
+<link rel="stylesheet" type="text/css" href="../../docs_common/defaultTemplateStyle.css">
+<style>
+code>pre { 
+    font-family: monospace;
+}
+dd{
+    margin-bottom: 7px;
+}
+.todo{
+    color: orange
+}
+.centerimg{
+    display: block;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 90%;
+    max-width: 800px;
+}
+p { margin: 4px 0px; }
+dd{ margin-bottom: 8px;}
+.newDictWord{ color : purple; }
+h6{
+    font-size: 1em;
+    margin: 18px 0px 9px 0px;
+}
+</style>
+<head><title>Grid vs Boundary walker problem analysis</title></head>
+
+<body>
+    <div id="top">
+    <h1>ISS FINAL PROJECT</h1>
+    </div>  
+    
+    <div class="body"> 
+    <div class="remark">
+    
+        <h3>Il problema della navigazione: <br>
+            <p>Uso di un sistema di coordinate  o  boundary walker che raggiunge gli angoli rilevando il contatto con i muri?</p>
+        </h3>
+        <p>La particolare collocazione delle zone <b>INDOOR</b>, <b>PLASTICBOX</b>, <b>GLASSBOX</b>, <b>HOME</b> e la presenza di un sonar o sensore di impatto sul robot rendono attuabile una 
+            soluzione che non richiede l'utilizzo di coordinate: 
+            il robot può infatti muoversi all'interno della <b>Service area</b> lungo le pareti, orientandosi semplicemente rilevando le collisioni con le pareti. <br>
+            In questa sezione analizziamo i punti a favore dell'utilizzo di un sistema a coordinate e uno senza coordinate:</p>
+        <br>
+    
+        <p>I vantaggi nell'utilizzo di un sistema a coordinate:</p>
+        <ul>
+            <li>Maggiore flessibilità. Ad esempio nel caso in cui la posizione dei siti non sia più negli angoli, o il robot debba seguire un percorso ottimo, o se ci sono ostacoli nella <b>Service area</b>, ecc... .</li>
+            <li>Potenziale riuso di moduli che già abbiamo sviluppato (mapper, planner)</li>
+        </ul>
+        <p>I vantaggi nell'utilizzo di un sistema senza coordinate:</p>
+        <ul>
+            <li>Minor complessità, minor costo</li>
+            <li>Maggior velocità negli spostamenti, e maggior velocità di reazione a comandi di halt mentre ci si muove in avanti (non si deve aspettare di aver terminato uno step)</li>
+            <li>Possibile miglior reazione da parte di robot reali che non fanno uso di sistemi in feedback o altro hardware per controllare meglio i propri spostamenti: <br>
+                L'errore potrebbe aumentare ad ogni singolo step, mentre la prima soluzione (siccome utilizza un sensore di contatto con il muro) non soffre di questo problema</li>
+        </ul>
+        <br>
+        <p>Per scegliere in merito ad una decisione così importante per la realizzazione del <b>Mover</b>, sono state analizzate 4 diverse opzioni, che vengono qui descritte: </p>
+        
+
+        <h4>OPZIONE 0 - senza coordinate</h4>
+        <p>La prima soluzione è anche quella più semplice da comprendere: la strategia sarebbe infatti quella di attivare la giusta macchia a stati, che si occuperà di muovere il robot da una 
+            predeterminata posizione X ad una predeterminata posizione Y.</p>
+        <p>Pro e Contro:</p>
+        <ul>
+            <li>+ possibile far gestire ogni singolo caso ad un attore dedicato dalla semplice implementazione</li>
+            <li>- Numero considerevole di casi: supponendo la destinazione sempre diversa dalla posizione attuale sarebbero 3×3 = 9 casi. <br>
+                Si potrebbero implementare solo i casi che vengono effettivamente utilizzati dall'applicazione (sono 7: inutile implementare PB→GB e GB→PB), ma la soluzione sarebbe poco riusabile. <br>
+                Conseguente poca flessibilità, potrebbe essere necessario modificare e testare un gran numero di casi se viene cambiato qualcosa</li>
+            <li>- Potrebbe risultare complesso implementare un cambio di rotta mentre il robot deve ancora raggiungere una destinazione (specialmente se si delega a singoli micro attori il raggiungimento di una destinazione)</li>
+        </ul> 
+        
+
+        <h4>OPZIONE 1 - senza coordinate</h4>
+        <p>Utilizziamo una macchina a stati in grado di raggiungere la destinazione facendo fare al robot sempre un giro in senso antiorario. <br>
+            Se viene cambiata la destinazione mentre il robot è in movimento, esso non cambia direzione, perchè comunque per raggiugere la nuova <b>Position</b> di destinazione si procederà
+            sempre in senso antiorario, e quindi la <b>Position</b> verso la quale ci si sta dirigendo attualmente dovrà essere comunque raggiunta.<br>
+            L'idea è quella di prevedere 4 macrostati, nei quali di volta in volta si decide se è necessario dirigersi verso la prossima <b>Position</b> o meno: si raggiuge la prossima <b>Position</b> solo se 
+            la destinazione non è ancora stata raggiunta. Le 4 <b>Position</b> possono essere viste come delle specie di "macrostati" della FSM che implementa il <b>mover</b>.
+        </p>
+        <img class="centerimg" style="max-width: 700px;" src="_images/mover_option1_explaination.png"/>
+        <p>Pro e Contro:</p>
+        <ul>
+            <li>+ semplicità</li>
+            <li>+ possibile estendere la soluzione appena mostrata per ottenere l'opzione successiva</li>
+            <li>- politica non molto efficiente. Particolarmente svantaggioso nel caso in cui vi sia una richiesta dopo aver depositato la plastica (al posto di andare direttamente da PB→I si ha PB→GB→H→I)</li>
+        </ul>
+        <p>Per quest'ultimo motivo il committente ha fatto sapere che la soluzione non è accettabile.</p>
+        <!-- <p>A livello concettuale la macchina a stati che deve essere implementata all'interno di <b>mover</b> sarebbe la seguente:</p>
+        <img class="centerimg" src="_images/mover_option1_verbose_state_machine.png"/>
+        <p>È anche possibile implementare lo stesso comportamento mantenendo la posizione corrente all'interno di una variabile (così come per la variabile contenente la posizione di destinazione). 
+            In tal caso la macchina verrebbe semplificata di parecchio:</p>
+        <img class="centerimg" src="_images/mover_option1_compact_state_machine.png"/> -->
+
+        
+        <h4 id="OPTION2">OPZIONE 2 - senza coordinate</h4>
+        <p>Si tratta di un'estensione dell'opzione 1: il robot è in grado di raggiungere la prossima destinazione procedendo sia in senso orario che in senso antiorario (in base a quello che risulta più conveniente in quel momento). 
+            Inoltre il robot può cambiare rotta anche mentre si sta muovendo in avanti. </p>
+        <img class="centerimg" style="width: 400px;" src="_images/mover_option2_explaination.png"/>
+        <p>Pro e Contro:</p>
+        <ul>
+            <li>+ più veloce in alcuni casi</li>
+            <li>- più complesso</li>
+        </ul>
+        <!--
+        <p>La macchina a stati che deve essere implementata all'interno di <b>Transport trolley</b> si complica, perchè tra ogni "macro stato" e l'altro vi sono molti più stati:</p>
+        <img class="centerimg" style="max-width: 1100px;" src="_images/mover_option2_verbose_state_machine.png"/>
+        <p>Nell'immagine viene mostrato solo il ramo da <b>HOME</b> a <b>INDOOR</b> e viceversa. Prendiamo il caso in cui si voglia andare da I→H. Per ipotesi il robot, una volta raggiunto un macro stato, 
+            si trova sempre orientato verso il prossimo sito in senso antiorario (quindi nel caso corrente è puntato verso est). Siccome conviene in questo caso procedere in senso orario, giriamo il robot verso 
+            sinistra per puntarlo verso nord (ossia verso <b>HOME</b>), poi lo facciamo andare avanti (stato <i>forward_clk</i>). Se non arrivano comandi di modifica di destinazione, quando rileviamo il contatto con la parete vuol 
+            dire che siamo arrivati in <b>HOME</b>: dobbiamo ora girarci verso <b>INDOOR</b> (stato <i>turn_clk</i>) per poter reagire correttamente alle le prossime richieste. 
+            Se invece, mentre si procede da <b>INDOOR</b> a <b>HOME</b> arriva un comando di nuova destinazione per la quale conviene tornare indietro (nel caso corrente o <b>INDOOR</b> o <b>PLASTICBOX</b>), allora si fa una sorta di 
+            inversione ad U (stato <i>u_turn_clk</i>) per tornare verso la <b>Position</b> dalla quale si era partiti.</p>
+        <p>E' pur sempre possibile una implementazione più sintetica e compatta se manteniamo la posizione corrente in una variabile:</p>
+        <img class="centerimg" style="max-width: 1100px;" src="_images/mover_option2_compact_state_machine_1.png"/>
+        <p>Anche in questo caso verifichiamo se, mentre si sta procedendo in avanti, arriva una nuova destinazione. Se non arriva si procede fino al raggiungimento del sito. Se invece arriva e risulta più 
+            vantaggioso cambiare direzione, si fa una inversione ad U per tornare verso la <b>Position</b> dalla quale si era partiti.</p>    
+        -->
+
+        <h4>OPZIONE 3 - con coordinate</h4>
+        <p>Il modulo, data la posizione corrente e l'orientamento del robot, fa un certo numero di step e di turn per raggiungere le coordinate di destinazione.</p>
+        <p>Pro e Contro:</p>
+        <ul>
+            <li>+ flessibilità</li>
+            <li>+ esiste sw per mappare le dimensioni della stanza (<a href="https://github.com/anatali/issLab2022/tree/main/unibo.mapperQak22">unibo.mapperQak22</a>), per trovare path (<a href="https://github.com/anatali/issLab2022/tree/main/unibo.planner22">unibo.planner22</a>) e per far eseguire il path (<a href="https://github.com/anatali/issLab2022/tree/main/unibo.pathexecutor">unibo.pathexecutor</a>)</li>
+            <li>- richiesto mapping iniziale della servicearea</li>
+            <li>- le dimensioni della servicearea potrebbero non essere multiple di RD. È dunque necessaria una logica che (una volta raggiunte le coordinate di destinazione) faccia andare il robot a contatto con la porta, per poter effettuare le operazioni di carico/scarico.</li>
+        </ul>
+        <img class="centerimg" style="width: 400px;" src="_images/mover_option3_explaination.png"/>
+        <p>Nell'esempio mostrato bisogna</p>
+        <ol>
+            <li>Eseguire il path che il planner ha trovato</li>
+            <li>Girare il robot nella direzione della porta</li>
+            <li>Far andare avanti il robot fino al contatto con la parete</li>
+            <li>Quando l'operazione di carico/scarico è terminata bisogna far tornare il robot indietro per rimetterlo sull'ultima cella raggiunta</li>
+        </ol>
+             
+        <h4>Scelta: OPZIONE 2</h4>
+        <p>Scegliamo la soluzione senza coordinate, e in particolare la seconda soluzione, poichè sembra quella in grado di offrire il miglior rapporto benefici/costo considerato lo specifico dominio applicativo.<br>
+            Se un giorno nuovi requisiti dovessero imporre l'utilizzo di un sistema di coordinate, all'interno del sistema dovrà essere modificato soltanto il componente <i>mover</i> (e <i>basicrobotwrapper</i> che verrebbe rimosso).</p>
+    
+    </div>
+
+    <div style="background-color:rgba(86, 56, 253, 0.9); width:100%;text-align:left;color:white">
+        <table style="border: 0px solid transparent; margin: 0 auto;">
+            <tr>
+                <td>
+                    <p style="font-weight: bold;">Loris Giannatempo <br>
+                    Email: loris.giannatempo@studio.unibo.it</p>
+                    <img class="centerimg" src="../../docs_common/lorisgiannatempo.jpg" style="width: 30%; height: 30%; border: 0px">
+                </td>
+                <td>
+                    <p style="font-weight: bold;">Davide Guidetti <br>
+                    Email: davide.guidetti3@studio.unibo.it</p>
+                    <img class="centerimg" src="../../docs_common/davideguidetti.jpg" style="width: 30%; height: 30%; border: 0px">
+                </td>
+            </tr>
+        </table>
+    </div> 
+    </body>
+</html>

@@ -10,10 +10,10 @@ Reply loadrejected     : loadrejected(MATERIAL, TRUCKLOAD)
 // ------------------------------------------------------ 
     
 // ---------------------- CONTEXTS -----------------------
-Context ctxserver ip [host="localhost" port=8095]
+Context ctxservertest ip [host="localhost" port=8095]
 // ------------------------------------------------------
 
-QActor wasteservice context ctxserver{  
+QActor wasteservice context ctxservertest{  
 	[# var Material  : ws.Material
 	   var TruckLoad : Float       #]
 	

@@ -1,5 +1,7 @@
 package testSprint1
 
+import alice.tuprolog.Struct
+import alice.tuprolog.Term
 import org.junit.Assert
 import org.junit.jupiter.api.*
 import unibo.comm22.utils.ColorsOut
@@ -57,6 +59,15 @@ internal class TestSprint1_integration_test {
     @AfterEach
     fun down() {
         ColorsOut.outappl(to!!.getHistory().toString(), ColorsOut.MAGENTA)
+
+        //reorientate the robot correctly in ACLK direction
+        val currentState = to!!.getCurrentCoapState("mover")
+        val orientation  = (Term.createTerm(currentState) as Struct).getArg(3).toString()
+        if(orientation=="CLK") {
+            val connTcp = ConnTcp("localhost", 8096)
+            val requestStr = "msg(cmdsync, request,python,basicrobotwrapper,cmdsync(r),1)"
+            connTcp.request(requestStr)
+        }
 
         try {
             //FIRSTLY, try to be nice and make the program exit "normally"
@@ -130,49 +141,46 @@ internal class TestSprint1_integration_test {
     fun test_accepted() {
         assertTimeoutPreemptively<Unit>(Duration.ofSeconds(25)){
             ColorsOut.outappl("test_accepted STARTS", ColorsOut.BLUE)
-            val truckRequestStr = "msg(depositrequest, request,python,wasteservice,depositrequest(GLASS,2),1)"
-            try {
-                val connTcp = ConnTcp("localhost", 8095)
-                waitRegimeState()
+            val requestStr = "msg(depositrequest, request,python,wasteservice,depositrequest(GLASS,2),1)"
 
-                val answer = connTcp.request(truckRequestStr)
-                ColorsOut.outappl("test_accepted answer=$answer", ColorsOut.GREEN)
-                Assertions.assertTrue(answer.contains("loadaccept"))
+            val connTcp = ConnTcp("localhost", 8095)
+            waitRegimeState()
 
-                waitRegimeState()
-                connTcp.close()
+            val answer = connTcp.request(requestStr)
+            ColorsOut.outappl("test_accepted answer=$answer", ColorsOut.GREEN)
+            Assertions.assertTrue(answer.contains("loadaccept"))
 
-                // --------------------------------------------------------------------- CHECKING HISTORY ---------------------------------------------------------------------
-                Assertions.assertTrue(to!!.checkNextContents(arrayOf( //wasteservice receives the request and commands the depositaction: robot moves to indoor
-                    "wasteservice(req_depositaction,0.0,2.0)",
-                    "transporttrolley(req_move,INDOOR)",
-                )) >= 0)
-                Assertions.assertTrue(to!!.checkNextContent("mover(req_forward,HOME,INDOOR)") >= 0) //moving towards INDOOR
-                Assertions.assertTrue(to!!.checkNextContent("mover(req_turn,HOME,INDOOR)") >= 0) //moving towards INDOOR
-                Assertions.assertTrue(to!!.checkNextContents(arrayOf( //robot arrives to INDOOR, and does the pickup
-                    "mover(wait,INDOOR,INDOOR)",
-                    "pickupdropouthandler(do_pickup)",
-                )) >= 0)
-                Assertions.assertTrue(to!!.checkNextContents(arrayOf( //depositaction reply to transporttrolley with pickupdone, wasteservice now ready to receive new request, robot heading to GLASSBOX
-                    "depositaction(reply,GLASS)",
-                    "wasteservice(wait,0.0,2.0)",
-                    "transporttrolley(req_move,GLASSBOX)",
-                    "mover(req_forward,INDOOR,GLASSBOX)"
-                )) >= 0)
-                //Assertions.assertTrue(to!!.checkNextContent("mover(req_forward,INDOOR,GLASSBOX)") >= 0) //moving towards GLASSBOX   -- HAS TO BE INCLUDED IN THE CASES ABOVE, as it happens simultaneously to the others
-                Assertions.assertTrue(to!!.checkNextContent("mover(req_turn,INDOOR,GLASSBOX)") >= 0) //moving towards GLASSBOX
-                Assertions.assertTrue(to!!.checkNextContent("mover(req_forward,PLASTICBOX,GLASSBOX)") >= 0) //moving towards GLASSBOX
-                Assertions.assertTrue(to!!.checkNextContent("mover(req_turn,PLASTICBOX,GLASSBOX)") >= 0) //moving towards GLASSBOX
-                Assertions.assertTrue(to!!.checkNextContents(arrayOf( //robot arrival to GLASSBOX, robot does the dropout
-                    "mover(wait,GLASSBOX,GLASSBOX)",
-                    "pickupdropouthandler(do_dropout)",
-                )) >= 0)
-                Assertions.assertTrue(to!!.checkNextContent("transporttrolley(req_move,HOME)") >= 0) //robot heading to HOME
-                Assertions.assertTrue(to!!.checkNextContent("mover(wait,HOME,HOME)") >= 0) //robot in HOME
+            waitRegimeState()
+            connTcp.close()
 
-            } catch (e: Exception) {
-                Assertions.fail("test_accepted ERROR:" + e.message)
-            }
+            // --------------------------------------------------------------------- CHECKING HISTORY ---------------------------------------------------------------------
+            Assertions.assertTrue(to!!.checkNextContents(arrayOf( //wasteservice receives the request and commands the depositaction: robot moves to indoor
+                "wasteservice(req_depositaction,0.0,2.0)",
+                "transporttrolley(req_move,INDOOR)",
+            )) >= 0)
+            Assertions.assertTrue(to!!.checkNextContent("mover(req_forward_aclk,HOME,INDOOR,ACLK)") >= 0) //moving towards INDOOR
+            Assertions.assertTrue(to!!.checkNextContent("mover(req_post_turn_aclk,HOME,INDOOR,ACLK)") >= 0) //moving towards INDOOR
+            Assertions.assertTrue(to!!.checkNextContents(arrayOf( //robot arrives to INDOOR, and does the pickup
+                "mover(wait,INDOOR,INDOOR,ACLK)",
+                "pickupdropouthandler(do_pickup)",
+            )) >= 0)
+            Assertions.assertTrue(to!!.checkNextContents(arrayOf( //depositaction reply to transporttrolley with pickupdone, wasteservice now ready to receive new request, robot heading to GLASSBOX
+                "depositaction(reply,GLASS)",
+                "wasteservice(wait,0.0,2.0)",
+                "transporttrolley(req_move,GLASSBOX)",
+                "mover(req_forward_aclk,INDOOR,GLASSBOX,ACLK)"
+            )) >= 0)
+            //Assertions.assertTrue(to!!.checkNextContent("mover(req_forward_aclk,INDOOR,GLASSBOX,ACLK)") >= 0) //moving towards GLASSBOX   -- HAS TO BE INCLUDED IN THE CASES ABOVE, as it happens simultaneously to the others
+            Assertions.assertTrue(to!!.checkNextContent("mover(req_post_turn_aclk,INDOOR,GLASSBOX,ACLK)") >= 0) //moving towards GLASSBOX
+            Assertions.assertTrue(to!!.checkNextContent("mover(req_forward_aclk,PLASTICBOX,GLASSBOX,ACLK)") >= 0) //moving towards GLASSBOX
+            Assertions.assertTrue(to!!.checkNextContent("mover(req_post_turn_aclk,PLASTICBOX,GLASSBOX,ACLK)") >= 0) //moving towards GLASSBOX
+            Assertions.assertTrue(to!!.checkNextContents(arrayOf( //robot arrival to GLASSBOX, robot does the dropout
+                "mover(wait,GLASSBOX,GLASSBOX,ACLK)",
+                "pickupdropouthandler(do_dropout)",
+            )) >= 0)
+            Assertions.assertTrue(to!!.checkNextContent("transporttrolley(req_move,HOME)") >= 0) //robot heading to HOME
+            Assertions.assertTrue(to!!.checkNextContent("mover(wait,HOME,HOME,ACLK)") >= 0) //robot in HOME
+
         }
     }
 
@@ -180,280 +188,268 @@ internal class TestSprint1_integration_test {
     fun test_rejected() {
         assertTimeoutPreemptively<Unit>(Duration.ofSeconds(15)) {
             ColorsOut.outappl("testLoadKo STARTS", ColorsOut.BLUE)
-            try {
-                val connTcp = ConnTcp("localhost", 8095)
 
-                val truckRequestStr = "msg(depositrequest, request,python,wasteservice,depositrequest(GLASS,11),1)"
-                val answer = connTcp.request(truckRequestStr)
-                ColorsOut.outappl("test_rejected answer=$answer", ColorsOut.GREEN)
-                Assertions.assertTrue(answer.contains("loadrejected"))
+            val connTcp = ConnTcp("localhost", 8095)
 
-                waitRegimeState()
-                connTcp.close()
+            val requestStr = "msg(depositrequest, request,python,wasteservice,depositrequest(GLASS,11),1)"
+            val answer = connTcp.request(requestStr)
+            ColorsOut.outappl("test_rejected answer=$answer", ColorsOut.GREEN)
+            Assertions.assertTrue(answer.contains("loadrejected"))
 
-                // --------------------------------------------- CHECKING HISTORY ---------------------------------------------
-                Assertions.assertTrue(to!!.checkNextContents(arrayOf(
-                        "wasteservice(handle_req,0.0,0.0)",
-                        "wasteservice(rejected,0.0,0.0)",
-                        "wasteservice(wait,0.0,0.0)"
-                )) >= 0)
-            } catch (e: java.lang.Exception) {
-                Assertions.fail("test_rejected ERROR:" + e.message)
-            }
+            waitRegimeState()
+            connTcp.close()
+
+            // --------------------------------------------- CHECKING HISTORY ---------------------------------------------
+            Assertions.assertTrue(to!!.checkNextContents(arrayOf(
+                "wasteservice(handle_req,0.0,0.0)",
+                "wasteservice(rejected,0.0,0.0)",
+                "wasteservice(wait,0.0,0.0)"
+            )) >= 0)
+
         }
     }
 
     @Test
-    /* the second request is made while the robot is still in operation, while still dropping down material.
-        After dropout it whould be observed a command to go directly to INDOOR, rather than HOME
-     */
+            /* the second request is made while the robot is still in operation, while still dropping down material.
+                After dropout it whould be observed a command to go directly to INDOOR, rather than HOME
+             */
     fun test_2_accepted_while_in_operation() {
         assertTimeoutPreemptively<Unit>(Duration.ofSeconds(45)){
-            try {
-                val connTcp = ConnTcp("localhost", 8095)
 
-                //FIRST REQUEST
-                var truckRequestStr = "msg(depositrequest, request,python,wasteservice,depositrequest(PLASTIC,2),1)"
-                var answer = connTcp.request(truckRequestStr)
-                ColorsOut.outappl("first request answer=$answer", ColorsOut.GREEN)
-                Assertions.assertTrue(answer.contains("loadaccept"))
-                to!!.waitUntilState("pickupdropouthandler","pickupdropouthandler(do_dropout)") //wait for dropout command
-                CommUtils.delay(50)  //concede a little extra time to the actors in the system to communicate and do their transition, before going ahead with the test requests
+            val connTcp = ConnTcp("localhost", 8095)
 
-                //SECOND REQUEST
-                ColorsOut.outappl("launch second request", ColorsOut.GREEN)
-                truckRequestStr = "msg(depositrequest, request,python,wasteservice,depositrequest(GLASS,7),1)"
-                answer = connTcp.request(truckRequestStr)
-                ColorsOut.outappl("second request answer=$answer", ColorsOut.GREEN)
-                Assertions.assertTrue(answer.contains("loadaccept"))
+            //FIRST REQUEST
+            var requestStr = "msg(depositrequest, request,python,wasteservice,depositrequest(PLASTIC,2),1)"
+            var answer = connTcp.request(requestStr)
+            ColorsOut.outappl("first request answer=$answer", ColorsOut.GREEN)
+            Assertions.assertTrue(answer.contains("loadaccept"))
+            to!!.waitUntilState("pickupdropouthandler","pickupdropouthandler(do_dropout)") //wait for dropout command
+            CommUtils.delay(50)  //concede a little extra time to the actors in the system to communicate and do their transition, before going ahead with the test requests
 
-                waitRegimeState()
-                connTcp.close()
+            //SECOND REQUEST
+            ColorsOut.outappl("launch second request", ColorsOut.GREEN)
+            requestStr = "msg(depositrequest, request,python,wasteservice,depositrequest(GLASS,7),1)"
+            answer = connTcp.request(requestStr)
+            ColorsOut.outappl("second request answer=$answer", ColorsOut.GREEN)
+            Assertions.assertTrue(answer.contains("loadaccept"))
 
-                // --------------------------------------------------------------------- CHECKING HISTORY ---------------------------------------------------------------------
+            waitRegimeState()
+            connTcp.close()
 
-                Assertions.assertTrue(to!!.checkNextContents(arrayOf( //wasteservice receives the request and commands the depositaction: robot moves to indoor
-                    "wasteservice(req_depositaction,2.0,0.0)",
-                    "transporttrolley(req_move,INDOOR)",
-                )) >= 0)
-                Assertions.assertTrue(to!!.checkNextContents(arrayOf( //robot arrives to INDOOR, and does the pickup
-                    "mover(wait,INDOOR,INDOOR)",
-                    "pickupdropouthandler(do_pickup)",
-                )) >= 0)
-                Assertions.assertTrue(to!!.checkNextContents(arrayOf( //reply to first request after pickup, wasteservice ready for new requests, robot heading to PLASTICBOX
-                    "depositaction(reply,PLASTIC)",
-                    "wasteservice(wait,2.0,0.0)",
-                    "transporttrolley(req_move,PLASTICBOX)",
-                )) >= 0)
-                Assertions.assertTrue(to!!.checkNextContents(arrayOf( //robot arrives at PLASTICBOX, and does the dropout
-                    "mover(wait,PLASTICBOX,PLASTICBOX)",
-                    "pickupdropouthandler(do_dropout)",
-                )) >= 0)
-                val nextCheckIndexBeforeSecondReq = to!!.nextCheckIndex
-                //CHECK SECOND REQUEST
-                Assertions.assertTrue(to!!.checkNextContents(arrayOf( //new request is handled now, depositaction state machine goes directly in next_move and req_move_indoor, robot goes from PLASTICBOX to INDOOR
-                    "wasteservice(req_depositaction,2.0,7.0)",
-                    "depositaction(next_move*)",
-                    "depositaction(req_move_indoor*)",
-                    "mover(handle,PLASTICBOX,INDOOR)",
-                )) >= 0)
-                to!!.nextCheckIndex = nextCheckIndexBeforeSecondReq
-                Assertions.assertFalse(to!!.checkNextSequence(arrayOf( "depositaction(move_home*)", "depositaction(req_pickup*)"))) //depositaction should not pass through move_home state (should not be present before - for example - req_pickup of the second request)
-                to!!.nextCheckIndex = nextCheckIndexBeforeSecondReq
-                Assertions.assertFalse(to!!.checkNextSequence(arrayOf( "mover(handle,GLASSBOX,HOME)", "depositaction(req_pickup*)"))) //robot should not go directly to home after bein in glassbox (should not be present before - for example - req_pickup of the second request)
+            // --------------------------------------------------------------------- CHECKING HISTORY ---------------------------------------------------------------------
 
-            } catch (e: java.lang.Exception) {
-                Assertions.fail("test_2_accepted_while_in_operation ERROR:" + e.message)
-            }
+            Assertions.assertTrue(to!!.checkNextContents(arrayOf( //wasteservice receives the request and commands the depositaction: robot moves to indoor
+                "wasteservice(req_depositaction,2.0,0.0)",
+                "transporttrolley(req_move,INDOOR)",
+            )) >= 0)
+            Assertions.assertTrue(to!!.checkNextContents(arrayOf( //robot arrives to INDOOR, and does the pickup
+                "mover(wait,INDOOR,INDOOR,ACLK)",
+                "pickupdropouthandler(do_pickup)",
+            )) >= 0)
+            Assertions.assertTrue(to!!.checkNextContents(arrayOf( //reply to first request after pickup, wasteservice ready for new requests, robot heading to PLASTICBOX
+                "depositaction(reply,PLASTIC)",
+                "wasteservice(wait,2.0,0.0)",
+                "transporttrolley(req_move,PLASTICBOX)",
+            )) >= 0)
+            Assertions.assertTrue(to!!.checkNextContents(arrayOf( //robot arrives at PLASTICBOX, and does the dropout
+                "mover(wait,PLASTICBOX,PLASTICBOX,ACLK)",
+                "pickupdropouthandler(do_dropout)",
+            )) >= 0)
+            val nextCheckIndexBeforeSecondReq = to!!.nextCheckIndex
+            //CHECK SECOND REQUEST
+            Assertions.assertTrue(to!!.checkNextContents(arrayOf( //new request is handled now, depositaction state machine goes directly in next_move and req_move_indoor, robot goes from PLASTICBOX to INDOOR
+                "wasteservice(req_depositaction,2.0,7.0)",
+                "depositaction(next_move*)",
+                "depositaction(req_move_indoor*)",
+                "mover(handle,PLASTICBOX,INDOOR,*)",
+                "mover(req_forward_clk,*)",
+            )) >= 0)
+            to!!.nextCheckIndex = nextCheckIndexBeforeSecondReq
+            Assertions.assertFalse(to!!.checkNextSequence(arrayOf( "depositaction(move_home*)", "depositaction(req_pickup*)"))) //depositaction should not pass through move_home state (should not be present before - for example - req_pickup of the second request)
+
         }
     }
 
     @Test
-    /* the second request is made while the robot is still in operation, while still dropping down material
-    After dropout it whould be observed a command to go to HOME, rather than INDOOR
-     */
+            /* the second request is made while the robot is still in operation, while still dropping down material
+            After dropout it whould be observed a command to go to HOME, rather than INDOOR
+             */
     fun test_1_accepted_1_rejected_while_in_operation() {
         assertTimeoutPreemptively<Unit>(Duration.ofSeconds(35)){
-            try {
-                val connTcp = ConnTcp("localhost", 8095)
 
-                //FIRST REQUEST
-                var truckRequestStr = "msg(depositrequest, request,python,wasteservice,depositrequest(PLASTIC,2),1)"
-                var answer = connTcp.request(truckRequestStr)
-                ColorsOut.outappl("first request answer=$answer", ColorsOut.GREEN)
-                Assertions.assertTrue(answer.contains("loadaccept"))
-                to!!.waitUntilState("pickupdropouthandler","pickupdropouthandler(do_dropout)") //wait for dropout command
-                CommUtils.delay(50)  //concede a little extra time to the actors in the system to communicate and do their transition, before going ahead with the test requests
+            val connTcp = ConnTcp("localhost", 8095)
 
-                //SECONDO REQUEST
-                ColorsOut.outappl("launch second request", ColorsOut.GREEN)
-                truckRequestStr = "msg(depositrequest, request,python,wasteservice,depositrequest(GLASS,11),1)"
-                answer = connTcp.request(truckRequestStr)
-                ColorsOut.outappl("second request answer=$answer", ColorsOut.GREEN)
-                Assertions.assertTrue(answer.contains("loadrejected"))
+            //FIRST REQUEST
+            var requestStr = "msg(depositrequest, request,python,wasteservice,depositrequest(PLASTIC,2),1)"
+            var answer = connTcp.request(requestStr)
+            ColorsOut.outappl("first request answer=$answer", ColorsOut.GREEN)
+            Assertions.assertTrue(answer.contains("loadaccept"))
+            to!!.waitUntilState("pickupdropouthandler","pickupdropouthandler(do_dropout)") //wait for dropout command
+            CommUtils.delay(50)  //concede a little extra time to the actors in the system to communicate and do their transition, before going ahead with the test requests
 
-                waitRegimeState()
-                connTcp.close()
+            //SECOND REQUEST
+            ColorsOut.outappl("launch second request", ColorsOut.GREEN)
+            requestStr = "msg(depositrequest, request,python,wasteservice,depositrequest(GLASS,11),1)"
+            answer = connTcp.request(requestStr)
+            ColorsOut.outappl("second request answer=$answer", ColorsOut.GREEN)
+            Assertions.assertTrue(answer.contains("loadrejected"))
 
-                // --------------------------------------------------------------------- CHECKING HISTORY ---------------------------------------------------------------------
+            waitRegimeState()
+            connTcp.close()
 
-                Assertions.assertTrue(to!!.checkNextContents(arrayOf( //wasteservice receives the request and commands the depositaction: robot moves to indoor
-                    "wasteservice(req_depositaction,2.0,0.0)",
-                    "transporttrolley(req_move,INDOOR)",
-                )) >= 0)
-                Assertions.assertTrue(to!!.checkNextContents(arrayOf( //robot arrives to INDOOR, and does the pickup
-                    "mover(wait,INDOOR,INDOOR)",
-                    "pickupdropouthandler(do_pickup)",
-                )) >= 0)
-                Assertions.assertTrue(to!!.checkNextContents(arrayOf( //reply to first request after pickup, wasteservice ready for new requests, robot heading to PLASTICBOX
-                    "depositaction(reply,PLASTIC)",
-                    "wasteservice(wait,2.0,0.0)",
-                    "transporttrolley(req_move,PLASTICBOX)",
-                )) >= 0)
-                Assertions.assertTrue(to!!.checkNextContents(arrayOf( //robot arrives at PLASTICBOX, and does the dropout
-                    "mover(wait,PLASTICBOX,PLASTICBOX)",
-                    "pickupdropouthandler(do_dropout)",
-                )) >= 0)
-                val nextCheckIndexBeforeSecondReq = to!!.nextCheckIndex
-                //CHECK SECOND REQUEST
-                Assertions.assertTrue(to!!.checkNextContents(arrayOf( //new request is rejected, ready for new requests. depositaction state machine goes to move_home (since depositrequest is rejected depositaction is not called), robot to directly to HOME
-                    "wasteservice(rejected,2.0,0.0)",
-                    "wasteservice(wait,2.0,0.0)",
-                    "depositaction(move_home*)",
-                    "mover(handle,PLASTICBOX,HOME)",
-                )) >= 0)
-            } catch (e: java.lang.Exception) {
-                Assertions.fail("test_1_accepted_1_rejected_while_in_operation ERROR:" + e.message)
-            }
+            // --------------------------------------------------------------------- CHECKING HISTORY ---------------------------------------------------------------------
+
+            Assertions.assertTrue(to!!.checkNextContents(arrayOf( //wasteservice receives the request and commands the depositaction: robot moves to indoor
+                "wasteservice(req_depositaction,2.0,0.0)",
+                "transporttrolley(req_move,INDOOR)",
+            )) >= 0)
+            Assertions.assertTrue(to!!.checkNextContents(arrayOf( //robot arrives to INDOOR, and does the pickup
+                "mover(wait,INDOOR,INDOOR,ACLK)",
+                "pickupdropouthandler(do_pickup)",
+            )) >= 0)
+            Assertions.assertTrue(to!!.checkNextContents(arrayOf( //reply to first request after pickup, wasteservice ready for new requests, robot heading to PLASTICBOX
+                "depositaction(reply,PLASTIC)",
+                "wasteservice(wait,2.0,0.0)",
+                "transporttrolley(req_move,PLASTICBOX)",
+            )) >= 0)
+            Assertions.assertTrue(to!!.checkNextContents(arrayOf( //robot arrives at PLASTICBOX, and does the dropout
+                "mover(wait,PLASTICBOX,PLASTICBOX,ACLK)",
+                "pickupdropouthandler(do_dropout)",
+            )) >= 0)
+            val nextCheckIndexBeforeSecondReq = to!!.nextCheckIndex
+            //CHECK SECOND REQUEST
+            Assertions.assertTrue(to!!.checkNextContents(arrayOf( //new request is rejected, ready for new requests. depositaction state machine goes to move_home (since depositrequest is rejected depositaction is not called), robot to directly to HOME
+                "wasteservice(rejected,2.0,0.0)",
+                "wasteservice(wait,2.0,0.0)",
+                "depositaction(move_home*)",
+                "mover(handle,PLASTICBOX,HOME,ACLK)",
+            )) >= 0)
+
         }
     }
 
     @Test
-    /* the second request is made while the robot is still in operation, while it's returning to home
-    After dropout it whould be observed a command to go to HOME, rather than INDOOR
-    */
-    fun test_2_accepted_while_returning_home() { //the second request is made while the robot is still in operation, while returning to home
+            /* the second request is made while the robot is still in operation, while it's returning to home
+            After dropout it whould be observed a command to go to HOME, rather than INDOOR
+            */
+    fun test_2_accepted_while_returning_home() { //the second request is made while the robot is still in operation, while returning to home. In the process a u turn is performed
         assertTimeoutPreemptively<Unit>(Duration.ofSeconds(45)){
-            try {
-                val connTcp = ConnTcp("localhost", 8095)
 
-                //FIRST REQUEST
-                var truckRequestStr = "msg(depositrequest, request,python,wasteservice,depositrequest(PLASTIC,2),1)"
-                var answer = connTcp.request(truckRequestStr)
-                ColorsOut.outappl("testFirstRequest answer=$answer", ColorsOut.GREEN)
-                Assertions.assertTrue(answer.contains("loadaccept"))
-                to!!.waitUntilState("mover","mover(req_forward,PLASTICBOX,HOME)") //wait for the robot to proceed from PLASTICBOX to HOME
-                CommUtils.delay(50)  //concede a little extra time to the actors in the system to communicate and do their transition, before going ahead with the test requests
+            val connTcp = ConnTcp("localhost", 8095)
 
-                //SECONDO REQUEST
-                truckRequestStr = "msg(depositrequest, request,python,wasteservice,depositrequest(GLASS,7),1)"
-                answer = connTcp.request(truckRequestStr)
-                ColorsOut.outappl("testSecondRequest answer=$answer", ColorsOut.GREEN)
-                Assertions.assertTrue(answer.contains("loadaccept"))
+            //FIRST REQUEST
+            var requestStr = "msg(depositrequest, request,python,wasteservice,depositrequest(PLASTIC,2),1)"
+            var answer = connTcp.request(requestStr)
+            ColorsOut.outappl("testFirstRequest answer=$answer", ColorsOut.GREEN)
+            Assertions.assertTrue(answer.contains("loadaccept"))
+            to!!.waitUntilState("mover","mover(req_forward_aclk,PLASTICBOX,HOME,ACLK)") //wait for the robot to proceed from PLASTICBOX to HOME
+            CommUtils.delay(250)  //wait to be roughly in the middle of the wall
 
-                waitRegimeState()
-                connTcp.close()
+            //SECOND REQUEST
+            requestStr = "msg(depositrequest, request,python,wasteservice,depositrequest(GLASS,7),1)"
+            answer = connTcp.request(requestStr)
+            ColorsOut.outappl("testSecondRequest answer=$answer", ColorsOut.GREEN)
+            Assertions.assertTrue(answer.contains("loadaccept"))
 
-                // --------------------------------------------------------------------- CHECKING HISTORY ---------------------------------------------------------------------
+            waitRegimeState()
+            connTcp.close()
 
-                Assertions.assertTrue(to!!.checkNextContents(arrayOf( //wasteservice receives the request and commands the depositaction: robot moves to indoor
-                    "wasteservice(req_depositaction,2.0,0.0)",
-                    "transporttrolley(req_move,INDOOR)",
-                )) >= 0)
-                Assertions.assertTrue(to!!.checkNextContents(arrayOf( //robot arrives to INDOOR, and does the pickup
-                    "mover(wait,INDOOR,INDOOR)",
-                    "pickupdropouthandler(do_pickup)",
-                )) >= 0)
-                Assertions.assertTrue(to!!.checkNextContents(arrayOf( //reply to first request after pickup, wasteservice ready for new requests, robot heading to PLASTICBOX
-                    "depositaction(reply,PLASTIC)",
-                    "wasteservice(wait,2.0,0.0)",
-                    "transporttrolley(req_move,PLASTICBOX)",
-                )) >= 0)
-                Assertions.assertTrue(to!!.checkNextContents(arrayOf( //robot arrives at PLASTICBOX, and does the dropout
-                    "mover(wait,PLASTICBOX,PLASTICBOX)",
-                    "pickupdropouthandler(do_dropout)",
-                )) >= 0)
-                Assertions.assertTrue(to!!.checkNextContents(arrayOf( //depositaction commands move to HOME, robot heading to HOME
-                    "depositaction(move_home*)",
-                    "transporttrolley(req_move,HOME)",
-                    "mover(handle,PLASTICBOX,HOME)",
-                )) >= 0) //robot is heading to HOME
-                val nextCheckIndexBeforeSecondReq = to!!.nextCheckIndex
-                //CHECK SECOND REQUEST
-                Assertions.assertTrue(to!!.checkNextContents(arrayOf( //new request is handled now: wasteservice request depositaction, depositaction request move indoor while robot was still going on, robot redirects towards INDOOR
-                    "wasteservice(req_depositaction,2.0,7.0)",
-                    "depositaction(req_move_indoor*)",
-                    "transporttrolley(req_move,INDOOR)",
-                    "mover(handle,GLASSBOX,INDOOR)",   //this actually happens a bit later since option 1 is used for the mover: at GLASSBOX the destination is updated
-                )) >= 0)
-                to!!.nextCheckIndex = nextCheckIndexBeforeSecondReq
-                Assertions.assertFalse(to!!.checkNextSequence(arrayOf("depositaction(wait*)", "depositaction(req_pickup*)"))) //depositaction should not trasit through wait, it should not go directly to req_move_indoor (should not be present before - for example - req_pickup of the second request)
+            // --------------------------------------------------------------------- CHECKING HISTORY ---------------------------------------------------------------------
 
-            } catch (e: java.lang.Exception) {
-                Assertions.fail("test_2_accepted_while_returning_home ERROR:" + e.message)
-            }
+            Assertions.assertTrue(to!!.checkNextContents(arrayOf( //wasteservice receives the request and commands the depositaction: robot moves to indoor
+                "wasteservice(req_depositaction,2.0,0.0)",
+                "transporttrolley(req_move,INDOOR)",
+            )) >= 0)
+            Assertions.assertTrue(to!!.checkNextContents(arrayOf( //robot arrives to INDOOR, and does the pickup
+                "mover(wait,INDOOR,INDOOR,ACLK)",
+                "pickupdropouthandler(do_pickup)",
+            )) >= 0)
+            Assertions.assertTrue(to!!.checkNextContents(arrayOf( //reply to first request after pickup, wasteservice ready for new requests, robot heading to PLASTICBOX
+                "depositaction(reply,PLASTIC)",
+                "wasteservice(wait,2.0,0.0)",
+                "transporttrolley(req_move,PLASTICBOX)",
+            )) >= 0)
+            Assertions.assertTrue(to!!.checkNextContents(arrayOf( //robot arrives at PLASTICBOX, and does the dropout
+                "mover(wait,PLASTICBOX,PLASTICBOX,ACLK)",
+                "pickupdropouthandler(do_dropout)",
+            )) >= 0)
+            Assertions.assertTrue(to!!.checkNextContents(arrayOf( //depositaction commands move to HOME, robot heading to HOME
+                "depositaction(move_home*)",
+                "transporttrolley(req_move,HOME)",
+                "mover(handle,PLASTICBOX,HOME,ACLK)",
+            )) >= 0) //robot is heading to HOME
+            val nextCheckIndexBeforeSecondReq = to!!.nextCheckIndex
+            //CHECK SECOND REQUEST
+            Assertions.assertTrue(to!!.checkNextContents(arrayOf( //new request is handled now: wasteservice request depositaction, depositaction request move indoor while robot was still going on, robot redirects towards INDOOR
+                "wasteservice(req_depositaction,2.0,7.0)",
+                "depositaction(req_move_indoor*)",
+                "transporttrolley(req_move,INDOOR)",
+                "mover(set_new_dest_aclk,PLASTICBOX,INDOOR,ACLK)",
+            )) >= 0)
+            Assertions.assertTrue(to!!.checkNextContent("mover(handle,PLASTICBOX,INDOOR,CLK)") >= 0)
+            Assertions.assertTrue(to!!.checkNextContent("mover(wait,INDOOR,INDOOR,CLK)") >= 0)
+            to!!.nextCheckIndex = nextCheckIndexBeforeSecondReq
+            Assertions.assertFalse(to!!.checkNextSequence(arrayOf("depositaction(wait*)", "depositaction(req_pickup*)"))) //depositaction should not trasit through wait, it should not go directly to req_move_indoor (should not be present before - for example - req_pickup of the second request)
+
         }
     }
 
     @Test
     fun test_1_accepted_1_rejected_while_returning_home() { //the second request is made while the robot is still in operation, while returning home
         assertTimeoutPreemptively<Unit>(Duration.ofSeconds(35)){
-            try {
-                val connTcp = ConnTcp("localhost", 8095)
 
-                //FIRST REQUEST
-                var truckRequestStr = "msg(depositrequest, request,python,wasteservice,depositrequest(PLASTIC,2),1)"
-                var answer = connTcp.request(truckRequestStr)
-                ColorsOut.outappl("testFirstRequest answer=$answer", ColorsOut.GREEN)
-                Assertions.assertTrue(answer.contains("loadaccept"))
-                to!!.waitUntilState("mover","mover(req_forward,PLASTICBOX,HOME)") //wait for the robot to proceed from PLASTICBOX to HOME
-                CommUtils.delay(50)  //concede a little extra time to the actors in the system to communicate and do their transition, before going ahead with the test requests
+            val connTcp = ConnTcp("localhost", 8095)
 
-                //SECONDO REQUEST
-                truckRequestStr = "msg(depositrequest, request,python,wasteservice,depositrequest(GLASS,11),1)"
-                answer = connTcp.request(truckRequestStr)
-                ColorsOut.outappl("testSecondRequest answer=$answer", ColorsOut.GREEN)
-                Assertions.assertTrue(answer.contains("loadrejected"))
+            //FIRST REQUEST
+            var requestStr = "msg(depositrequest, request,python,wasteservice,depositrequest(PLASTIC,2),1)"
+            var answer = connTcp.request(requestStr)
+            ColorsOut.outappl("testFirstRequest answer=$answer", ColorsOut.GREEN)
+            Assertions.assertTrue(answer.contains("loadaccept"))
+            to!!.waitUntilState("mover","mover(req_forward_aclk,PLASTICBOX,HOME,ACLK)") //wait for the robot to proceed from PLASTICBOX to HOME
+            CommUtils.delay(250)  //wait to be roughly in the middle of the wall
 
-                waitRegimeState()
-                connTcp.close()
+            //SECOND REQUEST
+            requestStr = "msg(depositrequest, request,python,wasteservice,depositrequest(GLASS,11),1)"
+            answer = connTcp.request(requestStr)
+            ColorsOut.outappl("testSecondRequest answer=$answer", ColorsOut.GREEN)
+            Assertions.assertTrue(answer.contains("loadrejected"))
 
-                // --------------------------------------------------------------------- CHECKING HISTORY ---------------------------------------------------------------------
+            waitRegimeState()
+            connTcp.close()
 
-                Assertions.assertTrue(to!!.checkNextContents(arrayOf( //wasteservice receives the request and commands the depositaction: robot moves to indoor
-                    "wasteservice(req_depositaction,2.0,0.0)",
-                    "transporttrolley(req_move,INDOOR)",
-                )) >= 0)
-                Assertions.assertTrue(to!!.checkNextContents(arrayOf( //robot arrives to INDOOR, and does the pickup
-                    "mover(wait,INDOOR,INDOOR)",
-                    "pickupdropouthandler(do_pickup)",
-                )) >= 0)
-                Assertions.assertTrue(to!!.checkNextContents(arrayOf( //reply to first request after pickup, wasteservice ready for new requests, robot heading to PLASTICBOX
-                    "depositaction(reply,PLASTIC)",
-                    "wasteservice(wait,2.0,0.0)",
-                    "transporttrolley(req_move,PLASTICBOX)",
-                )) >= 0)
-                Assertions.assertTrue(to!!.checkNextContents(arrayOf( //robot arrives at PLASTICBOX, and does the dropout
-                    "mover(wait,PLASTICBOX,PLASTICBOX)",
-                    "pickupdropouthandler(do_dropout)",
-                )) >= 0)
-                Assertions.assertTrue(to!!.checkNextContents(arrayOf( //depositaction commands move to HOME, robot heading to HOME
-                    "depositaction(move_home*)",
-                    "transporttrolley(req_move,HOME)",
-                    "mover(handle,PLASTICBOX,HOME)",
-                )) >= 0) //robot is heading to HOME
-                val nextCheckIndexBeforeSecondReq = to!!.nextCheckIndex
-                //CHECK SECOND REQUEST
-                Assertions.assertTrue(to!!.checkNextContents(arrayOf( //new request is handled now: wasteservice rejects request, and returns to wait
-                    "wasteservice(rejected,2.0,0.0)",
-                    "wasteservice(wait,2.0,0.0)"
-                )) >= 0)
-                to!!.nextCheckIndex = nextCheckIndexBeforeSecondReq
-                Assertions.assertFalse(to!!.checkNextContent("depositaction(req_move_indoor*)") >= 0) //depositaction should not trasit through wait, it should not go directly to req_move_indoor (should not be present before - for example - req_pickup of the second request)
+            // --------------------------------------------------------------------- CHECKING HISTORY ---------------------------------------------------------------------
 
-            } catch (e: java.lang.Exception) {
-                Assert.fail("test_1_accepted_1_rejected_while_returning_home ERROR:" + e.message)
-            }
+            Assertions.assertTrue(to!!.checkNextContents(arrayOf( //wasteservice receives the request and commands the depositaction: robot moves to indoor
+                "wasteservice(req_depositaction,2.0,0.0)",
+                "transporttrolley(req_move,INDOOR)",
+            )) >= 0)
+            Assertions.assertTrue(to!!.checkNextContents(arrayOf( //robot arrives to INDOOR, and does the pickup
+                "mover(wait,INDOOR,INDOOR,ACLK)",
+                "pickupdropouthandler(do_pickup)",
+            )) >= 0)
+            Assertions.assertTrue(to!!.checkNextContents(arrayOf( //reply to first request after pickup, wasteservice ready for new requests, robot heading to PLASTICBOX
+                "depositaction(reply,PLASTIC)",
+                "wasteservice(wait,2.0,0.0)",
+                "transporttrolley(req_move,PLASTICBOX)",
+            )) >= 0)
+            Assertions.assertTrue(to!!.checkNextContents(arrayOf( //robot arrives at PLASTICBOX, and does the dropout
+                "mover(wait,PLASTICBOX,PLASTICBOX,ACLK)",
+                "pickupdropouthandler(do_dropout)",
+            )) >= 0)
+            Assertions.assertTrue(to!!.checkNextContents(arrayOf( //depositaction commands move to HOME, robot heading to HOME
+                "depositaction(move_home*)",
+                "transporttrolley(req_move,HOME)",
+                "mover(handle,PLASTICBOX,HOME,ACLK)",
+            )) >= 0) //robot is heading to HOME
+            val nextCheckIndexBeforeSecondReq = to!!.nextCheckIndex
+            //CHECK SECOND REQUEST
+            Assertions.assertTrue(to!!.checkNextContents(arrayOf( //new request is handled now: wasteservice rejects request, and returns to wait
+                "wasteservice(rejected,2.0,0.0)",
+                "wasteservice(wait,2.0,0.0)"
+            )) >= 0)
+            to!!.nextCheckIndex = nextCheckIndexBeforeSecondReq
+            Assertions.assertFalse(to!!.checkNextContent("depositaction(req_move_indoor*)") >= 0) //depositaction should not trasit through wait, it should not go directly to req_move_indoor (should not be present before - for example - req_pickup of the second request)
+
         }
     }
 }

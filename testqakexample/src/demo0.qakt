@@ -5,85 +5,101 @@ System demo0
  
   
   
-Event update_led : update_led(STATE) //STATE = on | off | blink
+Dispatch myMsg1 : myMsg1(_)
+Dispatch myMsg2 : myMsg2(_)
+Dispatch myMsg3 : myMsg3(_)
 
 Dispatch noMsg : noMsg(_)
  
 Context ctxtest ip [host="localhost" port=8095]
  
 
-QActor led context ctxtest{
-	[# lateinit var newState : String #]
+QActor component context ctxtest{
+	
+	[# val actor = this@Component;
+		suspend fun transitNow(stateName : String){
+			var res = actor.handleCurrentMessage(NoMsg,actor.getStateByName(stateName));
+			if(res) actor.elabMsgInState( );
+			else println("ERROR: transition was not possible")
+		}
+		suspend fun transitNow(stateName : String, messageId : String){
+			var res = actor.handleCurrentMessage(actor.getMsgFromQueueStore(messageId)!!,actor.getStateByName(stateName));
+			if(res) actor.elabMsgInState( );
+			else println("ERROR: transition was not possible")
+		}
+	#]
 	
 	State s0 initial {
 		printCurrentMessage   
-		discardMsg On
+		discardMsg Off
 		//[# sysUtil.logMsgs=true #]
+		delay 2000
  	}
- 	Transition t0 whenEvent update_led -> handle_update
+ 	Goto s1
  	
- 	State handle_update {
+ 	State s1 {
  		printCurrentMessage
-		onMsg( update_led:update_led(ARG) ){
-			[# newState = payloadArg(0) #]
- 			println("update_led(${newState})")
- 			//forward led -m noMsg : noMsg(_)
- 			[# val actor = this@Led; 
- 				var res = false;
- 			#]
- 			[# when(newState) {
-	 					"off" -> res=actor.handleCurrentMessage(NoMsg,actor.getStateByName("off"))
-	 					"on" -> res=actor.handleCurrentMessage(NoMsg,actor.getStateByName("on"))
-	 					"blink" -> res=actor.handleCurrentMessage(NoMsg,actor.getStateByName("blink_on"))
-	 			   }
-			   if(res) actor.elabMsgInState( );
-			#]
- 		}
+ 		//priority to myMsg1
+		/*if[# actor.checkMsgQueueStore("myMsg1") #]{
+			println("body transition")
+			[# transitNow("myMsg1") #]
+		}else{
+			println("no msg1")
+		}*/
  	}
- 	//Transition to else Goto off
- 	/*Transition toNewState whenMsg noMsg and [# newState=="off" #] -> off
- 					whenMsg noMsg and [# newState=="on" #] -> on
- 					whenMsg noMsg and [# newState=="blink" #] -> blink_on*/
+ 	Transition t0 whenTime 10 -> s2
+ 					whenMsg myMsg1 -> stateMsg1
  	
- 	State off {
+ 	State s2 {
  		printCurrentMessage
- 		println("Led off")
+ 		if[# actor.checkMsgQueueStore("myMsg2") #]{
+			println("msg2 in queue")
+			//[# transitNow("stateMsg2") #] //transition without consuming messages
+			[# transitNow("stateMsg2","myMsg2") #]
+		}else{
+			println("no msg2 in queue")
+		}
  	}
- 	Transition t0 whenEvent update_led -> handle_update
+ 	Transition t0 whenTime 10 -> s3
+ 					whenMsg myMsg2 -> stateMsg2
+ 				
+ 	State s3 {
+ 		printCurrentMessage
+ 	}
+ 	Transition t0 whenMsg myMsg3 -> stateMsg3
  	
- 	State on {
- 		printCurrentMessage
- 		println("Led on")
- 	}
- 	Transition t0 whenEvent update_led -> handle_update
  	
- 	State blink_on {
+ 	State stateMsg1 {
  		printCurrentMessage
- 		println("Blinking on")
+ 		println("stateMsg1")
  	}
- 	Transition t0 whenTime 500 -> blink_off
- 					whenEvent update_led -> handle_update
- 					
- 	State blink_off {
+ 	Goto s0	
+ 	
+ 	State stateMsg2 {
  		printCurrentMessage
- 		println("Blinking off")
+ 		println("stateMsg2")
  	}
- 	Transition t0 whenTime 500 -> blink_on
- 					whenEvent update_led -> handle_update
- 					
+ 	Goto s0
+ 	
+ 	State stateMsg3 {
+ 		printCurrentMessage
+ 		println("stateMsg3")
+ 	}
+ 	Goto s0
 }
 
    
-//led TEST
-QActor test_led context ctxtest{
+QActor test_component context ctxtest{
 	State s0 initial { 	    
 		discardMsg On
 		//[# sysUtil.logMsgs=true #]
-		emit update_led : update_led(off)
-		delay 2000
-		emit update_led : update_led(on)
-		delay 2000
-		emit update_led : update_led(blink)
-		delay 2000
+		forward component -m myMsg3 : myMsg3(off)
+		delay 200
+		forward component -m myMsg2 : myMsg2(off)
+		//emit myMsg2 : myMsg2(off)/
+		delay 200
+		forward component -m myMsg1 : myMsg1(off)
+		//emit myMsg1 : myMsg1(off)
+		delay 200
  	}
 }

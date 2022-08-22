@@ -20,6 +20,12 @@ fi
 SAVEIFS=$IFS   # Save current IFS (Internal Field Separator)
 IFS=$'\n'      # Change IFS to newline char
 declare -a TEST_METHODS=(
+    "testSprint1.TestSprint1_mover.test_from_H_to_H"
+    "testSprint1.TestSprint1_mover.test_from_H_to_I"
+    "testSprint1.TestSprint1_mover.test_from_PB_to_I"
+    "testSprint1.TestSprint1_mover.test_new_pos_no_chenage_route_from_GB_to_H_then_I"
+    "testSprint1.TestSprint1_mover.test_new_pos_chenage_route_from_PB_to_H_then_I"
+
     "testSprint1.TestSprint1_wasteservice.test_2_accepted"
     "testSprint1.TestSprint1_wasteservice.test_1_accepted_1_rejected"
 

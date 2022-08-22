@@ -12,17 +12,17 @@ Event    update_container : update_container(PLASTIC,GLASS) // PLASTIC & GLASS f
 // ------------------------------------------------------------------------------------
 
 // ---------------------- CONTEXTS -----------------------
-Context ctxgui ip [host="localhost" port=8095]
+Context ctxguitest ip [host="localhost" port=8095]
 // --------------------------------------------------------
 
-QActor gui context ctxgui{ 
+QActor guiserver context ctxguitest{ 
 	[#	var ttState = ws.Transporttrolleystate.IDLE
 		var position = ws.Position.HOME
 		var plasticCont = 0.0F
 		var glassCont = 0.0F
 		var ledState = ws.LedState.OFF
 		
-		val actor = this@Gui;
+		val actor = this@Guiserver;
 		suspend fun transitNow(stateName : String){
 			var res = actor.handleCurrentMessage(NoMsg,actor.getStateByName(stateName));
 			if(res) actor.elabMsgInState( );

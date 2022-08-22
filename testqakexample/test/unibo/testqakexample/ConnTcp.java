@@ -1,6 +1,5 @@
 package unibo.testqakexample;
 
-
 import unibo.comm22.interfaces.Interaction2021;
 import unibo.comm22.tcp.TcpClientSupport;
 import unibo.comm22.utils.ColorsOut;
