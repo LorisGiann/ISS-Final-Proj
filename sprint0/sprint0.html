@@ -46,7 +46,7 @@ h6{
 <h2>Introduction</h2>
 <div class="remark">
     <p>Progetto finale di ISS, che consiste in un impianto di smistamento dei rifiuti nel quale un robot deve trasportare il materiale dal camion al relativo container</p>
-    <p>In questo sprint preliminare ci occupiamo dell'analisi dei requisiti, ossi della comprensione dei requisiti forniti dal committente e della loro formalizzazione.</p>
+    <p>In questo sprint preliminare ci occupiamo dell'analisi dei requisiti, ossia della comprensione dei requisiti forniti dal committente e della loro formalizzazione.</p>
 </div>
 
 <A NAME="Requirements"></A>
@@ -61,9 +61,9 @@ h6{
         <li>La GUI deve mostrare le coordinate del robot o basta l'area nella quale si trova attualmente? basta l'area nella quale si trova attualmente</li>
         <li>A cosa serve il sonar se la stanza è priva di ostacoli? Il sonar a cui si fa riferimento non è a bordo del robot, è un dispositivo esterno (così come il RPI). Se si mette una mano davanti al dispositivo, il robot si ferma. In aggiunta a questo è presente un sonar o sensore di impatto anche sul robot.</li>
         <li>Ci deve essere il contatto con la parete per il carico/scarico dei materiali? SI (o comunque il più vicino possibile)</li>
-        <li>Supponiamo che il robot si stia dirigendo verso HOME (perché ha scaricato l'ultimo carico di materiale e non ci sono altri Waste truck sull'INDOOR). Se arriva un Waste truck prima che il trolley raggiunga la base, il robot deve cambiare rotta immediatamente o può raggiungere la base e poi dirigersi presso l'Indoor? CAMBIA IMMEDIATAMENTE ROTTA per dirigersi su indoor. In generale ir robot non deve "girovagare" troppo per la stanza</li>
+        <li>Supponiamo che il robot si stia dirigendo verso HOME (perché ha scaricato l'ultimo carico di materiale e non ci sono altri Waste truck sull'INDOOR). Se arriva un Waste truck prima che il trolley raggiunga la base, il robot deve cambiare rotta immediatamente o può raggiungere la base e poi dirigersi presso l'Indoor? CAMBIA IMMEDIATAMENTE ROTTA per dirigersi su indoor. In generale il robot non deve "girovagare" troppo per la stanza</li>
         <li>È il robot a determinare quando avviene la fine di una azione di carico/scarico? In che modo tale evento può essere rilevato dal sistema da noi sviluppato? Modellare l'operazione con un SEMPLICE DELAY di durata fissa</li>
-        <li>Il nodo sul quale la GUI va installata e un nodo fisso? O si tratta forse di palmari posseduti dai Service-manager stessi? Il NODO è FISSO </li>
+        <li>Il nodo sul quale la GUI va installata è un nodo fisso? O si tratta forse di palmari posseduti dai Service-manager stessi? Il NODO è FISSO </li>
         <li>In cosa consiste lo smart device? Quanti sono (viene usato sempre lo stesso dispositivo o ve ne è uno per ogni conducente)? Come si relaziona con il nostro sistema? Un dispositivo per ogni conducente, "alieno" invia un messaggio</li>
         <li>Committente ha server aziendali disponibili? È possibile usare la RPI come server (nodo sempre attivo mentre il sistema è operativo)? E' possibile usare la Raspberry, ma si può anche mettere sul PC che usiamo.</li>
     </ul>
@@ -74,7 +74,7 @@ h6{
 <div class="remark">
     <p>In questo progetto verrà utilizzato il metamodello <a href="../docs_common/Qak.html">QAK</a> per le seguenti ragioni:</p>
     <ul>
-        <li>Parte del software già disponibile è stato sviluppato usando questo linguaggio (ad esempio <a href="https://github.com/anatali/issLab2022/tree/main/unibo.basicrobot22">unibo.basicRobot22</a> e <a href="https://github.com/anatali/issLab2022/tree/main/unibo.sonarqak22">unibo.sonarqak22</a> è sviluppato con un modello QAK)</li>
+        <li>Parte del software già disponibile è stato sviluppato usando questo linguaggio (ad esempio <a href="https://github.com/anatali/issLab2022/tree/main/unibo.basicrobot22">unibo.basicRobot22</a> e <a href="https://github.com/anatali/issLab2022/tree/main/unibo.sonarqak22">unibo.sonarqak22</a> sono sviluppati con un modello QAK)</li>
         <li>Definire fin da subito in maniera formale aspetti altrimenti non esprimibili con costrutti nativi di linguaggi general purpose (es: concetto di richiesta, risposta, evento)</li>
         <li>Flessibilità nello sviluppo e nel collocamento dei componenti dell'applicazione distribuita</li>
         <li>Definire modelli eseguibili e giungere ad una architettura logica di riferimento non ambigua</li>
@@ -224,8 +224,8 @@ Assert.assertTrue(answer.contains("loadrejected"))</pre>
         <dd>Sequenza di azioni di:<br>
             <ol>
                 <lI>Raccolta di <b>Waste-load</b> dal <b>Waste-truck</b> che avviene in <b>INDOOR</b> (d'ora in poi con il termine <span class="newDictWord"><b>Pickup</b></span> ci riferiremo a questa operazione)</lI>
-                <lI>Trasporto del materiale da <b>INDOOR</b> a <b>PLASTICBOX</b> o <b>GLASSBOX</b> in base al tipo di materiale (d'ora in poi con il termine <span class="newDictWord"><b>Dropout</b></span> ci riferiremo a questa operazione)</lI>
-                <lI>Deposito del materiale nel <b>PLASTICBOX</b> o <b>GLASSBOX</b> in base al tipo di materiale</lI>
+                <lI>Trasporto del materiale da <b>INDOOR</b> a <b>PLASTICBOX</b> o <b>GLASSBOX</b> in base al tipo di materiale</lI>
+                <lI>Deposito del materiale nel <b>PLASTICBOX</b> o <b>GLASSBOX</b> in base al tipo di materiale (d'ora in poi con il termine <span class="newDictWord"><b>Dropout</b></span> ci riferiremo a questa operazione)</lI>
             </ol>
         </dd>
         <dt><b>Waste-truck:</b></dt> 
@@ -234,7 +234,7 @@ Assert.assertTrue(answer.contains("loadrejected"))</pre>
         <dd>Dispositivo attraverso il quale il <b>Waste-truck</b> invia una <b>depositrequest</b> comunicando al <b>WasteService</b>:
             <ul>
                 <lI><b>Material</b>, ossia il tipo di materiale da depositare</lI>
-                <lI><b>Waste-load</b>, ossia i Kg di materiale</lI>
+                <lI><b>Truckload</b>, ossia i Kg di materiale</lI>
             </ul>
             E riceve dal <b>WasteService</b> l'esito, che può essere o una <b>loadaccept</b> o una <b>loadrejected</b>
         </dd>
@@ -244,7 +244,7 @@ Assert.assertTrue(answer.contains("loadrejected"))</pre>
         <dd>Pannello di controllo che permette al <b>Service-manager</b> di monitorare:
             <ul>
                 <lI>La <b>Position</b> del <b>Transport trolley</b> (non serve la posizione precisa di un sistema di coordinate)</lI>
-                <lI>Il <b class="newDictWord">Transporttrolleystate</b>, ossia lo stato attuale del <b>Transport trolley</b>. Formalizziamo lo stato con l'enumerativo <a href="./RequirementQakSprint0/resources/ws/Transporttrolleystate.kt">Transporttrolleystate.kt</a>:<br>
+                <lI>Il <b class="newDictWord">Transporttrolleystate</b>, ossia lo stato attuale del <b>Transport trolley</b>. Formalizzato con l'enumerativo <a href="./RequirementQakSprint0/resources/ws/Transporttrolleystate.kt">Transporttrolleystate.kt</a>:<br>
                     <code><pre>enum class Transporttrolleystate { IDLE, MOVING, PICKINGUP, DROPPINGOUT, HALT }</pre></code></lI>
                 <lI>Il peso corrente <b>contPB</b> e <b>contGB</b> del materiale contenuto in <b>PLASTICBOX</b> e in <b>GLASSBOX</b></lI>
                 <lI>Lo stato del <b>LED</b></lI>
@@ -261,12 +261,13 @@ Assert.assertTrue(answer.contains("loadrejected"))</pre>
                 <lI>Led On: quando il <b>Transport trolley</b> è fermo (quando distanza rilevata &lt DLIMIT)</lI>
                 <lI>Led Blink: quando il <b>Transport trolley</b> è in movimento, o sta scaricando/caricando materiale</lI>
             </ul>
-            <p>Il committente fornisce già del software per relativo al led in <a href="https://github.com/anatali/issLab2022/tree/main/it.unibo.radarSystem22.domain">it.unibo.radarSystem22.domain</a>, e in <a href="https://github.com/anatali/issLab2022/tree/main/unibo.ledqak22">unibo.ledqak22</a>.</p>
+            <p>Il committente fornisce già del software relativo al led in <a href="https://github.com/anatali/issLab2022/tree/main/it.unibo.radarSystem22.domain">it.unibo.radarSystem22.domain</a>, e in <a href="https://github.com/anatali/issLab2022/tree/main/unibo.ledqak22">unibo.ledqak22</a>.</p>
             <p>Formalizzazione: <br>
                 Lo stato del led viene rappresentato mediante l'enumerativo <a href="./RequirementQakSprint0/resources/ws/LedState.kt">LedState.kt</a></p>
             <code><pre>enum class LedState { ON, OFF, BLINK }</pre></code>
-            <p>Il servizio offerto dal led viene esplicitato mediante un attore QAK: <a href="./RequirementQakSprint0/src/requirementAnalysis/LedRequirement.qak">LedRequirement.qak</a>. Esso viene comandato per mezzo di eventi:</p>
-            <code><pre>Event   update_led     : update_led(LEDSTATE)</pre></code>
+            <p>Il servizio offerto dal led viene esplicitato mediante un attore QAK: <a href="./RequirementQakSprint0/src/requirementAnalysis/LedRequirement.qak">LedRequirement.qak</a>. 
+            <!-- Esso viene comandato per mezzo di eventi:</p>      MA NON é UN REQUISITO
+            <code><pre>Event   update_led     : update_led(LEDSTATE)</pre></code> -->
             <p>Per specificare in maniera più formale il comportamento del LED, è stata scritta la classe di test <a href="./RequirementQakSprint0/test/testSprint0/TestLed.kt">TestLed.kt</a> (non eseguibile in questo sprint).</p>
         </dd>
         <dt><b class="newDictWord">Sonar concreto:</b></dt> 
