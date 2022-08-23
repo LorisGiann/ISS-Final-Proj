@@ -11,7 +11,6 @@ import ws.LedState
 
 class ledAlarmControl (name : String ) : ActorBasic( name ) {
 
-
 	//function and variables to determine if the robot is in home and if the robot has been interrupted
 	fun checkIsHome(From: String, To: String) = From==To && To==ws.Position.HOME.toString() //true if the robot is currently in home (=false if the robot is moving from home to another place)
 	var ISHOME: Boolean = true
@@ -30,7 +29,11 @@ class ledAlarmControl (name : String ) : ActorBasic( name ) {
 		emit( m1 )
 	}
 
-	suspend fun initCoapObserver() {
+	init {
+		initCoapObserver()
+	}
+
+	fun initCoapObserver() {
 		CoapObserverSupport(this, "127.0.0.1", "8096", "ctxrobot", "basicrobotwrapper")
 		CoapObserverSupport(this, "127.0.0.1", "8096", "ctxrobot", "mover")
 		CoapObserverSupport(this, "127.0.0.1", "8096", "ctxrobot", "pickupdropouthandler")
@@ -39,7 +42,7 @@ class ledAlarmControl (name : String ) : ActorBasic( name ) {
 	override suspend fun actorBody(msg: IApplMessage) {
 		//MsgUtil.outgreen("$tt $name | msg ${msg.msgId()} : $msg")
 		if (msg.msgId() == "autoStartSysMsg") {
-			initCoapObserver()
+			//initCoapObserver()
 			//MsgUtil.outgreen("$tt $name | started ")
 		}else if(msg.msgId() == "coapUpdate"){
 			try {

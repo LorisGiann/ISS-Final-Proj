@@ -193,7 +193,7 @@ internal class TestSprint1_mover {
 
     @Test
     fun test_from_H_to_I() {
-        assertTimeoutPreemptively<Unit>(Duration.ofSeconds(20)){
+        assertTimeoutPreemptively<Unit>(Duration.ofSeconds(30)){
             ColorsOut.outappl("test_from_H_to_I STARTS", ColorsOut.BLUE)
 
             val connTcp = ConnTcp("localhost", 8096)
@@ -221,7 +221,7 @@ internal class TestSprint1_mover {
 
     @Test
     fun test_from_PB_to_I() {
-        assertTimeoutPreemptively<Unit>(Duration.ofSeconds(30)){
+        assertTimeoutPreemptively<Unit>(Duration.ofSeconds(40)){
             ColorsOut.outappl("test_from_PB_to_I STARTS", ColorsOut.BLUE)
 
             goTo(ws.Position.PLASTICBOX)
@@ -252,7 +252,7 @@ internal class TestSprint1_mover {
 
     @Test
     fun test_from_I_to_GB() {
-        assertTimeoutPreemptively<Unit>(Duration.ofSeconds(30)){
+        assertTimeoutPreemptively<Unit>(Duration.ofSeconds(40)){
             ColorsOut.outappl("test_from_I_to_GB STARTS", ColorsOut.BLUE)
 
             goTo(ws.Position.INDOOR)
@@ -278,7 +278,7 @@ internal class TestSprint1_mover {
 
     @Test
     fun test_new_pos_no_chenage_route_from_GB_to_H_then_I() { //initially a GB->H move is commanded, but halfway through the nel position I is commanded: route should not change (no u turns)
-        assertTimeoutPreemptively<Unit>(Duration.ofSeconds(30)){
+        assertTimeoutPreemptively<Unit>(Duration.ofSeconds(50)){
             ColorsOut.outappl("test_new_pos_no_chenage_route_from_GB_to_H_then_I STARTS", ColorsOut.BLUE)
 
             goTo(ws.Position.GLASSBOX)
@@ -315,7 +315,7 @@ internal class TestSprint1_mover {
 
     @Test
     fun test_new_pos_chenage_route_from_PB_to_H_then_I() { //initially a PB->H move is commanded, but halfway through the nel position I is commanded: route should change (u turn)
-        assertTimeoutPreemptively<Unit>(Duration.ofSeconds(30)){
+        assertTimeoutPreemptively<Unit>(Duration.ofSeconds(50)){
             ColorsOut.outappl("test_new_pos_no_chenage_route_from_GB_to_H_then_I STARTS", ColorsOut.BLUE)
 
             goTo(ws.Position.PLASTICBOX)

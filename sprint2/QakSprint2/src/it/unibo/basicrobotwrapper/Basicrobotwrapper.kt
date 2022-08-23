@@ -20,7 +20,7 @@ class Basicrobotwrapper ( name: String, scope: CoroutineScope  ) : ActorBasicFsm
 				state("handle_prio") { //this:State
 					action { //it:State
 						println("$name in ${currentState.stateName} | $currentMsg")
-						updateResourceRep( "pickupdropouthandler(handle_prio)"  
+						updateResourceRep( "basicrobotwrapper(handle_prio)"  
 						)
 						stateTimer = TimerActor("timer_handle_prio", 
 							scope, context!!, "local_tout_basicrobotwrapper_handle_prio", 10.toLong() )
@@ -32,7 +32,7 @@ class Basicrobotwrapper ( name: String, scope: CoroutineScope  ) : ActorBasicFsm
 				state("alarm") { //this:State
 					action { //it:State
 						println("$name in ${currentState.stateName} | $currentMsg")
-						updateResourceRep( "pickupdropouthandler(alarm)"  
+						updateResourceRep( "basicrobotwrapper(alarm)"  
 						)
 					}
 					 transition(edgeName="t061",targetState="handle_prio",cond=whenDispatch("alarmceased"))
@@ -41,7 +41,7 @@ class Basicrobotwrapper ( name: String, scope: CoroutineScope  ) : ActorBasicFsm
 					action { //it:State
 						discardMessages = false
 						println("$name in ${currentState.stateName} | $currentMsg")
-						updateResourceRep( "pickupdropouthandler(wait)"  
+						updateResourceRep( "basicrobotwrapper(wait)"  
 						)
 					}
 					 transition(edgeName="t062",targetState="handle",cond=whenRequest("cmdsync"))

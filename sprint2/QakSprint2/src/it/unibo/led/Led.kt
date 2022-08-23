@@ -27,7 +27,6 @@ class Led ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scope 
 						)
 						 ledM = `it.unibo`.radarSystem22.domain.models.LedModel.create()  
 						 ledM.turnOff() 
-						forward("autoStartSysMsg", "autoStartSysMsg(_)" ,"ledalarmcontrol" ) 
 					}
 					 transition(edgeName="t082",targetState="handle_update",cond=whenEvent("update_led"))
 				}	 

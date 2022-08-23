@@ -72,6 +72,5 @@ with Diagram('demo0Arch', show=False, outformat='png', graph_attr=graphattr) as 
      alarmemitter >> Edge( xlabel='alarm', **eventedgeattr) >> sys
      alarmemitter >> Edge( xlabel='alarmceased', **eventedgeattr) >> sys
      sys >> Edge(color='red', style='dashed', xlabel='local_sonardata') >> alarmemitter
-     led >> Edge(color='blue', style='solid', xlabel='autoStartSysMsg') >> ledalarmcontrol
      sys >> Edge(color='red', style='dashed', xlabel='update_led') >> led
 diag

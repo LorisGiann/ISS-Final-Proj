@@ -807,7 +807,7 @@ QActor basicrobotwrapper context ctxrobot{
 	
 	State handle_prio {
 		printCurrentMessage
-		updateResource [# "pickupdropouthandler(handle_prio)" #] 
+		updateResource [# "basicrobotwrapper(handle_prio)" #] 
 	}
 	Transition t0 whenTime 10 -> wait
 				whenMsg alarm -> alarm
@@ -815,14 +815,14 @@ QActor basicrobotwrapper context ctxrobot{
 	
 	State alarm {
 		printCurrentMessage
-		updateResource [# "pickupdropouthandler(alarm)" #] 
+		updateResource [# "basicrobotwrapper(alarm)" #] 
 	}
 	Transition t0 whenMsg alarmceased -> handle_prio
 	
 	State wait initial {
 		discardMsg Off
 	 	printCurrentMessage
-		updateResource [# "pickupdropouthandler(wait)" #] 
+		updateResource [# "basicrobotwrapper(wait)" #] 
 	}
 	Transition t0 whenRequest cmdsync -> handle
 					whenMsg alarm -> alarm
@@ -1113,7 +1113,6 @@ QActor led context ctxalarm{
 		//println("${name} STARTS")
 		[# ledM = `it.unibo`.radarSystem22.domain.models.LedModel.create() #]
 		[# ledM.turnOff()#]
-		forward ledalarmcontrol -m autoStartSysMsg : autoStartSysMsg(_)
 		//[# sysUtil.logMsgs=true #]
  	}
  	Transition t0 whenEvent update_led -> handle_update
