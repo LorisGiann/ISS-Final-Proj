@@ -7,6 +7,7 @@ import it.unibo.kactor.ActorBasic
 import it.unibo.kactor.CoapObserverSupport
 import it.unibo.kactor.IApplMessage
 import it.unibo.kactor.MsgUtil
+import unibo.comm22.utils.CommUtils
 import ws.LedState
 
 class ledAlarmControl (name : String ) : ActorBasic( name ) {
@@ -34,9 +35,14 @@ class ledAlarmControl (name : String ) : ActorBasic( name ) {
 	}
 
 	fun initCoapObserver() {
-		CoapObserverSupport(this, "127.0.0.1", "8096", "ctxrobot", "basicrobotwrapper")
-		CoapObserverSupport(this, "127.0.0.1", "8096", "ctxrobot", "mover")
-		CoapObserverSupport(this, "127.0.0.1", "8096", "ctxrobot", "pickupdropouthandler")
+		try {
+			CommUtils.delay(1000)
+			CoapObserverSupport(this, "127.0.0.1", "8096", "ctxrobot", "basicrobotwrapper")
+			CoapObserverSupport(this, "127.0.0.1", "8096", "ctxrobot", "mover")
+			CoapObserverSupport(this, "127.0.0.1", "8096", "ctxrobot", "pickupdropouthandler")
+		}catch (e: Exception){
+			e.printStackTrace()
+		}
 	}
 	
 	override suspend fun actorBody(msg: IApplMessage) {

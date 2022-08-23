@@ -1101,9 +1101,9 @@ QActor alarmemitter context ctxalarm {
 }*/
 
 QActor led context ctxalarm{ 
-	[# lateinit var ledM : `it.unibo`.radarSystem22.domain.interfaces.ILed
+	[# var ledM : `it.unibo`.radarSystem22.domain.interfaces.ILed? = null
 		`it.unibo`.radarSystem22.domain.utils.DomainSystemConfig.ledGui=true
-		var newState = ws.LedState.OFF
+		var newState : ws.LedState? = null
 	#]
 	
 	State s0 initial {
@@ -1111,8 +1111,7 @@ QActor led context ctxalarm{
 		printCurrentMessage
 		updateResource [# "led(initial,${newState})" #]
 		//println("${name} STARTS")
-		[# ledM = `it.unibo`.radarSystem22.domain.models.LedModel.create() #]
-		[# ledM.turnOff()#]
+		[# ledM = `it.unibo`.radarSystem22.domain.models.LedModel.create().also{ it.turnOff() } #]
 		//[# sysUtil.logMsgs=true #]
  	}
  	Transition t0 whenEvent update_led -> handle_update
@@ -1120,7 +1119,11 @@ QActor led context ctxalarm{
  	State handle_update {
  		printCurrentMessage
 		onMsg( update_led:update_led(ARG) ){
-			[# newState = ws.LedState.valueOf(payloadArg(0)) #]
+			if[# ledM != null #]{
+				[# newState = ws.LedState.valueOf(payloadArg(0)) #]
+			}else{
+				[# newState = null #] //apparently if a message arrives before the startMsg arrives, the s0 action is not executed
+			}
  			//println("update_led(${newState})")
  		}
  		updateResource [# "led(handle_update,${newState})" #]
@@ -1129,13 +1132,13 @@ QActor led context ctxalarm{
 	State handle_update_switch_1{}
 	Goto on if [# newState==ws.LedState.ON #] else handle_update_switch_2
 	State handle_update_switch_2{}
-	Goto blink_on if [# newState==ws.LedState.BLINK #] else handle_update
+	Goto blink_on if [# newState==ws.LedState.BLINK #] else s0
  	
  	State off {
  		printCurrentMessage
  		updateResource [# "led(off,${newState})" #]
  		[# unibo.actor22comm.utils.ColorsOut.outappl("${name} - off", unibo.actor22comm.utils.ColorsOut.GREEN)#]
- 		[# ledM.turnOff()#]
+ 		[# ledM!!.turnOff()#]
  	}
  	Transition t0 whenEvent update_led -> handle_update
  	
@@ -1144,7 +1147,7 @@ QActor led context ctxalarm{
  		updateResource [# "led(on,${newState})" #]
  		[# unibo.actor22comm.utils.ColorsOut.outappl("${name} - on", unibo.actor22comm.utils.ColorsOut.GREEN)#]
  		//println("Led on")
- 		[# ledM.turnOn()#]
+ 		[# ledM!!.turnOn()#]
  	}
  	Transition t0 whenEvent update_led -> handle_update
  	
@@ -1153,7 +1156,7 @@ QActor led context ctxalarm{
  		updateResource [# "led(blink_on,${newState})" #]
  		[# unibo.actor22comm.utils.ColorsOut.outappl("${name} - on (blinking)", unibo.actor22comm.utils.ColorsOut.GREEN)#]
  		//println("Blinking on")
- 		[# ledM.turnOn()#]
+ 		[# ledM!!.turnOn()#]
  	}
  	Transition t0 whenTime 250 -> blink_off
  					whenEvent update_led -> handle_update
@@ -1163,7 +1166,7 @@ QActor led context ctxalarm{
  		updateResource [# "led(blink_off,${newState})" #]
  		[# unibo.actor22comm.utils.ColorsOut.outappl("${name} - off (blinking)", unibo.actor22comm.utils.ColorsOut.GREEN)#]
  		//println("Blinking off")
- 		[# ledM.turnOff()#]
+ 		[# ledM!!.turnOff()#]
  	}
  	Transition t0 whenTime 250 -> blink_on
  					whenEvent update_led -> handle_update

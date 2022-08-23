@@ -15,9 +15,9 @@ class Led ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scope 
 	}
 	override fun getBody() : (ActorBasicFsm.() -> Unit){
 		val interruptedStateTransitions = mutableListOf<Transition>()
-		 lateinit var ledM : `it.unibo`.radarSystem22.domain.interfaces.ILed
+		 var ledM : `it.unibo`.radarSystem22.domain.interfaces.ILed? = null
 				`it.unibo`.radarSystem22.domain.utils.DomainSystemConfig.ledGui=true
-				var newState = ws.LedState.OFF
+				var newState : ws.LedState? = null
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
@@ -25,8 +25,7 @@ class Led ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scope 
 						println("$name in ${currentState.stateName} | $currentMsg")
 						updateResourceRep( "led(initial,${newState})"  
 						)
-						 ledM = `it.unibo`.radarSystem22.domain.models.LedModel.create()  
-						 ledM.turnOff() 
+						 ledM = `it.unibo`.radarSystem22.domain.models.LedModel.create().also{ it.turnOff() }  
 					}
 					 transition(edgeName="t082",targetState="handle_update",cond=whenEvent("update_led"))
 				}	 
@@ -35,7 +34,12 @@ class Led ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scope 
 						println("$name in ${currentState.stateName} | $currentMsg")
 						if( checkMsgContent( Term.createTerm("update_led(LEDSTATE)"), Term.createTerm("update_led(ARG)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
-								 newState = ws.LedState.valueOf(payloadArg(0))  
+								if(  ledM != null  
+								 ){ newState = ws.LedState.valueOf(payloadArg(0))  
+								}
+								else
+								 { newState = null  
+								 }
 						}
 						updateResourceRep( "led(handle_update,${newState})"  
 						)
@@ -58,7 +62,7 @@ class Led ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scope 
 					}
 					 transition( edgeName="goto",targetState="blink_on", cond=doswitchGuarded({ newState==ws.LedState.BLINK  
 					}) )
-					transition( edgeName="goto",targetState="handle_update", cond=doswitchGuarded({! ( newState==ws.LedState.BLINK  
+					transition( edgeName="goto",targetState="s0", cond=doswitchGuarded({! ( newState==ws.LedState.BLINK  
 					) }) )
 				}	 
 				state("off") { //this:State
@@ -67,7 +71,7 @@ class Led ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scope 
 						updateResourceRep( "led(off,${newState})"  
 						)
 						 unibo.actor22comm.utils.ColorsOut.outappl("${name} - off", unibo.actor22comm.utils.ColorsOut.GREEN) 
-						 ledM.turnOff() 
+						 ledM!!.turnOff() 
 					}
 					 transition(edgeName="t083",targetState="handle_update",cond=whenEvent("update_led"))
 				}	 
@@ -77,7 +81,7 @@ class Led ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scope 
 						updateResourceRep( "led(on,${newState})"  
 						)
 						 unibo.actor22comm.utils.ColorsOut.outappl("${name} - on", unibo.actor22comm.utils.ColorsOut.GREEN) 
-						 ledM.turnOn() 
+						 ledM!!.turnOn() 
 					}
 					 transition(edgeName="t084",targetState="handle_update",cond=whenEvent("update_led"))
 				}	 
@@ -87,7 +91,7 @@ class Led ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scope 
 						updateResourceRep( "led(blink_on,${newState})"  
 						)
 						 unibo.actor22comm.utils.ColorsOut.outappl("${name} - on (blinking)", unibo.actor22comm.utils.ColorsOut.GREEN) 
-						 ledM.turnOn() 
+						 ledM!!.turnOn() 
 						stateTimer = TimerActor("timer_blink_on", 
 							scope, context!!, "local_tout_led_blink_on", 250.toLong() )
 					}
@@ -100,7 +104,7 @@ class Led ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scope 
 						updateResourceRep( "led(blink_off,${newState})"  
 						)
 						 unibo.actor22comm.utils.ColorsOut.outappl("${name} - off (blinking)", unibo.actor22comm.utils.ColorsOut.GREEN) 
-						 ledM.turnOff() 
+						 ledM!!.turnOff() 
 						stateTimer = TimerActor("timer_blink_off", 
 							scope, context!!, "local_tout_led_blink_off", 250.toLong() )
 					}
