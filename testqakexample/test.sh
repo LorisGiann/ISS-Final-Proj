@@ -11,9 +11,9 @@ JAR_OUPUT_PATH=build/libs
 
 #first generate the jar files (but if an argument is present compilation is skipped)
 if [ -z "$1" ] ; then
-    gradle -PmainClass=it.unibo.ctxtesta.MainCtxtestaCustomKt jar
-    gradle -PmainClass=it.unibo.ctxtestb.MainCtxtestbCustomKt jar
-    gradle -PmainClass=it.unibo.ctxtestc.MainCtxtestcCustomKt jar
+    gradle -PmainClass=it.unibo.ctxtesta.MainCtxtestaKt jar
+    gradle -PmainClass=it.unibo.ctxtestb.MainCtxtestbKt jar
+    gradle -PmainClass=it.unibo.ctxtestc.MainCtxtestcKt jar
 else
   echo "skipping compilation"
 fi

@@ -37,11 +37,11 @@ internal class TestMultipleCtx {
             TestUtils.terminateProcOnPort(8096) //making sure that the port is free
 			TestUtils.terminateProcOnPort(8097) //making sure that the port is free
 
-            val (prR, processHandleR) = TestUtils.runCtx("build/libs/it.unibo.ctxtesta.MainCtxtestaCustomKt-1.0.jar")
+            val (prR, processHandleR) = TestUtils.runCtx("build/libs/it.unibo.ctxtesta.MainCtxtestaKt-1.0.jar")
             prRobot=prR; processHandleRobot=processHandleR
-            val (prS, processHandleS) = TestUtils.runCtx("build/libs/it.unibo.ctxtestb.MainCtxtestbCustomKt-1.0.jar")
+            val (prS, processHandleS) = TestUtils.runCtx("build/libs/it.unibo.ctxtestb.MainCtxtestbKt-1.0.jar")
             prServer=prS; processHandleServer=processHandleS
-			val (prC, processHandleC) = TestUtils.runCtx("build/libs/it.unibo.ctxtestc.MainCtxtestcCustomKt-1.0.jar")
+			val (prC, processHandleC) = TestUtils.runCtx("build/libs/it.unibo.ctxtestc.MainCtxtestcKt-1.0.jar")
             prCC=prC; processHandleCC=processHandleC
 
         } catch (e: IOException) {

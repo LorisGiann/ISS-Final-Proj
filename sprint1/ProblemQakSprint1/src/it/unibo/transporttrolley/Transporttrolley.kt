@@ -15,14 +15,8 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 	}
 	override fun getBody() : (ActorBasicFsm.() -> Unit){
 		val interruptedStateTransitions = mutableListOf<Transition>()
-		 lateinit var tmp : String 
-				
-			val actor = this@Transporttrolley;
-				suspend fun transitNow(stateName : String){
-					var res = actor.handleCurrentMessage(NoMsg,actor.getStateByName(stateName));
-					if(res) actor.elabMsgInState( );
-					else println("ERROR: transition was not possible")
-				}
+		  lateinit var tmp : String 
+				var newState : String? = null  
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
@@ -30,7 +24,9 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 						println("$name in ${currentState.stateName} | $currentMsg")
 						 sysUtil.logMsgs=true  
 					}
-					 transition( edgeName="goto",targetState="handle_cmd", cond=doswitch() )
+					 transition(edgeName="t00",targetState="handle_cmd",cond=whenRequest("move"))
+					transition(edgeName="t01",targetState="handle_cmd",cond=whenRequest("pickup"))
+					transition(edgeName="t02",targetState="handle_cmd",cond=whenRequest("dropout"))
 				}	 
 				state("handle_cmd") { //this:State
 					action { //it:State
@@ -41,28 +37,73 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 tmp = payloadArg(0)  
 								println("move(${tmp})")
-								 val stateName = when(ws.Position.valueOf(tmp)) {
+								 newState = when(ws.Position.valueOf(tmp)) {
 													ws.Position.HOME -> "moving_home"
 													ws.Position.INDOOR -> "moving_indoor"
 													ws.Position.PLASTICBOX -> "moving_plasticbox"
 													ws.Position.GLASSBOX -> "moving_glassbox"
 												}
-												transitNow(stateName)
 						}
 						if( checkMsgContent( Term.createTerm("pickup(_)"), Term.createTerm("pickup(_)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								println("PICKUP")
-								 transitNow("pickUp")  
+								 newState = "pickUp"  
 						}
 						if( checkMsgContent( Term.createTerm("dropout(_)"), Term.createTerm("dropout(_)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								println("DROPOUT")
-								 transitNow("dropOut")  
+								 newState = "dropOut"  
 						}
 					}
-					 transition(edgeName="t00",targetState="handle_cmd",cond=whenRequest("move"))
-					transition(edgeName="t01",targetState="handle_cmd",cond=whenRequest("pickup"))
-					transition(edgeName="t02",targetState="handle_cmd",cond=whenRequest("dropout"))
+					 transition( edgeName="goto",targetState="handle_update_switch_1", cond=doswitch() )
+				}	 
+				state("handle_update_switch_1") { //this:State
+					action { //it:State
+					}
+					 transition( edgeName="goto",targetState="moving_home", cond=doswitchGuarded({ newState=="moving_home"  
+					}) )
+					transition( edgeName="goto",targetState="handle_update_switch_2", cond=doswitchGuarded({! ( newState=="moving_home"  
+					) }) )
+				}	 
+				state("handle_update_switch_2") { //this:State
+					action { //it:State
+					}
+					 transition( edgeName="goto",targetState="moving_indoor", cond=doswitchGuarded({ newState=="moving_indoor"  
+					}) )
+					transition( edgeName="goto",targetState="handle_update_switch_3", cond=doswitchGuarded({! ( newState=="moving_indoor"  
+					) }) )
+				}	 
+				state("handle_update_switch_3") { //this:State
+					action { //it:State
+					}
+					 transition( edgeName="goto",targetState="moving_plasticbox", cond=doswitchGuarded({ newState=="moving_plasticbox"  
+					}) )
+					transition( edgeName="goto",targetState="handle_update_switch_4", cond=doswitchGuarded({! ( newState=="moving_plasticbox"  
+					) }) )
+				}	 
+				state("handle_update_switch_4") { //this:State
+					action { //it:State
+					}
+					 transition( edgeName="goto",targetState="moving_glassbox", cond=doswitchGuarded({ newState=="moving_glassbox"  
+					}) )
+					transition( edgeName="goto",targetState="handle_update_switch_5", cond=doswitchGuarded({! ( newState=="moving_glassbox"  
+					) }) )
+				}	 
+				state("handle_update_switch_5") { //this:State
+					action { //it:State
+					}
+					 transition( edgeName="goto",targetState="pickUp", cond=doswitchGuarded({ newState=="pickUp"  
+					}) )
+					transition( edgeName="goto",targetState="handle_update_switch_6", cond=doswitchGuarded({! ( newState=="pickUp"  
+					) }) )
+				}	 
+				state("handle_update_switch_6") { //this:State
+					action { //it:State
+					}
+					 transition( edgeName="goto",targetState="dropOut", cond=doswitchGuarded({ newState=="dropOut"  
+					}) )
+					transition( edgeName="goto",targetState="s0", cond=doswitchGuarded({! ( newState=="dropOut"  
+					) }) )
 				}	 
 				state("moving_home") { //this:State
 					action { //it:State

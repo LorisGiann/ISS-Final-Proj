@@ -90,7 +90,6 @@ internal class TestTransporttrolley {
         assertTimeoutPreemptively<Unit>(Duration.ofSeconds(25)) {
             try {
                 val connTcp = ConnTcp("localhost", 8095)
-                to!!.waitUntilState("transporttrolley","handle_cmd")
                 
                 //FIRST REQUEST
                 val RequestStr1 = "msg(move, request,python,transporttrolley,move(INDOOR),1)"

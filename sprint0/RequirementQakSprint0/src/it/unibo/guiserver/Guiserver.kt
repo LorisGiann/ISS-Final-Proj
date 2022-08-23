@@ -20,13 +20,6 @@ class Guiserver ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, 
 				var plasticCont = 0.0F
 				var glassCont = 0.0F
 				var ledState = ws.LedState.OFF
-				
-				val actor = this@Guiserver;
-				suspend fun transitNow(stateName : String){
-					var res = actor.handleCurrentMessage(NoMsg,actor.getStateByName(stateName));
-					if(res) actor.elabMsgInState( );
-					else println("ERROR: transition was not possible")
-				}
 		return { //this:ActionBasciFsm
 				state("wait") { //this:State
 					action { //it:State
@@ -35,10 +28,10 @@ class Guiserver ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, 
 						updateResourceRep( "gui(wait,${ttState},${position},${ledState},${plasticCont},${glassCont})"  
 						)
 					}
-					 transition(edgeName="t010",targetState="handle_update_tt_state",cond=whenEvent("update_tt_state"))
-					transition(edgeName="t011",targetState="handle_update_position",cond=whenEvent("update_position"))
-					transition(edgeName="t012",targetState="handle_update_container",cond=whenEvent("update_container"))
-					transition(edgeName="t013",targetState="handle_update_led",cond=whenEvent("update_led"))
+					 transition(edgeName="t00",targetState="handle_update_tt_state",cond=whenEvent("update_tt_state"))
+					transition(edgeName="t01",targetState="handle_update_position",cond=whenEvent("update_position"))
+					transition(edgeName="t02",targetState="handle_update_container",cond=whenEvent("update_container"))
+					transition(edgeName="t03",targetState="handle_update_led",cond=whenEvent("update_led"))
 				}	 
 				state("handle_update_tt_state") { //this:State
 					action { //it:State

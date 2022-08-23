@@ -22,8 +22,4 @@ with Diagram('demoledArch', show=False, outformat='png', graph_attr=graphattr) a
      with Cluster('ctxalarmtest', graph_attr=nodeattr):
           led=Custom('led','./qakicons/symActorSmall.png')
      sys >> Edge(color='red', style='dashed', xlabel='update_led') >> led
-     sys >> Edge(color='red', style='dashed', xlabel='update_led') >> led
-     sys >> Edge(color='red', style='dashed', xlabel='update_led') >> led
-     sys >> Edge(color='red', style='dashed', xlabel='update_led') >> led
-     sys >> Edge(color='red', style='dashed', xlabel='update_led') >> led
 diag

@@ -21,13 +21,6 @@ QActor guiserver context ctxguitest{
 		var plasticCont = 0.0F
 		var glassCont = 0.0F
 		var ledState = ws.LedState.OFF
-		
-		val actor = this@Guiserver;
-		suspend fun transitNow(stateName : String){
-			var res = actor.handleCurrentMessage(NoMsg,actor.getStateByName(stateName));
-			if(res) actor.elabMsgInState( );
-			else println("ERROR: transition was not possible")
-		}
 	#]
 	
 	State wait initial {

@@ -11,8 +11,8 @@ JAR_OUPUT_PATH=build/libs
 
 #first generate the jar files (but if an argument is present compilation is skipped)
 if [ -z "$1" ] ; then
-    gradle -PmainClass=it.unibo.ctxrobot.MainCtxrobotCustomKt jar
-    gradle -PmainClass=it.unibo.ctxserver.MainCtxserverCustomKt jar
+    gradle -PmainClass=it.unibo.ctxrobot.MainCtxrobotKt jar
+    gradle -PmainClass=it.unibo.ctxserver.MainCtxserverKt jar
 else
   echo "skipping compilation"
 fi
