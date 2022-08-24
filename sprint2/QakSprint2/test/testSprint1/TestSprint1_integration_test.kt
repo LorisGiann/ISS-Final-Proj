@@ -147,7 +147,7 @@ internal class TestSprint1_integration_test {
 
     @Test
     fun test_accepted() {
-        assertTimeoutPreemptively<Unit>(Duration.ofSeconds(25)){
+        assertTimeoutPreemptively<Unit>(Duration.ofSeconds(50)){
             ColorsOut.outappl("test_accepted STARTS", ColorsOut.BLUE)
             val requestStr = "msg(depositrequest, request,python,wasteservice,depositrequest(GLASS,2),1)"
 
@@ -194,7 +194,7 @@ internal class TestSprint1_integration_test {
 
     @Test
     fun test_rejected() {
-        assertTimeoutPreemptively<Unit>(Duration.ofSeconds(15)) {
+        assertTimeoutPreemptively<Unit>(Duration.ofSeconds(30)) {
             ColorsOut.outappl("testLoadKo STARTS", ColorsOut.BLUE)
 
             val connTcp = ConnTcp("localhost", 8095)
@@ -222,7 +222,7 @@ internal class TestSprint1_integration_test {
                 After dropout it whould be observed a command to go directly to INDOOR, rather than HOME
              */
     fun test_2_accepted_while_in_operation() {
-        assertTimeoutPreemptively<Unit>(Duration.ofSeconds(45)){
+        assertTimeoutPreemptively<Unit>(Duration.ofSeconds(90)){
 
             val connTcp = ConnTcp("localhost", 8095)
 
@@ -283,7 +283,7 @@ internal class TestSprint1_integration_test {
             After dropout it whould be observed a command to go to HOME, rather than INDOOR
              */
     fun test_1_accepted_1_rejected_while_in_operation() {
-        assertTimeoutPreemptively<Unit>(Duration.ofSeconds(35)){
+        assertTimeoutPreemptively<Unit>(Duration.ofSeconds(70)){
 
             val connTcp = ConnTcp("localhost", 8095)
 
@@ -341,7 +341,7 @@ internal class TestSprint1_integration_test {
             After dropout it whould be observed a command to go to HOME, rather than INDOOR
             */
     fun test_2_accepted_while_returning_home() { //the second request is made while the robot is still in operation, while returning to home. In the process a u turn is performed
-        assertTimeoutPreemptively<Unit>(Duration.ofSeconds(45)){
+        assertTimeoutPreemptively<Unit>(Duration.ofSeconds(90)){
 
             val connTcp = ConnTcp("localhost", 8095)
 
@@ -404,7 +404,7 @@ internal class TestSprint1_integration_test {
 
     @Test
     fun test_1_accepted_1_rejected_while_returning_home() { //the second request is made while the robot is still in operation, while returning home
-        assertTimeoutPreemptively<Unit>(Duration.ofSeconds(35)){
+        assertTimeoutPreemptively<Unit>(Duration.ofSeconds(70)){
 
             val connTcp = ConnTcp("localhost", 8095)
 

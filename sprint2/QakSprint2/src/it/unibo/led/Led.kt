@@ -25,7 +25,9 @@ class Led ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scope 
 						println("$name in ${currentState.stateName} | $currentMsg")
 						updateResourceRep( "led(initial,${newState})"  
 						)
-						 ledM = `it.unibo`.radarSystem22.domain.models.LedModel.create().also{ it.turnOff() }  
+						if(  ledM == null  
+						 ){ ledM = `it.unibo`.radarSystem22.domain.models.LedModel.create().also{ it.turnOff() }  
+						}
 					}
 					 transition(edgeName="t082",targetState="handle_update",cond=whenEvent("update_led"))
 				}	 
@@ -34,12 +36,10 @@ class Led ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scope 
 						println("$name in ${currentState.stateName} | $currentMsg")
 						if( checkMsgContent( Term.createTerm("update_led(LEDSTATE)"), Term.createTerm("update_led(ARG)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
-								if(  ledM != null  
-								 ){ newState = ws.LedState.valueOf(payloadArg(0))  
+								 newState = ws.LedState.valueOf(payloadArg(0))  
+								if(  ledM == null  
+								 ){ ledM = `it.unibo`.radarSystem22.domain.models.LedModel.create().also{ it.turnOff() }  
 								}
-								else
-								 { newState = null  
-								 }
 						}
 						updateResourceRep( "led(handle_update,${newState})"  
 						)

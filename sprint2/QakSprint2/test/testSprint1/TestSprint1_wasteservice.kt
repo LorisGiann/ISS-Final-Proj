@@ -81,15 +81,16 @@ internal class TestSprint1_wasteservice {
 
     @Test
     fun dummy() {
-        Assertions.assertTrue(true)
+        assertTimeoutPreemptively<Unit>(Duration.ofSeconds(5)) {
+            CommUtils.delay(1000)
+        }
     }
 
 
 
     @Test
-    @Timeout(30)
     fun test_2_accepted() {
-        assertTimeoutPreemptively<Unit>(Duration.ofSeconds(45)) {
+        assertTimeoutPreemptively<Unit>(Duration.ofSeconds(90)) {
             try {
                 val connTcp = ConnTcp("localhost", 8095)
 
@@ -118,7 +119,7 @@ internal class TestSprint1_wasteservice {
 
     @Test
     fun test_1_accepted_1_rejected() {
-        assertTimeoutPreemptively<Unit>(Duration.ofSeconds(35)){
+        assertTimeoutPreemptively<Unit>(Duration.ofSeconds(70)){
             try {
                 val connTcp = ConnTcp("localhost", 8095)
 

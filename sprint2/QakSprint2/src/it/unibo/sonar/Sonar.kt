@@ -17,11 +17,16 @@ class Sonar ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scop
 		val interruptedStateTransitions = mutableListOf<Transition>()
 		 val simulate       = true
 			   val sonarActorName = "sonar"
+			   var active = false
+			   var init = false
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
 						println("$name in ${currentState.stateName} | $currentMsg")
+						if(  !init  
+						 ){ init=true  
 						alarmSonar.configureSonarSubsystem.configureTheSonar( simulate, sonarActorName  )
+						}
 					}
 					 transition( edgeName="goto",targetState="activateTheSonar", cond=doswitch() )
 				}	 
@@ -30,12 +35,19 @@ class Sonar ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scop
 						println("$name in ${currentState.stateName} | $currentMsg")
 						updateResourceRep( "sonar(activateTheSonar,simulate)"  
 						)
-						if(  simulate  
+						if(  !init  
+						 ){ init=true  
+						alarmSonar.configureSonarSubsystem.configureTheSonar( simulate, sonarActorName  )
+						}
+						if(  !active  
+						 ){if(  simulate  
 						 ){forward("sonaractivate", "info(ok)" ,"sonarsimulator" ) 
 						}
 						else
 						 {forward("sonaractivate", "info(ok)" ,"sonardatasource" ) 
 						 }
+						 active=true  
+						}
 					}
 					 transition(edgeName="t076",targetState="handleSonarData",cond=whenEvent("alarmsonar"))
 					transition(edgeName="t077",targetState="deactivateTheSonar",cond=whenDispatch("sonardeactivate"))
@@ -45,12 +57,15 @@ class Sonar ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scop
 						println("$name in ${currentState.stateName} | $currentMsg")
 						updateResourceRep( "sonar(deactivateTheSonar,simulate)"  
 						)
-						if(  simulate  
+						if(  active  
+						 ){if(  simulate  
 						 ){forward("sonardeactivate", "info(ok)" ,"sonarsimulator" ) 
 						}
 						else
 						 {forward("sonardeactivate", "info(ok)" ,"sonardatasource" ) 
 						 }
+						 active=false  
+						}
 					}
 					 transition( edgeName="goto",targetState="end", cond=doswitch() )
 				}	 

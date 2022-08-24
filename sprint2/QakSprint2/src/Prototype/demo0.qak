@@ -1009,23 +1009,35 @@ QActor basicrobot context ctxrobot{
 QActor sonar context ctxalarm {
 	[# val simulate       = true
 	   val sonarActorName = "sonar"
+	   var active = false
+	   var init = false
 	#]
 	
 	State s0 initial {
 		printCurrentMessage
-		run alarmSonar.configureSonarSubsystem.configureTheSonar(simulate, sonarActorName)
+		if[# !init #]{ //prevent re-initialization
+			[# init=true #]
+			run alarmSonar.configureSonarSubsystem.configureTheSonar(simulate, sonarActorName)
+		}
 	}
 	Goto activateTheSonar
 	
 	State activateTheSonar{
 		printCurrentMessage
 		updateResource [# "sonar(activateTheSonar,simulate)" #]
-		if[# simulate #]{
-			//println("sonar simulator")
-			forward sonarsimulator -m sonaractivate : info(ok)
-		}else {
-			//println("sonar real")
-			forward sonardatasource -m sonaractivate : info(ok)  
+		if[# !init #]{ //if a message arrives before autoStartSysMsg s0 action will never be executed
+			[# init=true #]
+			run alarmSonar.configureSonarSubsystem.configureTheSonar(simulate, sonarActorName)
+		}
+		if[# !active #]{
+			if[# simulate #]{
+				//println("sonar simulator")
+				forward sonarsimulator -m sonaractivate : info(ok)
+			}else {
+				//println("sonar real")
+				forward sonardatasource -m sonaractivate : info(ok)  
+			}
+			[# active=true #]
 		}
 	}
 	Transition t0  whenEvent alarmsonar            -> handleSonarData  
@@ -1034,13 +1046,16 @@ QActor sonar context ctxalarm {
 	State deactivateTheSonar{
 		printCurrentMessage
 		updateResource [# "sonar(deactivateTheSonar,simulate)" #]
-		if[# simulate #]{
-			//println("sonar simulator")
-			forward sonarsimulator -m sonardeactivate : info(ok) 
-			//run sonarConfig.activateSonarSimulated() //usingDomain
-		}else {
-			//println("sonar real")
-			forward sonardatasource -m sonardeactivate : info(ok)  
+		if[# active #]{
+			if[# simulate #]{
+				//println("sonar simulator")
+				forward sonarsimulator -m sonardeactivate : info(ok) 
+				//run sonarConfig.activateSonarSimulated() //usingDomain
+			}else {
+				//println("sonar real")
+				forward sonardatasource -m sonardeactivate : info(ok)  
+			}
+			[# active=false #]
 		}
 	}
 	Goto end
@@ -1085,7 +1100,7 @@ QActor alarmemitter context ctxalarm {
 	Transition t0 whenEvent local_sonardata -> wait
 }
 
-/*QActor ledalarmcontrol context ctxalarm { //ctxobserver ctxboundaryqak30{
+/*QActor testledalarmcontrol context ctxalarm { //ctxobserver ctxboundaryqak30{
 	State s0 initial{
 		observeResource basicrobotwrapper
 		observeResource mover
@@ -1094,7 +1109,7 @@ QActor alarmemitter context ctxalarm {
 	Transition t0 whenMsg coapUpdate -> handleUpdate
 	State handleUpdate{
 		onMsg (coapUpdate : coapUpdate(RESOURCE, VALUE)) {
-			[# alarmLed.ledAlarmControl.processUpdate(RESOURCE, VALUE) #]
+			println("update: ${payloadArg(0)} ${payloadArg(1)}")
 		}
 	}
 	Transition t0 whenMsg coapUpdate -> handleUpdate
@@ -1111,7 +1126,9 @@ QActor led context ctxalarm{
 		printCurrentMessage
 		updateResource [# "led(initial,${newState})" #]
 		//println("${name} STARTS")
-		[# ledM = `it.unibo`.radarSystem22.domain.models.LedModel.create().also{ it.turnOff() } #]
+		if[# ledM == null #]{
+			[# ledM = `it.unibo`.radarSystem22.domain.models.LedModel.create().also{ it.turnOff() } #]
+		}
 		//[# sysUtil.logMsgs=true #]
  	}
  	Transition t0 whenEvent update_led -> handle_update
@@ -1119,10 +1136,9 @@ QActor led context ctxalarm{
  	State handle_update {
  		printCurrentMessage
 		onMsg( update_led:update_led(ARG) ){
-			if[# ledM != null #]{
-				[# newState = ws.LedState.valueOf(payloadArg(0)) #]
-			}else{
-				[# newState = null #] //apparently if a message arrives before the startMsg arrives, the s0 action is not executed
+			[# newState = ws.LedState.valueOf(payloadArg(0)) #]
+			if[# ledM == null #]{
+				[# ledM = `it.unibo`.radarSystem22.domain.models.LedModel.create().also{ it.turnOff() } #] //apparently if a message arrives before the startMsg, the s0 action is not executed
 			}
  			//println("update_led(${newState})")
  		}

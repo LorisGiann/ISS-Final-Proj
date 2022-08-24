@@ -37,16 +37,17 @@ class ledAlarmControl (name : String ) : ActorBasic( name ) {
 	fun initCoapObserver() {
 		try {
 			CommUtils.delay(1000)
+			println("$tt $name | connecting")
 			CoapObserverSupport(this, "127.0.0.1", "8096", "ctxrobot", "basicrobotwrapper")
 			CoapObserverSupport(this, "127.0.0.1", "8096", "ctxrobot", "mover")
 			CoapObserverSupport(this, "127.0.0.1", "8096", "ctxrobot", "pickupdropouthandler")
 		}catch (e: Exception){
-			e.printStackTrace()
+			System.err.println(e.stackTrace)
 		}
 	}
 	
 	override suspend fun actorBody(msg: IApplMessage) {
-		//MsgUtil.outgreen("$tt $name | msg ${msg.msgId()} : $msg")
+		MsgUtil.outgreen("$tt $name | msg ${msg.msgId()} : ${msg.toString()}")
 		if (msg.msgId() == "autoStartSysMsg") {
 			//initCoapObserver()
 			//MsgUtil.outgreen("$tt $name | started ")
@@ -60,8 +61,8 @@ class ledAlarmControl (name : String ) : ActorBasic( name ) {
 				when (RESOURCE) {
 					"mover" -> {
 						val msgterm = (Term.createTerm(VALUE) as Struct)
-						val FROM = msgterm.getArg(0).toString()
-						val TO = msgterm.getArg(1).toString()
+						val FROM = msgterm.getArg(1).toString()
+						val TO = msgterm.getArg(2).toString()
 						ISHOME = checkIsHome(FROM, TO)
 						println("$tt $name | mover from $FROM to $TO, ishome = $ISHOME" )
 					}
@@ -91,7 +92,9 @@ class ledAlarmControl (name : String ) : ActorBasic( name ) {
 					updateLed(LedState.BLINK)
 					//println("led blink")
 				}
-			} catch (_: InvalidTermException){}
+			} catch (e: Exception){
+				System.err.println(e.stackTrace)
+			}
 		}
 
 	}
