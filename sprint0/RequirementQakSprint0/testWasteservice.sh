@@ -32,7 +32,7 @@ i=0
 numFail=0
 for t in ${TEST_METHODS[@]} ; do
     echo "---------------------------- TEST " ${TEST_METHODS[$i]} " ------------------------------"
-    gradle test --tests ${TEST_METHODS[$i]}
+    gradle test --tests ${TEST_METHODS[$i]} -i
     TEST_RESULTS[$i]=$?
     if [[ ${TEST_RESULTS[$i]} -ne 0 ]] ; then
         ((numFail++))
@@ -55,9 +55,9 @@ echo ""
 i=0
 for t in ${TEST_METHODS[@]} ; do
     if [[ ${TEST_RESULTS[$i]} -eq 0 ]] ; then
-        printf "${GREEN}gradle test --tests ${TEST_METHODS[$i]}${NC}\n"
+        printf "${GREEN}gradle test --tests ${TEST_METHODS[$i]} -i ${NC}\n"
     else
-        printf "${RED}gradle test --tests ${TEST_METHODS[$i]}${NC}\n"
+        printf "${RED}gradle test --tests ${TEST_METHODS[$i]} -i ${NC}\n"
     fi
     ((i++))
 done

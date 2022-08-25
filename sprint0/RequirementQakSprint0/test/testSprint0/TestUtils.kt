@@ -13,11 +13,11 @@ class TestUtils {
 
     companion object {
 
-        private var logger: Logger? = null
-        private var appender: RollingFileAppender? = null
+        //private var logger: Logger? = null
+        //private var appender: RollingFileAppender? = null
 
-        private fun initlogger(fname : String){
-            val logger = Logger.getLogger(TestUtils.javaClass)
+        private fun initlogger(fname : String) : Pair<Logger,RollingFileAppender> {
+            val logger = Logger.getLogger(fname)
             val appender = RollingFileAppender()
             appender.setLayout(PatternLayout("%d %-5p %c{1}:%L - %m%n"));
             appender.setFile("logs/$fname.txt");
@@ -29,8 +29,9 @@ class TestUtils {
             logger.setAdditivity(false);
             logger.addAppender(appender);
 
-            this.appender=appender
-            this.logger=logger
+            //this.appender=appender
+            //this.logger=logger
+			return Pair(logger,appender)
         }
 
         /**
@@ -71,8 +72,10 @@ class TestUtils {
             val isr = InputStreamReader(`is`)
             val br = BufferedReader(isr)
             var line: String?
+            val (logger,appender) = initlogger(jarPath.substringAfterLast('/'))
             while (br.readLine().also { line = it } != null) {
                 ColorsOut.outappl(line, ColorsOut.YELLOW)
+                logger!!.info(line)
                 if (line!!.contains("WAIT/RETRY TO SET PROXY TO")) break
                 if (line!!.contains("PROXY DONE TO")) break
                 if (line!!.contains("msg(")) break //one context only, application already started
@@ -82,11 +85,27 @@ class TestUtils {
                 }
             }
             //br.close()
-            object : Thread(){
+            object : Thread(){ //STDOUT
                 override fun run(){
-                    initlogger(jarPath.substringAfterLast('/'))
-                    while (br.readLine().also { line = it } != null) {
-                        //ColorsOut.outappl(line, ColorsOut.YELLOW)
+                    try{
+                        while (br.readLine().also { line = it } != null) {
+                            //ColorsOut.outappl(line, ColorsOut.YELLOW)
+                            logger!!.info(line)
+                        }
+                    }catch (e : Exception){
+                        logger!!.info(line)
+                    }
+                    logger!!.removeAppender(appender);
+                }
+            }.start()
+            object : Thread(){ //STDERR
+                override fun run(){
+                    try{
+                        while (BufferedReader(InputStreamReader(pr.errorStream)).readLine().also { line = it } != null) {
+                            ColorsOut.outappl(line, ColorsOut.RED)
+                            logger!!.info(line)
+                        }
+                    }catch (e : Exception){
                         logger!!.info(line)
                     }
                     logger!!.removeAppender(appender);

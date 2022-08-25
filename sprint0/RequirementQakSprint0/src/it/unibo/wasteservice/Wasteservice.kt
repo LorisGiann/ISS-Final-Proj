@@ -21,6 +21,8 @@ class Wasteservice ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 				state("wait") { //this:State
 					action { //it:State
 						println("$name in ${currentState.stateName} | $currentMsg")
+						updateResourceRep( "wasteservice(wait,${ws.func.contPB},${ws.func.contGB})"  
+						)
 						discardMessages = false
 					}
 					 transition(edgeName="t00",targetState="handle_req",cond=whenRequest("depositrequest"))
@@ -28,6 +30,8 @@ class Wasteservice ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 				state("handle_req") { //this:State
 					action { //it:State
 						println("$name in ${currentState.stateName} | $currentMsg")
+						updateResourceRep( "wasteservice(handle_req,${ws.func.contPB},${ws.func.contGB})"  
+						)
 						if( checkMsgContent( Term.createTerm("depositrequest(MATERIAL,TRUCKLOAD)"), Term.createTerm("depositrequest(MATERIAL,TRUCKLOAD)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								   Material 	= ws.Material.valueOf(payloadArg(0))
@@ -35,10 +39,6 @@ class Wasteservice ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 								if(  ws.func.checkdepositpossible( Material, TruckLoad )  
 								 ){ ws.func.updateDeposit( Material, TruckLoad )  
 								answer("depositrequest", "loadaccept", "loadaccept($Material,$TruckLoad)"   )  
-								request("transporttrolleycmd", "transporttrolleycmd(_)" ,"transporttrolley" )  
-								 val Plastic = ws.func.contPB
-													val Glass = ws.func.contGB  
-								emit("update_container", "update_container($Plastic,$Glass)" ) 
 								}
 								else
 								 {answer("depositrequest", "loadrejected", "loadrejected($Material,$TruckLoad)"   )  

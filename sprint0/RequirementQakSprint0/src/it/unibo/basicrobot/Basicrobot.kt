@@ -37,10 +37,10 @@ class Basicrobot ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 					action { //it:State
 						println("basicrobot | waiting .............. ")
 					}
-					 transition(edgeName="t10",targetState="execcmd",cond=whenDispatch("cmd"))
-					transition(edgeName="t11",targetState="doStep",cond=whenRequest("step"))
-					transition(edgeName="t12",targetState="handleObstacle",cond=whenDispatch("obstacle"))
-					transition(edgeName="t13",targetState="endwork",cond=whenDispatch("end"))
+					 transition(edgeName="t14",targetState="execcmd",cond=whenDispatch("cmd"))
+					transition(edgeName="t15",targetState="doStep",cond=whenRequest("step"))
+					transition(edgeName="t16",targetState="handleObstacle",cond=whenDispatch("obstacle"))
+					transition(edgeName="t17",targetState="endwork",cond=whenDispatch("end"))
 				}	 
 				state("execcmd") { //this:State
 					action { //it:State
@@ -86,8 +86,8 @@ class Basicrobot ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 						stateTimer = TimerActor("timer_doStep", 
 							scope, context!!, "local_tout_basicrobot_doStep", StepTime )
 					}
-					 transition(edgeName="t04",targetState="stepDone",cond=whenTimeout("local_tout_basicrobot_doStep"))   
-					transition(edgeName="t05",targetState="stepFail",cond=whenDispatch("obstacle"))
+					 transition(edgeName="t08",targetState="stepDone",cond=whenTimeout("local_tout_basicrobot_doStep"))   
+					transition(edgeName="t09",targetState="stepFail",cond=whenDispatch("obstacle"))
 				}	 
 				state("stepDone") { //this:State
 					action { //it:State
@@ -103,7 +103,7 @@ class Basicrobot ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 					action { //it:State
 						Duration = getDuration(StartTime)
 						unibo.robot.robotSupport.move( "h"  )
-						 var TunedDuration = Duration;  
+						 var TunedDuration = Duration;
 									TunedDuration = Duration * 5 / 6
 						println("basicrobot | stepFail duration=$Duration TunedDuration=$TunedDuration")
 						unibo.robot.robotSupport.move( "s"  )

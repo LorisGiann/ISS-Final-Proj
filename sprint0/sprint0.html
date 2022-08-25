@@ -134,12 +134,14 @@ QActor wasteservice context ctxtest{
     
     State wait initial {
         printCurrentMessage
+        updateResource[# "wasteservice(wait,${ws.func.contPB},${ws.func.contGB})" #]
         discardMsg Off
     }
     Transition t0 whenRequest depositrequest -> handle_req
         
     State handle_req {
         printCurrentMessage
+        updateResource[# "wasteservice(handle_req,${ws.func.contPB},${ws.func.contGB})" #]
         onMsg(depositrequest : depositrequest(MATERIAL, TRUCKLOAD)) {
             [#   Material 	= ws.Material.valueOf(payloadArg(0))
                     TruckLoad 	= payloadArg(1).toFloat()   #]
@@ -155,7 +157,7 @@ QActor wasteservice context ctxtest{
 }</pre>
             </code>
             <br>
-            Inoltre, al fine di meglio specificare il comportamento che ci si aspetta, sono stati predisposti alcuni semplici test in <a href="./RequirementQakSprint0/test/testSprint0/TestWasteservice.kt">TestWasteservice.kt</a>
+            Inoltre, al fine di meglio specificare il comportamento che ci si aspetta, sono stati predisposti alcuni semplici test in <a href="./RequirementQakSprint0/test/testSprint0/TestWasteservice.kt">TestWasteservice.kt</a>. Esempio:
             <code><pre>
 var truckRequestStr = "msg(depositrequest, request,python,wasteservice,depositrequest(GLASS,2),1)"
 var answer = connTcp.request(truckRequestStr)
@@ -163,7 +165,11 @@ Assert.assertTrue(answer.contains("loadaccept"))
 
 truckRequestStr = "msg(depositrequest, request,python,wasteservice,depositrequest(GLASS,9),1)"
 answer = connTcp.request(truckRequestStr)
-Assert.assertTrue(answer.contains("loadrejected"))</pre>
+Assert.assertTrue(answer.contains("loadrejected"))
+
+Assertions.assertTrue(to!!.checkNextContent("wasteservice(wait,0.0,0.0)") >= 0)
+Assertions.assertTrue(to!!.checkNextContent("wasteservice(wait,0.0,2.0)") >= 0)
+Assertions.assertFalse(to!!.checkNextContent("wasteservice(wait,0.0,11.0)") >= 0)</pre>
             </code>
         </dd>
         <dt><b>Service area:</b></dt>
@@ -321,11 +327,14 @@ firstActorInPipe.
     <h6>Architettura logica:</h6>
     <img src="./RequirementQakSprint0/demosystemarchitecturearch.png" style="max-width: 800px;" class="centerimg"/>
     <p style="width: 100%; text-align: right;"><a href="../docs_common/Legenda.html">Legenda</a></p>
+    <p>Riepilogo di cosa è requisito e cosa no, e di cosa è già stato sviluppato e cosa no</p>
     <ul>
-        <li>Lo <i>smartdevice</i> è già stato sviluppato</li>
-        <li>Il <i>basicrobot</i> è già stato sviluppato</li>
-        <li>Per il <i>sonar</i> e il <i>led</i> è già disponibile software che è possibile utilizzare/adattare</li>
-        <li>Il resto è da analizzare e sviluppare</li>
+        <li>Lo <i>smartdevice</i> è già stato sviluppato (o comunque è parte dei test), le richieste/risposte (<i>depositrequest</i>, <i>loadaccept</i>, <i>loadrejected</i>) sono requisito.</li>
+        <li>Il <i>basicrobot</i> è già stato sviluppato, le interazioni con esso (<i>cmd</i>, <i>step</i>, <i>info</i>) sono quindi predefinite.</li>
+        <li>Il <i>wasteservice</i> è da sviluppare, l'interfaccia che espone verso l'esterno (<i>depositrequest</i>, <i>loadaccept</i>, <i>loadrejected</i>) è requisito, mentre l'interazione verso componenti interni (<i>transporttrolleycmd</i>, <i>update_container</i>) è per il momento vaga e non rappresenta un requisito.</li>
+        <li>Il <i>transporttrolley</i> è da sviluppare, e sarà oggetto di analisi del prossimo sprint. Inoltre è ancora incerta la collocazione di questo componente (o in <i>ctxrobot</i> o in <i>ctxserver</i>).</li>
+        <li>Il <i>sonar</i> e il <i>led</i> sono da sviluppare: è disponibile software che dovrà essere analizzato prima di essere eventualmente utilizzato/adattato, le interazioni qui illustrate (<i>obstacle</i>, <i>update_led</i>) non sono quindi requisito.</li>
+        <li>Il <i>guiserver</i> è da analizzare/sviluppare, e sarà oggetto degli sprint successivi (al momento è incerta la collocazione e/o l'esistenza sottoforma di attore del componente). Le interazioni (<i>update_led</i>, <i>update_tt_state</i>, <i>update_position</i>, <i>update_container</i>) sono indicative e non sono requisito.</li>
     </ul>
     <h6>QAK</h6>
     <a href="./RequirementQakSprint0/src/requirementAnalysis/SystemAchitecture.qak">Modello del sistema QAK</a> <br>
