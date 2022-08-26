@@ -14,7 +14,6 @@ class Basicrobotwrapper ( name: String, scope: CoroutineScope  ) : ActorBasicFsm
 		return "wait"
 	}
 	override fun getBody() : (ActorBasicFsm.() -> Unit){
-		val interruptedStateTransitions = mutableListOf<Transition>()
 		 var MOVE : ws.Move? = null   
 		return { //this:ActionBasciFsm
 				state("wait") { //this:State
