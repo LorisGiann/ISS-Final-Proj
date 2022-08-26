@@ -30,10 +30,10 @@ with Diagram('demo0Arch', show=False, outformat='png', graph_attr=graphattr) as 
           moveruturn=Custom('moveruturn','./qakicons/symActorSmall.png')
           alarmreceiverbasicrobot=Custom('alarmreceiverbasicrobot','./qakicons/symActorSmall.png')
           basicrobotwrapper=Custom('basicrobotwrapper','./qakicons/symActorSmall.png')
-          basicrobot=Custom('basicrobot','./qakicons/symActorSmall.png')
+          basicrobotlorisdavide=Custom('basicrobotlorisdavide','./qakicons/symActorSmall.png')
           distancefilter=Custom('distancefilter(coded)','./qakicons/codedQActor.png')
      with Cluster('ctxalarm', graph_attr=nodeattr):
-          sonar=Custom('sonar','./qakicons/symActorSmall.png')
+          sonarlorisdavide=Custom('sonarlorisdavide','./qakicons/symActorSmall.png')
           alarmemitter=Custom('alarmemitter','./qakicons/symActorSmall.png')
           led=Custom('led','./qakicons/symActorSmall.png')
           sonarsimulator=Custom('sonarsimulator(coded)','./qakicons/codedQActor.png')
@@ -60,15 +60,15 @@ with Diagram('demo0Arch', show=False, outformat='png', graph_attr=graphattr) as 
      alarmreceiverbasicrobot >> Edge(color='blue', style='solid', xlabel='alarmceased') >> basicrobotwrapper
      sys >> Edge(color='red', style='dashed', xlabel='alarm') >> alarmreceiverbasicrobot
      sys >> Edge(color='red', style='dashed', xlabel='alarmceased') >> alarmreceiverbasicrobot
-     basicrobotwrapper >> Edge(color='blue', style='solid', xlabel='cmd') >> basicrobot
+     basicrobotwrapper >> Edge(color='blue', style='solid', xlabel='cmd') >> basicrobotlorisdavide
      sys >> Edge(color='red', style='dashed', xlabel='info') >> basicrobotwrapper
-     basicrobot >> Edge( xlabel='info', **eventedgeattr) >> sys
-     sonar >> Edge(color='blue', style='solid', xlabel='sonaractivate') >> sonarsimulator
-     sonar >> Edge(color='blue', style='solid', xlabel='sonaractivate') >> sonardatasource
-     sys >> Edge(color='red', style='dashed', xlabel='alarmsonar') >> sonar
-     sonar >> Edge(color='blue', style='solid', xlabel='sonardeactivate') >> sonarsimulator
-     sonar >> Edge(color='blue', style='solid', xlabel='sonardeactivate') >> sonardatasource
-     sonar >> Edge( xlabel='local_sonardata', **eventedgeattr) >> sys
+     basicrobotlorisdavide >> Edge( xlabel='info', **eventedgeattr) >> sys
+     sonarlorisdavide >> Edge(color='blue', style='solid', xlabel='sonaractivate') >> sonarsimulator
+     sonarlorisdavide >> Edge(color='blue', style='solid', xlabel='sonaractivate') >> sonardatasource
+     sys >> Edge(color='red', style='dashed', xlabel='alarmsonar') >> sonarlorisdavide
+     sonarlorisdavide >> Edge(color='blue', style='solid', xlabel='sonardeactivate') >> sonarsimulator
+     sonarlorisdavide >> Edge(color='blue', style='solid', xlabel='sonardeactivate') >> sonardatasource
+     sonarlorisdavide >> Edge( xlabel='local_sonardata', **eventedgeattr) >> sys
      alarmemitter >> Edge( xlabel='alarm', **eventedgeattr) >> sys
      alarmemitter >> Edge( xlabel='alarmceased', **eventedgeattr) >> sys
      sys >> Edge(color='red', style='dashed', xlabel='local_sonardata') >> alarmemitter

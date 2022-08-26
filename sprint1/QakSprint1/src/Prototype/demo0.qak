@@ -719,7 +719,7 @@ QActor basicrobotwrapper context ctxrobot{
 		printCurrentMessage
 		updateResource [# "basicrobotwrapper(other_cmd,$MOVE)" #]
 		[# val MoveStr = MOVE.toString()#]
-		forward basicrobot -m cmd : cmd($MoveStr)
+		forward basicrobotlorisdavide -m cmd : cmd($MoveStr)
 		if[# MOVE==ws.Move.l || MOVE==ws.Move.r #]{
 			delay 500 //wait for turn to complete
 		}
@@ -731,7 +731,7 @@ QActor basicrobotwrapper context ctxrobot{
 	State forward_cmd {
 		printCurrentMessage
 		updateResource [# "basicrobotwrapper(forward_cmd)" #]
-		forward basicrobot -m cmd : cmd(w)
+		forward basicrobotlorisdavide -m cmd : cmd(w)
 	}
 	Transition t0 whenEvent info -> collision
 					whenRequest cmdsync -> handle
@@ -745,7 +745,7 @@ QActor basicrobotwrapper context ctxrobot{
 	
 }
 
-QActor basicrobot context ctxrobot{
+QActor basicrobotlorisdavide context ctxrobot{
 [#
   var StepTime      = 0L
   var StartTime     = 0L
