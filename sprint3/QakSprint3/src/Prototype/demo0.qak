@@ -108,10 +108,10 @@ CodedQActor robotalarmcontrol  context ctxalarm className "alarmSonar.robotAlarm
 CodedQActor ledalarmcontrol    context ctxalarm className "alarmLed.ledAlarmControl"
 
 // -------- receiver event GUI
-CodedQActor ledGui 			   context ctxgui	className "gui.updateLedGui"
-CodedQActor containerGui       context ctxgui	className "gui.updateContainerGui"
-CodedQActor positionGui 	   context ctxgui	className "gui.updatePositionGui"
-CodedQActor stateTTGui 		   context ctxgui	className "gui.updateStateTransprtTrolleyGui"
+CodedQActor ledgui 			   context ctxgui	className "gui.updateLedGui"
+CodedQActor containergui       context ctxgui	className "gui.updateContainerGui"
+CodedQActor positiongui 	   context ctxgui	className "gui.updatePositionGui"
+CodedQActor statettgui 		   context ctxgui	className "gui.updateStateTrasportTrolleyGui"
 
 QActor wasteservice context ctxserver{
 	[# lateinit var Material  : ws.Material
@@ -120,8 +120,6 @@ QActor wasteservice context ctxserver{
 	   lateinit var RES : String
 	   lateinit var TrolleyPos : String   //gbox,pbox,Home,indoor
 	   
-	   lateinit var contPB : String
-	   lateinit var contGB : String
 	#]
 	
 	State wait initial {
@@ -144,11 +142,6 @@ QActor wasteservice context ctxserver{
 			if[# ws.func.checkdepositpossible( Material, TruckLoad ) #]{
 				[# ws.func.updateDeposit( Material, TruckLoad ) 
 					#]
-				[#	
-				contPB = ${ws.func.contPB}
-				contGB = ${ws.func.contGB}
-				#]
-				emit update_container : update_container(contPB,contGB)
 				println("wasteservice | PB capacity: ${ws.func.contPB}, GB capacity: ${ws.func.contGB}")	
 				[# RES="OK"#]
 			} else{  

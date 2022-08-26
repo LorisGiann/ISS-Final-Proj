@@ -20,8 +20,6 @@ class Wasteservice ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 			   lateinit var RES : String
 			   lateinit var TrolleyPos : String   //gbox,pbox,Home,indoor
 			   
-			   lateinit var contPB : String
-			   lateinit var contGB : String
 		return { //this:ActionBasciFsm
 				state("wait") { //this:State
 					action { //it:State
@@ -46,10 +44,6 @@ class Wasteservice ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 								println("wasteservice | arrived $TruckLoad Kg of $Material")
 								if(  ws.func.checkdepositpossible( Material, TruckLoad )  
 								 ){ ws.func.updateDeposit( Material, TruckLoad ) 
-									
-												contPB = ${ws.func.contPB}
-												contGB = ${ws.func.contGB}
-								emit("update_container", "update_container(contPB,contGB)" ) 
 								println("wasteservice | PB capacity: ${ws.func.contPB}, GB capacity: ${ws.func.contGB}")
 								 RES="OK" 
 								}

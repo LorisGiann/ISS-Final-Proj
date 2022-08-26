@@ -67,7 +67,7 @@ class Basicrobotwrapper ( name: String, scope: CoroutineScope  ) : ActorBasicFsm
 						updateResourceRep( "basicrobotwrapper(other_cmd,$MOVE)"  
 						)
 						 val MoveStr = MOVE.toString() 
-						forward("cmd", "cmd($MoveStr)" ,"basicrobot" ) 
+						forward("cmd", "cmd($MoveStr)" ,"basicrobotlorisdavide" ) 
 						if(  MOVE==ws.Move.l || MOVE==ws.Move.r  
 						 ){delay(500) 
 						}
@@ -81,7 +81,7 @@ class Basicrobotwrapper ( name: String, scope: CoroutineScope  ) : ActorBasicFsm
 						println("$name in ${currentState.stateName} | $currentMsg")
 						updateResourceRep( "basicrobotwrapper(forward_cmd)"  
 						)
-						forward("cmd", "cmd(w)" ,"basicrobot" ) 
+						forward("cmd", "cmd(w)" ,"basicrobotlorisdavide" ) 
 					}
 					 transition(edgeName="t064",targetState="collision",cond=whenEvent("info"))
 					transition(edgeName="t065",targetState="handle",cond=whenRequest("cmdsync"))
@@ -92,7 +92,7 @@ class Basicrobotwrapper ( name: String, scope: CoroutineScope  ) : ActorBasicFsm
 						println("$name in ${currentState.stateName} | $currentMsg")
 						updateResourceRep( "basicrobotwrapper(halt_forward)"  
 						)
-						forward("cmd", "cmd(h)" ,"basicrobot" ) 
+						forward("cmd", "cmd(h)" ,"basicrobotlorisdavide" ) 
 					}
 					 transition(edgeName="t067",targetState="halt_collision",cond=whenEvent("info"))
 					transition(edgeName="t068",targetState="forward_cmd",cond=whenDispatch("alarmceased"))

@@ -14,7 +14,7 @@ context(ctxgui, "127.0.0.1",  "TCP", "8098").
   qactor( ledgui, ctxgui, "gui.updateLedGui").
   qactor( containergui, ctxgui, "gui.updateContainerGui").
   qactor( positiongui, ctxgui, "gui.updatePositionGui").
-  qactor( statettgui, ctxgui, "gui.updateStateTransprtTrolleyGui").
+  qactor( statettgui, ctxgui, "gui.updateStateTrasportTrolleyGui").
   qactor( wasteservice, ctxserver, "it.unibo.wasteservice.Wasteservice").
   qactor( depositaction, ctxserver, "it.unibo.depositaction.Depositaction").
   qactor( transporttrolley, ctxrobot, "it.unibo.transporttrolley.Transporttrolley").

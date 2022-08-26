@@ -1,10 +1,14 @@
 package gui
 
-import it.unibo.kactor.MsgUtil
-import it.unibo.kactor.ActorBasic
-import alice.tuprolog.Term
+import alice.tuprolog.InvalidTermException
 import alice.tuprolog.Struct
+import alice.tuprolog.Term
+import it.unibo.kactor.ActorBasic
+import it.unibo.kactor.CoapObserverSupport
 import it.unibo.kactor.IApplMessage
+import it.unibo.kactor.MsgUtil
+import unibo.comm22.utils.CommUtils
+import ws.LedState
 
 class updateStateTrasportTrolleyGui (name : String ) : ActorBasic( name ) {
 	
@@ -35,8 +39,9 @@ class updateStateTrasportTrolleyGui (name : String ) : ActorBasic( name ) {
 				//MsgUtil.outgreen("$tt $name | update $VALUE FROM $RESOURCE ")
 				
 				val msgterm = (Term.createTerm(VALUE) as Struct)
-				val state = msgterm.getArg(1).toString()
-				println("$tt $name | state $state" )
+				val data = msgterm.toString()
+				//val state = msgterm.getArg(1).toString()
+				println("$tt $name | updateStateTrasportTrolley $data" )
 				
 
 			} catch (e: Exception){

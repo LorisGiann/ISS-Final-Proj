@@ -11,4 +11,4 @@ context(ctxrobot, "127.0.0.1",  "TCP", "8096").
   qactor( mover, ctxrobot, "it.unibo.mover.Mover").
   qactor( moveruturn, ctxrobot, "it.unibo.moveruturn.Moveruturn").
   qactor( basicrobotwrapper, ctxrobot, "it.unibo.basicrobotwrapper.Basicrobotwrapper").
-  qactor( basicrobot, ctxrobot, "it.unibo.basicrobot.Basicrobot").
+  qactor( basicrobotlorisdavide, ctxrobot, "it.unibo.basicrobotlorisdavide.Basicrobotlorisdavide").

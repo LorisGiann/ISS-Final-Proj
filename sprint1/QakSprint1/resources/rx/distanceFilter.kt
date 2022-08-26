@@ -31,7 +31,7 @@ var curSonarDistance	= 0
  		val Distance = 5
 		obstacleFound = true
 		println("$tt $name |  VIRTUAL OBSTACLE FOUND")
-		forward("obstacle","obstacle($Distance)","basicrobot")	//send a msg to basicrobot			 
+		forward("obstacle","obstacle($Distance)","basicrobotlorisdavide")	//send a msg to basicrobot			 
 	}
 	
 
@@ -47,7 +47,7 @@ var curSonarDistance	= 0
 			obstacleFound = true
 			println("$tt $name |  OBSTACLE FOUND")
 			//emitLocalStreamEvent( m1 ) //propagate event obstacle
-			forward("obstacle","obstacle($Distance)","basicrobot")	//send a msg to basicrobot	
+			forward("obstacle","obstacle($Distance)","basicrobotlorisdavide")	//send a msg to basicrobot	
      	}else{
 			/*
 			 * Emit a sonarRobot event (to test the behavior with MQTT)

@@ -19,8 +19,8 @@ class updateLedGui (name : String ) : ActorBasic( name ) {
 	
 	suspend fun elabData( msg: IApplMessage ){ //OPTIMISTIC
 		val state  = (Term.createTerm( msg.msgContent() ) as Struct).getArg(0).toString()
-		println("$tt $name |  emit m1= $state" )
-		MsgUtil.buildDispatch("gui","update_led_gui",state,"guiserver");
+		println("$tt $name |  updateLedGui = $state" )
+		//MsgUtil.buildDispatch("gui","update_led_gui",state,"guiserver");
 		//println("$tt $name |  emit m1= $data, $toDisable, $wasDisabled, $Distance" )
 	}
 }
