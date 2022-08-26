@@ -32,12 +32,12 @@ with Diagram('demo0Arch', show=False, outformat='png', graph_attr=graphattr) as 
           distancefilter=Custom('distancefilter(coded)','./qakicons/codedQActor.png')
      wasteservice >> Edge(color='magenta', style='solid', xlabel='depositaction') >> depositaction
      depositaction >> Edge(color='blue', style='solid', xlabel='err') >> wasteservice
-     depositaction >> Edge(color='magenta', style='solid', xlabel='move') >> transporttrolley
+     depositaction >> Edge(color='magenta', style='solid', xlabel='moveto') >> transporttrolley
      depositaction >> Edge(color='magenta', style='solid', xlabel='pickup') >> transporttrolley
      depositaction >> Edge(color='magenta', style='solid', xlabel='dropout') >> transporttrolley
      transporttrolley >> Edge(color='magenta', style='solid', xlabel='pickup') >> pickupdropouthandler
      transporttrolley >> Edge(color='magenta', style='solid', xlabel='dropout') >> pickupdropouthandler
-     transporttrolley >> Edge(color='magenta', style='solid', xlabel='move') >> mover
+     transporttrolley >> Edge(color='magenta', style='solid', xlabel='moveto') >> mover
      mover >> Edge(color='magenta', style='solid', xlabel='cmdsync') >> basicrobotwrapper
      mover >> Edge(color='magenta', style='solid', xlabel='moveruturn') >> moveruturn
      moveruturn >> Edge(color='magenta', style='solid', xlabel='cmdsync') >> basicrobotwrapper

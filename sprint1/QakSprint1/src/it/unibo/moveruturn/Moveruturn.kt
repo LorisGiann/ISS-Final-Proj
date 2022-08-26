@@ -173,7 +173,7 @@ class Moveruturn ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 						println("$name in ${currentState.stateName} | $currentMsg")
 						updateResourceRep( "moveruturn(error,$ENDDIR)"  
 						)
-						answer("move", "moveruturnanswer", "moveruturnanswer(ERROR)"   )  
+						answer("moveruturn", "moveruturnanswer", "moveruturnanswer(ERROR)"   )  
 						println("moveruturn | ERROR STATE")
 					}
 				}	 

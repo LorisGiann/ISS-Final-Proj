@@ -29,8 +29,12 @@ Request pickup         : pickup(_)
 Reply   pickupanswer   : pickupanswer(RESULT)
 Request dropout        : dropout(_)
 Reply   dropoutanswer  : dropoutanswer(RESULT)
-Request move           : move(POSITION)    //INDOOR | PLASTICBOX | GLASSBOX | HOME
-Reply   moveanswer     : moveanswer(RESULT)
+//Request move           : moveTo(POSITION)    //INDOOR | PLASTICBOX | GLASSBOX | HOME
+Request movetoHOME     : moveToHOME(_)
+Request movetoINDOOR : moveToINDOOR(_)
+Request movetoPLASTICBOX : moveToPLASTICBOX(_)
+Request movetoGLASSBOX : moveToGLASSBOX(_)
+Reply   movetoanswer     : movetoanswer(RESULT)
 // ------------------------------------------------------------------------------------------------------------------------
     
 // ---------------------- CONTEXTS -----------------------
@@ -70,7 +74,10 @@ QActor wasteservice context ctxserver{
 				//send commands towards transporttrolley
 				request transporttrolley -m pickup : pickup(_)
 				request transporttrolley -m dropout : move(_)
-				request transporttrolley -m move : move(_)
+				request transporttrolley -m movetoHOME : moveToHOME(_)
+				request transporttrolley -m movetoINDOOR : moveToINDOOR(_)
+				request transporttrolley -m movetoPLASTICBOX : moveToPLASTICBOX(_)
+				request transporttrolley -m movetoGLASSBOX : moveToGLASSBOX(_)
 				//update containers
 				[# val Plastic = ws.func.contPB
 					val Glass = ws.func.contGB #]

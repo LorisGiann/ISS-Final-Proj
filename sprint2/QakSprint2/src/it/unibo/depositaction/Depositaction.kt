@@ -41,19 +41,19 @@ class Depositaction ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( na
 						if( checkMsgContent( Term.createTerm("depositaction(MATERIAL)"), Term.createTerm("depositaction(MATERIAL)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 MATERIAL=ws.Material.valueOf(payloadArg(0))  
-								request("move", "move(INDOOR)" ,"transporttrolley" )  
+								request("moveto", "moveto(INDOOR)" ,"transporttrolley" )  
 						}
 						updateResourceRep( "depositaction(req_move_indoor,$MATERIAL)"  
 						)
 					}
-					 transition(edgeName="t05",targetState="chk_move_indoor",cond=whenReply("moveanswer"))
+					 transition(edgeName="t05",targetState="chk_move_indoor",cond=whenReply("movetoanswer"))
 				}	 
 				state("chk_move_indoor") { //this:State
 					action { //it:State
 						updateResourceRep( "depositaction(chk_move_indoor,$MATERIAL)"  
 						)
 						println("$name in ${currentState.stateName} | $currentMsg")
-						if( checkMsgContent( Term.createTerm("moveanswer(RESULT)"), Term.createTerm("moveanswer(RES)"), 
+						if( checkMsgContent( Term.createTerm("movetoanswer(RESULT)"), Term.createTerm("movetoanswer(RES)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 RES = payloadArg(0);  
 						}
@@ -106,16 +106,16 @@ class Depositaction ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( na
 						println("$name in ${currentState.stateName} | $currentMsg")
 						updateResourceRep( "depositaction(req_move_container,$MATERIAL)"  
 						)
-						request("move", "move($Position)" ,"transporttrolley" )  
+						request("moveto", "moveto($Position)" ,"transporttrolley" )  
 					}
-					 transition(edgeName="t07",targetState="chk_move_container",cond=whenReply("moveanswer"))
+					 transition(edgeName="t07",targetState="chk_move_container",cond=whenReply("movetoanswer"))
 				}	 
 				state("chk_move_container") { //this:State
 					action { //it:State
 						println("$name in ${currentState.stateName} | $currentMsg")
 						updateResourceRep( "depositaction(chk_pickup,$MATERIAL)"  
 						)
-						if( checkMsgContent( Term.createTerm("moveanswer(RESULT)"), Term.createTerm("moveanswer(RES)"), 
+						if( checkMsgContent( Term.createTerm("movetoanswer(RESULT)"), Term.createTerm("movetoanswer(RES)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 RES = payloadArg(0);  
 						}
@@ -164,10 +164,10 @@ class Depositaction ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( na
 						println("$name in ${currentState.stateName} | $currentMsg")
 						updateResourceRep( "depositaction(move_home,$MATERIAL)"  
 						)
-						request("move", "move(HOME)" ,"transporttrolley" )  
+						request("moveto", "moveto(HOME)" ,"transporttrolley" )  
 					}
 					 transition(edgeName="t011",targetState="req_move_indoor",cond=whenRequest("depositaction"))
-					transition(edgeName="t012",targetState="wait",cond=whenReply("moveanswer"))
+					transition(edgeName="t012",targetState="wait",cond=whenReply("movetoanswer"))
 				}	 
 			}
 		}

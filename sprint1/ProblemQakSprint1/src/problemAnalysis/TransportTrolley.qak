@@ -11,13 +11,13 @@ Request pickup         : pickup(_)
 Reply   pickupanswer   : pickupanswer(RESULT)
 Request dropout        : dropout(_)
 Reply   dropoutanswer  : dropoutanswer(RESULT)
-Request move           : move(POSITION)    //INDOOR | PLASTICBOX | GLASSBOX | HOME
-Reply   moveanswer     : moveanswer(RESULT)
+Request moveto         : moveto(POSITION)    //INDOOR | PLASTICBOX | GLASSBOX | HOME
+Reply   movetoanswer     : movetoanswer(RESULT)
 
 //method to trigger the next transition within the state: send this message to the actor itself (cumbersome but works great)
 Dispatch noMsg : noMsg(_)
 
- 
+
 Context ctxrobottest ip [host="localhost" port=8095]
  
 
@@ -25,19 +25,20 @@ QActor transporttrolley context ctxrobottest{
 	[#  lateinit var tmp : String 
 		var newState : String? = null #]
 	
-	State s0 initial { 	    
+	State s0 initial {
 		discardMsg On
+		updateResource [# "transporttrolley(s0)" #]
 		printCurrentMessage
 		[# sysUtil.logMsgs=true #]
 	}
-	Transition t0 whenRequest move -> handle_cmd
+	Transition t0 whenRequest moveto -> handle_cmd
  					whenRequest pickup -> handle_cmd
  					whenRequest dropout -> handle_cmd
 	 
 	State handle_cmd {
 		updateResource [# "transporttrolley(handle_cmd)" #]
 		printCurrentMessage
-		onMsg( move:move(ARG) ){
+		onMsg( moveto:moveto(ARG) ){
 			[# tmp = payloadArg(0) #]
 			println("move(${tmp})")
 			[# newState = when(ws.Position.valueOf(tmp)) {
@@ -70,14 +71,14 @@ QActor transporttrolley context ctxrobottest{
  		printCurrentMessage
  	}
  	Transition t0 whenTime 1000 -> moved_home    //per il momento simulo lo spostamento con un delay
- 					whenRequest move -> handle_cmd
+ 					whenRequest moveto -> handle_cmd
  	State moved_home {
  		updateResource [# "transporttrolley(moved_home)" #]
  		printCurrentMessage
- 		replyTo move with moveanswer : moveanswer(OK)
+ 		replyTo moveto with movetoanswer : movetoanswer(OK)
  		println("robot reached HOME")
  	}
- 	Transition t0 whenRequest move -> handle_cmd
+ 	Transition t0 whenRequest moveto -> handle_cmd
  					whenRequest pickup -> handle_cmd
  					whenRequest dropout -> handle_cmd
  	
@@ -86,14 +87,14 @@ QActor transporttrolley context ctxrobottest{
  		printCurrentMessage
  	}
  	Transition t0 whenTime 1000 -> moved_indoor    //per il momento simulo lo spostamento con un delay
- 					whenRequest move -> handle_cmd
+ 					whenRequest moveto -> handle_cmd
  	State moved_indoor {
  		updateResource [# "transporttrolley(moved_indoor)" #]
  		printCurrentMessage
- 		replyTo move with moveanswer : moveanswer(OK)
+ 		replyTo moveto with movetoanswer : movetoanswer(OK)
  		println("robot reached INDOOR")
  	}
- 	Transition t0 whenRequest move -> handle_cmd
+ 	Transition t0 whenRequest moveto -> handle_cmd
  					whenRequest pickup -> handle_cmd
  					whenRequest dropout -> handle_cmd
  					
@@ -102,14 +103,14 @@ QActor transporttrolley context ctxrobottest{
  		printCurrentMessage
  	}
  	Transition t0 whenTime 1000 -> moved_plasticbox    //per il momento simulo lo spostamento con un delay
- 					whenRequest move -> handle_cmd
+ 					whenRequest moveto -> handle_cmd
  	State moved_plasticbox {
  		updateResource [# "transporttrolley(moved_plasticbox)" #]
  		printCurrentMessage
- 		replyTo move with moveanswer : moveanswer(OK)
+ 		replyTo moveto with movetoanswer : movetoanswer(OK)
  		println("robot reached PLASTICBOX")
  	}
- 	Transition t0 whenRequest move -> handle_cmd
+ 	Transition t0 whenRequest moveto -> handle_cmd
  					whenRequest pickup -> handle_cmd
  					whenRequest dropout -> handle_cmd
  	
@@ -118,14 +119,14 @@ QActor transporttrolley context ctxrobottest{
  		printCurrentMessage
  	}
  	Transition t0 whenTime 1000 -> moved_glassbox    //per il momento simulo lo spostamento con un delay
- 					whenRequest move -> handle_cmd
+ 					whenRequest moveto -> handle_cmd
  	State moved_glassbox {
  		updateResource [# "transporttrolley(moved_glassbox)" #]
  		printCurrentMessage
- 		replyTo move with moveanswer : moveanswer(OK)
+ 		replyTo moveto with movetoanswer : movetoanswer(OK)
  		println("robot reached GLASSBOX")
  	}
- 	Transition t0 whenRequest move -> handle_cmd
+ 	Transition t0 whenRequest moveto -> handle_cmd
  					whenRequest pickup -> handle_cmd
  					whenRequest dropout -> handle_cmd
  					
@@ -136,7 +137,7 @@ QActor transporttrolley context ctxrobottest{
  		replyTo pickup with pickupanswer : pickupanswer(OK)
  		println("robot pickedUp")
  	}
- 	Transition t0 whenRequest move -> handle_cmd
+ 	Transition t0 whenRequest moveto -> handle_cmd
  					whenRequest pickup -> handle_cmd
  					whenRequest dropout -> handle_cmd
  	
@@ -147,7 +148,7 @@ QActor transporttrolley context ctxrobottest{
  		replyTo dropout with dropoutanswer : dropoutanswer(OK)
  		println("robot droppedOut")
  	}
- 	Transition t0 whenRequest move -> handle_cmd
+ 	Transition t0 whenRequest moveto -> handle_cmd
  					whenRequest pickup -> handle_cmd
  					whenRequest dropout -> handle_cmd
 }

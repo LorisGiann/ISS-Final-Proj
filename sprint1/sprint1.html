@@ -67,8 +67,8 @@ h6{
             <code><pre>
 //POSITION = INDOOR | PLASTICBOX | GLASSBOX | HOME
 //RESULT =  OK | ERROR
-Request move           : move(POSITION)    
-Reply   moveanswer     : moveanswer(RESULT)
+Request moveto         : moveto(POSITION)  //INDOOR | PLASTICBOX | GLASSBOX | HOME
+Reply   movetoanswer   : movetoanswer(RESULT)
 Request pickup         : pickup(_)
 Reply   pickupanswer   : pickupanswer(RESULT)
 Request dropout        : dropout(_)
@@ -109,7 +109,7 @@ Reply   dropoutanswer  : dropoutanswer(RESULT)</pre>
     <h3><b>Wasteservice</b></h3>
 
     <h4>Quando rispondere allo <b>Smart device</b>?</h4>
-    <p>Come da requisiti aggiuntivi, se una richiesta può essere soddisfatta il driver deve essere liberato subito dopo il <b>Pickup</b> (inviando allo <b>Smart device</b> una <b>loadaccept</b>). 
+    <p>Siccome i requisiti aggiuntivi dicono che sarebbe bene mandare via il <b>Waste-truck</b> appena possibile, se una richiesta può essere soddisfatta il driver deve essere liberato subito dopo il <b>Pickup</b> (inviando allo <b>Smart device</b> una <b>loadaccept</b>). 
         Se invece la richiesta effettuata non può essere soddisfatta, è bene rispondere immediatamente con una <b>loadrejected</b> (qualunque cosa stia facendo il robot in quel momento).</p>
 
     <h3><b>Transport trolley</b></h3>
@@ -129,8 +129,8 @@ Dispatch cmd           : cmd(MOVE)</pre>
             Invece il <b>Transport trolley</b> è concepita come entità astratta di più alto livello che si occuperà di ricevere la destinazione generica<br>
             <code><pre>
 //POSITION =  INDOOR | PLASTICBOX | GLASSBOX | HOME
-Request move           : move(POSITION)
-Reply   moveanswer     : moveanswer(RESULT)</pre>
+Request moveto         : moveto(POSITION)
+Reply   movetoanswer   : movetoanswer(RESULT)</pre>
             </code>
         </li>
     </ul>
@@ -154,7 +154,7 @@ Reply   moveanswer     : moveanswer(RESULT)</pre>
         modificare quest'ultimo. Inoltre si ritiene corretto far gestire al <b>Transport trolley</b> le operazioni di <b>Pickup</b> e <b>Dropout</b>, siccome un domani potrebbe esser 
         necessario inviare comandi o segnali a HW presente sul robot per compiere queste azioni.</p>
     <p>Le interazioni con il <b>Transport trolley</b> dovrebbero essere di tipo request-response sincrone bloccanti. 
-        Tuttavia, solo per il comando <i>move(POSITION)</i>, dovrà essere possibile comandare una nuova destinazione anche se quella precedente non era stata ancora raggiunta (annullando di fatto la <i>move</i> precedente)<br>
+        Tuttavia, solo per il comando <i>moveto(POSITION)</i>, dovrà essere possibile comandare una nuova destinazione anche se quella precedente non era stata ancora raggiunta (annullando di fatto la <i>moveto</i> precedente)<br>
         Questo perchè è possibile che arrivi un nuovo <b>Waste-truck</b> mentre il <b>Transport trolley</b> sta tornando ad <b>HOME</b>. In questo modo è possibile la gestione immediata 
         della nuova richiesta senza aspettare che il <b>Transport trolley</b> raggiunga <b>HOME</b>.
     </p>
@@ -162,8 +162,8 @@ Reply   moveanswer     : moveanswer(RESULT)</pre>
     <code><pre>
         //POSITION = INDOOR | PLASTICBOX | GLASSBOX | HOME
         //RESULT =  OK | ERROR
-        Request move           : move(POSITION)    
-        Reply   moveanswer     : moveanswer(RESULT)
+        Request moveto         : moveto(POSITION)  //INDOOR | PLASTICBOX | GLASSBOX | HOME
+        Reply   movetoanswer   : movetoanswer(RESULT)
         Request pickup         : pickup(_)
         Reply   pickupanswer   : pickupanswer(RESULT)
         Request dropout        : dropout(_)
@@ -193,8 +193,8 @@ Reply   moveanswer     : moveanswer(RESULT)</pre>
             L'errore potrebbe aumentare ad ogni singolo step, mentre la prima soluzione (siccome utilizza un sensore di contatto con il muro) non soffre di questo problema</li>
     </ul>
     <br>
-    <p>Per scegliere in merito ad una decisione così importante per la realizzazione del <b>Mover</b>, sono state analizzate diverse opzioni, che vengono descritte in </p>
-    <p style="width: 100%; text-align: center; padding: 1rem"> <a href="docs/grid_or_boundary_analysis.html">grid_or_boundary_analysis.html</a> </p>
+    <p>Per scegliere in merito ad una decisione così importante, sono state analizzate diverse opzioni, che vengono descritte in </p>
+    <p style="width: 100%; text-align: center; padding: 1rem"> <a href="docs/grid_or_boundary_analysis.html"><mark>grid_or_boundary_analysis.html</mark></a> </p>
     <p>Come riportato nel relativo documento, optiamo per l'utilizzo di una soluzione senza utilizzo di coordinate, facendo solamente uso di una FSM</p>
 
     <div class="remark" style="background-color: #c3fbe8;">
@@ -271,7 +271,7 @@ Reply cmdanswer   	: cmdanswer(RESULT)</pre>
 
     <h4><i>mover</i></h4>
     <p>Siccome lo sviluppo di questo componente risulta essere piuttosto denso e articolato, viene trattato separatamente in una pagina a parte:</p>
-    <p style="width: 100%; text-align: center; padding: 1rem"> <a href="docs/mover_project.html">mover_project.html</a> </p>
+    <p style="width: 100%; text-align: center; padding: 1rem"> <a href="docs/mover_project.html"><mark>mover_project.html</mark></a> </p>
     <!--
     <p>La logica di base del componente rimane quella analizzata nell'opzione 1 di <a href="docs/grid_or_boundary_analysis.html">grid_or_boundary_analysis</a>. Tuttavia per poterlo implementare efficacemente con QAK la struttura è stata riorganizzata nel seguente modo:</p>
     <img class="centerimg" style="max-width: 800px;" src="./docs/_images/mover_actor_state_diagram_1.png"/>
@@ -344,7 +344,7 @@ Reply cmdanswer   	: cmdanswer(RESULT)</pre>
 
     <h4><p>Test effettuati:</p></h4>
     <ul>
-        <h6>TestSprint1_wasteservice.kt:</h6>
+        <h6>Classe di test TestSprint1_wasteservice.kt:</h6>
         <p>Si tratta essenzialmente degli stessi test già individuati in fase di analisi dei requisiti</p>
         <li><u>test_2_accepted()</u>: Invio al <i>wasteservice</i> di due richieste, che devono essere accettate</li>
         <li><u>test_1_accepted_1_rejected()</u>: Invio al <i>wasteservice</i> di due richieste, la prima deve essere accettata, la seconda no per mancanza di spazio</li>

@@ -8,7 +8,7 @@ Request depositrequest : depositrequest(MATERIAL, TRUCKLOAD)
 Reply loadaccept     : loadaccept(MATERIAL, TRUCKLOAD)
 Reply loadrejected     : loadrejected(MATERIAL, TRUCKLOAD)
 // ------------------------------------------------------ 
-    
+
 // ---------------------- CONTEXTS -----------------------
 Context ctxservertest ip [host="localhost" port=8095]
 // ------------------------------------------------------
@@ -19,19 +19,21 @@ QActor wasteservice context ctxservertest{
 	
 	State wait initial {
 		printCurrentMessage
+		updateResource[# "wasteservice(wait,${ws.func.contPB},${ws.func.contGB})" #]
 		discardMsg Off
  	}
  	Transition t0 whenRequest depositrequest -> handle_req
  	
  	State handle_req {
 		printCurrentMessage
+		updateResource[# "wasteservice(handle_req,${ws.func.contPB},${ws.func.contGB})" #]
 		onMsg(depositrequest : depositrequest(MATERIAL, TRUCKLOAD)) {
 			[#   Material 	= ws.Material.valueOf(payloadArg(0))
 				 TruckLoad 	= payloadArg(1).toFloat()   #]
 			if[# ws.func.checkdepositpossible( Material, TruckLoad ) #]{
 				[# ws.func.updateDeposit( Material, TruckLoad ) #]
 				replyTo depositrequest with loadaccept : loadaccept($Material,$TruckLoad)
-			} else{  
+			} else{
 				replyTo depositrequest with loadrejected : loadrejected($Material,$TruckLoad)
 			}		
 		} 

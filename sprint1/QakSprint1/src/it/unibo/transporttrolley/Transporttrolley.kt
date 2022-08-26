@@ -25,7 +25,7 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 					}
 					 transition(edgeName="toNewState13",targetState="req_pickup",cond=whenRequest("pickup"))
 					transition(edgeName="toNewState14",targetState="req_dropout",cond=whenRequest("dropout"))
-					transition(edgeName="toNewState15",targetState="req_move",cond=whenRequest("move"))
+					transition(edgeName="toNewState15",targetState="req_move",cond=whenRequest("moveto"))
 				}	 
 				state("req_pickup") { //this:State
 					action { //it:State
@@ -85,30 +85,30 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 					action { //it:State
 						println("$name in ${currentState.stateName} | $currentMsg")
 						 var Pos : ws.Position? = null  
-						if( checkMsgContent( Term.createTerm("move(POSITION)"), Term.createTerm("move(POS)"), 
+						if( checkMsgContent( Term.createTerm("moveto(POSITION)"), Term.createTerm("moveto(POS)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 Pos=ws.Position.valueOf(payloadArg(0))  
-								request("move", "move($Pos)" ,"mover" )  
+								request("moveto", "moveto($Pos)" ,"mover" )  
 						}
 						updateResourceRep( "transporttrolley(req_move,$Pos)"  
 						)
 					}
-					 transition(edgeName="toNewState18",targetState="chk_move",cond=whenReply("moveanswer"))
-					transition(edgeName="toNewState19",targetState="req_move",cond=whenRequest("move"))
+					 transition(edgeName="toNewState18",targetState="chk_move",cond=whenReply("movetoanswer"))
+					transition(edgeName="toNewState19",targetState="req_move",cond=whenRequest("moveto"))
 				}	 
 				state("chk_move") { //this:State
 					action { //it:State
 						println("$name in ${currentState.stateName} | $currentMsg")
 						updateResourceRep( "transporttrolley(chk_move)"  
 						)
-						if( checkMsgContent( Term.createTerm("moveanswer(RESULT)"), Term.createTerm("moveanswer(RES)"), 
+						if( checkMsgContent( Term.createTerm("movetoanswer(RESULT)"), Term.createTerm("movetoanswer(RES)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 RES = payloadArg(0) 
 								if(  RES=="OK"  
-								 ){answer("move", "moveanswer", "moveanswer(OK)"   )  
+								 ){answer("moveto", "movetoanswer", "movetoanswer(OK)"   )  
 								}
 								else
-								 {answer("move", "moveanswer", "moveanswer(ERROR)"   )  
+								 {answer("moveto", "movetoanswer", "movetoanswer(ERROR)"   )  
 								 }
 						}
 					}
