@@ -47,6 +47,7 @@ internal class TestWasteservice {
 
     @AfterEach
     fun down() {
+        ColorsOut.outappl(to!!.getHistory().toString(), ColorsOut.MAGENTA)
         try {
             //FIRSTLY, try to be nice and make the program exit "normally"
             processHandleServer!!.destroy()
@@ -81,13 +82,20 @@ internal class TestWasteservice {
                 ColorsOut.outappl("test_2_accepted answer=$answer", ColorsOut.GREEN)
                 Assertions.assertTrue(answer.contains("loadaccept"))
 
-                //SECONDO REQUEST
+                //SECOND REQUEST
                 truckRequestStr = "msg(depositrequest, request,python,wasteservice,depositrequest(GLASS,7),1)"
                 answer = connTcp.request(truckRequestStr)
                 ColorsOut.outappl("testSecondRequest answer=$answer", ColorsOut.GREEN)
                 Assertions.assertTrue(answer.contains("loadaccept"))
-
+                
                 connTcp.close()
+
+                to!!.waitUntilState("wasteservice","wasteservice(wait,0.0,9.0)") //wait for the last state to be reached
+                Assertions.assertTrue(to!!.checkNextSequence(arrayOf(
+                    "wasteservice(wait,0.0,0.0)",
+                    "wasteservice(wait,0.0,2.0)",
+                    "wasteservice(wait,0.0,9.0)",
+                )))
             } catch (e: java.lang.Exception) {
                 ColorsOut.outerr("test_2_accepted ERROR:" + e.message)
                 Assertions.fail();
@@ -108,13 +116,18 @@ internal class TestWasteservice {
                 ColorsOut.outappl("testFirstRequest answer=$answer", ColorsOut.GREEN)
                 Assertions.assertTrue(answer.contains("loadaccept"))
 
-                //SECONDO REQUEST
+                //SECOND REQUEST
                 truckRequestStr = "msg(depositrequest, request,python,wasteservice,depositrequest(GLASS,9),1)"
                 answer = connTcp.request(truckRequestStr)
                 ColorsOut.outappl("testSecondRequest answer=$answer", ColorsOut.GREEN)
                 Assertions.assertTrue(answer.contains("loadrejected"))
 
                 connTcp.close()
+				
+                to!!.waitUntilState("wasteservice","wasteservice(handle_req,0.0,2.0)") //wait for the last state to be reached
+				Assertions.assertTrue(to!!.checkNextContent("wasteservice(wait,0.0,0.0)") >= 0)
+				Assertions.assertTrue(to!!.checkNextContent("wasteservice(wait,0.0,2.0)") >= 0)
+				Assertions.assertFalse(to!!.checkNextContent("wasteservice(wait,0.0,11.0)") >= 0)
             } catch (e: java.lang.Exception) {
                 ColorsOut.outerr("test_1_accepted_1_rejected ERROR:" + e.message)
                 Assertions.fail();

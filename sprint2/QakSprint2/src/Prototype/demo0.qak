@@ -22,14 +22,14 @@ Request pickup         : pickup(_)
 Reply   pickupanswer   : pickupanswer(RESULT)
 Request dropout        : dropout(_)
 Reply   dropoutanswer  : dropoutanswer(RESULT)
-Request move           : move(POSITION)    //POSITION = INDOOR | PLASTICBOX | GLASSBOX | HOME
-Reply   moveanswer     : moveanswer(RESULT)
+Request moveto           : moveto(POSITION)    //POSITION = INDOOR | PLASTICBOX | GLASSBOX | HOME
+Reply   movetoanswer     : movetoanswer(RESULT)
 // ------------------------------------------------------
 
 // -------------------- mover msgs ----------------------
 //   (same as transporttrolley)
-//Request move           : move(POSITION)    //POSITION = INDOOR | PLASTICBOX | GLASSBOX | HOME
-//Reply   moveanswer     : moveanswer(RESULT)
+//Request moveto           : moveto(POSITION)    //POSITION = INDOOR | PLASTICBOX | GLASSBOX | HOME
+//Reply   movetoanswer     : movetoanswer(RESULT)
 // ------------------------------------------------------
 
 // --------------- depositaction msgs -------------------
@@ -197,15 +197,15 @@ QActor depositaction context ctxserver{
 		printCurrentMessage
 		onMsg(depositaction : depositaction(MATERIAL)){
 			[# MATERIAL=ws.Material.valueOf(payloadArg(0)) #]
-			request transporttrolley -m move : move(INDOOR)
+			request transporttrolley -m moveto : moveto(INDOOR)
 		}
 		updateResource [# "depositaction(req_move_indoor,$MATERIAL)" #] 
 	}
-	Transition t0 whenReply moveanswer -> chk_move_indoor
+	Transition t0 whenReply movetoanswer -> chk_move_indoor
 	State chk_move_indoor {
 		updateResource [# "depositaction(chk_move_indoor,$MATERIAL)" #] 
 		printCurrentMessage
-		onMsg(moveanswer : moveanswer(RES)){
+		onMsg(movetoanswer : movetoanswer(RES)){
 			[# RES = payloadArg(0); #]
 		}
 	}
@@ -241,13 +241,13 @@ QActor depositaction context ctxserver{
 			} #]
 		printCurrentMessage
 		updateResource [# "depositaction(req_move_container,$MATERIAL)" #] 
-		request transporttrolley -m move : move($Position)
+		request transporttrolley -m moveto : moveto($Position)
 	}
-	Transition t0 whenReply moveanswer -> chk_move_container
+	Transition t0 whenReply movetoanswer -> chk_move_container
 	State chk_move_container{
 		printCurrentMessage
 		updateResource [# "depositaction(chk_pickup,$MATERIAL)" #] 
-		onMsg(moveanswer : moveanswer(RES)){
+		onMsg(movetoanswer : movetoanswer(RES)){
 			[# RES = payloadArg(0); #]
 		}
 	}
@@ -277,10 +277,10 @@ QActor depositaction context ctxserver{
 	State move_home{
 		printCurrentMessage
 		updateResource [# "depositaction(move_home,$MATERIAL)" #] 
-		request transporttrolley -m move : move(HOME)
+		request transporttrolley -m moveto : moveto(HOME)
 	}
 	Transition t0 whenRequest depositaction -> req_move_indoor
-				  whenReply   moveanswer -> wait
+				  whenReply   movetoanswer -> wait
 }
 
 
@@ -296,7 +296,7 @@ QActor transporttrolley context ctxrobot{
  	}
  	Transition toNewState whenRequest pickup -> req_pickup
  						  whenRequest dropout -> req_dropout
- 						  whenRequest move -> req_move
+ 						  whenRequest moveto -> req_move
  						  
  	State req_pickup {
  		printCurrentMessage
@@ -341,24 +341,24 @@ QActor transporttrolley context ctxrobot{
  	State req_move {
  		printCurrentMessage
  		[# var Pos : ws.Position? = null #]
- 		onMsg( move:move(POS) ){
+ 		onMsg( moveto:moveto(POS) ){
 			[# Pos=ws.Position.valueOf(payloadArg(0)) #]
  			//println("transporttrolley | New robot destination: ${pos}")
- 			request mover -m move : move($Pos)
+ 			request mover -m moveto : moveto($Pos)
  		}
  		updateResource [# "transporttrolley(req_move,$Pos)" #] 
  	}
- 	Transition toNewState whenReply moveanswer -> chk_move
- 							whenRequest move -> req_move //cancel current destination and set the new one
+ 	Transition toNewState whenReply movetoanswer -> chk_move
+ 							whenRequest moveto -> req_move //cancel current destination and set the new one
  	State chk_move {
  		printCurrentMessage
  		updateResource [# "transporttrolley(chk_move)" #] 
- 		onMsg( moveanswer:moveanswer(RES) ){
+ 		onMsg( movetoanswer:movetoanswer(RES) ){
  			[# RES = payloadArg(0)#]
  			if[# RES=="OK" #]{
- 				replyTo move with moveanswer : moveanswer(OK)
+ 				replyTo moveto with movetoanswer : movetoanswer(OK)
  			}else{
- 				replyTo move with moveanswer : moveanswer(ERROR)
+ 				replyTo moveto with movetoanswer : movetoanswer(ERROR)
  			}
  		}
  	}
@@ -459,7 +459,7 @@ QActor pickupdropouthandler context ctxrobot{
 	Goto wait
 }
 
-//RECEIVES move(POS) MESSAGES, MOVES THE ROBOT INTO POS, AND REPLY WITH moveanswer(RES)
+//RECEIVES moveto(POS) MESSAGES, MOVES THE ROBOT INTO POS, AND REPLY WITH movetoanswer(RES)
 //basically it translates high level move to the final position, into low level robot moves
 QActor mover context ctxrobot{
 	[# var DEST = ws.Position.HOME
@@ -473,14 +473,14 @@ QActor mover context ctxrobot{
 		printCurrentMessage
 		updateResource [# "mover(wait,$CURRPOS,$DEST,$CURRDIR)" #]
 	}
-	Transition t0 whenRequest move -> handle
+	Transition t0 whenRequest moveto -> handle
 	
 	State handle {
 		printCurrentMessage
-		onMsg( move:move(POS) ){
+		onMsg( moveto:moveto(POS) ){
 			[# DEST = ws.Position.valueOf(payloadArg(0))#]
 			if [# DEST==CURRPOS#] {
-				replyTo move with moveanswer : moveanswer(OK)
+				replyTo moveto with movetoanswer : movetoanswer(OK)
 			}
 		}
 		updateResource [# "mover(handle,$CURRPOS,$DEST,$CURRDIR)" #]
@@ -522,7 +522,7 @@ QActor mover context ctxrobot{
 		request basicrobotwrapper -m cmdsync : cmdsync(w)
 	}
 	Transition t0 whenReply cmdanswer -> chk_forward_aclk //wall reached
-					whenRequest move -> set_new_dest_aclk //new position arrived
+					whenRequest moveto -> set_new_dest_aclk //new position arrived
 	State chk_forward_aclk {
 		printCurrentMessage
 		updateResource [# "mover(chk_forward_aclk,$CURRPOS,$DEST,$CURRDIR)" #]
@@ -533,7 +533,7 @@ QActor mover context ctxrobot{
 	Goto req_post_turn_aclk if [# RES=="OK" #] else error
 	State set_new_dest_aclk { //set new position and decide if it's convenient to change direction
 		printCurrentMessage
-		onMsg( move:move(POS) ){
+		onMsg( moveto:moveto(POS) ){
 			[# DEST = ws.Position.valueOf(payloadArg(0))#]
 		}
 		updateResource [# "mover(set_new_dest_aclk,$CURRPOS,$DEST,$CURRDIR)" #]
@@ -593,7 +593,7 @@ QActor mover context ctxrobot{
 		request basicrobotwrapper -m cmdsync : cmdsync(w)
 	}
 	Transition t0 whenReply cmdanswer -> chk_forward_clk //wall reached
-					whenRequest move -> set_new_dest_clk //new position arrived
+					whenRequest moveto -> set_new_dest_clk //new position arrived
 	State chk_forward_clk {
 		printCurrentMessage
 		updateResource [# "mover(chk_forward_clk,$CURRPOS,$DEST,$CURRDIR)" #]
@@ -604,7 +604,7 @@ QActor mover context ctxrobot{
 	Goto req_post_turn_clk if [# RES=="OK" #] else error
 	State set_new_dest_clk { //set new position and decide if it's convenient to change direction
 		printCurrentMessage
-		onMsg( move:move(POS) ){
+		onMsg( moveto:moveto(POS) ){
 			[# DEST = ws.Position.valueOf(payloadArg(0))#]
 		}
 		updateResource [# "mover(set_new_dest_clk,$CURRPOS,$DEST,$CURRDIR)" #]
@@ -642,7 +642,7 @@ QActor mover context ctxrobot{
 		updateResource [# "mover(req_u_turn,$CURRPOS,$DEST,$CURRDIR)" #]
 	}
 	Transition t0 whenReply moveruturnanswer -> chk_u_turn
-					whenReply moveanswer -> req_u_turn //consume possible incoming moveanswer due to critical race condition (new position for witch u turn is needed arrived, but the robot reaches the wall: the basicrobotwrapper replies before receiving the new commands from moveruturn)
+					whenReply movetoanswer -> req_u_turn //consume possible incoming movetoanswer due to critical race condition (new position for witch u turn is needed arrived, but the robot reaches the wall: the basicrobotwrapper replies before receiving the new commands from moveruturn)
 	State chk_u_turn {
 		printCurrentMessage
 		onMsg( moveruturnanswer:moveruturnanswer(RES) ){
@@ -661,17 +661,17 @@ QActor mover context ctxrobot{
 	State reply {
 		printCurrentMessage
 		if[# CURRPOS==DEST #]{
-			replyTo move with moveanswer : moveanswer(OK)
+			replyTo moveto with movetoanswer : movetoanswer(OK)
 		}
 		updateResource [# "mover(reply,$CURRPOS,$DEST,$CURRDIR)" #]
 	}
 	Transition t0 whenTime 10 -> handle //no messages, go to handle
-					whenRequest move -> handle //new destination, consume the message while going to handle
+					whenRequest moveto -> handle //new destination, consume the message while going to handle
 	
 	State error{
 		printCurrentMessage
 		updateResource [# "mover(error,$CURRPOS,$DEST,$CURRDIR)" #]
-		replyTo move with moveanswer : moveanswer(ERROR)
+		replyTo moveto with movetoanswer : movetoanswer(ERROR)
 		println("mover | ERROR STATE")
 	}
 }
@@ -783,7 +783,7 @@ QActor moveruturn context ctxrobot{
 	State error{
 		printCurrentMessage
 		updateResource [# "moveruturn(error,$ENDDIR)" #]
-		replyTo move with moveruturnanswer : moveruturnanswer(ERROR)
+		replyTo moveruturn with moveruturnanswer : moveruturnanswer(ERROR)
 		println("moveruturn | ERROR STATE")
 	}
 }
@@ -884,7 +884,7 @@ QActor basicrobotwrapper context ctxrobot{
 QActor basicrobot context ctxrobot{
 [#
   var StepTime      = 0L
-  var StartTime     = 0L     
+  var StartTime     = 0L
   var Duration      = 0L
   var ExpectingCollision = false
   //var RobotType     = "" 

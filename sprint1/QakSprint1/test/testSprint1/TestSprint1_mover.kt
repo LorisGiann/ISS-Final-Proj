@@ -92,7 +92,7 @@ internal class TestSprint1_mover {
         val connTcp = ConnTcp("localhost", 8096)
         waitRegimeState()
 
-        val requestStr = "msg(move, request,python,mover,move($pos),1)"
+        val requestStr = "msg(moveto, request,python,mover,moveto($pos),1)"
         val answer = connTcp.request(requestStr)
         ColorsOut.outappl("goTo answer=$answer", ColorsOut.GREEN)
         waitRegimeState()
@@ -164,10 +164,10 @@ internal class TestSprint1_mover {
             val connTcp = ConnTcp("localhost", 8096)
             waitRegimeState()
 
-            val requestStr = "msg(move, request,python,mover,move(HOME),1)"
+            val requestStr = "msg(moveto, request,python,mover,moveto(HOME),1)"
             val answer = connTcp.request(requestStr)
             ColorsOut.outappl("test_from_H_to_H answer=$answer", ColorsOut.GREEN)
-            Assertions.assertTrue(answer.contains("moveanswer(OK)"))
+            Assertions.assertTrue(answer.contains("movetoanswer(OK)"))
 
             waitRegimeState()
             connTcp.close()
@@ -191,10 +191,10 @@ internal class TestSprint1_mover {
             val connTcp = ConnTcp("localhost", 8096)
             waitRegimeState()
 
-            val requestStr = "msg(move, request,python,mover,move(INDOOR),1)"
+            val requestStr = "msg(moveto, request,python,mover,moveto(INDOOR),1)"
             val answer = connTcp.request(requestStr)
             ColorsOut.outappl("test_accepted answer=$answer", ColorsOut.GREEN)
-            Assertions.assertTrue(answer.contains("moveanswer(OK)"))
+            Assertions.assertTrue(answer.contains("movetoanswer(OK)"))
 
             waitRegimeState()
             connTcp.close()
@@ -221,10 +221,10 @@ internal class TestSprint1_mover {
             val connTcp = ConnTcp("localhost", 8096)
             waitRegimeState()
 
-            val requestStr = "msg(move, request,python,mover,move(INDOOR),1)"
+            val requestStr = "msg(moveto, request,python,mover,moveto(INDOOR),1)"
             val answer = connTcp.request(requestStr)
             ColorsOut.outappl("test_accepted answer=$answer", ColorsOut.GREEN)
-            Assertions.assertTrue(answer.contains("moveanswer(OK)"))
+            Assertions.assertTrue(answer.contains("movetoanswer(OK)"))
 
             waitRegimeState()
             connTcp.close()
@@ -252,10 +252,10 @@ internal class TestSprint1_mover {
             val connTcp = ConnTcp("localhost", 8096)
             waitRegimeState()
 
-            val requestStr = "msg(move, request,python,mover,move(GLASSBOX),1)"
+            val requestStr = "msg(moveto, request,python,mover,moveto(GLASSBOX),1)"
             val answer = connTcp.request(requestStr)
             ColorsOut.outappl("test_accepted answer=$answer", ColorsOut.GREEN)
-            Assertions.assertTrue(answer.contains("moveanswer(OK)"))
+            Assertions.assertTrue(answer.contains("movetoanswer(OK)"))
 
             waitRegimeState()
             connTcp.close()
@@ -279,16 +279,16 @@ internal class TestSprint1_mover {
             waitRegimeState()
 
             //FIRST REQUEST
-            var requestStr = "msg(move, request,python,mover,move(HOME),1)"
+            var requestStr = "msg(moveto, request,python,mover,moveto(HOME),1)"
             connTcp.forward(requestStr)
             to!!.waitUntilState("mover","mover(req_forward_aclk,GLASSBOX,HOME,ACLK)") //wait for the robot to proceed from PLASTICBOX to HOME
             CommUtils.delay(250)  //wait to be roughly in the middle of the wall
 
             //SECOND REQUEST
-            requestStr = "msg(move, request,python,mover,move(INDOOR),1)"
+            requestStr = "msg(moveto, request,python,mover,moveto(INDOOR),1)"
             val answer = connTcp.request(requestStr)
             ColorsOut.outappl("testSecondRequest answer=$answer", ColorsOut.GREEN)
-            Assertions.assertTrue(answer.contains("moveanswer(OK)"))
+            Assertions.assertTrue(answer.contains("movetoanswer(OK)"))
 
             waitRegimeState()
             connTcp.close()
@@ -316,16 +316,16 @@ internal class TestSprint1_mover {
             waitRegimeState()
 
             //FIRST REQUEST
-            var requestStr = "msg(move, request,python,mover,move(HOME),1)"
+            var requestStr = "msg(moveto, request,python,mover,moveto(HOME),1)"
             connTcp.forward(requestStr)
             to!!.waitUntilState("mover","mover(req_forward_aclk,PLASTICBOX,HOME,ACLK)") //wait for the robot to proceed from PLASTICBOX to HOME
             CommUtils.delay(250)  //wait to be roughly in the middle of the wall
 
             //SECOND REQUEST
-            requestStr = "msg(move, request,python,mover,move(INDOOR),1)"
+            requestStr = "msg(moveto, request,python,mover,moveto(INDOOR),1)"
             val answer = connTcp.request(requestStr)
             ColorsOut.outappl("testSecondRequest answer=$answer", ColorsOut.GREEN)
-            Assertions.assertTrue(answer.contains("moveanswer(OK)"))
+            Assertions.assertTrue(answer.contains("movetoanswer(OK)"))
 
             waitRegimeState()
             connTcp.close()

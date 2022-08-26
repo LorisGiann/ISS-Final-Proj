@@ -17,7 +17,7 @@ class Basicrobot ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 		val interruptedStateTransitions = mutableListOf<Transition>()
 		
 		  var StepTime      = 0L
-		  var StartTime     = 0L     
+		  var StartTime     = 0L
 		  var Duration      = 0L
 		  var ExpectingCollision = false
 		  //var RobotType     = "" 

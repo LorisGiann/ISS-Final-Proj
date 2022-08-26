@@ -29,7 +29,10 @@ with Diagram('demosystemarchitectureArch', show=False, outformat='png', graph_at
      smartdevice >> Edge(color='magenta', style='solid', xlabel='depositrequest') >> wasteservice
      wasteservice >> Edge(color='magenta', style='solid', xlabel='pickup') >> transporttrolley
      wasteservice >> Edge(color='magenta', style='solid', xlabel='dropout') >> transporttrolley
-     wasteservice >> Edge(color='magenta', style='solid', xlabel='move') >> transporttrolley
+     wasteservice >> Edge(color='magenta', style='solid', xlabel='movetoHOME') >> transporttrolley
+     wasteservice >> Edge(color='magenta', style='solid', xlabel='movetoINDOOR') >> transporttrolley
+     wasteservice >> Edge(color='magenta', style='solid', xlabel='movetoPLASTICBOX') >> transporttrolley
+     wasteservice >> Edge(color='magenta', style='solid', xlabel='movetoGLASSBOX') >> transporttrolley
      transporttrolley >> Edge(color='blue', style='solid', xlabel='cmd') >> basicrobot
      sys >> Edge(color='red', style='dashed', xlabel='info') >> transporttrolley
      basicrobot >> Edge( xlabel='info', **eventedgeattr) >> sys

@@ -21,10 +21,12 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 				state("s0") { //this:State
 					action { //it:State
 						discardMessages = true
+						updateResourceRep( "transporttrolley(s0)"  
+						)
 						println("$name in ${currentState.stateName} | $currentMsg")
 						 sysUtil.logMsgs=true  
 					}
-					 transition(edgeName="t00",targetState="handle_cmd",cond=whenRequest("move"))
+					 transition(edgeName="t00",targetState="handle_cmd",cond=whenRequest("moveto"))
 					transition(edgeName="t01",targetState="handle_cmd",cond=whenRequest("pickup"))
 					transition(edgeName="t02",targetState="handle_cmd",cond=whenRequest("dropout"))
 				}	 
@@ -33,7 +35,7 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 						updateResourceRep( "transporttrolley(handle_cmd)"  
 						)
 						println("$name in ${currentState.stateName} | $currentMsg")
-						if( checkMsgContent( Term.createTerm("move(POSITION)"), Term.createTerm("move(ARG)"), 
+						if( checkMsgContent( Term.createTerm("moveto(POSITION)"), Term.createTerm("moveto(ARG)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 tmp = payloadArg(0)  
 								println("move(${tmp})")
@@ -114,17 +116,17 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 							scope, context!!, "local_tout_transporttrolley_moving_home", 1000.toLong() )
 					}
 					 transition(edgeName="t03",targetState="moved_home",cond=whenTimeout("local_tout_transporttrolley_moving_home"))   
-					transition(edgeName="t04",targetState="handle_cmd",cond=whenRequest("move"))
+					transition(edgeName="t04",targetState="handle_cmd",cond=whenRequest("moveto"))
 				}	 
 				state("moved_home") { //this:State
 					action { //it:State
 						updateResourceRep( "transporttrolley(moved_home)"  
 						)
 						println("$name in ${currentState.stateName} | $currentMsg")
-						answer("move", "moveanswer", "moveanswer(OK)"   )  
+						answer("moveto", "movetoanswer", "movetoanswer(OK)"   )  
 						println("robot reached HOME")
 					}
-					 transition(edgeName="t05",targetState="handle_cmd",cond=whenRequest("move"))
+					 transition(edgeName="t05",targetState="handle_cmd",cond=whenRequest("moveto"))
 					transition(edgeName="t06",targetState="handle_cmd",cond=whenRequest("pickup"))
 					transition(edgeName="t07",targetState="handle_cmd",cond=whenRequest("dropout"))
 				}	 
@@ -137,17 +139,17 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 							scope, context!!, "local_tout_transporttrolley_moving_indoor", 1000.toLong() )
 					}
 					 transition(edgeName="t08",targetState="moved_indoor",cond=whenTimeout("local_tout_transporttrolley_moving_indoor"))   
-					transition(edgeName="t09",targetState="handle_cmd",cond=whenRequest("move"))
+					transition(edgeName="t09",targetState="handle_cmd",cond=whenRequest("moveto"))
 				}	 
 				state("moved_indoor") { //this:State
 					action { //it:State
 						updateResourceRep( "transporttrolley(moved_indoor)"  
 						)
 						println("$name in ${currentState.stateName} | $currentMsg")
-						answer("move", "moveanswer", "moveanswer(OK)"   )  
+						answer("moveto", "movetoanswer", "movetoanswer(OK)"   )  
 						println("robot reached INDOOR")
 					}
-					 transition(edgeName="t010",targetState="handle_cmd",cond=whenRequest("move"))
+					 transition(edgeName="t010",targetState="handle_cmd",cond=whenRequest("moveto"))
 					transition(edgeName="t011",targetState="handle_cmd",cond=whenRequest("pickup"))
 					transition(edgeName="t012",targetState="handle_cmd",cond=whenRequest("dropout"))
 				}	 
@@ -160,17 +162,17 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 							scope, context!!, "local_tout_transporttrolley_moving_plasticbox", 1000.toLong() )
 					}
 					 transition(edgeName="t013",targetState="moved_plasticbox",cond=whenTimeout("local_tout_transporttrolley_moving_plasticbox"))   
-					transition(edgeName="t014",targetState="handle_cmd",cond=whenRequest("move"))
+					transition(edgeName="t014",targetState="handle_cmd",cond=whenRequest("moveto"))
 				}	 
 				state("moved_plasticbox") { //this:State
 					action { //it:State
 						updateResourceRep( "transporttrolley(moved_plasticbox)"  
 						)
 						println("$name in ${currentState.stateName} | $currentMsg")
-						answer("move", "moveanswer", "moveanswer(OK)"   )  
+						answer("moveto", "movetoanswer", "movetoanswer(OK)"   )  
 						println("robot reached PLASTICBOX")
 					}
-					 transition(edgeName="t015",targetState="handle_cmd",cond=whenRequest("move"))
+					 transition(edgeName="t015",targetState="handle_cmd",cond=whenRequest("moveto"))
 					transition(edgeName="t016",targetState="handle_cmd",cond=whenRequest("pickup"))
 					transition(edgeName="t017",targetState="handle_cmd",cond=whenRequest("dropout"))
 				}	 
@@ -183,17 +185,17 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 							scope, context!!, "local_tout_transporttrolley_moving_glassbox", 1000.toLong() )
 					}
 					 transition(edgeName="t018",targetState="moved_glassbox",cond=whenTimeout("local_tout_transporttrolley_moving_glassbox"))   
-					transition(edgeName="t019",targetState="handle_cmd",cond=whenRequest("move"))
+					transition(edgeName="t019",targetState="handle_cmd",cond=whenRequest("moveto"))
 				}	 
 				state("moved_glassbox") { //this:State
 					action { //it:State
 						updateResourceRep( "transporttrolley(moved_glassbox)"  
 						)
 						println("$name in ${currentState.stateName} | $currentMsg")
-						answer("move", "moveanswer", "moveanswer(OK)"   )  
+						answer("moveto", "movetoanswer", "movetoanswer(OK)"   )  
 						println("robot reached GLASSBOX")
 					}
-					 transition(edgeName="t020",targetState="handle_cmd",cond=whenRequest("move"))
+					 transition(edgeName="t020",targetState="handle_cmd",cond=whenRequest("moveto"))
 					transition(edgeName="t021",targetState="handle_cmd",cond=whenRequest("pickup"))
 					transition(edgeName="t022",targetState="handle_cmd",cond=whenRequest("dropout"))
 				}	 
@@ -206,7 +208,7 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 						answer("pickup", "pickupanswer", "pickupanswer(OK)"   )  
 						println("robot pickedUp")
 					}
-					 transition(edgeName="t023",targetState="handle_cmd",cond=whenRequest("move"))
+					 transition(edgeName="t023",targetState="handle_cmd",cond=whenRequest("moveto"))
 					transition(edgeName="t024",targetState="handle_cmd",cond=whenRequest("pickup"))
 					transition(edgeName="t025",targetState="handle_cmd",cond=whenRequest("dropout"))
 				}	 
@@ -219,7 +221,7 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 						answer("dropout", "dropoutanswer", "dropoutanswer(OK)"   )  
 						println("robot droppedOut")
 					}
-					 transition(edgeName="t026",targetState="handle_cmd",cond=whenRequest("move"))
+					 transition(edgeName="t026",targetState="handle_cmd",cond=whenRequest("moveto"))
 					transition(edgeName="t027",targetState="handle_cmd",cond=whenRequest("pickup"))
 					transition(edgeName="t028",targetState="handle_cmd",cond=whenRequest("dropout"))
 				}	 

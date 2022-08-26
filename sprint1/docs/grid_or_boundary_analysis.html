@@ -64,7 +64,7 @@ h6{
                 L'errore potrebbe aumentare ad ogni singolo step, mentre la prima soluzione (siccome utilizza un sensore di contatto con il muro) non soffre di questo problema</li>
         </ul>
         <br>
-        <p>Per scegliere in merito ad una decisione così importante per la realizzazione del <b>Mover</b>, sono state analizzate 4 diverse opzioni, che vengono qui descritte: </p>
+        <p>Per scegliere in merito ad una decisione così importante, sono state analizzate 4 diverse opzioni, che vengono qui descritte: </p>
         
 
         <h4>OPZIONE 0 - senza coordinate</h4>
@@ -85,7 +85,7 @@ h6{
             Se viene cambiata la destinazione mentre il robot è in movimento, esso non cambia direzione, perchè comunque per raggiugere la nuova <b>Position</b> di destinazione si procederà
             sempre in senso antiorario, e quindi la <b>Position</b> verso la quale ci si sta dirigendo attualmente dovrà essere comunque raggiunta.<br>
             L'idea è quella di prevedere 4 macrostati, nei quali di volta in volta si decide se è necessario dirigersi verso la prossima <b>Position</b> o meno: si raggiuge la prossima <b>Position</b> solo se 
-            la destinazione non è ancora stata raggiunta. Le 4 <b>Position</b> possono essere viste come delle specie di "macrostati" della FSM che implementa il <b>mover</b>.
+            la destinazione non è ancora stata raggiunta. Le 4 <b>Position</b> possono essere viste come delle specie di "macrostati".
         </p>
         <img class="centerimg" style="max-width: 700px;" src="_images/mover_option1_explaination.png"/>
         <p>Pro e Contro:</p>
@@ -146,7 +146,7 @@ h6{
              
         <h4>Scelta: OPZIONE 2</h4>
         <p>Scegliamo la soluzione senza coordinate, e in particolare la seconda soluzione, poichè sembra quella in grado di offrire il miglior rapporto benefici/costo considerato lo specifico dominio applicativo.<br>
-            Se un giorno nuovi requisiti dovessero imporre l'utilizzo di un sistema di coordinate, all'interno del sistema dovrà essere modificato soltanto il componente <i>mover</i> (e <i>basicrobotwrapper</i> che verrebbe rimosso).</p>
+            Se un giorno nuovi requisiti dovessero imporre l'utilizzo di un sistema di coordinate, all'interno del sistema dovrà essere modificato soltanto il componente che si occupa di questa logica di navigazione.</p>
     
     </div>
 

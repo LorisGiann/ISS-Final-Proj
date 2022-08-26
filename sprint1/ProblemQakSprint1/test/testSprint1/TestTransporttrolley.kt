@@ -72,10 +72,10 @@ internal class TestTransporttrolley {
         assertTimeoutPreemptively<Unit>(Duration.ofSeconds(25)) {
             try {
                 val connTcp = ConnTcp("localhost", 8095)
-                var RequestStr = "msg(move, request,python,transporttrolley,move(INDOOR),1)"
+                var RequestStr = "msg(moveto, request,python,transporttrolley,moveto(INDOOR),1)"
                 var answer = connTcp.request(RequestStr)
                 ColorsOut.outappl("answer=$answer", ColorsOut.GREEN)
-                Assertions.assertTrue(answer.contains("moveanswer(OK)"))
+                Assertions.assertTrue(answer.contains("movetoanswer(OK)"))
                 connTcp.close()
             } catch (e: java.lang.Exception) {
                 ColorsOut.outerr("test_1_move ERROR:" + e.message)
@@ -92,20 +92,21 @@ internal class TestTransporttrolley {
                 val connTcp = ConnTcp("localhost", 8095)
                 
                 //FIRST REQUEST
-                val RequestStr1 = "msg(move, request,python,transporttrolley,move(INDOOR),1)"
+                val RequestStr1 = "msg(moveto, request,python,transporttrolley,moveto(INDOOR),1)"
                 connTcp.forward(RequestStr1) //do non wait for a reply
                 ColorsOut.outappl("FIRST REQUEST SENT", ColorsOut.GREEN)
                 CommUtils.delay(100)
                 
                 //SECOND REQUEST
                 ColorsOut.outappl("SENDING SECOND REQUEST", ColorsOut.GREEN)
-                val RequestStr2 = "msg(move, request,python,transporttrolley,move(PLASTICBOX),1)"
+                val RequestStr2 = "msg(moveto, request,python,transporttrolley,moveto(PLASTICBOX),1)"
                 val answer = connTcp.request(RequestStr2)
                 
                 ColorsOut.outappl("answer=$answer", ColorsOut.GREEN)
-                Assertions.assertTrue(answer.contains("moveanswer(OK)"))
+                Assertions.assertTrue(answer.contains("movetoanswer(OK)"))
                 connTcp.close()
 
+                to!!.waitUntilState("transporttrolley","transporttrolley(moved_plasticbox)")
                 Assertions.assertTrue(to!!.checkNextSequence(arrayOf(
                     "transporttrolley(moving_indoor)",
                     "transporttrolley(moving_plasticbox)",
