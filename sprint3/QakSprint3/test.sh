@@ -14,7 +14,6 @@ if [ -z "$1" ] ; then
     gradle -PmainClass=it.unibo.ctxrobot.MainCtxrobotKt jar
     gradle -PmainClass=it.unibo.ctxserver.MainCtxserverKt jar
     gradle -PmainClass=it.unibo.ctxalarm.MainCtxalarmKt jar
-    gradle -PmainClass=it.unibo.ctxgui.MainCtxguiKt jar
 else
   echo "skipping compilation"
 fi
@@ -27,6 +26,16 @@ declare -a TEST_METHODS=(
     "testSprint1.TestSprint1_mover.test_from_PB_to_I"
     "testSprint1.TestSprint1_mover.test_new_pos_no_chenage_route_from_GB_to_H_then_I"
     "testSprint1.TestSprint1_mover.test_new_pos_chenage_route_from_PB_to_H_then_I"
+    
+    "testSprint1.TestSprint1_wasteservice.test_2_accepted"
+    "testSprint1.TestSprint1_wasteservice.test_1_accepted_1_rejected"
+
+    "testSprint1.TestSprint1_integration_test.test_accepted"
+    "testSprint1.TestSprint1_integration_test.test_rejected"
+    "testSprint1.TestSprint1_integration_test.test_2_accepted_while_in_operation"
+    "testSprint1.TestSprint1_integration_test.test_1_accepted_1_rejected_while_in_operation"
+    "testSprint1.TestSprint1_integration_test.test_2_accepted_while_returning_home"
+    "testSprint1.TestSprint1_integration_test.test_1_accepted_1_rejected_while_returning_home"
 )
 
 IFS=$SAVEIFS   # Restore original IFS

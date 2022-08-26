@@ -14,6 +14,7 @@ class Alarmemitter ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 		return "wait"
 	}
 	override fun getBody() : (ActorBasicFsm.() -> Unit){
+		val interruptedStateTransitions = mutableListOf<Transition>()
 		 var alarm = false  
 		return { //this:ActionBasciFsm
 				state("wait") { //this:State

@@ -44,9 +44,10 @@ class updatePositionGui (name : String ) : ActorBasic( name ) {
 				//val currpos = msgterm.getArg(2).toString()
 				//println("$tt $name | state $state" )
 				
-				val data = msgterm.toString()
+				val CURRPOS = msgterm.getArg(1).toString()
+				
 				//val state = msgterm.getArg(1).toString()
-				println("$tt $name | updatePositionGui $data" )
+				println("$tt $name | updatePositionGui CURRPOS $CURRPOS" )
 				
 				
 

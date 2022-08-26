@@ -14,6 +14,7 @@ class Depositaction ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( na
 		return "wait"
 	}
 	override fun getBody() : (ActorBasicFsm.() -> Unit){
+		val interruptedStateTransitions = mutableListOf<Transition>()
 		 lateinit var RES : String
 			   lateinit var MATERIAL : ws.Material  
 		return { //this:ActionBasciFsm

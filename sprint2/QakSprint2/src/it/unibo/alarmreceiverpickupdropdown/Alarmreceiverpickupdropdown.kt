@@ -14,6 +14,7 @@ class Alarmreceiverpickupdropdown ( name: String, scope: CoroutineScope  ) : Act
 		return "wait"
 	}
 	override fun getBody() : (ActorBasicFsm.() -> Unit){
+		val interruptedStateTransitions = mutableListOf<Transition>()
 		return { //this:ActionBasciFsm
 				state("wait") { //this:State
 					action { //it:State

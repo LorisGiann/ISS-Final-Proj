@@ -8,7 +8,7 @@ System demo0
 Dispatch coapUpdate: coapUpdate(RESOURCE, VALUE)
 Dispatch autoStartSysMsg : autoStartSysMsg(_)
 
-// ------------ wasteservice msgs --------------------
+// ------------ wasteservice msgs -------------------- 
 //MATERIAL = PLASTIC | GLASS
 //TRUCKLOAD =  float number
 Request depositrequest : depositrequest(MATERIAL, TRUCKLOAD)
@@ -92,8 +92,7 @@ Event update_container : update_container(QPB,QGB)
 Context ctxserver ip [host="localhost" port=8095]
 Context ctxrobot  ip [host="127.0.0.1" port=8096]
 Context ctxalarm  ip [host="127.0.0.1" port=8097]
-Context ctxgui    ip [host="127.0.0.1" port=8098]
-// ------------------------------------------------
+// ------------------------------------------------ 
 
 // ------- basicrobot collision detection ---------
 CodedQActor distancefilter context ctxrobot className "rx.distanceFilter"   //Nel caso di robot virtuale semplicemente assorbe eventi obstacle e reinvia dispatch "obstacle:obstacle(virtual)" a basicrobot. Nel caso di robot reali riceve messaggi "sonarRobot" e invia a basicrobot dispatch "obstacle:obstacle(dist)" se vicino, altrimenti sonardata", "sonardata:distance(dist)" se lontano.
@@ -108,10 +107,10 @@ CodedQActor robotalarmcontrol  context ctxalarm className "alarmSonar.robotAlarm
 CodedQActor ledalarmcontrol    context ctxalarm className "alarmLed.ledAlarmControl"
 
 // -------- receiver event GUI
-CodedQActor ledgui 			   context ctxgui	className "gui.updateLedGui"
-CodedQActor containergui       context ctxgui	className "gui.updateContainerGui"
-CodedQActor positiongui 	   context ctxgui	className "gui.updatePositionGui"
-CodedQActor statettgui 		   context ctxgui	className "gui.updateStateTrasportTrolleyGui"
+CodedQActor ledgui 			   context ctxserver	className "gui.updateLedGui"
+CodedQActor containergui       context ctxserver	className "gui.updateContainerGui"
+CodedQActor positiongui 	   context ctxserver	className "gui.updatePositionGui"
+CodedQActor statettgui 		   context ctxserver	className "gui.updateStateTrasportTrolleyGui"
 
 QActor wasteservice context ctxserver{
 	[# lateinit var Material  : ws.Material

@@ -39,9 +39,9 @@ class updateStateTrasportTrolleyGui (name : String ) : ActorBasic( name ) {
 				//MsgUtil.outgreen("$tt $name | update $VALUE FROM $RESOURCE ")
 				
 				val msgterm = (Term.createTerm(VALUE) as Struct)
-				val data = msgterm.toString()
+				val STATETT = msgterm.getArg(1).toString()
 				//val state = msgterm.getArg(1).toString()
-				println("$tt $name | updateStateTrasportTrolley $data" )
+				println("$tt $name | updateStateTrasportTrolley STATE $STATETT" )
 				
 
 			} catch (e: Exception){

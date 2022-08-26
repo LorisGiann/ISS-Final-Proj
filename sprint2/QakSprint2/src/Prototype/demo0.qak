@@ -9,7 +9,7 @@ Dispatch coapUpdate: coapUpdate(RESOURCE, VALUE)
 Dispatch autoStartSysMsg : autoStartSysMsg(_)
 
 // ------------ wasteservice msgs --------------------
-//MATERIAL = PLASTIC | GLASS
+//MATERIAL = PLASTIC | GLASS 
 //TRUCKLOAD =  float number
 Request depositrequest : depositrequest(MATERIAL, TRUCKLOAD)
 Reply loadaccept       : loadaccept(MATERIAL, TRUCKLOAD)

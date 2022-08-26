@@ -38,10 +38,9 @@ class updateContainerGui (name : String ) : ActorBasic( name ) {
 				//MsgUtil.outgreen("$tt $name | update $VALUE FROM $RESOURCE ")
 				
 				val msgterm = (Term.createTerm(VALUE) as Struct)
-				val data = msgterm.toString()
-				//val pb = msgterm.getArg(1).toString()
-				//val gb = msgterm.getArg(2).toString()
-				println("$tt $name | updateContainerGui $data" )
+				val PB = msgterm.getArg(1).toString()
+				val GB = msgterm.getArg(2).toString()
+				println("$tt $name | updateContainerGui PB $PB GB $GB" )
 				
 
 				
