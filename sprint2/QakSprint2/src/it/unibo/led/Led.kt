@@ -23,7 +23,7 @@ class Led ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scope 
 					action { //it:State
 						discardMessages = true
 						println("$name in ${currentState.stateName} | $currentMsg")
-						updateResourceRep( "led(initial,${newState})"  
+						updateResourceRep( "led(initial,OFF)"  
 						)
 						if(  ledM == null  
 						 ){ ledM = `it.unibo`.radarSystem22.domain.models.LedModel.create().also{ it.turnOff() }  

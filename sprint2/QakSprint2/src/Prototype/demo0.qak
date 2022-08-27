@@ -1125,7 +1125,7 @@ QActor led context ctxalarm{
 	State s0 initial {
 		discardMsg On
 		printCurrentMessage
-		updateResource [# "led(initial,${newState})" #]
+		updateResource [# "led(initial,OFF)" #]
 		//println("${name} STARTS")
 		if[# ledM == null #]{
 			[# ledM = `it.unibo`.radarSystem22.domain.models.LedModel.create().also{ it.turnOff() } #]

@@ -22,6 +22,7 @@ SAVEIFS=$IFS   # Save current IFS (Internal Field Separator)
 IFS=$'\n'      # Change IFS to newline char
 declare -a TEST_METHODS=(
     "testSprint2.TestSprint2_integration_halt.test_accepted"
+    "testSprint2.TestSprint2_integration_led.test_accepted"
 
     "testSprint2.TestSprint2_halt_unit_test.test_halt_while_forward"
     "testSprint2.TestSprint2_halt_unit_test.test_halt_before_forward"
