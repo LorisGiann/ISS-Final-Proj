@@ -14,7 +14,6 @@ class Moveruturn ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 		return "wait"
 	}
 	override fun getBody() : (ActorBasicFsm.() -> Unit){
-		val interruptedStateTransitions = mutableListOf<Transition>()
 		  lateinit var RES : String
 				var ENDDIR : String? = null  
 		return { //this:ActionBasciFsm
