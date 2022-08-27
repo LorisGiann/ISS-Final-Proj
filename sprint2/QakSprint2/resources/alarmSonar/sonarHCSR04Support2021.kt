@@ -16,28 +16,36 @@ import kotlinx.coroutines.delay
 import it.unibo.kactor.MsgUtil
 import it.unibo.kactor.ApplMessage
 import it.unibo.kactor.IApplMessage
+import unibo.comm22.utils.CommUtils
 
 
 class sonarHCSR04Support2021 ( name : String ) : ActorBasic( name ) {
 	lateinit var reader : BufferedReader
+	var p : ProcessHandle? = null
 	//var coapSupport = javacode.CoapSupport("coap://localhost:8028","ctxsonarresource/sonarresource")
 
-    override suspend fun actorBody(msg : IApplMessage){
- 		//println("$tt $name | received  $msg "  )  //RICEVE GLI EVENTI!!!
+	override suspend fun actorBody(msg : IApplMessage){
+		//println("$tt $name | received  $msg "  )  //RICEVE GLI EVENTI!!!
 		if( msg.msgId() == "sonaractivate"){
 			println("sonarHCSR04Support2021 STARTING")
 			try{
-				val p  = Runtime.getRuntime().exec("sudo ./SonarAlone")
+				var p  = Runtime.getRuntime().exec("sudo ./SonarAlone")
 				reader = BufferedReader(  InputStreamReader(p.getInputStream() ))
 				doRead(   )
 			}catch( e : Exception){
 				println("WARNING: sonarHCSR04Support2021 does not find SonarAlone")
 			}
  		}
-     }
+		if( msg.msgId() == "sonardeactivate") {
+			reader?.close()
+			p?.destroy()
+			CommUtils.delay(100)
+			p?.destroyForcibly()
+		}
+	}
 		
 	suspend fun doRead(   ){
- 		var counter = 0
+		var counter = 0
 		GlobalScope.launch{	//to allow message handling
 			while( true ){
 				var data = reader.readLine()

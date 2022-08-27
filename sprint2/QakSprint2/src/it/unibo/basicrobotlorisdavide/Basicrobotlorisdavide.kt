@@ -28,7 +28,7 @@ class Basicrobotlorisdavide ( name: String, scope: CoroutineScope  ) : ActorBasi
 						discardMessages = false
 						println("basicrobot | START")
 						unibo.robot.robotSupport.create(myself ,"basicrobotConfig.json" )
-						updateResourceRep( "basicrobot(s0)"  
+						updateResourceRep( "basicrobotlorisdavide(s0)"  
 						)
 					}
 					 transition( edgeName="goto",targetState="work", cond=doswitch() )
@@ -36,6 +36,8 @@ class Basicrobotlorisdavide ( name: String, scope: CoroutineScope  ) : ActorBasi
 				state("work") { //this:State
 					action { //it:State
 						println("basicrobot | waiting .............. ")
+						updateResourceRep( "basicrobotlorisdavide(work)"  
+						)
 					}
 					 transition(edgeName="t170",targetState="execcmd",cond=whenDispatch("cmd"))
 					transition(edgeName="t171",targetState="doStep",cond=whenRequest("step"))
@@ -51,7 +53,7 @@ class Basicrobotlorisdavide ( name: String, scope: CoroutineScope  ) : ActorBasi
 								 if(Move=="w") ExpectingCollision=true  
 								println("basicrobot | executing '${Move}'")
 								unibo.robot.robotSupport.move( Move  )
-								updateResourceRep( "basicrobot(execcmd,$Move)"  
+								updateResourceRep( "basicrobotlorisdavide(execcmd,$Move)"  
 								)
 						}
 					}
@@ -64,7 +66,7 @@ class Basicrobotlorisdavide ( name: String, scope: CoroutineScope  ) : ActorBasi
 						 ){ ExpectingCollision=false  
 						unibo.robot.robotSupport.move( "h"  )
 						delay(600) 
-						updateResourceRep( "basicrobot(handleObstacle,${CurrentMove})"  
+						updateResourceRep( "basicrobotlorisdavide(handleObstacle,${CurrentMove})"  
 						)
 						emit("info", "info(obstacledoing(w))" ) 
 						}
@@ -77,7 +79,7 @@ class Basicrobotlorisdavide ( name: String, scope: CoroutineScope  ) : ActorBasi
 						if( checkMsgContent( Term.createTerm("step(TIME)"), Term.createTerm("step(T)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 									StepTime = payloadArg(0).toLong() 	 
-								updateResourceRep( "basicrobot(doStep,${StepTime})"  
+								updateResourceRep( "basicrobotlorisdavide(doStep,${StepTime})"  
 								)
 						}
 						StartTime = getCurrentTime()
@@ -92,7 +94,7 @@ class Basicrobotlorisdavide ( name: String, scope: CoroutineScope  ) : ActorBasi
 				state("stepDone") { //this:State
 					action { //it:State
 						unibo.robot.robotSupport.move( "h"  )
-						updateResourceRep( "basicrobot(stepDone,$StepTime)"  
+						updateResourceRep( "basicrobotlorisdavide(stepDone,$StepTime)"  
 						)
 						answer("step", "stepdone", "stepdone(ok)"   )  
 						println("basicrobot | stepDone reply done")
@@ -109,7 +111,7 @@ class Basicrobotlorisdavide ( name: String, scope: CoroutineScope  ) : ActorBasi
 						unibo.robot.robotSupport.move( "s"  )
 						delay(TunedDuration)
 						unibo.robot.robotSupport.move( "h"  )
-						updateResourceRep( "basicrobot(stepFail,$Duration)"  
+						updateResourceRep( "basicrobotlorisdavide(stepFail,$Duration)"  
 						)
 						answer("step", "stepfail", "stepfail($Duration,obst)"   )  
 					}
@@ -117,7 +119,7 @@ class Basicrobotlorisdavide ( name: String, scope: CoroutineScope  ) : ActorBasi
 				}	 
 				state("endwork") { //this:State
 					action { //it:State
-						updateResourceRep( "basicrobot(endwork)"  
+						updateResourceRep( "basicrobotlorisdavide(endwork)"  
 						)
 						terminate(1)
 					}

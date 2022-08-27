@@ -905,12 +905,13 @@ QActor basicrobotlorisdavide context ctxrobot{
   		//run unibo.robot.robotSupport.move( "l" )    //synch
  		//run unibo.robot.robotSupport.move( "r" )	//synch
     		//run unibo.robot.robotSupport.move( "w" )    //asynch 
- 		updateResource [# "basicrobot(s0)" #]
+ 		updateResource [# "basicrobotlorisdavide(s0)" #]
  	}
 	Goto work
 
 	State work{
 		println("basicrobot | waiting .............. ")
+		updateResource [# "basicrobotlorisdavide(work)" #]
 	}
 	Transition t1   whenMsg     cmd       -> execcmd
 					whenRequest step      -> doStep
@@ -926,7 +927,7 @@ QActor basicrobotlorisdavide context ctxrobot{
   			[# if(Move=="w") ExpectingCollision=true #]
   			println("basicrobot | executing '${Move}'")
 			run unibo.robot.robotSupport.move( Move )
-			updateResource [# "basicrobot(execcmd,$Move)" #]
+			updateResource [# "basicrobotlorisdavide(execcmd,$Move)" #]
 		}
 	 }
 	 Goto work
@@ -938,7 +939,7 @@ QActor basicrobotlorisdavide context ctxrobot{
 			[# ExpectingCollision=false #]
 			run unibo.robot.robotSupport.move( "h" )
 			delay 600
-			updateResource [# "basicrobot(handleObstacle,${CurrentMove})" #]
+			updateResource [# "basicrobotlorisdavide(handleObstacle,${CurrentMove})" #]
 			/*if[# CurrentMove == "w"#]{
 			//back to avoid emission of obstacle again if real robot moving forward !!!
 			//if[# RobotType != "virtual" #]{	//is it better to embed this behavior in the support?
@@ -961,7 +962,7 @@ QActor basicrobotlorisdavide context ctxrobot{
  		printCurrentMessage
 		onMsg( step : step( T ) ){
 			[#	StepTime = payloadArg(0).toLong() 	#]
-			updateResource [# "basicrobot(doStep,${StepTime})" #]
+			updateResource [# "basicrobotlorisdavide(doStep,${StepTime})" #]
   		}
         memoCurrentTime StartTime
         println("basicrobot | doStep StepTime =$StepTime  ")
@@ -974,7 +975,7 @@ QActor basicrobotlorisdavide context ctxrobot{
 
 	State stepDone{
  		run unibo.robot.robotSupport.move( "h" )  //stop the real robot already done ???
-		updateResource [# "basicrobot(stepDone,$StepTime)" #]
+		updateResource [# "basicrobotlorisdavide(stepDone,$StepTime)" #]
    		//emit info : info( stepdone($StepTime) )
    		replyTo step with stepdone : stepdone(ok)
 		println("basicrobot | stepDone reply done")
@@ -991,14 +992,14 @@ QActor basicrobotlorisdavide context ctxrobot{
 			run unibo.robot.robotSupport.move( "s" )
 			delayVar TunedDuration
 			run unibo.robot.robotSupport.move( "h" )
- 		updateResource [# "basicrobot(stepFail,$Duration)" #]
+ 		updateResource [# "basicrobotlorisdavide(stepFail,$Duration)" #]
  		//emit info : info( stepFail($Duration) )
  		replyTo step with stepfail : stepfail($Duration, obst)
     }
 	Goto work
 
 	State endwork{
-		updateResource [# "basicrobot(endwork)" #]
+		updateResource [# "basicrobotlorisdavide(endwork)" #]
  		terminate 1
 	}
 }
@@ -1189,3 +1190,96 @@ QActor led context ctxalarm{
 }
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+QActor commandissuerfortests context ctxrobot{
+	[#
+		lateinit var RES : String
+	#]
+	
+	State wait initial {
+		printCurrentMessage
+		discardMsg Off
+		updateResource [# "commandissuerfortests(wait)" #]
+	}
+	Transition toNewState whenRequest pickup -> req_pickup
+						  whenRequest dropout -> req_dropout
+						  whenRequest cmdsync -> req_cmdsync
+						  
+	State req_pickup {
+		printCurrentMessage
+		updateResource [# "commandissuerfortests(req_pickup)" #]
+		request pickupdropouthandler -m pickup : pickup(_)
+	}
+	Transition toNewState whenReply pickupanswer -> chk_pickup
+	State chk_pickup {
+		printCurrentMessage
+		updateResource [# "commandissuerfortests(chk_pickup)" #]
+		onMsg( pickupanswer:pickupanswer(RES) ){
+			[# RES = payloadArg(0)#]
+			if[# RES=="OK" #]{
+			replyTo pickup with pickupanswer : pickupanswer(OK)
+			}else{
+				replyTo pickup with pickupanswer : pickupanswer(ERROR)
+			}
+		}
+	}
+	Goto wait
+	
+	State req_dropout {
+		printCurrentMessage
+		updateResource [# "commandissuerfortests(req_dropout)" #]
+		request pickupdropouthandler -m dropout : dropout(_)
+	}
+	Transition toNewState whenReply dropoutanswer -> chk_dropout
+	State chk_dropout {
+		printCurrentMessage
+		updateResource [# "commandissuerfortests(chk_dropout)" #] 
+		onMsg( dropoutanswer:dropoutanswer(RES) ){
+			[# RES = payloadArg(0)#]
+		if[# RES=="OK" #]{
+				replyTo dropout with dropoutanswer : dropoutanswer(OK)
+			}else{
+				replyTo dropout with dropoutanswer : dropoutanswer(ERROR)
+			}
+		}
+	}
+	Goto wait
+
+	State req_cmdsync {
+		printCurrentMessage
+		[# var Move : ws.Move? = null #]
+		onMsg( cmdsync:cmdsync(MOVE) ){
+			[# Move=ws.Move.valueOf(payloadArg(0)) #]
+			request basicrobotwrapper -m cmdsync : cmdsync($Move)
+		}
+		updateResource [# "commandissuerfortests(req_cmdsync,$Move)" #] 
+	}
+	Transition toNewState whenReply cmdanswer -> chk_cmdsync
+	State chk_cmdsync {
+		printCurrentMessage
+		updateResource [# "commandissuerfortests(chk_cmdsync)" #] 
+		onMsg( cmdanswer:cmdanswer(RES) ){
+			[# RES = payloadArg(0)#]
+			if[# RES=="OK" #]{
+				replyTo cmdsync with cmdanswer : cmdanswer(OK)
+			}else{
+				replyTo cmdsync with cmdanswer : cmdanswer(ERROR)
+			}
+		}
+	}
+	Goto wait
+}
+QActor alarmreceivertest context ctxrobot{
+	State wait initial {
+		printCurrentMessage
+		onMsg(alarm : alarm(_)){
+			updateResource [# "alarmreceivertest(wait,alarm)" #] 
+		}
+		onMsg(alarmceased : alarmceased(_)){
+			updateResource [# "alarmreceivertest(wait,alarmceased)" #] 
+		}
+	}
+	Transition t0 whenEvent alarm -> wait
+				  whenEvent alarmceased -> wait
+}

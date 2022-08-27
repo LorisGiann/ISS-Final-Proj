@@ -1,4 +1,4 @@
-package testSprint1
+package testCommon
 
 import org.eclipse.californium.core.CoapHandler
 import org.eclipse.californium.core.CoapResponse
@@ -19,6 +19,7 @@ class TestObserver : CoapHandler {
         val ctxMap = mapOf(
             "ctxserver" to Pair<String,Int>("localhost",8095),
             "ctxrobot" to Pair<String,Int>("127.0.0.1",8096),
+            "ctxalarm" to Pair<String,Int>("127.0.0.1",8097),
         )
         val actorMap = mapOf(
             "wasteservice" to "ctxserver",
@@ -26,9 +27,14 @@ class TestObserver : CoapHandler {
             "transporttrolley" to "ctxrobot",
             "mover" to "ctxrobot",
             "moveruturn" to "ctxrobot",
-            //"mover180turn" to "ctxrobot",
+            "mover180turn" to "ctxrobot",
             "pickupdropouthandler" to "ctxrobot",
+            "basicrobotlorisdavide" to "ctxrobot",
+            "commandissuerfortests" to "ctxrobot",
             "basicrobotwrapper" to "ctxrobot",
+            "alarmreceivertest" to "ctxrobot",
+            "led" to "ctxalarm",
+            "sonarlorisdavide" to "ctxalarm",
         )
         // ----------------------------------------------------------------------------
 

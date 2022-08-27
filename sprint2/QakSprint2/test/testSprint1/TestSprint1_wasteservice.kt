@@ -1,12 +1,14 @@
 package testSprint1
 
 import org.junit.jupiter.api.*
+import testCommon.TestObserver
 import unibo.comm22.utils.ColorsOut
 import unibo.comm22.utils.CommSystemConfig
 import unibo.comm22.utils.CommUtils
 import java.io.IOException
 import java.time.Duration
 import kotlin.test.Test
+import testCommon.*
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation::class)
 internal class TestSprint1_wasteservice {

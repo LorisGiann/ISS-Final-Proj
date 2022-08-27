@@ -31,6 +31,8 @@ with Diagram('demo0Arch', show=False, outformat='png', graph_attr=graphattr) as 
           alarmreceiverbasicrobot=Custom('alarmreceiverbasicrobot','./qakicons/symActorSmall.png')
           basicrobotwrapper=Custom('basicrobotwrapper','./qakicons/symActorSmall.png')
           basicrobotlorisdavide=Custom('basicrobotlorisdavide','./qakicons/symActorSmall.png')
+          commandissuerfortests=Custom('commandissuerfortests','./qakicons/symActorSmall.png')
+          alarmreceivertest=Custom('alarmreceivertest','./qakicons/symActorSmall.png')
           distancefilter=Custom('distancefilter(coded)','./qakicons/codedQActor.png')
      with Cluster('ctxalarm', graph_attr=nodeattr):
           sonarlorisdavide=Custom('sonarlorisdavide','./qakicons/symActorSmall.png')
@@ -73,4 +75,9 @@ with Diagram('demo0Arch', show=False, outformat='png', graph_attr=graphattr) as 
      alarmemitter >> Edge( xlabel='alarmceased', **eventedgeattr) >> sys
      sys >> Edge(color='red', style='dashed', xlabel='local_sonardata') >> alarmemitter
      sys >> Edge(color='red', style='dashed', xlabel='update_led') >> led
+     commandissuerfortests >> Edge(color='magenta', style='solid', xlabel='pickup') >> pickupdropouthandler
+     commandissuerfortests >> Edge(color='magenta', style='solid', xlabel='dropout') >> pickupdropouthandler
+     commandissuerfortests >> Edge(color='magenta', style='solid', xlabel='cmdsync') >> basicrobotwrapper
+     sys >> Edge(color='red', style='dashed', xlabel='alarm') >> alarmreceivertest
+     sys >> Edge(color='red', style='dashed', xlabel='alarmceased') >> alarmreceivertest
 diag
