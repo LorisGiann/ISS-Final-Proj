@@ -14,6 +14,7 @@ class Basicrobotlorisdavide ( name: String, scope: CoroutineScope  ) : ActorBasi
 		return "s0"
 	}
 	override fun getBody() : (ActorBasicFsm.() -> Unit){
+		val interruptedStateTransitions = mutableListOf<Transition>()
 		
 		  var StepTime      = 0L
 		  var StartTime     = 0L

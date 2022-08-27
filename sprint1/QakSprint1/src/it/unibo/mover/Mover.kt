@@ -14,6 +14,7 @@ class Mover ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scop
 		return "wait"
 	}
 	override fun getBody() : (ActorBasicFsm.() -> Unit){
+		val interruptedStateTransitions = mutableListOf<Transition>()
 		 var DEST = ws.Position.HOME
 			   var CURRPOS = ws.Position.HOME
 			   var CURRDIR = "ACLK" // ACLK | CLK
