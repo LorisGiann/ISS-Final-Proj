@@ -21,8 +21,8 @@ Request pickup         : pickup(_)
 Reply   pickupanswer   : pickupanswer(RESULT)
 Request dropout        : dropout(_)
 Reply   dropoutanswer  : dropoutanswer(RESULT)
-Request move           : move(POSITION)    //POSITION = INDOOR | PLASTICBOX | GLASSBOX | HOME
-Reply   moveanswer     : moveanswer(RESULT)
+Request moveto         : moveto(POSITION)    //POSITION = INDOOR | PLASTICBOX | GLASSBOX | HOME
+Reply   movetoanswer   : movetoanswer(RESULT)
 // ------------------------------------------------------
 
 // -------------------- mover msgs ----------------------
@@ -70,7 +70,9 @@ Event    update_led 	  : update_led(LEDSTATE) // LEDSTATE = ON | OFF | BLINK
 // ---------------------------------------------------------------------------------------
 
 //-------------------------------------- SONAR -------------------------------------
-Event    local_sonardata       : distance( V )   //for the application level	
+Event    local_sonardata       : distance( V )   //for the application level
+Dispatch sonaractivate   : sonaractivate(_)
+Dispatch sonardeactivate : sonaractivate(_)
 //----------------------------------------------------------------------------------
 
 //-------------------------------------- ALARM -------------------------------------
@@ -191,15 +193,15 @@ QActor depositaction context ctxserver{
 		printCurrentMessage
 		onMsg(depositaction : depositaction(MATERIAL)){
 			[# MATERIAL=ws.Material.valueOf(payloadArg(0)) #]
-			request transporttrolley -m move : move(INDOOR)
+			request transporttrolley -m moveto : moveto(INDOOR)
 		}
 		updateResource [# "depositaction(req_move_indoor,$MATERIAL)" #] 
 	}
-	Transition t0 whenReply moveanswer -> chk_move_indoor
+	Transition t0 whenReply movetoanswer -> chk_move_indoor
 	State chk_move_indoor {
 		updateResource [# "depositaction(chk_move_indoor,$MATERIAL)" #] 
 		printCurrentMessage
-		onMsg(moveanswer : moveanswer(RES)){
+		onMsg(movetoanswer : movetoanswer(RES)){
 			[# RES = payloadArg(0); #]
 		}
 	}
@@ -235,13 +237,13 @@ QActor depositaction context ctxserver{
 			} #]
 		printCurrentMessage
 		updateResource [# "depositaction(req_move_container,$MATERIAL)" #] 
-		request transporttrolley -m move : move($Position)
+		request transporttrolley -m moveto : moveto($Position)
 	}
-	Transition t0 whenReply moveanswer -> chk_move_container
+	Transition t0 whenReply movetoanswer -> chk_move_container
 	State chk_move_container{
 		printCurrentMessage
 		updateResource [# "depositaction(chk_pickup,$MATERIAL)" #] 
-		onMsg(moveanswer : moveanswer(RES)){
+		onMsg(movetoanswer : movetoanswer(RES)){
 			[# RES = payloadArg(0); #]
 		}
 	}
@@ -271,10 +273,10 @@ QActor depositaction context ctxserver{
 	State move_home{
 		printCurrentMessage
 		updateResource [# "depositaction(move_home,$MATERIAL)" #] 
-		request transporttrolley -m move : move(HOME)
+		request transporttrolley -m moveto : moveto(HOME)
 	}
 	Transition t0 whenRequest depositaction -> req_move_indoor
-				  whenReply   moveanswer -> wait
+				  whenReply   movetoanswer -> wait
 }
 
 QActor transporttrolley context ctxrobot{
@@ -288,7 +290,7 @@ QActor transporttrolley context ctxrobot{
  	}
  	Transition toNewState whenRequest pickup -> req_pickup
  						  whenRequest dropout -> req_dropout
- 						  whenRequest move -> req_move
+ 						  whenRequest moveto -> req_move
  						  
  	State req_pickup {
  		printCurrentMessage
@@ -333,24 +335,24 @@ QActor transporttrolley context ctxrobot{
  	State req_move {
  		printCurrentMessage
  		[# var Pos : ws.Position? = null #]
- 		onMsg( move:move(POS) ){
+ 		onMsg( moveto:moveto(POS) ){
 			[# Pos=ws.Position.valueOf(payloadArg(0)) #]
  			//println("transporttrolley | New robot destination: ${pos}")
- 			request mover -m move : move($Pos)
+ 			request mover -m moveto : moveto($Pos)
  		}
  		updateResource [# "transporttrolley(req_move,$Pos)" #] 
  	}
- 	Transition toNewState whenReply moveanswer -> chk_move
- 							whenRequest move -> req_move //cancel current destination and set the new one
+ 	Transition toNewState whenReply movetoanswer -> chk_move
+ 							whenRequest moveto -> req_move //cancel current destination and set the new one
  	State chk_move {
  		printCurrentMessage
  		updateResource [# "transporttrolley(chk_move)" #] 
- 		onMsg( moveanswer:moveanswer(RES) ){
+ 		onMsg( movetoanswer:movetoanswer(RES) ){
  			[# RES = payloadArg(0)#]
  			if[# RES=="OK" #]{
- 				replyTo move with moveanswer : moveanswer(OK)
+ 				replyTo moveto with movetoanswer : movetoanswer(OK)
  			}else{
- 				replyTo move with moveanswer : moveanswer(ERROR)
+ 				replyTo moveto with movetoanswer : movetoanswer(ERROR)
  			}
  		}
  	}
@@ -425,7 +427,7 @@ QActor pickupdropouthandler context ctxrobot{
 	// --------------------------------------------------------------
 }
 
-//RECEIVES move(POS) MESSAGES, MOVES THE ROBOT INTO POS, AND REPLY WITH moveanswer(RES)
+//RECEIVES moveto(POS) MESSAGES, MOVES THE ROBOT INTO POS, AND REPLY WITH movetoanswer(RES)
 //basically it translates high level move to the final position, into low level robot moves
 QActor mover context ctxrobot{
 	[# var DEST = ws.Position.HOME
@@ -439,14 +441,14 @@ QActor mover context ctxrobot{
 		printCurrentMessage
 		updateResource [# "mover(wait,$CURRPOS,$DEST,$CURRDIR)" #]
 	}
-	Transition t0 whenRequest move -> handle
+	Transition t0 whenRequest moveto -> handle
 	
 	State handle {
 		printCurrentMessage
-		onMsg( move:move(POS) ){
+		onMsg( moveto:moveto(POS) ){
 			[# DEST = ws.Position.valueOf(payloadArg(0))#]
 			if [# DEST==CURRPOS#] {
-				replyTo move with moveanswer : moveanswer(OK)
+				replyTo moveto with movetoanswer : movetoanswer(OK)
 			}
 		}
 		updateResource [# "mover(handle,$CURRPOS,$DEST,$CURRDIR)" #]
@@ -488,7 +490,7 @@ QActor mover context ctxrobot{
 		request basicrobotwrapper -m cmdsync : cmdsync(w)
 	}
 	Transition t0 whenReply cmdanswer -> chk_forward_aclk //wall reached
-					whenRequest move -> set_new_dest_aclk //new position arrived
+					whenRequest moveto -> set_new_dest_aclk //new position arrived
 	State chk_forward_aclk {
 		printCurrentMessage
 		updateResource [# "mover(chk_forward_aclk,$CURRPOS,$DEST,$CURRDIR)" #]
@@ -499,7 +501,7 @@ QActor mover context ctxrobot{
 	Goto req_post_turn_aclk if [# RES=="OK" #] else error
 	State set_new_dest_aclk { //set new position and decide if it's convenient to change direction
 		printCurrentMessage
-		onMsg( move:move(POS) ){
+		onMsg( moveto:moveto(POS) ){
 			[# DEST = ws.Position.valueOf(payloadArg(0))#]
 		}
 		updateResource [# "mover(set_new_dest_aclk,$CURRPOS,$DEST,$CURRDIR)" #]
@@ -559,7 +561,7 @@ QActor mover context ctxrobot{
 		request basicrobotwrapper -m cmdsync : cmdsync(w)
 	}
 	Transition t0 whenReply cmdanswer -> chk_forward_clk //wall reached
-					whenRequest move -> set_new_dest_clk //new position arrived
+					whenRequest moveto -> set_new_dest_clk //new position arrived
 	State chk_forward_clk {
 		printCurrentMessage
 		updateResource [# "mover(chk_forward_clk,$CURRPOS,$DEST,$CURRDIR)" #]
@@ -570,7 +572,7 @@ QActor mover context ctxrobot{
 	Goto req_post_turn_clk if [# RES=="OK" #] else error
 	State set_new_dest_clk { //set new position and decide if it's convenient to change direction
 		printCurrentMessage
-		onMsg( move:move(POS) ){
+		onMsg( moveto:moveto(POS) ){
 			[# DEST = ws.Position.valueOf(payloadArg(0))#]
 		}
 		updateResource [# "mover(set_new_dest_clk,$CURRPOS,$DEST,$CURRDIR)" #]
@@ -608,7 +610,7 @@ QActor mover context ctxrobot{
 		updateResource [# "mover(req_u_turn,$CURRPOS,$DEST,$CURRDIR)" #]
 	}
 	Transition t0 whenReply moveruturnanswer -> chk_u_turn
-					whenReply moveanswer -> req_u_turn //consume possible incoming moveanswer due to critical race condition (new position for witch u turn is needed arrived, but the robot reaches the wall: the basicrobotwrapper replies before receiving the new commands from moveruturn)
+					whenReply movetoanswer -> req_u_turn //consume possible incoming movetoanswer due to critical race condition (new position for witch u turn is needed arrived, but the robot reaches the wall: the basicrobotwrapper replies before receiving the new commands from moveruturn)
 	State chk_u_turn {
 		printCurrentMessage
 		onMsg( moveruturnanswer:moveruturnanswer(RES) ){
@@ -627,17 +629,17 @@ QActor mover context ctxrobot{
 	State reply {
 		printCurrentMessage
 		if[# CURRPOS==DEST #]{
-			replyTo move with moveanswer : moveanswer(OK)
+			replyTo moveto with movetoanswer : movetoanswer(OK)
 		}
 		updateResource [# "mover(reply,$CURRPOS,$DEST,$CURRDIR)" #]
 	}
 	Transition t0 whenTime 10 -> handle //no messages, go to handle
-					whenRequest move -> handle //new destination, consume the message while going to handle
+					whenRequest moveto -> handle //new destination, consume the message while going to handle
 	
 	State error{
 		printCurrentMessage
 		updateResource [# "mover(error,$CURRPOS,$DEST,$CURRDIR)" #]
-		replyTo move with moveanswer : moveanswer(ERROR)
+		replyTo moveto with movetoanswer : movetoanswer(ERROR)
 		println("mover | ERROR STATE")
 	}
 }
@@ -749,10 +751,11 @@ QActor moveruturn context ctxrobot{
 	State error{
 		printCurrentMessage
 		updateResource [# "moveruturn(error,$ENDDIR)" #]
-		replyTo move with moveruturnanswer : moveruturnanswer(ERROR)
+		replyTo moveruturn with moveruturnanswer : moveruturnanswer(ERROR)
 		println("moveruturn | ERROR STATE")
 	}
 }
+
 
 QActor basicrobotwrapper context ctxrobot{
 	[# var MOVE : ws.Move? = null  #]
@@ -782,7 +785,7 @@ QActor basicrobotwrapper context ctxrobot{
 		printCurrentMessage
 		updateResource [# "basicrobotwrapper(other_cmd,$MOVE)" #]
 		[# val MoveStr = MOVE.toString()#]
-		forward basicrobot -m cmd : cmd($MoveStr)
+		forward basicrobotlorisdavide -m cmd : cmd($MoveStr)
 		if[# MOVE==ws.Move.l || MOVE==ws.Move.r #]{
 			delay 500 //wait for turn to complete
 		}
@@ -794,7 +797,7 @@ QActor basicrobotwrapper context ctxrobot{
 	State forward_cmd {
 		printCurrentMessage
 		updateResource [# "basicrobotwrapper(forward_cmd)" #]
-		forward basicrobot -m cmd : cmd(w)
+		forward basicrobotlorisdavide -m cmd : cmd(w)
 	}
 	Transition t0 whenEvent info -> collision
 					whenRequest cmdsync -> handle
@@ -803,7 +806,7 @@ QActor basicrobotwrapper context ctxrobot{
 	State halt_forward {
 		printCurrentMessage
 		updateResource [# "basicrobotwrapper(halt_forward)" #]
-		forward basicrobot -m cmd : cmd(h)
+		forward basicrobotlorisdavide -m cmd : cmd(h)
 	}
 	Transition t0 whenEvent info -> collision
 					whenEvent alarmceased -> forward_cmd
@@ -817,10 +820,10 @@ QActor basicrobotwrapper context ctxrobot{
 	
 }
 
-QActor basicrobot context ctxrobot{
+QActor basicrobotlorisdavide context ctxrobot{
 [#
   var StepTime      = 0L
-  var StartTime     = 0L     
+  var StartTime     = 0L
   var Duration      = 0L
   var ExpectingCollision = false
   //var RobotType     = "" 
@@ -841,12 +844,13 @@ QActor basicrobot context ctxrobot{
   		//run unibo.robot.robotSupport.move( "l" )    //synch
  		//run unibo.robot.robotSupport.move( "r" )	//synch
     		//run unibo.robot.robotSupport.move( "w" )    //asynch 
- 		updateResource [# "basicrobot(s0)" #]
+ 		updateResource [# "basicrobotlorisdavide(s0)" #]
  	}
 	Goto work
 
 	State work{
 		println("basicrobot | waiting .............. ")
+		updateResource [# "basicrobotlorisdavide(work)" #]
 	}
 	Transition t1   whenMsg     cmd       -> execcmd
 					whenRequest step      -> doStep
@@ -862,7 +866,7 @@ QActor basicrobot context ctxrobot{
   			[# if(Move=="w") ExpectingCollision=true #]
   			println("basicrobot | executing '${Move}'")
 			run unibo.robot.robotSupport.move( Move )
-			updateResource [# "basicrobot(execcmd,$Move)" #]
+			updateResource [# "basicrobotlorisdavide(execcmd,$Move)" #]
 		}
 	 }
 	 Goto work
@@ -874,7 +878,7 @@ QActor basicrobot context ctxrobot{
 			[# ExpectingCollision=false #]
 			run unibo.robot.robotSupport.move( "h" )
 			delay 600
-			updateResource [# "basicrobot(handleObstacle,${CurrentMove})" #]
+			updateResource [# "basicrobotlorisdavide(handleObstacle,${CurrentMove})" #]
 			/*if[# CurrentMove == "w"#]{
 			//back to avoid emission of obstacle again if real robot moving forward !!!
 			//if[# RobotType != "virtual" #]{	//is it better to embed this behavior in the support?
@@ -897,7 +901,7 @@ QActor basicrobot context ctxrobot{
  		printCurrentMessage
 		onMsg( step : step( T ) ){
 			[#	StepTime = payloadArg(0).toLong() 	#]
-			updateResource [# "basicrobot(doStep,${StepTime})" #]
+			updateResource [# "basicrobotlorisdavide(doStep,${StepTime})" #]
   		}
         memoCurrentTime StartTime
         println("basicrobot | doStep StepTime =$StepTime  ")
@@ -910,7 +914,7 @@ QActor basicrobot context ctxrobot{
 
 	State stepDone{
  		run unibo.robot.robotSupport.move( "h" )  //stop the real robot already done ???
-		updateResource [# "basicrobot(stepDone,$StepTime)" #]
+		updateResource [# "basicrobotlorisdavide(stepDone,$StepTime)" #]
    		//emit info : info( stepdone($StepTime) )
    		replyTo step with stepdone : stepdone(ok)
 		println("basicrobot | stepDone reply done")
@@ -927,14 +931,14 @@ QActor basicrobot context ctxrobot{
 			run unibo.robot.robotSupport.move( "s" )
 			delayVar TunedDuration
 			run unibo.robot.robotSupport.move( "h" )
- 		updateResource [# "basicrobot(stepFail,$Duration)" #]
+ 		updateResource [# "basicrobotlorisdavide(stepFail,$Duration)" #]
  		//emit info : info( stepFail($Duration) )
  		replyTo step with stepfail : stepfail($Duration, obst)
     }
 	Goto work
 
 	State endwork{
-		updateResource [# "basicrobot(endwork)" #]
+		updateResource [# "basicrobotlorisdavide(endwork)" #]
  		terminate 1
 	}
 }
@@ -1036,7 +1040,7 @@ QActor alarmemitter context ctxalarm {
 	Transition t0 whenEvent local_sonardata -> handle_sonardata 
 }
 
-QActor sonar context ctxalarm {	
+QActor sonarlorisdavide context ctxalarm {	
 	State s0 initial {
 		printCurrentMessage
 		
@@ -1044,5 +1048,23 @@ QActor sonar context ctxalarm {
 		emit local_sonardata : distance($D)
 		
 	}
+	Transition t0   whenMsg   sonardeactivate -> s0
+					whenMsg   sonaractivate   -> s0
 }
 
+
+//-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+QActor alarmreceivertest context ctxrobot{
+	State wait initial {
+		printCurrentMessage
+		onMsg(alarm : alarm(_)){
+			updateResource [# "alarmreceivertest(wait,alarm)" #] 
+		}
+		onMsg(alarmceased : alarmceased(_)){
+			updateResource [# "alarmreceivertest(wait,alarmceased)" #] 
+		}
+	}
+	Transition t0 whenEvent alarm -> wait
+				  whenEvent alarmceased -> wait
+}

@@ -34,7 +34,6 @@ internal class TestSprint2_integration_led {
         o.waitUntilState("basicrobotwrapper","wait")
         o.waitUntilState("basicrobotlorisdavide","work")
         o.waitUntilState("pickupdropouthandler","wait")
-        //o.waitUntilState("sonarlorisdavide","activateTheSonar")
         //o.waitUntilState("led","s0")
         CommUtils.delay(50)  //concede a little extra time to the actors in the system to communicate and do their transition, before going ahead with the rest of the test
     }
@@ -64,7 +63,6 @@ internal class TestSprint2_integration_led {
         to.establishCoapConn("wasteservice");
         to.establishCoapConn("depositaction");
         to.establishCoapConn("transporttrolley");
-        to.establishCoapConn("mover")
         to.establishCoapConn("basicrobotwrapper")
         to.establishCoapConn("basicrobotlorisdavide")
         to.establishCoapConn("pickupdropouthandler")
@@ -78,8 +76,6 @@ internal class TestSprint2_integration_led {
     @AfterEach
     fun down() {
         ColorsOut.outappl("history=" + to!!.getHistory(), ColorsOut.MAGENTA)
-
-        goBackHome()
 
         try {
             //FIRSTLY, try to be nice and make the program exit "normally"
@@ -97,28 +93,6 @@ internal class TestSprint2_integration_led {
         }catch(_:  NullPointerException){ }
         
         to!!.closeAllConnections()
-    }
-
-    fun goTo(pos : ws.Position) {
-        val connTcp = ConnTcp("localhost", 8096)
-        waitRegimeState()
-
-        val requestStr = "msg(moveto, request,python,mover,moveto($pos),1)"
-        val answer = connTcp.request(requestStr)
-        ColorsOut.outappl("goTo answer=$answer", ColorsOut.GREEN)
-        waitRegimeState()
-        connTcp.close()
-        to!!.clearHistory()
-    }
-    fun goBackHome() {
-        goTo(ws.Position.HOME)
-        val currentState = to!!.getCurrentCoapState("mover")
-        val orientation  = (Term.createTerm(currentState) as Struct).getArg(3).toString()
-        if(orientation=="CLK") {
-            val connTcp = ConnTcp("localhost", 8096)
-            val requestStr = "msg(cmdsync, request,python,basicrobotwrapper,cmdsync(r),1)"
-            connTcp.request(requestStr)
-        }
     }
 
 
@@ -190,7 +164,7 @@ internal class TestSprint2_integration_led {
                 Assertions.assertTrue(to!!.checkNextContent("led(*,OFF)") >= 0)
                 Assertions.assertTrue(to!!.checkNextContents(arrayOf( //led blink while moving
                     "basicrobotwrapper(forward_cmd)",
-                    "led(blink_on,*)",
+                    "led(*,BLINK)",
                 )) >= 0)
                 Assertions.assertTrue(to!!.checkNextContents(arrayOf( //halt move forward
                     "alarmreceivertest(wait,alarm)",
@@ -200,25 +174,11 @@ internal class TestSprint2_integration_led {
                     "alarmreceivertest(wait,alarmceased)",
                     "led(*,BLINK)"
                 )) >= 0)
-                val afterResume = to!!.nextCheckIndex
-                Assertions.assertTrue(to!!.checkNextContent("basicrobotwrapper(wait)") >= 0)
 
                 Assertions.assertTrue(to!!.checkNextContent("basicrobotwrapper(other_cmd,l)") >= 0)
-                Assertions.assertTrue(to!!.checkNextContent("alarmreceivertest(wait,alarm)") >= 0) //alarm is received but led continues to blink
-                val afteralarminturn = to!!.nextCheckIndex
-
-                //check that led continues to blink before robot halts (which happes after the turn)
-                to!!.nextCheckIndex = afterResume
-                val ledOn = to!!.checkNextContent("led(*,ON)") //should NOT be present between alarmreceivertest(wait,alarmceased) and basicrobotwrapper(alarm)
-                to!!.nextCheckIndex = afterResume
-                val robAlarm = to!!.checkNextContent("basicrobotwrapper(alarm)") //however "led(*,ON)" happens right after "basicrobotwrapper(alarm)", so it can actually happen that "led(*,ON)" preceeds "basicrobotwrapper(alarm)" in the history...
-                Assertions.assertTrue( ledOn > robAlarm )
-
-                to!!.nextCheckIndex = afteralarminturn
-                Assertions.assertTrue(to!!.checkNextContents(arrayOf(//basicrobotwrapper in alarm only after the turn completes: only then the led tuns on
-                    "basicrobotwrapper(alarm)",
-                    "led(*,ON)",
-                )) >= 0)
+                Assertions.assertTrue(to!!.checkNextContent("alarmreceivertest(wait,alarm)") >= 0) 
+                Assertions.assertTrue(to!!.checkNextContent("led(*,BLINK)") >= 0) //alarm is received but led continues to blink
+                Assertions.assertTrue(to!!.checkNextContent("led(*,ON)") >= 0) //then on after turn
                 Assertions.assertTrue(to!!.checkNextContents(arrayOf( //alarm ceased, led blinks
                     "alarmreceivertest(wait,alarmceased)",
                     "led(*,BLINK)"
@@ -233,11 +193,11 @@ internal class TestSprint2_integration_led {
                     "led(*,BLINK)",
                 )) >= 0)
 
-                Assertions.assertTrue(to!!.checkNextContents(arrayOf( //dropout halted
+                Assertions.assertTrue(to!!.checkNextContents(arrayOf( //dropdown halted
                     "alarmreceivertest(wait,alarm)",
                     "led(*,ON)",
                 )) >= 0)
-                Assertions.assertTrue(to!!.checkNextContents(arrayOf( //dropout resumed
+                Assertions.assertTrue(to!!.checkNextContents(arrayOf( //dropdown halted
                     "alarmreceivertest(wait,alarmceased)",
                     "led(*,BLINK)",
                 )) >= 0)

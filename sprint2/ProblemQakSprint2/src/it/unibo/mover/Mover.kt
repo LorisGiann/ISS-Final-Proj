@@ -27,16 +27,16 @@ class Mover ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scop
 						updateResourceRep( "mover(wait,$CURRPOS,$DEST,$CURRDIR)"  
 						)
 					}
-					 transition(edgeName="t032",targetState="handle",cond=whenRequest("move"))
+					 transition(edgeName="t032",targetState="handle",cond=whenRequest("moveto"))
 				}	 
 				state("handle") { //this:State
 					action { //it:State
 						println("$name in ${currentState.stateName} | $currentMsg")
-						if( checkMsgContent( Term.createTerm("move(POSITION)"), Term.createTerm("move(POS)"), 
+						if( checkMsgContent( Term.createTerm("moveto(POSITION)"), Term.createTerm("moveto(POS)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 DEST = ws.Position.valueOf(payloadArg(0)) 
 								if(  DEST==CURRPOS 
-								 ){answer("move", "moveanswer", "moveanswer(OK)"   )  
+								 ){answer("moveto", "movetoanswer", "movetoanswer(OK)"   )  
 								}
 						}
 						updateResourceRep( "mover(handle,$CURRPOS,$DEST,$CURRDIR)"  
@@ -102,7 +102,7 @@ class Mover ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scop
 						request("cmdsync", "cmdsync(w)" ,"basicrobotwrapper" )  
 					}
 					 transition(edgeName="t034",targetState="chk_forward_aclk",cond=whenReply("cmdanswer"))
-					transition(edgeName="t035",targetState="set_new_dest_aclk",cond=whenRequest("move"))
+					transition(edgeName="t035",targetState="set_new_dest_aclk",cond=whenRequest("moveto"))
 				}	 
 				state("chk_forward_aclk") { //this:State
 					action { //it:State
@@ -122,7 +122,7 @@ class Mover ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scop
 				state("set_new_dest_aclk") { //this:State
 					action { //it:State
 						println("$name in ${currentState.stateName} | $currentMsg")
-						if( checkMsgContent( Term.createTerm("move(POSITION)"), Term.createTerm("move(POS)"), 
+						if( checkMsgContent( Term.createTerm("moveto(POSITION)"), Term.createTerm("moveto(POS)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 DEST = ws.Position.valueOf(payloadArg(0)) 
 						}
@@ -211,7 +211,7 @@ class Mover ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scop
 						request("cmdsync", "cmdsync(w)" ,"basicrobotwrapper" )  
 					}
 					 transition(edgeName="t038",targetState="chk_forward_clk",cond=whenReply("cmdanswer"))
-					transition(edgeName="t039",targetState="set_new_dest_clk",cond=whenRequest("move"))
+					transition(edgeName="t039",targetState="set_new_dest_clk",cond=whenRequest("moveto"))
 				}	 
 				state("chk_forward_clk") { //this:State
 					action { //it:State
@@ -231,7 +231,7 @@ class Mover ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scop
 				state("set_new_dest_clk") { //this:State
 					action { //it:State
 						println("$name in ${currentState.stateName} | $currentMsg")
-						if( checkMsgContent( Term.createTerm("move(POSITION)"), Term.createTerm("move(POS)"), 
+						if( checkMsgContent( Term.createTerm("moveto(POSITION)"), Term.createTerm("moveto(POS)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 DEST = ws.Position.valueOf(payloadArg(0)) 
 						}
@@ -284,7 +284,7 @@ class Mover ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scop
 						)
 					}
 					 transition(edgeName="t041",targetState="chk_u_turn",cond=whenReply("moveruturnanswer"))
-					transition(edgeName="t042",targetState="req_u_turn",cond=whenReply("moveanswer"))
+					transition(edgeName="t042",targetState="req_u_turn",cond=whenReply("movetoanswer"))
 				}	 
 				state("chk_u_turn") { //this:State
 					action { //it:State
@@ -310,7 +310,7 @@ class Mover ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scop
 					action { //it:State
 						println("$name in ${currentState.stateName} | $currentMsg")
 						if(  CURRPOS==DEST  
-						 ){answer("move", "moveanswer", "moveanswer(OK)"   )  
+						 ){answer("moveto", "movetoanswer", "movetoanswer(OK)"   )  
 						}
 						updateResourceRep( "mover(reply,$CURRPOS,$DEST,$CURRDIR)"  
 						)
@@ -318,14 +318,14 @@ class Mover ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scop
 							scope, context!!, "local_tout_mover_reply", 10.toLong() )
 					}
 					 transition(edgeName="t043",targetState="handle",cond=whenTimeout("local_tout_mover_reply"))   
-					transition(edgeName="t044",targetState="handle",cond=whenRequest("move"))
+					transition(edgeName="t044",targetState="handle",cond=whenRequest("moveto"))
 				}	 
 				state("error") { //this:State
 					action { //it:State
 						println("$name in ${currentState.stateName} | $currentMsg")
 						updateResourceRep( "mover(error,$CURRPOS,$DEST,$CURRDIR)"  
 						)
-						answer("move", "moveanswer", "moveanswer(ERROR)"   )  
+						answer("moveto", "movetoanswer", "movetoanswer(ERROR)"   )  
 						println("mover | ERROR STATE")
 					}
 				}	 

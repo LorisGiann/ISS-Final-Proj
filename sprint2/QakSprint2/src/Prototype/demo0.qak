@@ -56,7 +56,7 @@ Dispatch cmd       	: cmd(MOVE)
 Dispatch end       	: end(ARG)
  
 Request step       : step( TIME )	
-Reply   stepdone   : stepdone(V)  
+Reply   stepdone   : stepdone(V)
 Reply   stepfail   : stepfail(DURATION, CAUSE)
  
  
@@ -71,8 +71,8 @@ Event    update_led 	  : update_led(LEDSTATE) // LEDSTATE = ON | OFF | BLINK
 // ---------------------------------------------------------------------------------------
 
 //-------------------------------------- SONAR -------------------------------------
-Dispatch sonaractivate   : info(ARG)
-Dispatch sonardeactivate : info(ARG)
+Dispatch sonaractivate   : sonaractivate(_)
+Dispatch sonardeactivate : sonardeactivate(_)
 Event    alarmsonar : distance( V ) //emitted from sonar infrastructure to sonar actor
 Event    local_sonardata : distance( V )
 //----------------------------------------------------------------------------------

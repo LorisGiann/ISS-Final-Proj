@@ -223,11 +223,11 @@ internal class TestSprint2_integration_halt {
                     "pickupdropouthandler(resume_pickup)",
                 )) >= 0)
 
-                Assertions.assertTrue(to!!.checkNextContents(arrayOf( //dropdown halted
+                Assertions.assertTrue(to!!.checkNextContents(arrayOf( //dropout halted
                     "alarmreceivertest(wait,alarm)",
                     "pickupdropouthandler(halt_dropout)",
                 )) >= 0)
-                Assertions.assertTrue(to!!.checkNextContents(arrayOf( //dropdown halted
+                Assertions.assertTrue(to!!.checkNextContents(arrayOf( //dropout resumed
                     "alarmreceivertest(wait,alarmceased)",
                     "pickupdropouthandler(resume_dropout)",
                 )) >= 0)

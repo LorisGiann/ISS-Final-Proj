@@ -1,0 +1,233 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+    <!--
+<link rel="stylesheet" type="text/css" href="../css/issStyle1.css">
+<script type="text/javascript" src="../css/issStyle.js"></script>
+-->
+<link rel="stylesheet" type="text/css" href="../docs_common/defaultTemplateStyle.css">
+<style>
+code>pre { 
+    font-family: monospace;
+}
+dd{
+    margin-bottom: 7px;
+}
+.todo{
+    color: orange
+}
+.centerimg{
+    display: block;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 90%;
+    max-width: 800px;
+}
+p { margin: 4px 0px; }
+dd{ margin-bottom: 8px;}
+.newDictWord{ color : purple; }
+h6{
+    font-size: 1em;
+    margin: 18px 0px 9px 0px;
+}
+</style>
+<head><title>WasteService SPRINT2</title></head>
+    
+<body>
+<div id="top">
+<h1>ISS FINAL PROJECT </h1>
+</div>  
+
+<div class="body"> 
+<h2>Introduction</h2>
+<div class="remark">
+    <p>Progetto finale di ISS, che consiste in un impianto di smistamento dei rifiuti nel quale un robot deve trasportare il materiale dal camion al relativo container</p>
+</div>
+
+<h2>Requirements</h2>
+<div class="remark">
+    <a href="../docs_prof/html/TemaFinale22.html">Link alla pagina dei requisiti del committente</a> <br>
+    <a href="../sprint0/sprint0.html#Requirements">Requisiti sprint0</a>
+</div>
+
+<h2>Requirement analysis</h2>
+<div class="remark">
+    <p>Una più approfondita analisi insieme alle osservazioni qui esposte ci permettono di dettagliare meglio il comportamento che deve assumere il robot e il <b>Led</b> al verificarsi di allarmi: </p>
+    <ul>
+        <li>In caso di allarme il robot dovrebbe fermarsi a causa di una emergenza, quindi è opportuno interrompere, nel limite del possibile, più operazioni possibili. <br>
+            Sappiamo tuttavia dal committente che non dovremo interrompere il robot mentre questo si sta girando. <br>
+            Tutto questo ci permette di dedurre che le operazioni che devono essere interrotte e poi riprese sono quelle di <b>Pickup</b>, <b>Dropout</b> e di move forward</li>
+        <li>Il <b>Led</b> serve a segnalare il potenziale pericolo derivante dai movimenti del robot che sta gestendo una <b>Deposit action</b>. Dunque si dovrà segnalare quando il 
+            macchinario è in movimento, o più in generale quando sta operando. <br>
+            Per questo motivo si deduce che il <b>Led</b>:
+            <ul>
+                <li>Debba lampeggiare quando il robot sta gestendo (ho ha gestito e sta tornando a casa) una depositaction, segnalando quindi che il robot può muoversi. <br>
+                    Inoltre, se il robot si trova in home ma si sta girando (magari per riposizionarsi dopo aver gestito una deposiaction), il <b>Led</b> deve comunque lampeggiare.</li>
+                <li>Resterà acceso solo se la depositaction viene interrotta da un allarme.</li>
+                <li>Resterà spento solo quando non vi sarà più niente da gestire (e per questo motivo ci si troverà in HOME).
+                </li>
+            </ul>
+        </li>
+    </ul>
+</div>
+
+<A NAME="ScrumGoalWorkPlan"></A>
+<h2>Scrum Goal and Work Plan</h2>
+<div class="remark">
+    <h4>Scrum goal:</h4>
+    <p>Obiettivo dello SPRINT2 è l'estensione della demo dello <a href="../sprint1/sprint1.html">SPRINT1</a> per realizzare i requisiti riguardanti il <b>Led</b> e il <b>Sonar</b> specificati 
+        dal committente al punto 4, siccome questo rappresenta una parte più importante e corposa rispetto alla gui del punto 3.</p>
+    <h4>Piano di lavoro:</h4>
+    <ul>
+        <li>Analisi del problema di chi e in che forma riceve le informazioni relative ad un allarme per realizzare lo stop di emergenza del robot</li>
+        <li>Analisi del problema di chi e in che forma riceve le informazioni per realizzare l'aggiornamento dello stato del <b>Led</b></li>
+        <li>Sviluppo / adattamento dei componenti necessari</li>
+        <li>Realizzazione di un modello eseguibile (a tal proposito verrà utilizzato il metamodello <a href="../docs_common/Qak.html">QAK</a>).</li>
+        <li>Realizzazione di un (più completo) test-plan per il modello</li>
+    </ul>
+</div>
+
+<!--PROBLEM ANALYSIS-->
+<A NAME="ProblemAnalysis"></A>
+<h2>Problem analysis</h2>
+<div class="remark">
+    <h6><b>Architettura logica precedente:</b></h6>
+    <img class="centerimg" style="max-width: 1300px;" src="../sprint1/QakSprint1/demo0arch.png"/>
+    <p style="width: 100%; text-align: right;"><a href="../docs_common/Legenda.html">Legenda</a></p>
+    <br>
+
+    <h3><b>Sonar</b></h3>
+
+    <h4>Che informazioni invia il sonar?</h4>
+    <p>Trattandosi di un dispositivo di input, ha senso che venga emesso un evento quando è disponibile una nuova misura (il che avverrà con una certa periodicità).<br> 
+        Per quanto riguarda il tipo di informazione emessa, è possibile:</p>
+    <ul>
+        <li>Emettere eventi con la distanza rilevata. <br>
+            Pro: più flessibile nel caso in cui un altro contesto abbia bisogno della distanza precisa</li>
+        <li>Emettere eventi solo per notificare se la distanza è diventata maggiore o minore di DLIMIT. <br>
+            Pro: generato (molto) meno traffico</li>
+    </ul>
+    <p>Analizzando il problema, emerge che l'unico compito di questo sonar è quello di rilevare la presenza o meno di una mano, che è il modo con il quale si intende triggerare il 
+        meccanismo di allarme. Per questo motivo si può ragionevolmente affermare che nessun componente al di fuori del raspberry necessiterà mai della distanza effettivamente misurata, 
+        e che il sistema nel suo complesso sia interessato solamente a due tipi di avvenimenti (eventi):</p>
+        <ul>
+            <li>Quando viene rilevato un allarme</li>
+            <li>Quando l'allarme attualmente in corso è cessato</li>
+        </ul>
+        <code><pre>
+Event alarm       : alarm(_)
+Event alarmceased : alarmceased(_)</pre>
+        </code>
+    <p>Risulta quindi logicamente sensato porre in cascata al sonar (il quale potrà emettere eventi locali di distanza misurata) un componente dedicato all'invio system-wide degli eventi 
+        di allarme e cessato allarme.</p>
+    <p>Inoltre, al fine di realizzare un buon test plan, è opportuno che il sonar possa essere disattivato in modo che gli allarmi possano essere inviati on demand dal test stesso</p>
+    <code><pre>
+Event    local_sonardata : distance( V )   //for the application level
+Dispatch sonaractivate   : sonaractivate(_)
+Dispatch sonardeactivate : sonaractivate(_)</pre>
+    </code>
+    <p>Per implementare il componente sarà quindi opportuno modificare il <b>Sonar</b> di <a href="https://github.com/anatali/issLab2022/tree/main/unibo.sonarqak22">unibo.sonarqak22</a>, 
+        motivo per cui chiameremo tale componente <i>sonarlorisdavide</i></p>
+    <img class="centerimg" style="max-width: 650px;" src="docs/_images/sonar_alarmemitter.png"/>
+    <h4>Chi gestisce gli allarmi per implementare l'halt?</h4>
+    Per far si che la catena <i>trasporttrolley</i>, <i>pickupdropouthandler</i>, <i>mover</i>, <i>basicrobotwrapper</i> faccia fermare il trolley, abbiamo due possibilità:
+    <ul>
+        <li>Gli allarmi sono gestiti in maniera centralizzata dal trasporttrolley (poi esso provvederà a comandare opportunamente i componenti di più basso livello) <br>
+            <img class="centerimg" style="max-width: 550px;" src="docs/_images/halt_option_handled_by_transporttrolley.png"/>
+            Pro: il trolley potrebbe avere una concezione del proprio stato che include anche la possibilità di essere bloccato da un allarme. In altre parole può calcolare il <b>Transporttrolleystate</b>.</li>
+        <li>Gli allarmi sono gestiti direttamente dai componenti di più basso livello (<i>pickupdropouthandler</i> e <i>basicrobotwrapper</i>). <br> 
+            <img class="centerimg" style="max-width: 550px;" src="docs/_images/halt_option_handled_by_basicrobotwrapper_and_pickupdropouthandler.png"/>
+            Pro: Il tutto avviene in maniera trasparente rispetto ai componenti <i>trasporttrolley</i> e <i>mover</i>, poichè <i>pickupdropouthandler</i> e <i>basicrobotwrapper</i> 
+            risponderanno ai componenti di più alto livello solo una volta che il comando è stato effettivamente completato, il che avviene se non vi sono allarmi in corso.</li>
+    </ul>
+    <p>Idealmente dovrebbero essere i componenti di più basso livello a gestire gli allarmi, siccome dovrebbero essere loro a sapere quali sono i comandi da inviare e quando impartirli. 
+        Si noti infatti che il <b>transporttrolley</b> comanda solo spostamenti di alto livello da una <b>Position</b> all'altra, e non sa se il robot sta girando (mossa che non deve essere interrotta) o 
+        se sta andando avanti (mossa che deve essere interrotta).</p>
+    <p>In seguito a tutte queste osservazioni risulterebbe quindi conveniente far gestire a <i>pickupdropouthandler</i> e <i>basicrobotwrapper</i> gli eventi di allarme, anche perchè 
+        <b>Transporttrolleystate</b> può sempre essere calcolato da un attore a parte osservando altri attori</p>
+    
+    
+    <h3><b>Led</b></h3>
+    <h4>Come calcolare lo stato del led?</h4>
+    <p>Lo stato del <b>Led</b> dipende: </p>
+    <ul>
+        <li>Dal fatto che il robot si trovi o meno in home senza dover gestire nient'altro. L'informazione è ottenibile osservando il <i>mover</i></li>
+        <li>Dal fatto che il robot sia in movimento (o che comunque stia operando) piuttosto che si trovi invece bloccato da un allarme. L'informazione è ottenibile da <i>basicrobotwrapper</i> e <i>pickupdropouthandler</i></li>
+    </ul>
+    <h4>Come interagire con il componente <b>Led</b>?</h4>
+    <p>Il componente <b>Led</b> può ricevere gli aggiornamenti di stato tramite eventi, il che permette di realizzare un buon loose binding tra il <b>Led</b> e il resto del sistema. Inoltre lo stato del 
+        <b>Led</b> sulla gui potrà essere aggiornato facendo uso del medesimo evento.</p>
+    <code><pre>
+Event    update_led 	  : update_led(LEDSTATE) // LEDSTATE = ON | OFF | BLINK</pre>
+    </code>
+
+    <div class="remark" style="background-color: #c3fbe8;">
+        <h3>Riassunto situazione attuale:</h3>
+        <h6>Architettura logica:</h6>
+        <img class="centerimg" style="max-width: 1200px;" src="ProblemQakSprint2/demosystemarchitecturearch.png"/>
+        <p style="width: 100%; text-align: right;"><a href="../docs_common/Legenda.html">Legenda</a></p>
+        <h6>QAK</h6>
+        <a href="ProblemQakSprint2/src/problemAnalysis/SystemAchitecture.qak">Modello del sistema QAK</a> <br>
+        <h6><p>Testplan <small>(non ancora eseguibili)</small>:</p></h6>
+        <p><a href="ProblemQakSprint2/test/testSprint2/TestSprint2_halt.kt">TestSprint2_halt.kt</a> <br>
+            <a href="ProblemQakSprint2/test/testSprint2/TestSprint2_led.kt">TestSprint2_led.kt</a></p>
+    </div>
+
+</div>
+    
+
+
+<h2>Project</h2>
+
+
+
+<h2>Test plans</h2> 
+
+
+<div class="remark" style="background-color: #c3fbe8;">
+    <!--<h3>Riassunto situazione attuale:</h3>
+    <h6>Architettura logica:</h6>
+    <img class="centerimg" style="max-width: 1300px;" src="QakSprint1/demo0arch.png"/>
+    <p style="width: 100%; text-align: right;"><a href="../docs_common/Legenda.html">Legenda</a></p>
+    <h6>Note</h6>
+    <small><p><i>Basicrobot</i> è stato leggermente modificato rispetto alla versione iniziale per renderlo più stabile, ed è per questo stato rinominato in <i>basicrobotlorisdavide</i></p></small>
+    <h6>QAK</h6>
+    <a href="QakSprint1/src/Prototype/demo0.qak">Metamodello eseguibile QAK</a>
+    <h6><p>Testplan:</p></h6>
+    <p><a href="QakSprint1/test/testSprint1/TestSprint1_wasteservice.kt">TestSprint1_wasteservice.kt</a> <small>(= a sprint0)</small> <br>
+        <a href="QakSprint1/test/testSprint1/TestSprint1_mover.kt">TestSprint1_mover.kt</a> <br>
+        <a href="QakSprint1/test/testSprint1/TestSprint1_integration_test.kt">TestSprint1_integration_test.kt</a></p>-->
+</div>
+ 
+<!-- USEFUL
+<table style="width:100%" border="1">
+<tr>
+<td style="width:50%">
+</td>
+<td></td>
+</tr>
+</table>
+-->
+	      	
+<br/><br/> 	
+</div>  
+
+<div style="background-color:rgba(86, 56, 253, 0.9); width:100%;text-align:left;color:white">
+    <table style="border: 0px solid transparent; margin: 0 auto;">
+        <tr>
+            <td>
+                <p style="font-weight: bold;">Loris Giannatempo <br>
+                Email: loris.giannatempo@studio.unibo.it</p>
+                <img class="centerimg" src="../docs_common/lorisgiannatempo.jpg" style="width: 30%; height: 30%; border: 0px">
+            </td>
+            <td>
+                <p style="font-weight: bold;">Davide Guidetti <br>
+                Email: davide.guidetti3@studio.unibo.it</p>
+                <img class="centerimg" src="../docs_common/davideguidetti.jpg" style="width: 30%; height: 30%; border: 0px">
+            </td>
+        </tr>
+    </table>
+</div> 
+</body>
+</html>

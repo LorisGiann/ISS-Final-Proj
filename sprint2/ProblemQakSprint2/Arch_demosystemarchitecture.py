@@ -30,22 +30,23 @@ with Diagram('demosystemarchitectureArch', show=False, outformat='png', graph_at
           mover=Custom('mover','./qakicons/symActorSmall.png')
           moveruturn=Custom('moveruturn','./qakicons/symActorSmall.png')
           basicrobotwrapper=Custom('basicrobotwrapper','./qakicons/symActorSmall.png')
-          basicrobot=Custom('basicrobot','./qakicons/symActorSmall.png')
+          basicrobotlorisdavide=Custom('basicrobotlorisdavide','./qakicons/symActorSmall.png')
+          alarmreceivertest=Custom('alarmreceivertest','./qakicons/symActorSmall.png')
           distancefilter=Custom('distancefilter(coded)','./qakicons/codedQActor.png')
      with Cluster('ctxalarm', graph_attr=nodeattr):
           led_alarm_control=Custom('led_alarm_control','./qakicons/symActorSmall.png')
           led=Custom('led','./qakicons/symActorSmall.png')
           alarmemitter=Custom('alarmemitter','./qakicons/symActorSmall.png')
-          sonar=Custom('sonar','./qakicons/symActorSmall.png')
+          sonarlorisdavide=Custom('sonarlorisdavide','./qakicons/symActorSmall.png')
      smartdevice >> Edge(color='magenta', style='solid', xlabel='depositrequest') >> wasteservice
      wasteservice >> Edge(color='magenta', style='solid', xlabel='depositaction') >> depositaction
      depositaction >> Edge(color='blue', style='solid', xlabel='err') >> wasteservice
-     depositaction >> Edge(color='magenta', style='solid', xlabel='move') >> transporttrolley
+     depositaction >> Edge(color='magenta', style='solid', xlabel='moveto') >> transporttrolley
      depositaction >> Edge(color='magenta', style='solid', xlabel='pickup') >> transporttrolley
      depositaction >> Edge(color='magenta', style='solid', xlabel='dropout') >> transporttrolley
      transporttrolley >> Edge(color='magenta', style='solid', xlabel='pickup') >> pickupdropouthandler
      transporttrolley >> Edge(color='magenta', style='solid', xlabel='dropout') >> pickupdropouthandler
-     transporttrolley >> Edge(color='magenta', style='solid', xlabel='move') >> mover
+     transporttrolley >> Edge(color='magenta', style='solid', xlabel='moveto') >> mover
      sys >> Edge(color='red', style='dashed', xlabel='alarm') >> pickupdropouthandler
      sys >> Edge(color='red', style='dashed', xlabel='alarmceased') >> pickupdropouthandler
      mover >> Edge(color='magenta', style='solid', xlabel='cmdsync') >> basicrobotwrapper
@@ -53,9 +54,9 @@ with Diagram('demosystemarchitectureArch', show=False, outformat='png', graph_at
      moveruturn >> Edge(color='magenta', style='solid', xlabel='cmdsync') >> basicrobotwrapper
      sys >> Edge(color='red', style='dashed', xlabel='alarm') >> basicrobotwrapper
      sys >> Edge(color='red', style='dashed', xlabel='alarmceased') >> basicrobotwrapper
-     basicrobotwrapper >> Edge(color='blue', style='solid', xlabel='cmd') >> basicrobot
+     basicrobotwrapper >> Edge(color='blue', style='solid', xlabel='cmd') >> basicrobotlorisdavide
      sys >> Edge(color='red', style='dashed', xlabel='info') >> basicrobotwrapper
-     basicrobot >> Edge( xlabel='info', **eventedgeattr) >> sys
+     basicrobotlorisdavide >> Edge( xlabel='info', **eventedgeattr) >> sys
      basicrobotwrapper >> Edge(color='blue', style='solid', xlabel='coapUpdate') >> led_alarm_control
      mover >> Edge(color='blue', style='solid', xlabel='coapUpdate') >> led_alarm_control
      pickupdropouthandler >> Edge(color='blue', style='solid', xlabel='coapUpdate') >> led_alarm_control
@@ -64,5 +65,7 @@ with Diagram('demosystemarchitectureArch', show=False, outformat='png', graph_at
      sys >> Edge(color='red', style='dashed', xlabel='local_sonardata') >> alarmemitter
      alarmemitter >> Edge( xlabel='alarm', **eventedgeattr) >> sys
      alarmemitter >> Edge( xlabel='alarmceased', **eventedgeattr) >> sys
-     sonar >> Edge( xlabel='local_sonardata', **eventedgeattr) >> sys
+     sonarlorisdavide >> Edge( xlabel='local_sonardata', **eventedgeattr) >> sys
+     sys >> Edge(color='red', style='dashed', xlabel='alarm') >> alarmreceivertest
+     sys >> Edge(color='red', style='dashed', xlabel='alarmceased') >> alarmreceivertest
 diag
