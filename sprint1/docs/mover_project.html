@@ -46,8 +46,8 @@ h6{
         <p>Interfaccia:</p>
         <code><pre>
 //POSITION =  INDOOR | PLASTICBOX | GLASSBOX | HOME
-Request move           : move(POSITION)
-Reply   moveanswer     : moveanswer(RESULT)</pre>
+Request moveto           : moveto(POSITION)
+Reply   movetoanswer     : movetoanswer(RESULT)</pre>
         </code></p>
 
         <p>Le 4 <b>Position</b> possono essere viste come delle specie di "macrostati" della FSM che implementa il <b>mover</b>. L'idea è quella di prevedere 4 macrostati, nei quali di 
@@ -65,14 +65,14 @@ Reply   moveanswer     : moveanswer(RESULT)</pre>
         <img class="centerimg" style="max-width: 1100px;" src="_images/mover_option2_compact_state_machine_1.png"/>
         <p>Inizialmente ci si trova nello stato di <i>wait</i>, quando si riceve una nuova posizione si passa allo stato di <i>handle</i>, che setta la variabile di destinazione <i>DEST</i> e la confronta con <i>CURRPOS</i> (contenente 
             la posizione attuale). Se non siamo nella destinazione finale, decidiamo se procedere in senso orario o antiorario. Anche in questo caso <span style="color: #45d0ff;">verifichiamo se è necessario cambiare l'orientamento del 
-            robot</span>, poi si <span style="color: #f55b07;">procede in avanti</span> fino al raggiungimento della nuova <b>Position</b>. Se però arriva un nuovo comando di <i>move(POS)</i> e risulta più vantaggioso cambiare direzione, 
+            robot</span>, poi si <span style="color: #f55b07;">procede in avanti</span> fino al raggiungimento della nuova <b>Position</b>. Se però arriva un nuovo comando di <i>moveto(POS)</i> e risulta più vantaggioso cambiare direzione, 
             si fa una <span style="color: #febb00;">inversione ad U</span> per tornare verso la <b>Position</b> dalla quale si era partiti. Se invece la nuova <b>Position</b> è stata raggiunta, si aggiorna la variabile <i>CURRPOS</i> 
             e si <span style="color: #5ac600;">gira il robot</span>.<br>
             Ogni volta che si giunge presso una <b>Position</b> si verifica se siamo arrivati a destinazione: ci si continua a muovere fino a che questo non accade.</p>
         
         <p>Scendendo ancor di più nel dettaglio, la FSM effettivamente implementata è la seguente (viene omesso per brevità lo stato di errore):</p>
         <img class="centerimg" style="max-width: 1300px;" src="_images/mover_option2_compact_state_machine_2.png"/>
-        <p>Si noti come, dopo lo stato di risposta <i>reply</i>, si torni in <i>handle</i> consumando un nuovo eventuale comando di <i>move(POS)</i> (se presente, altrimenti transizione spontanea).</p>
+        <p>Si noti come, dopo lo stato di risposta <i>reply</i>, si torni in <i>handle</i> consumando un nuovo eventuale comando di <i>moveto(POS)</i> (se presente, altrimenti transizione spontanea).</p>
         <p>Inoltre la gestione della manovra di <span style="color: #febb00;">inversione ad U</span> e di quello che segue è delegata ad un apposito attore <i>moveruturn</i>, la cui implementazione viene qui riportata:</p>
         <img class="centerimg" style="max-width: 750px;" src="_images/moveruturn_state_machine_1.png"/>
         <p>All'attore viene passato l'orientamento corrente del robot, in modo che una volta raggiunta la <b>Position</b> dalla quale si era partiti il robot si giri dalla parte giusta (stato <i>final_turn</i>). </p>

@@ -241,8 +241,8 @@ Reply   dropoutanswer  : dropoutanswer(RESULT)</pre>
             <p>Attore <i>mover</i> per implementare la logica di navigazione del robot verso la prossima destinazione. Interfaccia:</p>
             <code><pre>
 //POSITION =  INDOOR | PLASTICBOX | GLASSBOX | HOME
-Request move           : move(POSITION)
-Reply   moveanswer     : moveanswer(RESULT)</pre>
+Request moveto           : moveto(POSITION)
+Reply   movetoanswer     : movetoanswer(RESULT)</pre>
             </code>
         </li>
     </ul>
@@ -266,7 +266,7 @@ Reply cmdanswer   	: cmdanswer(RESULT)</pre>
     <p>Visitiamo ora nel dettaglio le implementazioni dei nuovi componenti:</p>
 
     <h4><i>trasporttrolley</i></h4>
-    <p>Come anticipato, si tratta di un semplice dispatcher di comandi. Si noti come per l'operazione di <i>move</i> sia possibile comandare una nuova <i>move(POS)</i> senza che la precedente sia necessariamente terminata.</p>
+    <p>Come anticipato, si tratta di un semplice dispatcher di comandi. Si noti come per l'operazione di <i>move</i> sia possibile comandare una nuova <i>moveto(POS)</i> senza che la precedente sia necessariamente terminata.</p>
     <img class="centerimg" style="max-width: 550px;" src="./docs/_images/transporttrolley_state_machine.png"/>
 
     <h4><i>mover</i></h4>
@@ -275,9 +275,9 @@ Reply cmdanswer   	: cmdanswer(RESULT)</pre>
     <!--
     <p>La logica di base del componente rimane quella analizzata nell'opzione 1 di <a href="docs/grid_or_boundary_analysis.html">grid_or_boundary_analysis</a>. Tuttavia per poterlo implementare efficacemente con QAK la struttura è stata riorganizzata nel seguente modo:</p>
     <img class="centerimg" style="max-width: 800px;" src="./docs/_images/mover_actor_state_diagram_1.png"/>
-    <p>In particolare lo stato <i>handle</i> conterrà un blocco onMsg() che permetterà di settare la variabile di destinazione solo quando arriva un messaggio <i>move(POS)</i>, mentre la guardia 
+    <p>In particolare lo stato <i>handle</i> conterrà un blocco onMsg() che permetterà di settare la variabile di destinazione solo quando arriva un messaggio <i>moveto(POS)</i>, mentre la guardia 
         permetterà di capire se è necessario continuare per raggiungere la prossima <b>Position</b> o fermarsi. Inoltre la transizione che va da <i>reply</i> a <i>wait</i> potrebbe avvenire sia in assenza 
-        di messaggi (transizione spontanea), sia consumando un ulteriore messaggio <i>move(POS)</i>, il che avviene quando si cambia la destinazione prima ancora di aver raggiunto quella precedente.</p>
+        di messaggi (transizione spontanea), sia consumando un ulteriore messaggio <i>moveto(POS)</i>, il che avviene quando si cambia la destinazione prima ancora di aver raggiunto quella precedente.</p>
     <p>La macchina a stati completa sarebbe quindi la seguente:</p>
     <img class="centerimg" style="max-width: 800px;" src="./docs/_images/mover_actor_state_diagram_2.png"/>
     -->
