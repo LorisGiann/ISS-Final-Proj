@@ -34,7 +34,7 @@ with Diagram('demosystemarchitectureArch', show=False, outformat='png', graph_at
           alarmreceivertest=Custom('alarmreceivertest','./qakicons/symActorSmall.png')
           distancefilter=Custom('distancefilter(coded)','./qakicons/codedQActor.png')
      with Cluster('ctxalarm', graph_attr=nodeattr):
-          led_alarm_control=Custom('led_alarm_control','./qakicons/symActorSmall.png')
+          ledalarmcontrol=Custom('ledalarmcontrol','./qakicons/symActorSmall.png')
           led=Custom('led','./qakicons/symActorSmall.png')
           alarmemitter=Custom('alarmemitter','./qakicons/symActorSmall.png')
           sonarlorisdavide=Custom('sonarlorisdavide','./qakicons/symActorSmall.png')
@@ -57,10 +57,10 @@ with Diagram('demosystemarchitectureArch', show=False, outformat='png', graph_at
      basicrobotwrapper >> Edge(color='blue', style='solid', xlabel='cmd') >> basicrobotlorisdavide
      sys >> Edge(color='red', style='dashed', xlabel='info') >> basicrobotwrapper
      basicrobotlorisdavide >> Edge( xlabel='info', **eventedgeattr) >> sys
-     basicrobotwrapper >> Edge(color='blue', style='solid', xlabel='coapUpdate') >> led_alarm_control
-     mover >> Edge(color='blue', style='solid', xlabel='coapUpdate') >> led_alarm_control
-     pickupdropouthandler >> Edge(color='blue', style='solid', xlabel='coapUpdate') >> led_alarm_control
-     led_alarm_control >> Edge( xlabel='update_led', **eventedgeattr) >> sys
+     basicrobotwrapper >> Edge(color='blue', style='solid', xlabel='coapUpdate') >> ledalarmcontrol
+     mover >> Edge(color='blue', style='solid', xlabel='coapUpdate') >> ledalarmcontrol
+     pickupdropouthandler >> Edge(color='blue', style='solid', xlabel='coapUpdate') >> ledalarmcontrol
+     ledalarmcontrol >> Edge( xlabel='update_led', **eventedgeattr) >> sys
      sys >> Edge(color='red', style='dashed', xlabel='update_led') >> led
      sys >> Edge(color='red', style='dashed', xlabel='local_sonardata') >> alarmemitter
      alarmemitter >> Edge( xlabel='alarm', **eventedgeattr) >> sys

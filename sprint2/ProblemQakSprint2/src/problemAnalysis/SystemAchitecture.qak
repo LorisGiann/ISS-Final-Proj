@@ -950,7 +950,7 @@ QActor basicrobotlorisdavide context ctxrobot{
 
 // ----------------------------------------------------- ADDED COMPONENTS FOR SPRINT 2 -----------------------------------------------------
 
-QActor led_alarm_control context ctxalarm { //ctxobserver ctxboundaryqak30{
+QActor ledalarmcontrol context ctxalarm { //ctxobserver ctxboundaryqak30{
 	State s0 initial{
 		observeResource basicrobotwrapper
 		observeResource mover

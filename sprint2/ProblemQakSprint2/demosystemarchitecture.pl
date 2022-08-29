@@ -15,7 +15,7 @@ context(ctxalarm, "127.0.0.1",  "TCP", "8097").
   qactor( moveruturn, ctxrobot, "it.unibo.moveruturn.Moveruturn").
   qactor( basicrobotwrapper, ctxrobot, "it.unibo.basicrobotwrapper.Basicrobotwrapper").
   qactor( basicrobotlorisdavide, ctxrobot, "it.unibo.basicrobotlorisdavide.Basicrobotlorisdavide").
-  qactor( led_alarm_control, ctxalarm, "it.unibo.led_alarm_control.Led_alarm_control").
+  qactor( ledalarmcontrol, ctxalarm, "it.unibo.ledalarmcontrol.Ledalarmcontrol").
   qactor( led, ctxalarm, "it.unibo.led.Led").
   qactor( alarmemitter, ctxalarm, "it.unibo.alarmemitter.Alarmemitter").
   qactor( sonarlorisdavide, ctxalarm, "it.unibo.sonarlorisdavide.Sonarlorisdavide").

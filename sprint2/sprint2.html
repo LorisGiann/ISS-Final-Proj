@@ -62,10 +62,10 @@ h6{
             macchinario è in movimento, o più in generale quando sta operando. <br>
             Per questo motivo si deduce che il <b>Led</b>:
             <ul>
-                <li>Debba lampeggiare quando il robot sta gestendo (ho ha gestito e sta tornando a casa) una depositaction, segnalando quindi che il robot può muoversi. <br>
-                    Inoltre, se il robot si trova in home ma si sta girando (magari per riposizionarsi dopo aver gestito una deposiaction), il <b>Led</b> deve comunque lampeggiare.</li>
+                <li>Debba lampeggiare quando il robot sta gestendo (ho ha gestito e sta tornando a casa) una <b>Deposit action</b>, segnalando quindi che il robot può muoversi. <br>
+                    Inoltre, se il robot si trova in <b>HOME</b> ma si sta girando (magari per riposizionarsi dopo aver gestito una deposiaction), il <b>Led</b> deve comunque lampeggiare.</li>
                 <li>Resterà acceso solo se la depositaction viene interrotta da un allarme.</li>
-                <li>Resterà spento solo quando non vi sarà più niente da gestire (e per questo motivo ci si troverà in HOME).
+                <li>Resterà spento solo quando non vi sarà più niente da gestire (e per questo motivo ci si troverà in <b>HOME</b>).
                 </li>
             </ul>
         </li>
@@ -80,7 +80,7 @@ h6{
         dal committente al punto 4, siccome questo rappresenta una parte più importante e corposa rispetto alla gui del punto 3.</p>
     <h4>Piano di lavoro:</h4>
     <ul>
-        <li>Analisi del problema di chi e in che forma riceve le informazioni relative ad un allarme per realizzare lo stop di emergenza del robot</li>
+        <li>Analisi del problema di chi e in che forma riceve le informazioni relative ad un allarme per realizzare l'halt del robot</li>
         <li>Analisi del problema di chi e in che forma riceve le informazioni per realizzare l'aggiornamento dello stato del <b>Led</b></li>
         <li>Sviluppo / adattamento dei componenti necessari</li>
         <li>Realizzazione di un modello eseguibile (a tal proposito verrà utilizzato il metamodello <a href="../docs_common/Qak.html">QAK</a>).</li>
@@ -119,7 +119,7 @@ h6{
 Event alarm       : alarm(_)
 Event alarmceased : alarmceased(_)</pre>
         </code>
-    <p>Risulta quindi logicamente sensato porre in cascata al sonar (il quale potrà emettere eventi locali di distanza misurata) un componente dedicato all'invio system-wide degli eventi 
+    <p>Risulta quindi logicamente sensato porre in cascata al <b>Sonar</b> (il quale potrà emettere eventi locali di distanza misurata) un componente dedicato all'invio system-wide degli eventi 
         di allarme e cessato allarme.</p>
     <p>Inoltre, al fine di realizzare un buon test plan, è opportuno che il sonar possa essere disattivato in modo che gli allarmi possano essere inviati on demand dal test stesso</p>
     <code><pre>
@@ -149,12 +149,13 @@ Dispatch sonardeactivate : sonaractivate(_)</pre>
     
     
     <h3><b>Led</b></h3>
-    <h4>Come calcolare lo stato del led?</h4>
+    <h4>Come calcolare lo stato del <b>Led</b>?</h4>
     <p>Lo stato del <b>Led</b> dipende: </p>
     <ul>
-        <li>Dal fatto che il robot si trovi o meno in home senza dover gestire nient'altro. L'informazione è ottenibile osservando il <i>mover</i></li>
+        <li>Dal fatto che il robot si trovi o meno in <b>HOME</b> senza dover gestire nient'altro. L'informazione è ottenibile osservando il <i>mover</i></li>
         <li>Dal fatto che il robot sia in movimento (o che comunque stia operando) piuttosto che si trovi invece bloccato da un allarme. L'informazione è ottenibile da <i>basicrobotwrapper</i> e <i>pickupdropouthandler</i></li>
     </ul>
+    <p>Dunque potrà essere creato una specie di controller che ossreva questi attori e che invia messaggi al <b>Led</b>.</p>
     <h4>Come interagire con il componente <b>Led</b>?</h4>
     <p>Il componente <b>Led</b> può ricevere gli aggiornamenti di stato tramite eventi, il che permette di realizzare un buon loose binding tra il <b>Led</b> e il resto del sistema. Inoltre lo stato del 
         <b>Led</b> sulla gui potrà essere aggiornato facendo uso del medesimo evento.</p>
@@ -167,6 +168,8 @@ Event    update_led 	  : update_led(LEDSTATE) // LEDSTATE = ON | OFF | BLINK</pr
         <h6>Architettura logica:</h6>
         <img class="centerimg" style="max-width: 1200px;" src="ProblemQakSprint2/demosystemarchitecturearch.png"/>
         <p style="width: 100%; text-align: right;"><a href="../docs_common/Legenda.html">Legenda</a></p>
+        <h6>Note</h6>
+        <small>Ai soli fini di testing è previsto un attore <i>alarmreceivertest</i> in grado registrare nella history quando viene ricevuto un allarme</small>
         <h6>QAK</h6>
         <a href="ProblemQakSprint2/src/problemAnalysis/SystemAchitecture.qak">Modello del sistema QAK</a> <br>
         <h6><p>Testplan <small>(non ancora eseguibili)</small>:</p></h6>
@@ -179,25 +182,101 @@ Event    update_led 	  : update_led(LEDSTATE) // LEDSTATE = ON | OFF | BLINK</pr
 
 
 <h2>Project</h2>
+<div class="remark">
+    <p>Procediamo con lo sviluppo vero e proprio dei componenti. Essi sono tutti presenti nel <a href="QakSprint2/src/Prototype/demo0.qak">file QAK di questo sprint</a>, ma vengono qui 
+        riportate e spiegate le macchine a stati che li implementano.</p>
 
+    <h3><i>pickupdropouthandler</i></h3>
+    <img class="centerimg" style="max-width: 650px;" src="docs/_images/pickupdropouthandler.png"/>
+    <p>La macchina gestisce prioritariamente i messaggi di <i>alarm</i> e <i>alarmceased</i>. Se la macchina a stati si trova nello stato di <i>alarm</i>, allora non verrà effettuata alcuna 
+        operazione fino a che l'allarme non sarà cessato. Se invece non vi è alcun allarme e arriva una richiesta di <b>Pickup</b> o di <b>Dropout</b>, allora si passa da <i>wait</i> a 
+        <i>do_pickup</i> o <i>do_dropout</i>. Se durante tali operazioni giunge un allarme, queste vengono interrotte (stati <i>halt_pickup</i> e <i>halt_dropout</i>), e si passa agli stati 
+        di resume (<i>resume_pickup</i> e <i>resume_dropout</i>) solo una volta cessato l'allarme.</p>
+        <p>Note:</p>
+        <ul>
+            <li>Solo una volta terminata l'operazione si risponde a colui che ha fatto la richiesta (<i>transporttrolley</i> in questo caso), di conseguenza anche le macchine a più alto livello 
+                rimarranno bloccate durante un allarme.</li>
+            <li>Gli allarmi potevano essere gestiti come interrupt. Tuttavia al tempo dello sviluppo di questo sprint, il supporto runtime non è stato ritenuto sufficientemente stabile da poter
+                utilizzare la relativa feature, e quindi si hanno diversi stati di halt/alarm. Inoltre la routine di gestione dell'halt del <b>Pickup</b> potrebbe un domani essere diversa da quella di <b>Dropout</b>.</li>
+            <li>Siccome non si deve perdere nemmeno un messaggio di allarme, gli eventi <i>alarm</i> e <i>alarmceased</i> vengono trasformati in messaggi di tipo Dispatch da un apposito attore 
+                "receiver" (<i>alarmreceiverpickupdropdown</i>) prima di giungere alla macchina corrente. In questo modo i messaggi di allarme vengono accodati invece di essere scartati se arrivano 
+                mentre si è in uno stato che non prevede reazioni ad essi.</li>
+        </ul>
 
+    <h3><i>basicrobotwrapper</i></h3>
+    <img class="centerimg" style="max-width: 600px;" src="docs/_images/basicrobotwrapper.png"/>
+    <p>La macchina gestisce prioritariamente i messaggi di <i>alarm</i> e <i>alarmceased</i>. Se la macchina a stati si trova nello stato di <i>alarm</i>, allora non verrà effettuata alcuna 
+        operazione fino a che l'allarme non sarà cessato. Se invece non vi è alcun allarme e arriva una richiesta, allora si passa da <i>wait</i> a <i>forward_cmd</i> o <i>other_cmd</i> a 
+        seconda che il comando sia di move forward o meno. Se durante una move forward giunge un allarme, il robot viene fermato (<i>halt_forward</i>) e riprenderà ad andare in avanti solo a 
+        cessato allarme (<i>forward_cmd</i>). Quando viene incontrato l'ostacolo si risponde al chiamante (stato <i>collision</i>) e si attengono i prossimi comandi. <br>
+        Un caso particolare è se l'evento di <i>info</i> (che segnala la collisione) avviene mentre si è in <i>halt_forward</i> (magari perché l'allarme è giunto poco prima della collisione, e il 
+        robot non ha fatto in tempo a fermarsi): in tal caso si attende in <i>halt_collision</i> il cessato allarme, per poi passare direttamente a <i>collision</i> (N.B: se si passasse 
+        direttamente da <i>halt_forward</i> a <i>collision</i> durante un allarme, l'evento <i>alarm</i> verrebbe consumato e la macchina sarebbe pronta ad interpretare ed eseguire nuovi 
+        comandi anche se l'<i>alarmceased</i> non è ancora arrivato). <br>
+        Per gli altri comandi (stato <i>other_cmd</i>) tutto questo non è necessario, siccome ne gli halt, ne i turn devono essere interrotti. </p>
+        <p>Note:</p>
+        <ul>
+            <li>Solo una volta terminata l'operazione si risponde a colui che ha fatto la richiesta (<i>mover</i> in questo caso), di conseguenza anche le macchine a più alto livello rimarranno bloccate durante un allarme.</li>
+            <li>Siccome non si deve perdere nemmeno un messaggio di allarme, gli eventi <i>alarm</i> e <i>alarmceased</i> vengono trasformati in messaggi di tipo Dispatch da un apposito attore "receiver" (<i>alarmreceiverbasicrobot</i>) 
+                prima di giungere alla macchina corrente. In questo modo i messaggi di allarme vengono accodati invece di essere scartati se arrivano mentre si è in uno stato che non prevede reazioni ad essi.</p></li>
+        </ul>
 
-<h2>Test plans</h2> 
+    <h3><i>ledalarmcontrol</i></h3>
+    <p>Vengono osservati gli attori <i>mover</i>, <i>basicrobotwrapper</i> e <i>pickupdropouthandler</i>, e ad ogni singolo cambiamento di stato di questi si calcola il nuovo stato del <b>Led</b>. 
+        Se tale stato differisce da quello in cui si trova attualmente, allora viene emesso l'evento <i>update_led</i>. <br>
+        Dal <i>mover</i> ricaviamo la posizione attuale e la prossima destinazione che il robot deve raggiungere. Se queste sono entrambe "HOME", allora significa che il robot è inattivo, e 
+        il <b>Led</b> deve essere in ogni caso spento. <br>
+        Da <i>basicrobotwrapper</i> e <i>pickupdropouthandler</i> capiamo invece se il robot è attualmente in movimento, o se è invece bloccato. Il robot è effettivamente bloccato solo quando 
+        sia <i>basicrobotwrapper</i>, sia <i>pickupdropouthandler</i> sono in uno stato di halt/alarm. Ad esempio, se il robot sta girando ed è appena arrivato un allarme, 
+        <i>pickupdropouthandler</i> sarà nello stato <i>alarm</i>, mentre <i>basicrobotwrapper</i> entrerà in <i>alarm</i> solamente dopo aver completato il giro (ossia solo quando sarà 
+        effettivamente fermo). <br>
+        Il <b>Led</b> quindi rimane acceso solo quando:
+        <ul>
+            <li><i>basicrobotwrapper</i> si trova in <i>alarm</i>, <i>halt_forward</i> o <i>halt_collision</i></li>
+            <li><i>pickupdropouthandler</i> si trova in  <i>alarm</i>, <i>halt_pickup</i> o <i>halt_dropout</i></li>
+        </ul>
+    </p>
+</div>
 
+<h2>Test plans</h2>
+<div class="remark">
+    <h4><p>Test effettuati:</p></h4>
+    <ul>
+        <h6>Classe di test TestSprint2_integration_halt.kt:</h6>
+        <p>Classe per testare il sistema, in particolare per verificare che il robot si fermi</p>
+        <li><u>test_accepted()</u>: Il robot viene interrotto durante una move forward, durante una turn, durante una <b>Pickup</b> e una <b>Dropout</b>.
+            Si controlla che gli stati delle varie macchine assumano i valori che si si aspetti</li>
+        <h6>Classe di test TestSprint2_halt_unit_test.kt:</h6>
+        <p>Test specifici per testare <i>basicrobotwrapper</i> e <i>pickupdropouthandler</i>. Per questi test viene anche fatto uso dell'attore ausiliario <i>commandissuerfortests</i></p>
+        <lI><u>test_halt_while_forward()</u>: <i>alarm</i> inviato durante l'operazione di move forward: operazione interrotta e poi ripresa</lI>
+        <li><u>test_halt_before_forward()</u>: <i>alarm</i> inviato prima dell'operazione di move forward: comincerà dopo <i>alarmceased</i></li>
+        <li><u>test_halt_while_turn()</u>: <i>alarm</i> inviato durante l'operazione di turn: operazione continua, e solo dopo che è completata la macchina si blocca</li>
+        <li><u>test_halt_before_turn()</u>: <i>alarm</i> inviato prima dell'operazione di turn: comincerà dopo <i>alarmceased</i></li>
+        <li><u>test_halt_while_pickup()</u>: <i>alarm</i> inviato durante l'operazione di <b>Pickup</b>: operazione interrotta e poi ripresa</li>
+        <li><u>test_halt_before_pickup()</u>: <i>alarm</i> inviato prima dell'operazione di <b>Pickup</b>: comincerà dopo <i>alarmceased</i></li>
+        <h6>Classe di test TestSprint2_integration_led.kt:</h6>
+        <p>Classe per testare il sistema, in particolare per verificare che il led si comporti come ci si aspetti</p>
+        <li><u>test_accepted()</u>: Il robot viene interrotto durante una move forward, durante una turn, durante una <b>Pickup</b> e una <b>Dropout</b>. 
+            Si controlla che lo stato del <b>Led</b> assuma il valore che ci si aspetti</li>
+    </ul>
+</div>
 
 <div class="remark" style="background-color: #c3fbe8;">
-    <!--<h3>Riassunto situazione attuale:</h3>
+    <h3>Riassunto situazione attuale:</h3>
     <h6>Architettura logica:</h6>
-    <img class="centerimg" style="max-width: 1300px;" src="QakSprint1/demo0arch.png"/>
+    <img class="centerimg" style="max-width: 1300px;" src="QakSprint2/demo0arch.png"/>
     <p style="width: 100%; text-align: right;"><a href="../docs_common/Legenda.html">Legenda</a></p>
     <h6>Note</h6>
-    <small><p><i>Basicrobot</i> è stato leggermente modificato rispetto alla versione iniziale per renderlo più stabile, ed è per questo stato rinominato in <i>basicrobotlorisdavide</i></p></small>
+    <small><ul>
+        <li>Ai soli fini di testing è previsto un attore <i>commandissuerfortests</i> in grado di effettuare singole richieste e registrare le risposte degli attori <i>basicrobotwrapper</i> e <i>pickupdropouthandler</i>.</li>
+        <li>Anche se nell'immagine non figura (a causa del fatto che è un codedQActor), <i>ledalarmcontrol</i> riceve aggiornamenti coap da <i>mover</i>, <i>basicrobotwrapper</i> e <i>pickupdropouthandler</i> per poi emettere eventi di tipo <i>update_led</i>.</li>
+    </ul></small>
     <h6>QAK</h6>
-    <a href="QakSprint1/src/Prototype/demo0.qak">Metamodello eseguibile QAK</a>
+    <a href="QakSprint2/src/Prototype/demo0.qak">Metamodello eseguibile QAK</a>
     <h6><p>Testplan:</p></h6>
-    <p><a href="QakSprint1/test/testSprint1/TestSprint1_wasteservice.kt">TestSprint1_wasteservice.kt</a> <small>(= a sprint0)</small> <br>
-        <a href="QakSprint1/test/testSprint1/TestSprint1_mover.kt">TestSprint1_mover.kt</a> <br>
-        <a href="QakSprint1/test/testSprint1/TestSprint1_integration_test.kt">TestSprint1_integration_test.kt</a></p>-->
+    <p><a href="QakSprint2/test/testSprint2/TestSprint2_integration_halt.kt">TestSprint2_integration_halt.kt</a> <br>
+        <a href="QakSprint2/test/testSprint2/TestSprint2_halt_unit_test.kt">TestSprint2_halt_unit_test.kt</a> <br>
+        <a href="QakSprint2/test/testSprint2/TestSprint2_integration_led.kt">TestSprint2_integration_led.kt</a></p>
 </div>
  
 <!-- USEFUL
