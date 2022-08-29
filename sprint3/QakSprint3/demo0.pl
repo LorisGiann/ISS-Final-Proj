@@ -11,9 +11,8 @@ context(ctxalarm, "127.0.0.1",  "TCP", "8097").
   qactor( robotalarmcontrol, ctxalarm, "alarmSonar.robotAlarmControl").
   qactor( ledalarmcontrol, ctxalarm, "alarmLed.ledAlarmControl").
   qactor( ledgui, ctxserver, "gui.updateLedGui").
-  qactor( containergui, ctxserver, "gui.updateContainerGui").
-  qactor( positiongui, ctxserver, "gui.updatePositionGui").
   qactor( statettgui, ctxserver, "gui.updateStateTrasportTrolleyGui").
+  qactor( guiserver, ctxserver, "gui.guiServer").
   qactor( wasteservice, ctxserver, "it.unibo.wasteservice.Wasteservice").
   qactor( depositaction, ctxserver, "it.unibo.depositaction.Depositaction").
   qactor( transporttrolley, ctxrobot, "it.unibo.transporttrolley.Transporttrolley").

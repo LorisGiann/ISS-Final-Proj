@@ -23,9 +23,8 @@ with Diagram('demo0Arch', show=False, outformat='png', graph_attr=graphattr) as 
           wasteservice=Custom('wasteservice','./qakicons/symActorSmall.png')
           depositaction=Custom('depositaction','./qakicons/symActorSmall.png')
           ledgui=Custom('ledgui(coded)','./qakicons/codedQActor.png')
-          containergui=Custom('containergui(coded)','./qakicons/codedQActor.png')
-          positiongui=Custom('positiongui(coded)','./qakicons/codedQActor.png')
           statettgui=Custom('statettgui(coded)','./qakicons/codedQActor.png')
+          guiserver=Custom('guiserver(coded)','./qakicons/codedQActor.png')
      with Cluster('ctxrobot', graph_attr=nodeattr):
           transporttrolley=Custom('transporttrolley','./qakicons/symActorSmall.png')
           alarmreceiverpickupdropdown=Custom('alarmreceiverpickupdropdown','./qakicons/symActorSmall.png')
