@@ -1008,8 +1008,8 @@ QActor basicrobotlorisdavide context ctxrobot{
 //-------------------------------------------------------------------- ALARM CTX ----------------------------------------------------------------------
 
 QActor sonarlorisdavide context ctxalarm {
-	[# //AlarmConfig.loadConf()
-		val simulate   =  AlarmConfig.simulation
+	[# 
+		var simulate : Boolean = true
 		val sonarActorName = name
 		var active = false
 		var init = false
@@ -1018,7 +1018,11 @@ QActor sonarlorisdavide context ctxalarm {
 	State s0 initial {
 		printCurrentMessage
 		if[# !init #]{ //prevent re-initialization
-			[# init=true #]
+			[# 
+				init=true
+				AlarmConfig.loadConf()
+				simulate = AlarmConfig.simulation 
+			#]
 			run alarmSonar.configureSonarSubsystem.configureTheSonar(simulate, sonarActorName)
 		}
 	}
@@ -1028,7 +1032,11 @@ QActor sonarlorisdavide context ctxalarm {
 		printCurrentMessage
 		updateResource [# "sonarlorisdavide(activateTheSonar,simulate)" #]
 		if[# !init #]{ //if a message arrives before autoStartSysMsg s0 action will never be executed
-			[# init=true #]
+			[# 
+				init=true
+				AlarmConfig.loadConf()
+				simulate = AlarmConfig.simulation 
+			#]
 			run alarmSonar.configureSonarSubsystem.configureTheSonar(simulate, sonarActorName)
 		}
 		if[# !active #]{
@@ -1119,9 +1127,6 @@ QActor alarmemitter context ctxalarm {
 
 QActor led context ctxalarm{ 
 	[# var ledM : `it.unibo`.radarSystem22.domain.interfaces.ILed? = null
-		//AlarmConfig.loadConf()
-		`it.unibo`.radarSystem22.domain.utils.DomainSystemConfig.ledGui = true
-		`it.unibo`.radarSystem22.domain.utils.DomainSystemConfig.simulation = true
 		var newState : ws.LedState? = null
 	#]
 	
@@ -1131,7 +1136,12 @@ QActor led context ctxalarm{
 		updateResource [# "led(initial,OFF)" #]
 		//println("${name} STARTS")
 		if[# ledM == null #]{
-			[# ledM = `it.unibo`.radarSystem22.domain.models.LedModel.create().also{ it.turnOff() } #]
+			[# 
+				AlarmConfig.loadConf()
+				//`it.unibo`.radarSystem22.domain.utils.DomainSystemConfig.ledGui = true
+				//`it.unibo`.radarSystem22.domain.utils.DomainSystemConfig.simulation = true
+				ledM = `it.unibo`.radarSystem22.domain.models.LedModel.create().also{ it.turnOff() } 
+			#]
 		}
 		//[# sysUtil.logMsgs=true #]
  	}
@@ -1141,8 +1151,13 @@ QActor led context ctxalarm{
  		printCurrentMessage
 		onMsg( update_led:update_led(ARG) ){
 			[# newState = ws.LedState.valueOf(payloadArg(0)) #]
-			if[# ledM == null #]{
-				[# ledM = `it.unibo`.radarSystem22.domain.models.LedModel.create().also{ it.turnOff() } #] //apparently if a message arrives before the startMsg, the s0 action is not executed
+			if[# ledM == null #]{ //apparently if a message arrives before the startMsg, the s0 action is not executed
+				[# 
+					AlarmConfig.loadConf()
+					//`it.unibo`.radarSystem22.domain.utils.DomainSystemConfig.ledGui = true
+					//`it.unibo`.radarSystem22.domain.utils.DomainSystemConfig.simulation = true
+					ledM = `it.unibo`.radarSystem22.domain.models.LedModel.create().also{ it.turnOff() } 
+				#] 
 			}
  			//println("update_led(${newState})")
  		}

@@ -13,5 +13,7 @@ COPY ./build/libs/it.unibo.ctxrobot.MainCtxrobotKt-1.0.jar ./it.unibo.ctxrobot.M
 
 COPY ./*.pl ./
 COPY ./*.json ./
+COPY ./docker/*.pl ./
+COPY ./docker/*.json ./
 
 CMD ["java", "-jar", "it.unibo.ctxrobot.MainCtxrobotKt-1.0.jar"]

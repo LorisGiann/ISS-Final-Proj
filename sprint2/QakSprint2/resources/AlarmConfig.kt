@@ -12,7 +12,7 @@ object AlarmConfig {
     }
 
     fun loadConf() {
-        val config = File("alarmConfig").readText(Charsets.UTF_8)
+        val config = File("alarmConfig.json").readText(Charsets.UTF_8)
         val jsonObject = JSONObject(config)
         `it.unibo`.radarSystem22.domain.utils.DomainSystemConfig.ledGui = jsonObject.getBoolean("ledGui")
         simulation = jsonObject.getBoolean("simulation")

@@ -15,8 +15,8 @@ class Sonarlorisdavide ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 	}
 	override fun getBody() : (ActorBasicFsm.() -> Unit){
 		val interruptedStateTransitions = mutableListOf<Transition>()
-		 //AlarmConfig.loadConf()
-				val simulate   =  AlarmConfig.simulation
+		 
+				var simulate : Boolean = true
 				val sonarActorName = name
 				var active = false
 				var init = false
@@ -25,7 +25,10 @@ class Sonarlorisdavide ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 					action { //it:State
 						println("$name in ${currentState.stateName} | $currentMsg")
 						if(  !init  
-						 ){ init=true  
+						 ){ 
+										init=true
+										AlarmConfig.loadConf()
+										simulate = AlarmConfig.simulation 
 						alarmSonar.configureSonarSubsystem.configureTheSonar( simulate, sonarActorName  )
 						}
 					}
@@ -37,7 +40,10 @@ class Sonarlorisdavide ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 						updateResourceRep( "sonarlorisdavide(activateTheSonar,simulate)"  
 						)
 						if(  !init  
-						 ){ init=true  
+						 ){ 
+										init=true
+										AlarmConfig.loadConf()
+										simulate = AlarmConfig.simulation 
 						alarmSonar.configureSonarSubsystem.configureTheSonar( simulate, sonarActorName  )
 						}
 						if(  !active  

@@ -1,9 +1,11 @@
 build:
+    docker buildx build --platform linux/arm64 --tag alarmctx -f docker/Dockerfile-alarmctx .
+transfer:
     docker save alarmctx | pv | ssh pi@192.168.1.115 docker load
 test wiringpi:
-	docker run -i -t --rm --name alarmctx --privileged --device /dev/mem -v /proc:/proc -v /sys/firmware/devicetree/base:/sys/firmware/devicetree/base alarmctx gpio readall
+	docker run -i -t --rm --privileged --device /dev/mem -v /proc:/proc -v /sys/firmware/devicetree/base:/sys/firmware/devicetree/base alarmctx gpio readall
 Run the context in foreground:
-	docker run -i -t --rm --name alarmctx --privileged --device /dev/mem -v /proc:/proc -v /sys/firmware/devicetree/base:/sys/firmware/devicetree/base --network=host alarmctx
+	docker run -i -t --rm --privileged --device /dev/mem -v /proc:/proc -v /sys/firmware/devicetree/base:/sys/firmware/devicetree/base --network=host alarmctx
 Run in background
     docker run -d --name alarmctx --privileged --device /dev/mem -v /proc:/proc -v /sys/firmware/devicetree/base:/sys/firmware/devicetree/base --network=host alarmctx
     docker logs -f alarmctx
@@ -23,3 +25,9 @@ Run the context in foreground:
 Run in background:
     docker run -d --name serverctx --network=host  serverctx
     docker logs -f serverctx
+
+
+
+avviare facendo fare la richiesta tramite python:
+    cd resources/python/
+    jupyter notebook

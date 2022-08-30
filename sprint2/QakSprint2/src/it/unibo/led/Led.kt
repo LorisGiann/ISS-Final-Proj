@@ -16,9 +16,6 @@ class Led ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scope 
 	override fun getBody() : (ActorBasicFsm.() -> Unit){
 		val interruptedStateTransitions = mutableListOf<Transition>()
 		 var ledM : `it.unibo`.radarSystem22.domain.interfaces.ILed? = null
-				//AlarmConfig.loadConf()
-				`it.unibo`.radarSystem22.domain.utils.DomainSystemConfig.ledGui = true
-				`it.unibo`.radarSystem22.domain.utils.DomainSystemConfig.simulation = true
 				var newState : ws.LedState? = null
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
@@ -28,7 +25,11 @@ class Led ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scope 
 						updateResourceRep( "led(initial,OFF)"  
 						)
 						if(  ledM == null  
-						 ){ ledM = `it.unibo`.radarSystem22.domain.models.LedModel.create().also{ it.turnOff() }  
+						 ){ 
+										AlarmConfig.loadConf()
+										//`it.unibo`.radarSystem22.domain.utils.DomainSystemConfig.ledGui = true
+										//`it.unibo`.radarSystem22.domain.utils.DomainSystemConfig.simulation = true
+										ledM = `it.unibo`.radarSystem22.domain.models.LedModel.create().also{ it.turnOff() } 
 						}
 					}
 					 transition(edgeName="t082",targetState="handle_update",cond=whenEvent("update_led"))
@@ -40,7 +41,11 @@ class Led ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scope 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 newState = ws.LedState.valueOf(payloadArg(0))  
 								if(  ledM == null  
-								 ){ ledM = `it.unibo`.radarSystem22.domain.models.LedModel.create().also{ it.turnOff() }  
+								 ){ 
+													AlarmConfig.loadConf()
+													//`it.unibo`.radarSystem22.domain.utils.DomainSystemConfig.ledGui = true
+													//`it.unibo`.radarSystem22.domain.utils.DomainSystemConfig.simulation = true
+													ledM = `it.unibo`.radarSystem22.domain.models.LedModel.create().also{ it.turnOff() } 
 								}
 						}
 						updateResourceRep( "led(handle_update,${newState})"  
