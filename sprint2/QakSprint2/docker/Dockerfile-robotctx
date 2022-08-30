@@ -1,0 +1,17 @@
+##FROM arm64v8/openjdk:11
+##FROM arm64v8/adoptopenjdk:11
+FROM adoptopenjdk/openjdk11
+EXPOSE 8096
+
+## gradle -PmainClass=it.unibo.ctxrobot.MainCtxrobotKt-1.0 jar
+
+RUN apt update -y
+
+##RUN mkdir ./it.unibo.ctxrobot.MainCtxrobotKt-1.0/
+WORKDIR ./it.unibo.ctxrobot.MainCtxrobotKt-1.0/
+COPY ./build/libs/it.unibo.ctxrobot.MainCtxrobotKt-1.0.jar ./it.unibo.ctxrobot.MainCtxrobotKt-1.0.jar
+
+COPY ./*.pl ./
+COPY ./*.json ./
+
+CMD ["java", "-jar", "it.unibo.ctxrobot.MainCtxrobotKt-1.0.jar"]
