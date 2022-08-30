@@ -16,7 +16,9 @@ class Led ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scope 
 	override fun getBody() : (ActorBasicFsm.() -> Unit){
 		val interruptedStateTransitions = mutableListOf<Transition>()
 		 var ledM : `it.unibo`.radarSystem22.domain.interfaces.ILed? = null
-				`it.unibo`.radarSystem22.domain.utils.DomainSystemConfig.ledGui=true
+				//AlarmConfig.loadConf()
+				`it.unibo`.radarSystem22.domain.utils.DomainSystemConfig.ledGui = true
+				`it.unibo`.radarSystem22.domain.utils.DomainSystemConfig.simulation = true
 				var newState : ws.LedState? = null
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State

@@ -7,6 +7,8 @@ import it.unibo.kactor.ActorBasic
 import it.unibo.kactor.CoapObserverSupport
 import it.unibo.kactor.IApplMessage
 import it.unibo.kactor.MsgUtil
+import unibo.comm22.coap.CoapConnection
+import unibo.comm22.utils.ColorsOut
 import unibo.comm22.utils.CommUtils
 import ws.LedState
 
@@ -34,13 +36,28 @@ class ledAlarmControl (name : String ) : ActorBasic( name ) {
 		initCoapObserver()
 	}
 
+	fun coapObsserve(actor : String){
+		val ctx : String  = it.unibo.kactor.sysUtil.solve("qactor( $actor, CTX, CLASS)","CTX")!!
+		val ctxHost : String  = it.unibo.kactor.sysUtil.solve("getCtxHost($ctx,H)","H")!!
+		val ctxPort : String = it.unibo.kactor.sysUtil.solve("getCtxPort($ctx,P)","P")!!
+		val conn = CoapConnection("${ctxHost}:${ctxPort}", "$ctx/$actor")
+		while (conn.request("") == "0") {
+			ColorsOut.outappl("waiting for Coap conn to $actor", ColorsOut.CYAN)
+			CommUtils.delay(100)
+		}
+		CoapObserverSupport(this, ctxHost, ctxPort, ctx, actor)
+	}
+
 	fun initCoapObserver() {
 		try {
-			CommUtils.delay(1000)
+			CommUtils.delay(500) //improves stability, for some reason...
 			println("$tt $name | connecting")
-			CoapObserverSupport(this, "127.0.0.1", "8096", "ctxrobot", "basicrobotwrapper")
-			CoapObserverSupport(this, "127.0.0.1", "8096", "ctxrobot", "mover")
-			CoapObserverSupport(this, "127.0.0.1", "8096", "ctxrobot", "pickupdropouthandler")
+			coapObsserve("basicrobotwrapper")
+			coapObsserve("mover")
+			coapObsserve("pickupdropouthandler")
+			//CoapObserverSupport(this, "127.0.0.1", "8096", "ctxrobot", "basicrobotwrapper")
+			//CoapObserverSupport(this, "127.0.0.1", "8096", "ctxrobot", "mover")
+			//CoapObserverSupport(this, "127.0.0.1", "8096", "ctxrobot", "pickupdropouthandler")
 		}catch (e: Exception){
 			System.err.println(e.stackTrace)
 		}

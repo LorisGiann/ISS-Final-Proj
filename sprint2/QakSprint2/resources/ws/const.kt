@@ -4,5 +4,5 @@ object const {
     val MAXPB : Float = 10.0F
     val MAXGB : Float = 10.0F
 	
-    val DLIMIT : Int = 10
+    var DLIMIT : Int = 10
 }

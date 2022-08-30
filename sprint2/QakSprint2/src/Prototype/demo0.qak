@@ -1008,10 +1008,11 @@ QActor basicrobotlorisdavide context ctxrobot{
 //-------------------------------------------------------------------- ALARM CTX ----------------------------------------------------------------------
 
 QActor sonarlorisdavide context ctxalarm {
-	[# val simulate       = true
-	   val sonarActorName = name
-	   var active = false
-	   var init = false
+	[# //AlarmConfig.loadConf()
+		val simulate   =  AlarmConfig.simulation
+		val sonarActorName = name
+		var active = false
+		var init = false
 	#]
 	
 	State s0 initial {
@@ -1118,7 +1119,9 @@ QActor alarmemitter context ctxalarm {
 
 QActor led context ctxalarm{ 
 	[# var ledM : `it.unibo`.radarSystem22.domain.interfaces.ILed? = null
-		`it.unibo`.radarSystem22.domain.utils.DomainSystemConfig.ledGui=true
+		//AlarmConfig.loadConf()
+		`it.unibo`.radarSystem22.domain.utils.DomainSystemConfig.ledGui = true
+		`it.unibo`.radarSystem22.domain.utils.DomainSystemConfig.simulation = true
 		var newState : ws.LedState? = null
 	#]
 	

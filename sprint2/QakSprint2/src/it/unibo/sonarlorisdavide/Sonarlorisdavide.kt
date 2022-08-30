@@ -15,10 +15,11 @@ class Sonarlorisdavide ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 	}
 	override fun getBody() : (ActorBasicFsm.() -> Unit){
 		val interruptedStateTransitions = mutableListOf<Transition>()
-		 val simulate       = true
-			   val sonarActorName = name
-			   var active = false
-			   var init = false
+		 //AlarmConfig.loadConf()
+				val simulate   =  AlarmConfig.simulation
+				val sonarActorName = name
+				var active = false
+				var init = false
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
