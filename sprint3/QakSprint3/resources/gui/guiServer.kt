@@ -44,25 +44,29 @@ class guiServer (name : String ) : ActorBasic( name ) {
 						val msgterm = (Term.createTerm(VALUE) as Struct)
 						val CURRPOS = msgterm.getArg(1).toString()		
 						println("$tt $name | updatePositionGui CURRPOS $CURRPOS" )
+						updateResourceRep( "position($CURRPOS)")
 					}
 					"wasteservice" -> {
 						val msgterm = (Term.createTerm(VALUE) as Struct)
 						val PB = msgterm.getArg(1).toString()
 						val GB = msgterm.getArg(2).toString()
 						println("$tt $name | updateContainerGui PB $PB GB $GB" )
+						updateResourceRep( "container($PB,$GB)")
 					}
 				}
 
 			} catch (e: Exception){
 				System.err.println(e.stackTrace)
 			}
-		}else if(msg.msgId() == "update_led_gui"){
+		}else if(msg.msgId() == "update_led"){
 			//val termLed = (Term.createTerm(msg.msgContent()) as Struct).toString()		
 			val stateLed  = (Term.createTerm( msg.msgContent() ) as Struct).getArg(0).toString()
 			println("$tt $name | termLed State: $stateLed")
+			updateResourceRep( "ledstate($stateLed)")
 		}else if(msg.msgId() == "updateStateTrasportTrolley"){
 			val statett  = (Term.createTerm( msg.msgContent() ) as Struct).getArg(0).toString()
 			println("$tt $name | updateStateTrasportTrolley State: $statett" )
+			updateResourceRep( "statett($statett)")
 		}
 
 	}

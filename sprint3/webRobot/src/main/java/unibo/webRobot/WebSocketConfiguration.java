@@ -1,5 +1,6 @@
 package unibo.webRobot;
 
+import Robots.common.RobotUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;

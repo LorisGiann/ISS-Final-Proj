@@ -22,7 +22,6 @@ with Diagram('demo0Arch', show=False, outformat='png', graph_attr=graphattr) as 
      with Cluster('ctxserver', graph_attr=nodeattr):
           wasteservice=Custom('wasteservice','./qakicons/symActorSmall.png')
           depositaction=Custom('depositaction','./qakicons/symActorSmall.png')
-          ledgui=Custom('ledgui(coded)','./qakicons/codedQActor.png')
           statettgui=Custom('statettgui(coded)','./qakicons/codedQActor.png')
           guiserver=Custom('guiserver(coded)','./qakicons/codedQActor.png')
      with Cluster('ctxrobot', graph_attr=nodeattr):
