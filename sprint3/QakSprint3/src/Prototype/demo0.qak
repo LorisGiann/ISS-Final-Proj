@@ -107,10 +107,11 @@ CodedQActor robotalarmcontrol  context ctxalarm className "alarmSonar.robotAlarm
 CodedQActor ledalarmcontrol    context ctxalarm className "alarmLed.ledAlarmControl"
 
 // -------- receiver event GUI
-CodedQActor ledgui 			   context ctxserver	className "gui.updateLedGui"
-CodedQActor containergui       context ctxserver	className "gui.updateContainerGui"
-CodedQActor positiongui 	   context ctxserver	className "gui.updatePositionGui"
+//CodedQActor ledgui 			   context ctxserver	className "gui.updateLedGui"
+//CodedQActor containergui       context ctxserver	className "gui.updateContainerGui"
+//CodedQActor positiongui 	   context ctxserver	className "gui.updatePositionGui"
 CodedQActor statettgui 		   context ctxserver	className "gui.updateStateTrasportTrolleyGui"
+CodedQActor guiserver		   context ctxserver 	className "gui.guiServer"
 
 QActor wasteservice context ctxserver{
 	[# lateinit var Material  : ws.Material

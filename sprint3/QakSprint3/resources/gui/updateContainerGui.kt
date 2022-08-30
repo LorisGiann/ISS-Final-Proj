@@ -19,7 +19,7 @@ class updateContainerGui (name : String ) : ActorBasic( name ) {
 		try {
 			CommUtils.delay(1000)
 			println("$tt $name | connecting")
-			CoapObserverSupport(this, "127.0.0.1", "8096", "ctxserver", "wasteservice")
+			CoapObserverSupport(this, "127.0.0.1", "8095", "ctxserver", "wasteservice")
 		}catch (e: Exception){
 			System.err.println(e.stackTrace)
 		}

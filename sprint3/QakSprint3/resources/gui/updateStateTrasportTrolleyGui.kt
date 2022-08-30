@@ -41,8 +41,12 @@ class updateStateTrasportTrolleyGui (name : String ) : ActorBasic( name ) {
 				val msgterm = (Term.createTerm(VALUE) as Struct)
 				val STATETT = msgterm.getArg(1).toString()
 				//val state = msgterm.getArg(1).toString()
-				println("$tt $name | updateStateTrasportTrolley STATE $STATETT" )
+				//println("$tt $name | updateStateTrasportTrolley STATE $STATETT" )
+				//MsgUtil.buildDispatch("gui","update_state_tt",STATETT,"guiserver");
+				//val m1 = MsgUtil.buildEvent(name, "updateStateTrasportTrolley", "updateStateTrasportTrolley($STATETT)")
+				//emit(m1)
 				
+				forward("updateStateTrasportTrolley","updateStateTrasportTrolley($STATETT)","guiServer")
 
 			} catch (e: Exception){
 				System.err.println(e.stackTrace)
