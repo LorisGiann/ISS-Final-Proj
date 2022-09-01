@@ -46,7 +46,7 @@ class updateStateTrasportTrolleyGui (name : String ) : ActorBasic( name ) {
 				//val m1 = MsgUtil.buildEvent(name, "updateStateTrasportTrolley", "updateStateTrasportTrolley($STATETT)")
 				//emit(m1)
 				
-				forward("updateStateTrasportTrolley","updateStateTrasportTrolley($STATETT)","guiServer")
+				forward("updateStateTrasportTrolley","updateStateTrasportTrolley($STATETT)","guiserver")
 
 			} catch (e: Exception){
 				System.err.println(e.stackTrace)

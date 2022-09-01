@@ -8,7 +8,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class WebRobotApplication {
 
 	public static void main(String[] args) {
-		RobotUtils.connectUsingCoap("localhost");
+		//RobotUtils.connectUsingCoap("localhost");
+		//RobotUtils.connectWithRobotUsingTcp("localhost");
 		SpringApplication.run(WebRobotApplication.class, args);
 	}
 

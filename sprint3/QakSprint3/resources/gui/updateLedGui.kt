@@ -24,7 +24,7 @@ class updateLedGui (name : String ) : ActorBasic( name ) {
 		//val m1 = MsgUtil.buildEvent(name, "update_led_gui","update_led_gui($state)")
 		//emit(m1)
 		
-		forward("update_led_gui","update_led_gui($state)","guiServer")
+		forward("update_led_gui","update_led_gui($state)","guiserver")
 		
 		//println("$tt $name |  emit m1= $data, $toDisable, $wasDisabled, $Distance" )
 	}

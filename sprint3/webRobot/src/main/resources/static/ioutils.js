@@ -2,31 +2,19 @@
 ioutils.js
 */
 
-    const infoDisplay     = document.getElementById("display");
-    //const webcamip        = document.getElementById("webcamip");
-    const robotDisplay    = document.getElementById("robotDisplay");
-    const pathexecDisplay = document.getElementById("pathexecDisplay");
+const infoDisplay     = document.getElementById("display");
+const messageArea = document.getElementById("messageArea");
 
-    function setMessageToWindow(outfield, message) {
-         var output = message.replace("\n","<br/>")
-         outfield.innerHTML = `<tt>${output}</tt>`
-    }
+function setMessageToWindow(outfield, message) {
+     var output = message.replace("\n","<br/>")
+     outfield.innerHTML = `<tt>${output}</tt>`
+}
 
-    function addMessageToWindow(outfield, message) {
-         var output = message.replace("\n","<br/>")
-          outfield.innerHTML += `<div>${output}</div>`
-    }
- 
-//short-hand for $(document).ready(function() { ... });
-$(function () {
-    $( "#h" ).click(function() { callServerUsingAjax("h") });  //callServerUsingAjax is in wsminimal
-    $( "#w" ).click(function() { callServerUsingAjax("w") });
-    $( "#s" ).click(function() { callServerUsingAjax("s") });
-    $( "#r" ).click(function() { callServerUsingAjax("r") });
-    $( "#l" ).click(function() { callServerUsingAjax("l") });
-    $( "#p" ).click(function() { callServerUsingAjax("p") });
-    $( "#z" ).click(function() { callServerUsingAjax("z") });
- });
+function addMessageToWindow(message) {
+     var output = message.replace("\n","<br/>")
+      messageArea.innerHTML += `<div>${output}</div>`
+}
+
 
 function callServerUsingAjax(message) {
     //alert("callServerUsingAjax "+message)
@@ -36,7 +24,7 @@ function callServerUsingAjax(message) {
       //Dove  inviare i dati
       url: "robotmove",
       //Dati da inviare
-      data: "move=" + message,
+      data: "info=" + message,
       dataType: "html",
       //Visualizzazione risultato o errori
       success: function(msg){  //msg ha tutta la pagina ...

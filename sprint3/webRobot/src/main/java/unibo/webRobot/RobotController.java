@@ -16,7 +16,6 @@ import unibo.comm22.utils.ColorsOut;
 public class RobotController {
     public final static String robotName  = "robottrolley";
     protected String mainPage             = "consoleGui";
-    protected boolean usingTcp            = false;
 
 
     protected String buildThePage(Model viewmodel) {
@@ -29,7 +28,8 @@ public class RobotController {
    }
 
   
-    @PostMapping("/info")
+   /*
+   @PostMapping("/info")
     public String receiveInfo(Model viewmodel  , @RequestParam String info ){
         ColorsOut.outappl("RobotController | info:" + info + " robotName=" + robotName, ColorsOut.BLUE);
         //WebSocketConfiguration.wshandler.sendToAll("RobotController | doMove:" + move); //disappears
@@ -41,7 +41,7 @@ public class RobotController {
         //return mainPage;
         return buildThePage(viewmodel);
     }
-
+    */
 
 
     @ExceptionHandler

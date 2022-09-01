@@ -21,16 +21,25 @@ via @EnableWebSocket annotation.
 @Configuration
 @EnableWebSocket
 public class WebSocketConfiguration implements WebSocketConfigurer {
-	public static final WebSocketHandler wshandler = new WebSocketHandler();
+
+    public static final WebSocketHandler wshandler = new WebSocketHandler();
+
+    public WebSocketConfiguration(){
+        new Thread(){ //To test ws-connection
+            public void run(){
+                wshandler.sendToAll("WebSocketConfiguration created" );
+            }
+        }.start();
+    }
     /*
     Necessario per l'invio di immagini
-     */
     @Bean
     public ServletServerContainerFactoryBean createWebSocketContainer() {
         ServletServerContainerFactoryBean container = new ServletServerContainerFactoryBean();
         container.setMaxBinaryMessageBufferSize(1024000);
         return container;
     }
+     */
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {

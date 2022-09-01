@@ -15,17 +15,17 @@
     <div class="container-fluid pt-1 bg-primary text-white text-center">
         <h1>console</h1>
     </div>
-
+    <div id="messageArea"  class="messageAreaStyle"></div>
     <div class="container-fluid">
         <div class="card iss-bg-robotarea text-dark">
             <div class="card-header px-1">Robot:</div>
               <div class="card-content px-1">
                 <span id="Display" >
-                    <p id="statett"></p>    
-                    <p id="ledstate"></p>
-                    <p id="position"></p>
-                    <p ip="pb"></p>
-                    <p id="gb"></p>
+                    State transport trolley: <p id="statett"></p>    
+                    State led: <p id="stateled"></p>
+                    Current position: <p id="position"></p>
+                    Capacity plastic box: <p id="pb"></p>
+                    Capacity glass box: <p id="gb"></p>
                 </span>
             </div>
           </div>
@@ -40,9 +40,9 @@
     </footer>
 
     <script src="vendors/jquery/jquery.min.js"></script>
-    <script src="sockjs.min.js"></script>
+    <!-- <script src="sockjs.min.js"></script> -->
     <!-- <script src="app.js"></script> -->
-    <script src="ioutils.js"></script>
+    <!-- <script src="ioutils.js"></script> -->
     <script src="wsminimal.js"></script>
     <script>connect()</script>  <!-- connect definita in wsminimal-->
 </body>

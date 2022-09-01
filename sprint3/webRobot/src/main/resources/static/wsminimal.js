@@ -2,38 +2,56 @@
 wsminimal.js
 */
 
-    var socket;
+var socket;
 
-    function sendMessage(message) {
-        var jsonMsg = JSON.stringify( {'name': message});
-        socket.send(jsonMsg);
-        console.log("Sent Message: " + jsonMsg);
-    }
+const messageArea = document.getElementById("messageArea");
 
-    function connect(){
-        var host     =  document.location.host;
-        var pathname =  "/"                   //document.location.pathname;
-        var addr     = "ws://" +host  + pathname + "socket"  ;
-        //alert("connect addr=" + addr   );
+function addMessageToWindow(message) {
+     var output = message.replace("\n","<br/>")
+      messageArea.innerHTML += `<div>${output}</div>`
+}
 
-        // Assicura che sia aperta un unica connessione
-        if(socket !== undefined && socket.readyState !== WebSocket.CLOSED){
-             alert("WARNING: Connessione WebSocket già stabilita");
-        }
-        socket = new WebSocket(addr);
+function sendMessage(message) {
+    var jsonMsg = JSON.stringify( {'name': message});
+    socket.send(jsonMsg);
+    console.log("Sent Message: " + jsonMsg);
+}
 
-        socket.onopen = function (event) {
-            //console.log("Connected to " + addr);
-            setMessageToWindow(infoDisplay,"Connected to " + addr);
-        };
+function updateInfoConsole(message) {
+	//console.log(message);
+    //console.log("update");
+    //var str = replaceAll(message, "&quot;", '"');
+    var obj = JSON.parse(message);
 
-        socket.onmessage = function (event) {
-            //alert(`Got Message: ${event.data}`);
-            msg = event.data;
-            //alert(`Got Message: ${msg}`);
-            console.log("ws-status:" + msg);
-            if( msg.includes("path") ) setMessageToWindow(pathexecDisplay,msg);
-            else setMessageToWindow(robotDisplay,msg); //""+`${event.data}`*/
-         };
-    }//connect
+    document.getElementById("statett").innerHTML = obj.statett;
+    document.getElementById("stateled").innerHTML = obj.stateled;
+    document.getElementById("position").innerHTML = obj.position;
+    document.getElementById("pb").innerHTML = obj.pb;
+    document.getElementById("gb").innerHTML = obj.gb;
+
+}
+
+function connect(){
+  var host     = document.location.host;
+  var pathname =  document.location.pathname;
+  var addr     = "ws://" +host + pathname + "socket"  ;
+    alert("connect addr=" + addr   );
+  // Assicura che sia aperta un unica connessione
+  if(socket!==undefined && socket.readyState!==WebSocket.CLOSED){
+    alert("WARNING: Connessione WebSocket già stabilita");
+  }
+  var socket = new WebSocket(addr); //CONNESSIONE
+
+  socket.onopen = function (event) {
+    alert("connected")
+    //addMessageToWindow("Connected");
+  };
+  socket.onmessage = function (event) { //RICEZIONE
+    console.log("ws-status:" + `${event.data}`);
+    msg = event.data;
+    addMessageToWindow(msg);
+    updateInfoConsole(msg)
+  };
+  return socket;
+}//connect
 
