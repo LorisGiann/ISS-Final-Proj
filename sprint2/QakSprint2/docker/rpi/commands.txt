@@ -1,5 +1,5 @@
 build:
-    docker buildx build --platform linux/arm64 --tag alarmctx -f docker/Dockerfile-alarmctx .
+    docker buildx build --platform linux/arm64 --tag alarmctx -f docker/rpi/Dockerfile-alarmctx .
 transfer:
     docker save alarmctx | pv | ssh pi@192.168.1.115 docker load
 test wiringpi:
@@ -11,7 +11,7 @@ Run in background
     docker logs -f alarmctx
 
 build:
-    docker buildx build --platform linux/amd64 --tag robotctx -f docker/Dockerfile-robotctx .
+    docker buildx build --platform linux/amd64 --tag robotctx -f docker/rpi/Dockerfile-robotctx .
 Run the context in foreground:
     docker run -i -t --rm --name robotctx --network=host  robotctx
 Run in background:
@@ -19,7 +19,7 @@ Run in background:
     docker logs -f robotctx
 
 build:
-    docker buildx build --platform linux/amd64 --tag serverctx -f docker/Dockerfile-serverctx .
+    docker buildx build --platform linux/amd64 --tag serverctx -f docker/rpi/Dockerfile-serverctx .
 Run the context in foreground:
     docker run -i -t --rm --name serverctx --network=host  serverctx
 Run in background:
