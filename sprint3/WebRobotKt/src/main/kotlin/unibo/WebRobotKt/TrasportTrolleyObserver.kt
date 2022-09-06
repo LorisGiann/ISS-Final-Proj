@@ -9,7 +9,7 @@ import org.springframework.web.socket.WebSocketSession
 import unibo.comm22.utils.ColorsOut
 
 class TrasportTrolleyObserver (private val webSocketList: ArrayList<WebSocketSession>, updateGuiG : UpdateGui) : CoapHandler {
-    var statett = "WAIT"
+    var statett = "wait"
     var updateGui=updateGuiG
 
     init{
@@ -31,7 +31,22 @@ class TrasportTrolleyObserver (private val webSocketList: ArrayList<WebSocketSes
                 "TrasportTrolleyObserver | content ${content}, state transporttrolley ${statett}",
                 ColorsOut.GREEN
             )
-            updateGui.statett = statett;
+            //updateGui.statett = statett;
+
+            //conversion value state transport trolley
+            if (statett.equals("wait")){
+                updateGui.statett="wait"
+            }else if (statett.equals("req_pickup") || (statett.equals("chk_pickup"))){
+                updateGui.statett="pick-up"
+            }else if (statett.equals("req_dropout") || (statett.equals("chk_dropout"))){
+                updateGui.statett="drop-out"
+            }else if (statett.equals("req_move") || (statett.equals("chk_move"))){
+                updateGui.statett="move"
+            }else{
+                updateGui.statett = statett;
+            }
+
+
 
             var json = updateGui.toString();
             for (webSocket in webSocketList) {

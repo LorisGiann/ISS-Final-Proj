@@ -9,8 +9,8 @@ import org.springframework.web.socket.WebSocketSession
 import unibo.comm22.utils.ColorsOut
 
 class ContainerObserver (private val webSocketList: ArrayList<WebSocketSession>, updateGuiG : UpdateGui) : CoapHandler {
-    var pb = "10"
-    var gb = "10"
+    var pb = "0.0"
+    var gb = "0.0"
     var updateGui=updateGuiG
 
     init{

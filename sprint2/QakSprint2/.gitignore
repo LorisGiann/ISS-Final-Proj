@@ -19,6 +19,6 @@ package-lock.json
 
 /ReadMe.html
 .lck/ 
-#docker/
+docker/
 /.metadata/
 /src-gen/

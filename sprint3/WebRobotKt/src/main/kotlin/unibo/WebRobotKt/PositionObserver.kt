@@ -9,7 +9,7 @@ import org.springframework.web.socket.WebSocketSession
 import unibo.comm22.utils.ColorsOut
 
 class PositionObserver (private val webSocketList: ArrayList<WebSocketSession>, updateGuiG : UpdateGui) : CoapHandler {
-    var position = "HOME"
+    var position = "home"
     var updateGui=updateGuiG
 
     init{
