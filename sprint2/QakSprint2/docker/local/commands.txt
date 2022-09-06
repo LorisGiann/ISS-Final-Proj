@@ -1,0 +1,20 @@
+IP=$(ip -f inet addr show enp0s3 | sed -En -e 's/.*inet ([0-9.]+).*/\1/p')
+sudo bash -c 'echo -e "{ \n \"insecure-registries\" : [\"'$IP':5000\"] \n}" > /etc/docker/daemon.json'
+sudo systemctl restart docker.service
+echo IP="$IP" > .env
+
+docker stack rm wasteservice
+docker service rm registry
+docker swarm leave --force
+docker swarm init --advertise-addr $IP  #do that on the master node
+docker swarm join-token manager
+docker node update --label-add rpi=yes $(docker node ls | tail -2 | head -1 | cut -f1 -d' ') #on rpi
+docker service create --network=host --name registry registry:2
+
+docker rm serverctx alarmctx robotctx wenvdf
+docker rmi localhost:5000/serverctx localhost:5000/wenvdf localhost:5000/alarmctx localhost:5000/robotctx
+
+docker-compose build
+docker-compose push
+docker stack deploy -c <(docker-compose config) wasteservice
+docker stack services wasteservice

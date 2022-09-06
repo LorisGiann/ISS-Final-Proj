@@ -19,8 +19,8 @@ COPY ./build/libs/it.unibo.ctxalarm.MainCtxalarmKt-1.0.jar ./it.unibo.ctxalarm.M
 
 COPY ./*.pl ./
 COPY ./*.json ./
-COPY ./docker/*.pl ./
-COPY ./docker/*.json ./
+COPY ./docker/rpi/*.pl ./
+COPY ./docker/rpi/*.json ./
 COPY ./resources/alarmSonar/SonarAlone.c ./
 COPY ./resources/alarmLed/led25GpioTurnOff.sh ./
 COPY ./resources/alarmLed/led25GpioTurnOn.sh ./
