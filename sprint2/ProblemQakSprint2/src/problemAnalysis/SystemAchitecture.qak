@@ -27,8 +27,8 @@ Reply   movetoanswer   : movetoanswer(RESULT)
 
 // -------------------- mover msgs ----------------------
 //   (same as transporttrolley)
-//Request moveto         : moveto(POSITION)    //POSITION = INDOOR | PLASTICBOX | GLASSBOX | HOME
-//Reply   movetoanswer   : movetoanswer(RESULT)
+//Request move           : move(POSITION)    //POSITION = INDOOR | PLASTICBOX | GLASSBOX | HOME
+//Reply   moveanswer     : moveanswer(RESULT)
 // ------------------------------------------------------
 
 // --------------- depositaction msgs -------------------
