@@ -187,7 +187,7 @@ internal class TestSprint2_integration_led {
                 connTcpAlarm.close()
 
                 // --------------------------------------------------------------------- CHECKING HISTORY ---------------------------------------------------------------------
-                Assertions.assertTrue(to!!.checkNextContent("led(*,OFF)") >= 0)
+                //Assertions.assertTrue(to!!.checkNextContent("led(*,OFF)") >= 0)    //this may happen before the test executable connects
                 Assertions.assertTrue(to!!.checkNextContents(arrayOf( //led blink while moving
                     "basicrobotwrapper(forward_cmd)",
                     "led(blink_on,*)",
