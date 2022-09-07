@@ -1,0 +1,2 @@
+docker rm serverctx robotctx wenvdf
+docker-compose up

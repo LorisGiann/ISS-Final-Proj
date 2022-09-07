@@ -1,0 +1,31 @@
+##FROM arm64v8/openjdk:11
+##FROM arm64v8/adoptopenjdk:11
+FROM adoptopenjdk/openjdk11
+EXPOSE 8097
+
+## gradle -PmainClass=it.unibo.ctxalarm.MainCtxalarmKt jar
+## cd sprint2/QakSprint2/resources/alarmSonar/
+## wget https://github.com/TheNextLVL/wiringPi/releases/download/2.46/wiringpi-2.46.deb
+
+COPY ./resources/alarmSonar/wiringpi-2.46.deb ./
+RUN apt update -y
+RUN apt install -y sudo
+RUN apt install -y build-essential g++
+RUN apt install ./wiringpi-2.46.deb
+
+##RUN mkdir ./it.unibo.ctxalarm.MainCtxalarmKt-1.0/
+WORKDIR ./it.unibo.ctxalarm.MainCtxalarmKt-1.0/
+COPY ./build/libs/it.unibo.ctxalarm.MainCtxalarmKt-1.0.jar ./it.unibo.ctxalarm.MainCtxalarmKt-1.0.jar
+
+COPY ./*.pl ./
+COPY ./*.json ./
+COPY ./docker/rpi/*.pl ./
+COPY ./docker/rpi/*.json ./
+COPY ./resources/alarmSonar/SonarAlone.c ./
+COPY ./resources/alarmLed/led25GpioTurnOff.sh ./
+COPY ./resources/alarmLed/led25GpioTurnOn.sh ./
+
+RUN g++ SonarAlone.c -l wiringPi -o  SonarAlone
+##COPY alarmSonar/SonarAlone ./
+
+CMD ["java", "-jar", "it.unibo.ctxalarm.MainCtxalarmKt-1.0.jar"]

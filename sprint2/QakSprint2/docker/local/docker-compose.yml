@@ -1,0 +1,60 @@
+version: "3.3"
+services:
+  serverctx:
+    #platform: linux/amd64
+    image: serverctx
+    build:
+      context: ../../
+      dockerfile: docker/local/Dockerfile-serverctx
+    container_name: serverctx
+    #network_mode: "host"
+    networks:
+      - wasteservicenet
+    depends_on:
+      - "wenv"
+    ports:
+      - "0.0.0.0:8095:8095"
+  robotctx:
+    #platform: linux/amd64
+    image: robotctx
+    build:
+      context: ../../
+      dockerfile: docker/local/Dockerfile-robotctx
+    container_name: robotctx
+    #network_mode: "host"
+    networks:
+      - wasteservicenet
+    ports:
+      - "8096:8096"
+  alarmctx:
+    #platform: linux/arm64
+    image: alarmctx
+    build:
+      context: ../../
+      dockerfile: docker/local/Dockerfile-alarmctx
+    container_name: alarmctx
+    #network_mode: "host"
+    networks:
+      - wasteservicenet
+    ports:
+      - "8097:8097"
+  wenv:
+    #platform: linux/amd64
+    image: wenvdf
+    build:
+      context: ../../../../it.unibo.virtualRobot2020/
+    container_name: "wenvdf"
+    #network_mode: "host"
+    networks:
+      - wasteservicenet
+    ports:
+      #- "8090:8090"
+      - "0.0.0.0:8090:8090"
+      - "8091:8091"
+networks:
+  wasteservicenet:
+    #driver: overlay
+    #attachable: true
+    #ipam:
+    #  config:
+    #    - subnet: 192.168.18.0/24
