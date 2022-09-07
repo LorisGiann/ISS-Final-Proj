@@ -1,9 +1,9 @@
 %====================================================================================
 % demo0 description   
 %====================================================================================
-context(ctxserver, "192.168.1.138",  "TCP", "8095").
-context(ctxrobot, "192.168.1.138",  "TCP", "8096").
-context(ctxalarm, "192.168.1.115",  "TCP", "8097").
+context(ctxserver, "serverctx",  "TCP", "8095").
+context(ctxrobot, "robotctx",  "TCP", "8096").
+context(ctxalarm, "alarmctx",  "TCP", "8097").
  qactor( distancefilter, ctxrobot, "rx.distanceFilter").
   qactor( sonarsimulator, ctxalarm, "alarmSonar.sonarSimulator").
   qactor( sonardatasource, ctxalarm, "alarmSonar.sonarHCSR04Support2021").

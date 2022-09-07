@@ -1,0 +1,32 @@
+version: "3.3"
+services:
+  alarmctx:
+    #platform: linux/arm64
+    privileged: true
+    devices:
+      - "/dev/mem"
+    volumes:
+      - "/proc:/proc"
+      - "/sys/firmware/devicetree:/sys/firmware/devicetree"
+    image: ${IP}:5000/alarmctx
+    build:
+      context: ../../
+      dockerfile: docker/rpi/Dockerfile-alarmctx
+    container_name: alarmctx
+    #network_mode: "host"
+    networks:
+      - wasteservicenet
+    ports:
+      - "8097:8097"
+    deploy:
+      mode: global
+      # placement: 
+      #   constraints: 
+      #     - "node.labels.rpi==yes"
+networks:
+  wasteservicenet:
+    driver: overlay
+    attachable: true
+    #ipam:
+    #  config:
+    #    - subnet: 192.168.18.0/24
