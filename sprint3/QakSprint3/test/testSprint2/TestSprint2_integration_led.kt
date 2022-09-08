@@ -211,7 +211,7 @@ internal class TestSprint2_integration_led {
                 to!!.nextCheckIndex = afterResume
                 val ledOn = to!!.checkNextContent("led(*,ON)") //should NOT be present between alarmreceivertest(wait,alarmceased) and basicrobotwrapper(alarm)
                 to!!.nextCheckIndex = afterResume
-                val robAlarm = to!!.checkNextContent("basicrobotwrapper(alarm)") //however "led(*,ON)" happens right after "basicrobotwrapper(alarm)", so it can actually happen that "led(*,ON)" preceeds "basicrobotwrapper(alarm)" in the history...
+                val robAlarm = to!!.checkNextContent("alarmreceivertest(wait,alarm)") //<---- this should be "basicrobotwrapper(alarm)". But the problem is that a "led(*,ON)" happens right after "basicrobotwrapper(alarm)", so it can actually happen that this "led(*,ON)" is received before "basicrobotwrapper(alarm)", even if it actually happened after it. So take the preceding event in the timeline, which is when the alarm arrives during the turn (unfortunately we cannot do any better)
                 Assertions.assertTrue( ledOn > robAlarm )
 
                 to!!.nextCheckIndex = afteralarminturn

@@ -60,15 +60,16 @@ class TransporttrolleyState (name : String ) : ActorBasic( name ) {
 
 	suspend fun initCoapObserver() {
 		try {
-			delay(1000) //improves stability, for some reason...
+			delay(500) //improves stability, for some reason...
 			println("$tt $name | connecting")
 			coapObsserve("transporttrolley")
 			coapObsserve("basicrobotwrapper")
 			coapObsserve("pickupdropouthandler")
-			//updateResourceRep( "$name($transporttrolleyState)" )
+			updateResourceRep( "$name($transporttrolleyState)" )
 		}catch (e: Exception){
 			println("$tt $name | ERROR: ")
-			System.err.println(e.stackTrace)
+			e.printStackTrace(System.err)
+			//System.err.println(e.stackTrace)
 			//System.exit(0)
 		}
 	}
@@ -79,6 +80,7 @@ class TransporttrolleyState (name : String ) : ActorBasic( name ) {
 			initCoapObserver()
 			//MsgUtil.outgreen("$tt $name | started ")
 		}else if(msg.msgId() == "coapUpdate"){
+			if(msg.msgContent().contains("ActorBasic(Resource)")) return
 			try {
 				val term = (Term.createTerm(msg.msgContent()) as Struct)
 				val RESOURCE = term.getArg(0).toString()
@@ -124,8 +126,9 @@ class TransporttrolleyState (name : String ) : ActorBasic( name ) {
 					updateState(BASICSTATE)
 				}
 			} catch (e: Exception){
-				println("$tt $name | ERROR: ")
-				System.err.println(e.stackTrace)
+				println("$tt $name | ERROR2: ")
+				e.printStackTrace(System.err)
+				//System.err.println(e.stackTrace)
 				//System.exit(0)
 			}
 		}

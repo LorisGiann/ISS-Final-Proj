@@ -210,7 +210,7 @@ internal class TestSprint3_integration_transporttrolleystate {
                 to!!.nextCheckIndex = afterResume
                 val ledHalt = to!!.checkNextContent("transporttrolleystate(HALT)") //should NOT be present between alarmreceivertest(wait,alarmceased) [after forward resume] and basicrobotwrapper(alarm)
                 to!!.nextCheckIndex = afterResume
-                val robAlarm = to!!.checkNextContent("basicrobotwrapper(alarm)") //however "transporttrolleystate(HALT)" happens right after "basicrobotwrapper(alarm)", so it can actually happen that "transporttrolleystate(HALT)" preceeds "basicrobotwrapper(alarm)" in the history...
+                val robAlarm = to!!.checkNextContent("alarmreceivertest(wait,alarm)") //<---- this should be "basicrobotwrapper(alarm)". But the problem is that a "transporttrolleystate(HALT)" happens right after "basicrobotwrapper(alarm)", so it can actually happen that this "transporttrolleystate(HALT)" is received before "basicrobotwrapper(alarm)", even if it actually happened after it. So take the preceding event in the timeline, which is when the alarm arrives during the turn (unfortunately we cannot do any better)
                 Assertions.assertTrue( ledHalt > robAlarm )
 
                 to!!.nextCheckIndex = afteralarminturn

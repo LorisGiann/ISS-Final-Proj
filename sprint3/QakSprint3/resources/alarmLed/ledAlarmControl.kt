@@ -65,7 +65,8 @@ class ledAlarmControl (name : String ) : ActorBasic( name ) {
 			//CoapObserverSupport(this, "127.0.0.1", "8096", "ctxrobot", "pickupdropouthandler")
 		}catch (e: Exception){
 			println("$tt $name | ERROR: ")
-			System.err.println(e.stackTrace)
+			e.printStackTrace(System.err)
+			//System.err.println(e.stackTrace)
 			//System.exit(0)
 		}
 	}
@@ -76,6 +77,7 @@ class ledAlarmControl (name : String ) : ActorBasic( name ) {
 			initCoapObserver()
 			//MsgUtil.outgreen("$tt $name | started ")
 		}else if(msg.msgId() == "coapUpdate"){
+			if(msg.msgContent().contains("ActorBasic(Resource)")) return //initial default actors value
 			try {
 				val term = (Term.createTerm(msg.msgContent()) as Struct)
 				val RESOURCE = term.getArg(0).toString()
@@ -117,8 +119,9 @@ class ledAlarmControl (name : String ) : ActorBasic( name ) {
 					//println("led blink")
 				}
 			} catch (e: Exception){
-				println("$tt $name | ERROR: ")
-				System.err.println(e.stackTrace)
+				println("$tt $name | ERROR2: ")
+				e.printStackTrace(System.err)
+				//System.err.println(e.stackTrace)
 				//System.exit(0)
 			}
 		}
