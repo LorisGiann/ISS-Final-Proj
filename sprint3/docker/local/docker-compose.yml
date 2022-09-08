@@ -1,0 +1,78 @@
+version: "3.3"
+services:
+  serverctx:
+    #platform: linux/amd64
+    image: serverctx
+    build:
+      context: ../../
+      dockerfile: docker/local/Dockerfile-serverctx
+    container_name: serverctx
+    #network_mode: "host"
+    networks:
+      - wasteservicenet
+    depends_on:
+      - "wenv"
+    ports:
+      - "0.0.0.0:8095:8095/tcp"
+      - "0.0.0.0:8095:8095/udp"
+  robotctx:
+    #platform: linux/amd64
+    image: robotctx
+    build:
+      context: ../../
+      dockerfile: docker/local/Dockerfile-robotctx
+    container_name: robotctx
+    #network_mode: "host"
+    networks:
+      - wasteservicenet
+    ports:
+      - "0.0.0.0:8096:8096/tcp"
+      - "0.0.0.0:8096:8096/udp"
+  alarmctx:
+    #platform: linux/arm64
+    image: alarmctx
+    build:
+      context: ../../
+      dockerfile: docker/local/Dockerfile-alarmctx
+    container_name: alarmctx
+    #network_mode: "host"
+    networks:
+      - wasteservicenet
+    ports:
+      - "0.0.0.0:8097:8097/tcp"
+      - "0.0.0.0:8097:8097/udp"
+  wenv:
+    #platform: linux/amd64
+    image: wenvdf
+    build:
+      context: ../../../it.unibo.virtualRobot2020/
+    container_name: "wenvdf"
+    #network_mode: "host"
+    networks:
+      - wasteservicenet
+    ports:
+      #- "8090:8090"
+      - "0.0.0.0:8090:8090/tcp"
+      - "0.0.0.0:8090:8090/udp"
+      - "8091:8091"
+  guiwebserver:
+    #platform: linux/amd64
+    image: guiwebserver
+    build:
+      context: ../../
+      dockerfile: docker/local/Dockerfile-guiwebserver
+    container_name: "guiwebserver"
+    #network_mode: "host"
+    networks:
+      - wasteservicenet
+    ports:
+      #- "8090:8090"
+      - "0.0.0.0:8089:8089/tcp"
+      - "0.0.0.0:8089:8089/udp"
+networks:
+  wasteservicenet:
+    #driver: overlay
+    #attachable: true
+    #ipam:
+    #  config:
+    #    - subnet: 192.168.18.0/24

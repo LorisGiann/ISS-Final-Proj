@@ -1,0 +1,89 @@
+one time operations:
+	IP=$(ip -f inet addr show enp0s3 | sed -En -e 's/.*inet ([0-9.]+).*/\1/p')
+	echo IP="$IP" > .env
+
+cleanup:
+	docker service rm registry
+	docker swarm leave --force #on the pi too
+	docker rm serverctx robotctx wenvdf
+	docker rmi $(docker images | grep alarmctx | awk  '{print $3}')
+	docker rmi $(docker images | grep serverctx | awk  '{print $3}')
+	docker rmi $(docker images | grep robotctx | awk  '{print $3}')
+	docker rmi $(docker images | grep wenvdf | awk  '{print $3}')
+
+initialize the swarm & registry:
+	docker swarm init --advertise-addr $IP  #do that on the primary node
+	docker swarm join-token manager         #copy the printed command on the pi
+	docker service create --name registry --network=host registry:2
+
+compiling the containers:
+	docker buildx bake -f docker-compose-rpi.yml --set=*.output=type=registry,registry.insecure=true --set *.platform=linux/arm64
+	docker-compose build
+	docker-compose up --no-build
+
+run:
+	#LOCAL
+	docker-compose up --no-build
+	
+	#RPI
+	docker rmi $(docker images | grep alarmctx | awk  '{print $3}')
+	docker run -i -t --rm --name alarmctx --privileged --device /dev/mem -v /proc:/proc -v /sys/firmware/devicetree/base:/sys/firmware/devicetree/base --network=rpi_wasteservicenet 192.168.43.169:5000/alarmctx
+	
+	
+avviare facendo fare la richiesta tramite python:
+    cd ../../resources/python/
+    jupyter notebook
+    
+----------------------------------------------------- B PLAN -----------------------------------------------
+#should the rpi build command not work:
+	#docker buildx build --platform linux/arm64 --tag $IP:5000/alarmctx --load -f Dockerfile-alarmctx ../..
+	#docker push $IP:5000/alarmctx
+#in case of problem with the registry, transfer the container through ssh:
+	#docker save $IP:5000/alarmctx | pv | ssh pi@192.168.43.167 docker load
+
+
+----------------------------------------------------- C PLAN -----------------------------------------------
+- !!! EDIT THE .pl WITH THE RIGHT IPs !!!
+- locally build the containers
+- transfer the alarmctx container through ssh
+- run the container in host mode
+Follow the steps
+
+RASPBERRY, ALARMCTX:
+build:
+    docker buildx build --platform linux/arm64 --tag alarmctx -f docker/rpi/Dockerfile-alarmctx .
+transfer:
+    docker save alarmctx | pv | ssh pi@192.168.1.115 docker load
+test wiringpi:
+	docker run -i -t --rm --privileged --device /dev/mem -v /proc:/proc -v /sys/firmware/devicetree/base:/sys/firmware/devicetree/base alarmctx gpio readall
+Run the context in foreground:
+	docker run -i -t --rm --privileged --device /dev/mem -v /proc:/proc -v /sys/firmware/devicetree/base:/sys/firmware/devicetree/base --network=host alarmctx
+Run in background
+    docker run -d --name alarmctx --privileged --device /dev/mem -v /proc:/proc -v /sys/firmware/devicetree/base:/sys/firmware/devicetree/base --network=host alarmctx
+    docker logs -f alarmctx
+
+COMPUTER, SERVERCTX:
+build:
+    docker buildx build --platform linux/amd64 --tag serverctx -f docker/rpi/Dockerfile-serverctx .
+Run the context in foreground:
+    docker run -i -t --rm --name serverctx --network=host  serverctx
+Run in background:
+    docker run -d --name serverctx --network=host  serverctx
+    docker logs -f serverctx
+
+COMPUTER, ROBOTCTX:
+build:
+    docker buildx build --platform linux/amd64 --tag robotctx -f docker/rpi/Dockerfile-robotctx .
+Run the context in foreground:
+    docker run -i -t --rm --name robotctx --network=host  robotctx
+Run in background:
+    docker run -d --name robotctx --network=host  robotctx
+    docker logs -f robotctx
+
+
+
+
+
+
+    
+

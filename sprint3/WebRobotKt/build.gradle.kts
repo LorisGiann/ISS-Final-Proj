@@ -13,6 +13,10 @@ group = "unibo"
 version = "0.0.1-SNAPSHOT"
 java.sourceCompatibility = JavaVersion.VERSION_11
 
+application {
+	mainClass.set("unibo.WebRobotKt.WebRobotKtApplicationKt")
+}
+
 repositories {
 	mavenCentral()
 	flatDir { dirs("../../unibolibs") }

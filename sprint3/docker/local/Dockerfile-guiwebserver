@@ -1,0 +1,14 @@
+##FROM arm64v8/openjdk:11
+##FROM arm64v8/adoptopenjdk:11
+FROM adoptopenjdk/openjdk11
+EXPOSE 8089
+
+## gradle disttar #run this in webrobot project
+
+RUN apt update -y
+
+WORKDIR ./home
+ADD ./WebRobotKt/build/distributions/WebRobotKt-0.0.1-SNAPSHOT.tar ./
+##COPY ./WebRobotKt/gradlew ./gradlew
+
+CMD ["WebRobotKt-0.0.1-SNAPSHOT/bin/WebRobotKt"]
