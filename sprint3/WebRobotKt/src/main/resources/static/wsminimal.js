@@ -25,6 +25,21 @@ function updateInfoConsole(message) {
 
     document.getElementById("statett").innerHTML = obj.statett;
     document.getElementById("stateled").innerHTML = obj.stateled;
+    if (obj.stateled.toUpperCase()=="ON"){
+      $(".ledgreen").removeClass("off")
+      .removeClass("blink")
+      .addClass("on")
+    }else if (obj.stateled.toUpperCase()=="OFF"){
+      $(".ledgreen").removeClass("on")
+      .removeClass("blink")
+      .addClass("off")
+    }else if (obj.stateled.toUpperCase()=="BLINK"){
+      $(".ledgreen").removeClass("off")
+      .removeClass("on")
+      .addClass("blink")
+    }else{
+      console.log("Error led status")
+    }
     document.getElementById("position").innerHTML = obj.position;
     document.getElementById("pb").innerHTML = obj.pb;
     document.getElementById("gb").innerHTML = obj.gb;
@@ -49,7 +64,7 @@ function connect(){
   socket.onmessage = function (event) { //RICEZIONE
     console.log("ws-status:" + `${event.data}`);
     msg = event.data;
-    addMessageToWindow(msg);
+    //addMessageToWindow(msg);
     updateInfoConsole(msg)
   };
   return socket;

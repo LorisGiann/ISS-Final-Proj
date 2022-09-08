@@ -5,7 +5,7 @@ EXPOSE 8097
 
 ## gradle -PmainClass=it.unibo.ctxalarm.MainCtxalarmKt-1.0 jar
 
-RUN apt update -y
+#RUN apt update -y
 
 ##RUN mkdir ./it.unibo.ctxalarm.MainCtxalarmKt-1.0/
 WORKDIR ./it.unibo.ctxalarm.MainCtxalarmKt-1.0/

@@ -33,7 +33,6 @@ class WebSocketHandler : TextWebSocketHandler() {
         initCoapObserver()
     }
 
-
     public override fun handleTextMessage(session: WebSocketSession, message: TextMessage) {
         println("WebSocketHandler | handleTextMessage Received: $message")
         //val cmd = message.payload

@@ -39,3 +39,76 @@
 .font-bold {
 	font-weight: 700
 }
+
+.led-box {
+
+}
+
+.ledgreen{
+    margin: 0 auto;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    float: left;
+}
+
+.ledgreen.on {
+    background-color: #33ff00;
+    box-shadow: rgba(0, 0, 0, 0.2) 0 -1px 7px 1px, inset #304701 0 -1px 9px, #89FF00 0 2px 12px;
+}
+.ledgreen.off {
+    background-color: lightgray;
+    box-shadow: rgba(0, 0, 0, 0.2) 0 -1px 7px 1px, inset #304701 0 -1px 9px, #89FF00 0 2px 12px;
+ 
+}
+.ledgreen.blink {
+    background-color: #33ff00;
+    box-shadow: rgba(0, 0, 0, 0.2) 0 -1px 7px 1px, inset #304701 0 -1px 9px, #89FF00 0 2px 12px;
+    -webkit-animation: blinkGreen 1s infinite;
+    -moz-animation: blinkGreen 1s infinite;
+    -ms-animation: blinkGreen 1s infinite;
+    -o-animation: blinkGreen 1s infinite;
+    animation: blinkGreen 1s infinite;
+}
+
+.led-green {
+  margin: 0 auto;
+  width: 24px;
+  height: 24px;
+  background-color: #33ff00;
+  border-radius: 50%;
+  box-shadow: rgba(0, 0, 0, 0.2) 0 -1px 7px 1px, inset #304701 0 -1px 9px, #89FF00 0 2px 12px;
+  -webkit-animation: blinkGreen 1s infinite;
+  -moz-animation: blinkGreen 1s infinite;
+  -ms-animation: blinkGreen 1s infinite;
+  -o-animation: blinkGreen 1s infinite;
+  animation: blinkGreen 1s infinite;
+}
+
+@-webkit-keyframes blinkGreen {
+    from { background-color: #33ff00; }
+    50% { background-color: rgb(0, 170, 14); box-shadow: rgba(0, 0, 0, 0.2) 0 -1px 7px 1px, inset #118002 0 -1px 9px, rgb(21, 255, 0) 0 2px 0; }
+    to { background-color: rgb(60, 255, 0); }
+}
+@-moz-keyframes blinkGreen {
+    from { background-color: #33ff00; }
+    50% { background-color: rgb(0, 170, 14); box-shadow: rgba(0, 0, 0, 0.2) 0 -1px 7px 1px, inset #118002 0 -1px 9px, rgb(21, 255, 0) 0 2px 0; }
+    to { background-color: rgb(60, 255, 0); }
+}
+@-ms-keyframes blinkGreen {
+    from { background-color: #33ff00; }
+    50% { background-color: rgb(0, 170, 14); box-shadow: rgba(0, 0, 0, 0.2) 0 -1px 7px 1px, inset #118002 0 -1px 9px, rgb(21, 255, 0) 0 2px 0; }
+    to { background-color: rgb(60, 255, 0); }
+}
+@-o-keyframes blinkGreen {
+    from { background-color: #33ff00; }
+    50% { background-color: rgb(0, 170, 14); box-shadow: rgba(0, 0, 0, 0.2) 0 -1px 7px 1px, inset #118002 0 -1px 9px, rgb(21, 255, 0) 0 2px 0; }
+    to { background-color: rgb(60, 255, 0); }
+}
+
+@keyframes blinkGreen {
+    from { background-color: #33ff00; }
+    50% { background-color: rgb(0, 170, 14); box-shadow: rgba(0, 0, 0, 0.2) 0 -1px 7px 1px, inset #118002 0 -1px 9px, rgb(21, 255, 0) 0 2px 0; }
+    to { background-color: rgb(60, 255, 0); }
+}
+

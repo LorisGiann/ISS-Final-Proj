@@ -5,7 +5,7 @@ EXPOSE 8089
 
 ## gradle disttar #run this in webrobot project
 
-RUN apt update -y
+#RUN apt update -y
 
 WORKDIR ./home
 ADD ./WebRobotKt/build/distributions/WebRobotKt-0.0.1-SNAPSHOT.tar ./

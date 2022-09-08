@@ -13,35 +13,34 @@ class ContainerObserver (private val webSocketList: ArrayList<WebSocketSession>,
     var gb = "0.0"
     var updateGui=updateGuiG
 
-    init{
-        var json=updateGui.toString();
-        for (webSocket in webSocketList) {
-            synchronized(webSocket) {
-                webSocket.sendMessage(TextMessage("${json}"))
-            }
-        }
-    }
 
     override fun onLoad(response: CoapResponse) {
         val content = response.responseText
-        //ColorsOut.outappl("ContainerObserver | content ${content}", ColorsOut.GREEN)
-        try{
-            val term = (Term.createTerm(content) as Struct)
-            pb = term.getArg(1).toString()
-            gb = term.getArg(2).toString()
-            ColorsOut.outappl("ContainerObserver | content ${content}, plasticbox ${pb}, glassbox ${gb}", ColorsOut.GREEN)
-            updateGui.pb=pb
-            updateGui.gb=gb
-
-            var json=updateGui.toString();
-            for (webSocket in webSocketList) {
-                synchronized(webSocket) {
-                    webSocket.sendMessage(TextMessage("${json}"))
+        if (content.isNotBlank() && !(content.contains("ActorBasic(Resource)") && content.contains("created"))) {
+            ColorsOut.outappl("ContainerObserver | content ${content}", ColorsOut.GREEN)
+            try {
+                val term = (Term.createTerm(content) as Struct)
+                pb = term.getArg(1).toString()
+                gb = term.getArg(2).toString()
+                ColorsOut.outappl(
+                    "ContainerObserver | content ${content}, plasticbox ${pb}, glassbox ${gb}",
+                    ColorsOut.GREEN
+                )
+                synchronized(updateGui) {
+                    updateGui.pb = pb
+                    updateGui.gb = gb
                 }
+
+                var json = updateGui.toString();
+                for (webSocket in webSocketList) {
+                    synchronized(webSocket) {
+                        webSocket.sendMessage(TextMessage("${json}"))
+                    }
+                }
+            } catch (e: Exception) {
+                System.err.println("Errore lettura coap container : " + e.toString())
             }
-        }catch (e: Exception){
-            System.err.println("Errore lettura coap")
-        }
+        } else return
     }
 
     override fun onError() {
