@@ -119,7 +119,7 @@ class TransporttrolleyState (name : String ) : ActorBasic( name ) {
 				}
 
 				//calculate new trasporttrolley state
-				ISHALTED = ISBasicRobotWrapperHalted && ISPickupDropoutHalted //if turning ISBasicRobotWrapperHalted=false, while ISPickupDropoutHalted=true
+				ISHALTED = ISBasicRobotWrapperHalted || ISPickupDropoutHalted //if turning ISBasicRobotWrapperHalted=false, while ISPickupDropoutHalted=true
 				if (ISHALTED) {
 					updateState(Transporttrolleystate.HALT)
 				} else { //not halted, basicstate is the state

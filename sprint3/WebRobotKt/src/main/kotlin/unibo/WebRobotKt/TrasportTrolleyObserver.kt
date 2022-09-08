@@ -26,18 +26,7 @@ class TrasportTrolleyObserver (private val webSocketList: ArrayList<WebSocketSes
                 )
                 //updateGui.statett = statett;
                 synchronized(updateGui) {
-                    //conversion value state transport trolley
-                    if (statett.equals("wait")) {
-                        updateGui.statett = "wait"
-                    } else if (statett.equals("req_pickup") || (statett.equals("chk_pickup"))) {
-                        updateGui.statett = "pick-up"
-                    } else if (statett.equals("req_dropout") || (statett.equals("chk_dropout"))) {
-                        updateGui.statett = "drop-out"
-                    } else if (statett.equals("req_move") || (statett.equals("chk_move"))) {
-                        updateGui.statett = "move"
-                    } else {
-                        updateGui.statett = statett;
-                    }
+                    updateGui.statett = statett
                 }
 
                 var json = updateGui.toString();

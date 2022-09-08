@@ -33,7 +33,7 @@ class WebSocketHandler : TextWebSocketHandler() {
         try {
             //CommUtils.delay(1000)
             startCoapConnection("127.0.0.1", "8096", "ctxrobot", "mover",positionObserver)
-            startCoapConnection("127.0.0.1", "8096", "ctxrobot", "transporttrolley",trasportTrolleyObserver)
+            startCoapConnection("127.0.0.1", "8096", "ctxrobot", "transporttrolleystate",trasportTrolleyObserver)
             startCoapConnection("127.0.0.1", "8095", "ctxserver", "wasteservice",containerObserver)
             startCoapConnection("127.0.0.1", "8097", "ctxalarm", "led",ledObserver)
             ColorsOut.out("Initialized handler!", ColorsOut.BLUE)
