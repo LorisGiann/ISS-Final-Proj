@@ -6,15 +6,25 @@ import java.io.Serializable
 @Controller
 class UpdateGui : Serializable {
     var statett: String
-        @Synchronized set
+        set(value){
+            field=value
+        }
     var stateled: String
-        @Synchronized set
+        set(value){
+            field=value
+        }
     var position: String
-        @Synchronized set
+        set(value){
+            field=value
+        }
     var pb: String
-        @Synchronized set
+        set(value){
+            field=value
+        }
     var gb: String
-        @Synchronized set
+        set(value){
+            field=value
+        }
 
     constructor() {
         statett = "WAIT"

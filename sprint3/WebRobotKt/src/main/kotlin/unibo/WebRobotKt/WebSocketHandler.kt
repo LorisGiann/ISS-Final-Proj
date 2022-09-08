@@ -66,10 +66,6 @@ class WebSocketHandler : TextWebSocketHandler() {
         Thread {
             val conn = CoapConnection(addr+ ":" + port,context + "/" + actor)
             conn.observeResource(observer)
-            while (conn.request("") == "0") {
-                ColorsOut.outappl("waiting for Coap conn to $actor (conn: $conn)", ColorsOut.CYAN)
-                Timer().schedule(1000){}
-            }
             ColorsOut.outappl("connected via Coap conn: ${addr + ":" + port}/${context + "/" + actor}", ColorsOut.BLUE)
         }.start()
     }

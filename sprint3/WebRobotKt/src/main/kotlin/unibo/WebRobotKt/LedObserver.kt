@@ -12,33 +12,29 @@ class LedObserver (private val webSocketList: ArrayList<WebSocketSession>, updat
     var ledState = "OFF"
     var updateGui=updateGuiG
 
-    init{
-        var json=updateGui.toString();
-        for (webSocket in webSocketList) {
-            synchronized(webSocket) {
-                webSocket.sendMessage(TextMessage("${json}"))
-            }
-        }
-    }
 
     override fun onLoad(response: CoapResponse) {
         val content = response.responseText
-        //ColorsOut.outappl("LedObserver | content ${content}", ColorsOut.GREEN)
-        try {
-            val term = (Term.createTerm(content) as Struct)
-            ledState = term.getArg(1).toString()
-            ColorsOut.outappl("LedObserver | content ${content}, ledstate ${ledState}", ColorsOut.GREEN)
-            updateGui.stateled = ledState
-
-            var json = updateGui.toString();
-            for (webSocket in webSocketList) {
-                synchronized(webSocket) {
-                    webSocket.sendMessage(TextMessage("${json}"))
+        if (content.isNotBlank() && !(content.contains("ActorBasic(Resource)") && content.contains("created"))) {
+            ColorsOut.outappl("LedObserver | content ${content}", ColorsOut.GREEN)
+            try {
+                val term = (Term.createTerm(content) as Struct)
+                ledState = term.getArg(1).toString()
+                ColorsOut.outappl("LedObserver | content ${content}, ledstate ${ledState}", ColorsOut.GREEN)
+                synchronized(updateGui) {
+                    updateGui.stateled = ledState
                 }
+
+                var json = updateGui.toString();
+                for (webSocket in webSocketList) {
+                    synchronized(webSocket) {
+                        webSocket.sendMessage(TextMessage("${json}"))
+                    }
+                }
+            } catch (e: Exception) {
+                System.err.println("Errore lettura coap led : " + e.toString())
             }
-        }catch (e: Exception){
-            System.err.println("Errore lettura coap")
-        }
+        } else return
     }
 
     override fun onError() {
