@@ -15,7 +15,7 @@ RUN apt install ./wiringpi-2.46.deb
 
 ##RUN mkdir ./it.unibo.ctxalarm.MainCtxalarmKt-1.0/
 WORKDIR ./it.unibo.ctxalarm.MainCtxalarmKt-1.0/
-COPY ./QAkSprint3/build/libs/it.unibo.ctxalarm.MainCtxalarmKt-1.0.jar ./it.unibo.ctxalarm.MainCtxalarmKt-1.0.jar
+COPY ./QakSprint3/build/libs/it.unibo.ctxalarm.MainCtxalarmKt-1.0.jar ./it.unibo.ctxalarm.MainCtxalarmKt-1.0.jar
 
 COPY ./QakSprint3/*.pl ./
 COPY ./QakSprint3/*.json ./

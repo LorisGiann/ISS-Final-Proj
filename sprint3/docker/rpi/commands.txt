@@ -1,15 +1,27 @@
 one time operations:
 	IP=$(ip -f inet addr show enp0s3 | sed -En -e 's/.*inet ([0-9.]+).*/\1/p')
 	echo IP="$IP" > .env
+	export IP
 
 cleanup:
 	docker service rm registry
 	docker swarm leave --force #on the pi too
 	docker rm serverctx robotctx wenvdf
-	docker rmi $(docker images | grep alarmctx | awk  '{print $3}')
-	docker rmi $(docker images | grep serverctx | awk  '{print $3}')
-	docker rmi $(docker images | grep robotctx | awk  '{print $3}')
-	docker rmi $(docker images | grep wenvdf | awk  '{print $3}')
+	docker stop $(docker ps | grep alarmctx | awk  '{print $1}')
+	docker stop $(docker ps | grep serverctx | awk  '{print $1}')
+	docker stop $(docker ps | grep robotctx | awk  '{print $1}')
+	docker stop $(docker ps | grep wenvdf | awk  '{print $1}')
+	docker stop $(docker ps | grep guiwebserver | awk  '{print $1}')
+	docker rm $(docker ps -a | grep alarmctx | awk  '{print $1}')
+	docker rm $(docker ps -a | grep serverctx | awk  '{print $1}')
+	docker rm $(docker ps -a | grep robotctx | awk  '{print $1}')
+	docker rm $(docker ps -a | grep wenvdf | awk  '{print $1}')
+	docker rm $(docker ps -a | grep guiwebserver | awk  '{print $1}')
+	docker rmi -f $(docker images | grep alarmctx | awk  '{print $3}')
+	docker rmi -f $(docker images | grep serverctx | awk  '{print $3}')
+	docker rmi -f $(docker images | grep robotctx | awk  '{print $3}')
+	docker rmi -f $(docker images | grep wenvdf | awk  '{print $3}')
+	docker rmi -f $(docker images | grep guiwebserver | awk  '{print $3}')
 
 initialize the swarm & registry:
 	docker swarm init --advertise-addr $IP  #do that on the primary node

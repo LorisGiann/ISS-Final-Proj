@@ -1,5 +1,7 @@
 package unibo.WebRobotKt
 
+import alice.tuprolog.Prolog
+import alice.tuprolog.Theory
 import org.eclipse.californium.core.CoapHandler
 import org.springframework.stereotype.Component
 import org.springframework.web.socket.CloseStatus
@@ -10,6 +12,7 @@ import unibo.comm22.coap.CoapConnection
 import unibo.comm22.utils.ColorsOut
 import unibo.comm22.utils.CommUtils
 import unibo.comm22.utils.CommUtils.delay
+import java.io.FileInputStream
 import java.util.*
 import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.collections.ArrayList
@@ -24,24 +27,11 @@ class WebSocketHandler : TextWebSocketHandler() {
     private final var ledObserver = LedObserver(sessions,updateGui)
     private final var trasportTrolleyObserver = TrasportTrolleyObserver(sessions,updateGui)
 
+    private val pengine : Prolog = Prolog()
 
     init {
         initCoapObserver()
     }
-
-    fun initCoapObserver() {
-        try {
-            //CommUtils.delay(1000)
-            startCoapConnection("127.0.0.1", "8096", "ctxrobot", "mover",positionObserver)
-            startCoapConnection("127.0.0.1", "8096", "ctxrobot", "transporttrolley",trasportTrolleyObserver)
-            startCoapConnection("127.0.0.1", "8095", "ctxserver", "wasteservice",containerObserver)
-            startCoapConnection("127.0.0.1", "8097", "ctxalarm", "led",ledObserver)
-            ColorsOut.out("Initialized handler!", ColorsOut.BLUE)
-        }catch (e: Exception){
-            System.err.println(e.stackTrace)
-        }
-    }
-
 
 
     public override fun handleTextMessage(session: WebSocketSession, message: TextMessage) {
@@ -62,15 +52,72 @@ class WebSocketHandler : TextWebSocketHandler() {
         ColorsOut.out("Session closed", ColorsOut.CYAN)
     }
 
+
+
+
+
+    fun initCoapObserver() {
+        try {
+            //CommUtils.delay(1000)
+            loadTheory("demo0.pl")
+            loadTheory("sysRules.pl")
+            coapObsserve("mover",positionObserver)
+            coapObsserve("transporttrolleystate",trasportTrolleyObserver)
+            coapObsserve("wasteservice",containerObserver)
+            coapObsserve("led",ledObserver)
+            ColorsOut.out("Initialized handler!", ColorsOut.BLUE)
+        }catch (e: Exception){
+            System.err.println(e.stackTrace)
+        }
+    }
+
+
+    fun coapObsserve(actor : String, observer: CoapHandler){
+        val ctx : String  = solve("qactor( $actor, CTX, CLASS)","CTX")!!
+        val ctxHost : String  = solve("getCtxHost($ctx,H)","H")!!
+        val ctxPort : String = solve("getCtxPort($ctx,P)","P")!!
+        startCoapConnection(ctxHost, ctxPort, ctx, actor, observer)
+    }
+
     private fun startCoapConnection(addr: String, port: String, context: String, actor: String, observer: CoapHandler) {
         Thread {
             val conn = CoapConnection(addr+ ":" + port,context + "/" + actor)
             conn.observeResource(observer)
-            while (conn.request("") == "0") {
-                ColorsOut.outappl("waiting for Coap conn to $actor (conn: $conn)", ColorsOut.CYAN)
+            var i=0;
+            while (/*i<10 && */conn.request("") == "0") {
+                ColorsOut.outappl("waiting for Coap conn to $actor (conn: $conn, attempt $i)", ColorsOut.CYAN)
                 Timer().schedule(1000){}
+                i++
             }
-            ColorsOut.outappl("connected via Coap conn: ${addr + ":" + port}/${context + "/" + actor}", ColorsOut.BLUE)
+            ColorsOut.outappl("coap connected to: ${addr + ":" + port}/${context + "/" + actor}", ColorsOut.BLUE)
         }.start()
     }
+
+
+    fun solve( goal: String, resVar: String  ) : String? {
+        //println("sysUtil  | solveGoal ${goal}" );
+        val sol = pengine.solve( "$goal.")
+        if( sol.isSuccess ) {
+            if( resVar.length == 0 ) return "success"
+            val result = sol.getVarValue(resVar)  //Term
+            var resStr = result.toString()
+            return  strCleaned( resStr )
+        }
+        else return null
+    }
+
+    fun loadTheory( path: String ) {
+        try {
+            val worldTh = Theory( FileInputStream(path) )
+            pengine.addTheory(worldTh)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    fun strCleaned( s : String) : String{
+        if( s.startsWith("'")) return s.replace("'","")
+        else return s
+    }
+
 }

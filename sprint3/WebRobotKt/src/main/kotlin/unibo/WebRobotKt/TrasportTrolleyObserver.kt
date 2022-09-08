@@ -31,10 +31,10 @@ class TrasportTrolleyObserver (private val webSocketList: ArrayList<WebSocketSes
                 "TrasportTrolleyObserver | content ${content}, state transporttrolley ${statett}",
                 ColorsOut.GREEN
             )
-            //updateGui.statett = statett;
+            updateGui.statett = statett;
 
             //conversion value state transport trolley
-            if (statett.equals("wait")){
+            /*if (statett.equals("wait")){
                 updateGui.statett="wait"
             }else if (statett.equals("req_pickup") || (statett.equals("chk_pickup"))){
                 updateGui.statett="pick-up"
@@ -44,7 +44,7 @@ class TrasportTrolleyObserver (private val webSocketList: ArrayList<WebSocketSes
                 updateGui.statett="move"
             }else{
                 updateGui.statett = statett;
-            }
+            }*/
 
 
 
