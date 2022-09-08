@@ -6,25 +6,15 @@ import java.io.Serializable
 @Controller
 class UpdateGui : Serializable {
     var statett: String
-        set(value) {         // setter
-            field = value
-        }
+        @Synchronized set
     var stateled: String
-        set(value) {         // setter
-            field = value
-        }
+        @Synchronized set
     var position: String
-        set(value) {         // setter
-            field = value
-        }
+        @Synchronized set
     var pb: String
-        set(value) {         // setter
-            field = value
-        }
+        @Synchronized set
     var gb: String
-        set(value) {         // setter
-            field = value
-        }
+        @Synchronized set
 
     constructor() {
         statett = "WAIT"
@@ -32,14 +22,6 @@ class UpdateGui : Serializable {
         position = "HOME"
         pb = "10"
         gb = "10"
-    }
-
-    constructor(statett: String, stateled: String, position: String, pb: String, gb: String) {
-        this.statett = statett
-        this.stateled = stateled
-        this.position = position
-        this.pb = pb
-        this.gb = gb
     }
 
     override fun toString(): String {
