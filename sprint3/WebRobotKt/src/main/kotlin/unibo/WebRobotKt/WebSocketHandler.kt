@@ -8,8 +8,12 @@ import org.springframework.web.socket.WebSocketSession
 import org.springframework.web.socket.handler.TextWebSocketHandler
 import unibo.comm22.coap.CoapConnection
 import unibo.comm22.utils.ColorsOut
+import unibo.comm22.utils.CommUtils
+import unibo.comm22.utils.CommUtils.delay
+import java.util.*
 import java.util.concurrent.CopyOnWriteArrayList
-
+import kotlin.collections.ArrayList
+import kotlin.concurrent.schedule
 
 @Component
 class WebSocketHandler : TextWebSocketHandler() {
@@ -62,6 +66,10 @@ class WebSocketHandler : TextWebSocketHandler() {
         Thread {
             val conn = CoapConnection(addr+ ":" + port,context + "/" + actor)
             conn.observeResource(observer)
+            while (conn.request("") == "0") {
+                ColorsOut.outappl("waiting for Coap conn to $actor (conn: $conn)", ColorsOut.CYAN)
+                Timer().schedule(1000){}
+            }
             ColorsOut.outappl("connected via Coap conn: ${addr + ":" + port}/${context + "/" + actor}", ColorsOut.BLUE)
         }.start()
     }
