@@ -77,7 +77,7 @@ class TransporttrolleyState (name : String ) : ActorBasic( name ) {
 	override suspend fun actorBody(msg: IApplMessage) {
 		MsgUtil.outgreen("$tt $name | msg ${msg.msgId()} : ${msg.toString()}")
 		if (msg.msgId() == "autoStartSysMsg") {
-			initCoapObserver()
+			//initCoapObserver()
 			//MsgUtil.outgreen("$tt $name | started ")
 		}else if(msg.msgId() == "coapUpdate"){
 			if(msg.msgContent().contains("ActorBasic(Resource)")) return

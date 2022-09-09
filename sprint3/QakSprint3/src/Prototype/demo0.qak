@@ -90,6 +90,10 @@ Dispatch alarmceased : alarmceased(_)
 Context ctxserver ip [host="localhost" port=8095]
 Context ctxrobot ip  [host="127.0.0.1" port=8096]
 Context ctxalarm ip  [host="127.0.0.1" port=8097]
+
+//Context ctxserver ip [host="serverctx" port=8095]
+//Context ctxrobot ip  [host="robotctx" port=8096]
+//Context ctxalarm ip  [host="alarmctx" port=8097]
 // ------------------------------------------------
 
 // ------- basicrobot collision detection ---------
@@ -103,6 +107,8 @@ CodedQActor datacleaner           context ctxalarm className "alarmSonar.dataCle
 CodedQActor ledalarmcontrol       context ctxalarm className "alarmLed.ledAlarmControl"
 
 CodedQActor transporttrolleystate context ctxrobot className "transporttrolleyState.TransporttrolleyState"
+
+CodedQActor coapdispatcher context ctxrobot className "coapdispatcher.Coapdispatcher"
 
 
 QActor wasteservice context ctxserver{
@@ -1300,3 +1306,29 @@ QActor alarmreceivertest context ctxrobot{
 	Transition t0 whenEvent alarm -> wait
 				  whenEvent alarmceased -> wait
 }
+
+
+/*QActor coapdispatcher context ctxrobot {
+	[# var STATE = ws.Transporttrolleystate.IDLE #]
+	State s0 initial{
+		observeResource transporttrolley
+		observeResource basicrobotwrapper
+		observeResource pickupdropouthandler
+		observeResource mover
+	} 
+	Transition t0 whenMsg coapUpdate -> handleUpdate
+	State handleUpdate{
+		printCurrentMessage
+		onMsg (coapUpdate : coapUpdate(RESOURCE, VALUE)) {
+			[# val RESOURCE = payloadArg(0) 
+				val VALUE = payloadArg(1) #]
+			println("coapdispatcher | update: ${payloadArg(0)} ${payloadArg(1)}")
+			//var STATE = ...calculate new sate...
+			//updateResource [# "transporttrolleystate(STATE)" #]
+			//discardMsg Off
+			forward transporttrolleystate -m coapUpdate : coapUpdate($RESOURCE, $VALUE)
+			forward ledalarmcontrol -m coapUpdate : coapUpdate($RESOURCE, $VALUE)
+		}
+	}
+	Transition t0 whenMsg coapUpdate -> handleUpdate
+}*/

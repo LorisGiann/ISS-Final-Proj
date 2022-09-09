@@ -10,6 +10,7 @@ context(ctxalarm, "127.0.0.1",  "TCP", "8097").
   qactor( datacleaner, ctxalarm, "alarmSonar.dataCleaner").
   qactor( ledalarmcontrol, ctxalarm, "alarmLed.ledAlarmControl").
   qactor( transporttrolleystate, ctxrobot, "transporttrolleyState.TransporttrolleyState").
+  qactor( coapdispatcher, ctxrobot, "coapdispatcher.Coapdispatcher").
   qactor( wasteservice, ctxserver, "it.unibo.wasteservice.Wasteservice").
   qactor( depositaction, ctxserver, "it.unibo.depositaction.Depositaction").
   qactor( transporttrolley, ctxrobot, "it.unibo.transporttrolley.Transporttrolley").

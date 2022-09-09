@@ -4,9 +4,9 @@ one time operations:
 	export IP
 
 cleanup:
-	docker service rm registry
 	docker swarm leave --force #on the pi too
-	docker rm serverctx robotctx wenvdf
+	docker-compose down
+	docker service rm registry
 	docker stop $(docker ps | grep alarmctx | awk  '{print $1}')
 	docker stop $(docker ps | grep serverctx | awk  '{print $1}')
 	docker stop $(docker ps | grep robotctx | awk  '{print $1}')
@@ -17,6 +17,7 @@ cleanup:
 	docker rm $(docker ps -a | grep robotctx | awk  '{print $1}')
 	docker rm $(docker ps -a | grep wenvdf | awk  '{print $1}')
 	docker rm $(docker ps -a | grep guiwebserver | awk  '{print $1}')
+	
 	docker rmi -f $(docker images | grep alarmctx | awk  '{print $3}')
 	docker rmi -f $(docker images | grep serverctx | awk  '{print $3}')
 	docker rmi -f $(docker images | grep robotctx | awk  '{print $3}')
@@ -30,15 +31,15 @@ initialize the swarm & registry:
 
 compiling the containers:
 	docker buildx bake -f docker-compose-rpi.yml --set=*.output=type=registry,registry.insecure=true --set *.platform=linux/arm64
-	docker-compose build
-	docker-compose up --no-build
+	docker-compose build --no-cache
 
 run:
-	#LOCAL
+	#PC
 	docker-compose up --no-build
 	
 	#RPI
 	docker rmi $(docker images | grep alarmctx | awk  '{print $3}')
+	docker pull 192.168.43.169:5000/alarmctx
 	docker run -i -t --rm --name alarmctx --privileged --device /dev/mem -v /proc:/proc -v /sys/firmware/devicetree/base:/sys/firmware/devicetree/base --network=rpi_wasteservicenet 192.168.43.169:5000/alarmctx
 	
 	

@@ -35,6 +35,7 @@ with Diagram('demo0Arch', show=False, outformat='png', graph_attr=graphattr) as 
           alarmreceivertest=Custom('alarmreceivertest','./qakicons/symActorSmall.png')
           distancefilter=Custom('distancefilter(coded)','./qakicons/codedQActor.png')
           transporttrolleystate=Custom('transporttrolleystate(coded)','./qakicons/codedQActor.png')
+          coapdispatcher=Custom('coapdispatcher(coded)','./qakicons/codedQActor.png')
      with Cluster('ctxalarm', graph_attr=nodeattr):
           sonarlorisdavide=Custom('sonarlorisdavide','./qakicons/symActorSmall.png')
           alarmemitter=Custom('alarmemitter','./qakicons/symActorSmall.png')
