@@ -1,0 +1,247 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+    <!--
+<link rel="stylesheet" type="text/css" href="../css/issStyle1.css">
+<script type="text/javascript" src="../css/issStyle.js"></script>
+-->
+<link rel="stylesheet" type="text/css" href="../docs_common/defaultTemplateStyle.css">
+<style>
+code>pre { 
+    font-family: monospace;
+}
+dd{
+    margin-bottom: 7px;
+}
+.todo{
+    color: orange
+}
+.centerimg{
+    display: block;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 90%;
+    max-width: 800px;
+}
+p { margin: 4px 0px; }
+dd{ margin-bottom: 8px;}
+.newDictWord{ color : purple; }
+h6{
+    font-size: 1em;
+    margin: 18px 0px 9px 0px;
+}
+</style>
+<head><title>WasteService Deployment - SPRINT3</title></head>
+    
+<body>
+<div id="top">
+<h1>ISS FINAL PROJECT </h1>
+</div>  
+
+<div class="body"> 
+<h2>Introduction</h2>
+<div class="remark">
+    <p>Progetto finale di ISS, che consiste in un impianto di smistamento dei rifiuti nel quale un robot deve trasportare il materiale dal camion al relativo container</p>
+</div>
+
+<h2>Deployment</h2>
+<div class="remark">
+    <p>Allo scopo di dimostrare il funzionamento dell'applicazione, l'applicazione sarà distribuita fra due nodi:</p>
+    <img src="./docs/_images/deploy/node-summary.png" class="centerimg" style="max-width: 900px;"/>
+    <ul>
+        <li>
+            <p>Il PC:</p>
+            <ul>
+                <li>ctxrobot</li>
+                <li>ctxserver</li>
+                <li>guiwebserver & wenv</li>
+            </ul>
+        </li>
+        <li>
+            <p>Il Rasberry:</p>
+            <ul>
+                <li>ctxalarm</li>
+            </ul>
+        </li>
+    </ul>
+    <p>Per comodità il deployment viene fatto con strumenti avanzati messi a disposizione da Docker, più in particolare si fa utilizzo:</p>
+    <ul>
+        <li>
+            <p>Di container. Abbiamo infatti:</p>
+            <ul>
+                <li>serverctx: contenente il contesto che dovrebbe girare sul server</li>
+                <li>robotctx: contenente il contesto che dovrebbe girare sul robot</li>
+                <li>alarmctx: contenente il contesto che gira sul Raspberry</li>
+                <li>wenv: contenente il server con l'ambiente virtuale (in un'applicazione reale non vi sarà tale componente)</li>
+                <li>guiwebserver: contenente il server web spring che mostra la <b>WasteServiceStatusGUI</b></li>
+            </ul>
+        </li>
+        <li>
+            <p>Di <a href="https://docs.docker.com/build/buildx/">Docker buildx</a>, che permette di cosscompilare il container che girerà sulla Raspberry3 (ARM 64 bit). Necessario installare Qemu, e scaricare un container con Buildkit.</p>
+        </li>
+        <li>
+            <p>Di <a href="https://docs.docker.com/compose/">Docker compose</a>, che permette con un unico comando di avvaire e configurare più container contemporaneamente, utilizzando un file <code>docker-compose.yml</code>.</p>
+        </li>
+        <li>
+            <p>Di <a href="https://docs.docker.com/engine/swarm/">Docker swarm</a>, un orchestratore di container (simile per certi aspetti a Kubernetes, ma più basilare) utile per automatizzare certe operazioni in un contesto distributo come questo.</p>
+            <p>Più in particolare:</p>
+            <ul>
+                <li>
+                    <p>Permette di creare una <a href="https://docs.docker.com/network/overlay/">Overlay network</a> unica per l'applicazione distribuita, ossia una specie di VPN che tutti i container dell'applicazione possono utilizzare per comunicare tra di loro. 
+                    Questo, combinato con la risoluzione tramite DNS (che permette di scrivere direttamente il nome del container al posto dell'indirizzo IP del nodo su cui si trova) permette di ridurre drasticamente la configurazione necessaria nel caso in cui un nodo cambi indirizzo</p>
+                </li>
+                <li>
+                    <p>Possibilità di usare comandi di alto livello (<code>docker stack deploy</code>) per trasferire e avviare automaticametne i container sui nodi specificati nel <code>docker-compose.yml</code>. Purtroppo questa modalità non permette di eseguire container in modalità privilegiata, quindi non ha senso utilizare questo comando nella demo qui mostrata</p>
+                    <p>Possibilità di creare un repository locale nel quale caricare le immagini utilizzate dall'applicazione (similmente a <a href="https://hub.docker.com/">Dockerhub</a>), in modo che possano essere scaricate dagli altri nodi anche in assenza di una connessione internet.</p>
+                </li>
+            </ul>
+        </li>
+        
+    </ul>
+
+    <h3>Passi operativi:</h3>
+    <p>Posizionarsi in <code>ISS-Final-Proj/sprint3/docker/rpi</code></p>
+
+    <h4 id="cleanup">(opzionale) Cleanup:</h4>
+    <ul>
+        <li>
+            <p>reset swarm, reset registry</p>
+            <code>
+<pre>docker swarm leave --force #on the pi too
+docker-compose down
+docker service rm registry</pre></code>
+        </li>
+        <li>
+            <p>Stop e rimozione containers</p>
+            <code>
+<pre>docker stop $(docker ps | grep alarmctx | awk  '{print $1}')
+docker stop $(docker ps | grep serverctx | awk  '{print $1}')
+docker stop $(docker ps | grep robotctx | awk  '{print $1}')
+docker stop $(docker ps | grep wenvdf | awk  '{print $1}')
+docker stop $(docker ps | grep guiwebserver | awk  '{print $1}')
+docker rm $(docker ps -a | grep alarmctx | awk  '{print $1}')
+docker rm $(docker ps -a | grep serverctx | awk  '{print $1}')
+docker rm $(docker ps -a | grep robotctx | awk  '{print $1}')
+docker rm $(docker ps -a | grep wenvdf | awk  '{print $1}')
+docker rm $(docker ps -a | grep guiwebserver | awk  '{print $1}')</pre></code>
+        <li>
+            <p>Rimozione immagini</p>
+            <code>
+<pre>docker rmi -f $(docker images | grep alarmctx | awk  '{print $3}')
+docker rmi -f $(docker images | grep serverctx | awk  '{print $3}')
+docker rmi -f $(docker images | grep robotctx | awk  '{print $3}')
+docker rmi -f $(docker images | grep wenvdf | awk  '{print $3}')
+docker rmi -f $(docker images | grep guiwebserver | awk  '{print $3}')</pre>
+            </code>
+        </li>
+        <li>
+            <p>Rimozione immagine su raspberry</p>
+            <code>
+<pre>docker rmi $(docker images | grep alarmctx | awk  '{print $3}')</pre>
+            </code>
+        </li>
+    </ul>
+
+    <h4>One time operations:</h4>
+    <ul>
+        <li>
+            <p>Settaggio variabile IP PC:</p>
+            <code>
+<pre>INTERFACE="enp0s3"
+IP=$(ip -f inet addr show $INTERFACE | sed -En -e 's/.*inet ([0-9.]+).*/\1/p')
+echo IP="$IP" > .env
+export IP</pre>
+            </code>
+        </li>
+        <li>
+            <p>Settaggio utilizzo repository insicuro:</p>
+            <code>
+<pre>sudo bash -c 'echo -e "{ \n \"insecure-registries\" : [\"'$IP':5000\"] \n}" > /etc/docker/daemon.json'
+sudo systemctl restart docker.service</pre>
+            </code>
+        </li>
+        <li>
+            <p>swarm:</p>
+            <code>
+<pre>docker swarm init --advertise-addr $IP  #do that on the pc
+docker swarm join-token manager         #copy the printed command on the pi</pre>
+            </code>
+            <p>Copiare e eseguire il comando che viene restituito da <code>docker swarm join-token manager</code> sulla Raspberry: la raspberry dovrebbe essere ora visibile se si effettua un <code>docker node ls</code>. Il nodo è un manager e non un worker siccome non ci interessa avere lo stesso container replicato su più nodi (che si fa solo per backup e load balancing)</p>
+        </li>
+        <li>
+            <p>creazione di un repository:</p>
+            <code>
+<pre>docker service create --name registry --network=host registry:2</pre>
+            </code>
+        </li>
+        <li>
+            <p>compilazione e push container:</p>
+            <code>
+<pre>docker buildx bake -f docker-compose-rpi.yml --set=*.output=type=registry,registry.insecure=true --set *.platform=linux/arm64
+docker-compose build --no-cache</pre>
+            </code>
+        </li>
+    </ul>
+
+    <h4>Esecuzione containers:</h4>
+    <ul>
+        <li>
+            <p>Su PC:</p>
+            <code>
+<pre>docker-compose up --no-build</pre>
+            </code>
+        </li>
+        <li>
+            <p>Su raspberry:</p>
+            <code>
+<pre>docker pull 192.168.43.169:5000/alarmctx  #se non già presente in locale
+docker run -i -t --rm --name alarmctx --privileged --device /dev/mem -v /proc:/proc -v /sys/firmware/devicetree/base:/sys/firmware/devicetree/base --network=rpi_wasteservicenet 192.168.43.169:5000/alarmctx</pre>
+            </code>
+        </li>
+    </ul>
+
+    <h3>Esecuzione in locale:</h3>
+    <p>Se non si ha la Raspberry il sistema può anche eseguire in locale con un sonar e led mock (il led mock non ha tuttavia la gui essengo in un container)</p>
+    <p>Posizionarsi in <code>ISS-Final-Proj/sprint3/docker/lcoal</code></p>
+    
+    <h4>Cleanup:</h4>
+    <p>Vedi: <a href="#cleanup">cleanup</a></p>
+    <h4>(eventuale build e) esecuzione containers:</h4>
+    <ul>
+        <li>
+            <p>Su PC:</p>
+            <code>
+<pre>docker-compose up</pre>
+            </code>
+        </li>
+    </ul>
+
+    <h3>Richiesta driver:</h3>
+    <p>La richiesta può essere fatta per mezzo di uno script python eseguibile con jupyter:</p>
+    <code>
+<pre>cd ../../resources/python/
+jupyter notebook</pre>
+    </code>
+</div>
+
+</div>  
+
+<div style="background-color:rgba(86, 56, 253, 0.9); width:100%;text-align:left;color:white">
+    <table style="border: 0px solid transparent; margin: 0 auto;">
+        <tr>
+            <td>
+                <p style="font-weight: bold;">Loris Giannatempo <br>
+                Email: loris.giannatempo@studio.unibo.it</p>
+                <img class="centerimg" src="../docs_common/lorisgiannatempo.jpg" style="width: 30%; height: 30%; border: 0px">
+            </td>
+            <td>
+                <p style="font-weight: bold;">Davide Guidetti <br>
+                Email: davide.guidetti3@studio.unibo.it</p>
+                <img class="centerimg" src="../docs_common/davideguidetti.jpg" style="width: 30%; height: 30%; border: 0px">
+            </td>
+        </tr>
+    </table>
+</div> 
+</body>
+</html>

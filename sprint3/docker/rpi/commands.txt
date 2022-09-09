@@ -1,7 +1,10 @@
 one time operations:
-	IP=$(ip -f inet addr show enp0s3 | sed -En -e 's/.*inet ([0-9.]+).*/\1/p')
+	INTERFACE="enp0s3"
+	IP=$(ip -f inet addr show $INTERFACE | sed -En -e 's/.*inet ([0-9.]+).*/\1/p')
 	echo IP="$IP" > .env
 	export IP
+	#sudo bash -c 'echo -e "{ \n \"insecure-registries\" : [\"'$IP':5000\"] \n}" > /etc/docker/daemon.json'
+	#sudo systemctl restart docker.service
 
 cleanup:
 	docker swarm leave --force #on the pi too
