@@ -27,12 +27,20 @@ class UpdateGui : Serializable {
         }
 
     constructor() {
-        statett = "WAIT"
+        statett = "coap connecting"
+        stateled = "coap connecting"
+        position = "coap connecting"
+        pb = "coap connecting"
+        gb = "coap connecting"
+    }
+
+    /*constructor() {
+        statett = "load"
         stateled = "OFF"
         position = "HOME"
         pb = "10"
         gb = "10"
-    }
+    }*/
 
     override fun toString(): String {
         return "{\"statett\":\"$statett\",\"stateled\":\"$stateled\",\"position\":\"$position\",\"pb\":\"$pb\",\"gb\":\"$gb\"}"

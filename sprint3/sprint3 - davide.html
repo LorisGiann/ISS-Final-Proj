@@ -53,14 +53,6 @@ h6{
 
 <h2>Requirement analysis</h2>
 <div class="remark">
-    La <b>WasteServiceStatusGUI:</b> deve permette al <b>Service-manager</b> di monitorare:
-    <ul>
-        <lI>La <b>Position</b> del <b>Transport trolley</b> (non serve la posizione precisa di un sistema di coordinate)</lI>
-        <lI>Il <b>Transporttrolleystate</b>, ossia lo stato attuale del <b>Transport trolley</b>. Formalizzato con l'enumerativo <a href="./ProblemQakSprint3/resources/ws/Transporttrolleystate.kt">Transporttrolleystate.kt</a>:<br>
-            <code><pre>enum class Transporttrolleystate { IDLE, MOVING, PICKINGUP, DROPPINGOUT, HALT }</pre></code></lI>
-        <lI>Il peso corrente <b>contPB</b> e <b>contGB</b> del materiale contenuto in <b>PLASTICBOX</b> e in <b>GLASSBOX</b></lI>
-        <lI>Lo stato del <b>LED</b></lI>
-    </ul>
     
 </div>
 
@@ -69,13 +61,12 @@ h6{
 <div class="remark">
     <h4>Scrum goal:</h4>
     <p>Obiettivo dello SPRINT3 è l'estensione della demo dello <a href="../sprint2/sprint2.html">SPRINT2</a> per realizzare il requisito riguardante la <b>WasteServiceStatusGUI</b> specificato 
-        dal committente al punto 3.</p><br>
-    <p>Inoltre è necessario pensare ad un piano per la distribuzione, il committente apprezzerebbe che questo avvenisse con container Docker.</p>
+        dal committente al punto 3.</p>
     <h4>Piano di lavoro:</h4>
     <ul>
         <li>Analisi del problema riguardo la tipologia di GUI da implementare</li>
         <li>Analisi del problema riguardo il passaggio di informazioni alla GUI</li>
-        <li>Sviluppo / adattametno dei componenti necessari</li>
+        <li>Sviluppo / adattamento dei componenti necessari</li>
         <li>Realizzazione di un modello eseguibile (a tal proposito verrà utilizzato il metamodello <a href="../docs_common/Qak.html">QAK</a>).</li>
         <li>Realizzazione di un (più completo) test-plan per il modello</li>
     </ul>
@@ -92,69 +83,23 @@ h6{
 
     <h3><b>GUI</b></h3>
 
-    <h4>Webgui o gui standard</h4>
+    <h4>Che informazioni necessita la GUI?</h4>
+    <p>La <b>WasteServiceStatusGUI</b> deve avere, per il committente, la possibilità di visualizzare le seguenti informazioni:</p>
     <ul>
-        <li>
-            <p>Webgui, con un componente che fa da server web e che risiede sul server aziendale</p>
-            <ul>
-                <li>+ Gui visualizzabile su qualunqe dispositivo dotato di browser</li>
-                <li>+ Riutilizzo di codice disponibile (progetto <a href="../docs_prof/html/webRobot22.html">Webrobot</a>)</li>
-                <li>- Necessaria definire l'interazione tra server web e "sistema" (osservare attori tramite CoAP, oppure connettersi come un "<a href="../docs_prof/html/QakIntro.html?highlight=alien#message-delivery-rules">alieno</a>", oppure avviare il server come componente interno ad un attore)</li>
-            </ul>
-        </li>
-        <li>
-            <p>Gui standard "tradizionare", ossia con un componente da installare sulla workstation nella quale si desidera visualizzare le informazioni della GUI</p>
-            <ul>
-                <li>- Necessario installare componenti su ogni dispositivo nel quale viene visualizzata la GUI</li>
-            </ul>
-            <p>A sua volta abbiamo 2 possibilità</p>
-            <ul>
-                <li>
-                    <p>Si sviluppa un programma "esterno" al sistema, ossia un eseguibile che si connette tramite rete al sistema e avvia una gui sulla workstation</p>
-                    <ul>
-                        <li>- Necessario definire l'interazione tra server web e "sistema" (osservare attori tramite CoAP, oppure connettersi come un "<a href="../docs_prof/html/QakIntro.html?highlight=alien#message-delivery-rules">alieno</a>")</li>
-                    </ul>
-                </li>
-                <li>
-                    <p>Si sviluppa un programma "interno" al sistema, ossia il nodo sul quale è in esecuzione la GUI diventa una parte integrante del sistema, con un attore (ad es. un <a href="../docs_prof/html/QakIntro.html#externalqactor">externalqactor</a>) che riceve/osserva le informazioni e le mostra sulla gui avviata dall'attore</p>
-                    <ul>
-                        <li>- Viene di fatto aggiunto un nodo al sistema, si ha un nuovo contesto solo per la GUI</li>
-                        <li>- Aumenta l'accoppiamento del sistema con la GUI, che è una "external interface", il sistema non dovrebbe dipendere da qualcosa di esterno (vedi <a href="../docs_prof/html/Architetture.html#la-clean-architecture">clean-architecture</a>)</li>
-                    </ul>
-                </li>
-            </ul>
-        </li>
+        <li>Lo stato corrente del <b>transporttrolley</b></li>
+        <li>La posizione corrente del <b>transporttrolley</b> nella stanza</li>
+        <li>Lo stato corrente del <b>led</b></li>
+        <li>Il peso corrente immagazzinato all'interno della <b>plasticbox</b> e della <b>glassbox</b></li>
     </ul>
-    <p>Alla luce di questi raginamenti risulterebbe più comveniente sviluppare una webgui (o meglio di adattare quella di <a href="../docs_prof/html/webRobot22.html">Webrobot</a>)</p>
-    <img class="centerimg" style="max-width: 600px;" src="docs/_images/system-webserver-browser.png"/>
-
-    <h4>Interazione sistema / webserver</h4>
-    <p>Si è inizialmente ragionato su due possibilità:</p>
-    <ul>
-        <li>
-            <p>Quella di un attore interno al sistema che osserva (tramite CoAP) tutti gli attori necessari, per poi inviare gli opportuni aggiornamenti al webserver per mezzo di eventi. Il webserver apre una connessione TCP verso i vari contesti per connettersi come "alieno".</p>
-            <p>Tuttavia questa modalità di interazione è stata recentemente deprecata dal supporto, dunque l'opzione non è più percorribile (in virtù della prossima modalità di interazione)</p>
-        </li>
-        <li>
-            <p>Il webserver osserva gli attori come risorse CoAP, ricevendo aggiornamenti in merito al loro stato e mostrando di conseguenza le informazioni di interesse</p>
-        </li>
-    </ul>
-
-    <h4>Il <b>Transporttrolleystate</b> viene calcolato dalla GUI o dal sistema?</h4>
-    <p>Transporttrolleystate</b> può essere calcolato:</p>
-    <ul>
-        <li>
-            <p>Dal webserver (quindi esternamente)</p>
-            <ul>
-                <li>+ Il sistema ha un compito in meno</li>
-            </ul>
-            <p>Da un attore del sistema (quindi internamente)</p>
-            <ul>
-                <li>+ Informazione potenzialmente utile per futuri componenti, che risulterà così reperibile anche da essi</li>
-            </ul>
-        </li>
-    </ul>
-    <p>Al fine di garantire una futura maggiore estensibilità dell'applicazione si ritiene più opportuno calcolare internamente l'informazione, delegando il compito ad un opportuno attore (<i>transporttrolleystate</i>)</p>
+    <p>Analizzando il problema risulta necessario un attore in grado di poter ottenere queste informazioni e riuscirle poi a mostrare in una <b>gui</b>.<br>
+    Viene quindi definito un attore <b>servergui</b> che, mediante <b>coap</b>, estrapolerà le informazioni necessarie.<br>
+    La scelta dell'utilizzo di Coap risulta particolarmente comoda avendo gli attori che già dagli sprint precedenti riferiscono le informazioni richieste per la Gui.</p>
+    <code><pre>Dispatch coapUpdate: coapUpdate(RESOURCE, VALUE)</pre></code><br>
+    
+    <p>In particolare viene definito un attore <b>transporttrolleystate</b> che ha il compito di osservare gli attori transporttrolley,basicrobotwrapper e pickupdropouthandler per poi definire e aggiornare lo stato del transporttrolley</p>
+    <code><pre>observeResource transporttrolley
+observeResource basicrobotwrapper
+observeResource pickupdropouthandler</pre></code>
 
 
 
@@ -163,10 +108,6 @@ h6{
         <h6>Architettura logica:</h6>
         <img class="centerimg" style="max-width: 1200px;" src="ProblemQakSprint3/demosystemarchitecturearch.png"/>
         <p style="width: 100%; text-align: right;"><a href="../docs_common/Legenda.html">Legenda</a></p>
-
-        <h6>Note</h6>
-        <small>Il webserver esterno (o comunque il componente che si occupa di mostrare la gui) viene al momento rappresentato con l'attore <i>servergui</i>: esso dovrà comunque osservare gli attori <i>transporttrolleystate</i>, <i>wasteservice</i>, <i>mover</i> e <i>led</i>.</small>
-
         <h6>QAK</h6>
         <a href="ProblemQakSprint3/src/Prototype/SystemAchitecture.qak">Modello del sistema QAK</a> <br>
         <h6><p>Testplan <small>(non ancora eseguibili)</small>:</p></h6>
@@ -179,17 +120,29 @@ h6{
 
 <h2>Project</h2>
 <div class="remark">
-        <h4>Web robot</h4>
-        <p>L'implementazione di <i>WebRobot</i> è stata effettuata mediante l'utilizzo di <a href="../docs_prof/html/WebApplications.html">SpringBoot</a>.<br>
-           <i>WebRobot</i> riceve le informazioni mediante l'utilizzo di CoAP, che a sua volta invierà informazioni al front-end mediante l'utilizzo di una WebSocket.</br>
-           Più nello specifico, le informazioni che giungono tramite le connessioni CoAP (e che vengono elaborate dagli oggetti 
-           <a href="WebRobotKt/src/main/kotlin/unibo/WebRobotKt/ContainerObserver.kt"><i>ContainerObserver</i></a>, <a href="WebRobotKt/src/main/kotlin/unibo/WebRobotKt/PositionObserver.kt"><i>PositionObserver</i></a>, <a href="WebRobotKt/src/main/kotlin/unibo/WebRobotKt/TrasportTrolleyObserver.kt"><i>TrasportTrolleyObserver</i></a>, <a href="WebRobotKt/src/main/kotlin/unibo/WebRobotKt/LedObserver.kt"><i>LedObserver</i></a>) 
-           aggiornano un oggetto bean (<a href="WebRobotKt/src/main/kotlin/unibo/WebRobotKt/UpdateGui.kt"><i>UpdateGui</i></a>), che viene poi trasformato in una stringa JSON poi inviata tramite WebSocket a tutti i client attualmente connessi.</p>
+    <p>Procediamo con lo sviluppo vero e proprio dei componenti. Essi sono tutti presenti nel <a href="QakSprint3/src/Prototype/demo0.qak">file QAK di questo sprint</a>, ma vengono qui 
+        riportate e spiegate le macchine a stati che li implementano.</p>
+
+        <p>Analizzando il problema, possiamo constatare che la GUI potrebbe esseere realizzata nei seguenti modi:</p>
+        <ul>
+            <li>Come <b>applicazione web</b></li>
+            <li>Come <b>applicazione desktop</b></li>
+        </ul>
+        Questo comporta quindi l'utilizzo di un <b>alieno</b><br>
+        È stato scelto di implementare l'applicazione web, rispetto che a quella desktop, per avere una maggiore flessibilità e facilità di accesso alla <b>WasteServiceStatusGUI</b> da parte del Service-manager senza dover installare nel dispositivo l'applicazione richiesta.
         
-        <p>Pagina web:</p>
+        <h4>In che modo vengono passate le informazioni alla GUI?</h4>
+        
+        <p>Analizzando il problema, avendo scelto in precedenza di implementare una applicazione web, la comunicazione può essere realizzata tramite l'utilizzato di Coap, già utilizzato in precendeza.<br>
+           In questo modo la web application osserverà i vari attori del sistema e aggiornerà di conseguenza la Gui.<br>
+        </p>
+
+        <h4>Web robot</h4>
+        <p>L'implementazione dell'alieno webRobot è stata effettuata mediante l'utilizzo di <b>SpringBoot</b>, essendo adatto all'implementazione rapida di applicazioni web.<br>
+           Il sistema riceve le informazioni mediante l'utilizzo di Coap per poi comunicare, dal back-end al front-end, mediante l'utilizzo di una <b>websocket</b>.</br>
+           Le informazioni osservate tramite Coap vengono utilizzate per aggiornare, tramite l'utilizzo di un bean, i dati visuallati nella console gui.
+        </p>
         <img class="centerimg" style="max-width: 1300px;" src="docs/_images/consolegui.png"/>
-
-
 
         <h3>Riassunto situazione attuale:</h3>
         <h6>Architettura logica:</h6>
@@ -198,9 +151,9 @@ h6{
 
 
         <h4>problematiche</h4>
-        <p>È stato notato, testando il sistema, di come le informazioni CoAP non sempre riuscissero ad essere correttamente visualizzate.<br>
+        <p>È stato notato, testando il sistema, di come le informazioni Coap non sempre riuscissero ad essere correttamente visualizzate.<br>
         Per fare fronte a questo problema è stato fatto, in maniera iterativa, una nuova analisi del problema per riuscire a risolvere questa problematica.<br>
-        Si è constatata la difficoltà del sistema nel mantenere le connessioni CoAP attive, in particolare alcuni messagi erano vuoti e portavano al blocco della comunicazione.<br>
+        Si è constatata la difficoltà del sistema nel mantenere le connessioni Coap attive, in particolare alcuni messagi erano vuoti e portavano al blocco della comunicazione.<br>
         È stato quindi necessario riorganizzare la struttura degli attori del sistema.</p>
 </div>
 
@@ -208,7 +161,7 @@ h6{
 <div class="remark">
         <p>Per far fronte alle problematiche riscontrate in precedenza è stato introdotto un nuovo attore, denominato <b>coapdispatcher</b>.<br>
         Quest'ultimo avrà il compito di osservare gli attori transporttrolley,pickupdropouthandler,basicrobotwrapper,mover e, tramite un dispatcher, comunicare con il led ed trasporttrolleystate.<br>
-        Mediante questa tecnica gli attori ledalarmcontrol e trasporttrolleystate non osserveranno attori CoAP ma bensì riceveranno dei dispatch.<br>
+        Mediante questa tecnica gli attori ledalarmcontrol e trasporttrolleystate non osserveranno attori coap ma bensì riceveranno dei dispatch.<br>
         In questo modo risulta soltanto un attore in osservazione e genera meno difficoltà nel sistema nella loro comunicazione.</p>
 
         <div class="remark" style="background-color: #c3fbe8;">
@@ -227,7 +180,7 @@ h6{
 <div class="remark">
     <p>È stato necessario implementare un ulteriore attore, chiamato <b>coapdispatcher</b>, che ha il compito di osservare gli attori transporttrolley, basicrobotwrapper, pickupdropouthandler e mover.<br>
     In questo modo si è potuto avere un solo attore in osservazione, che poi procede ad eseguire un dispatch delle informazioni ottenute a transporttrolleystate e ledalarmcontrol.<br>
-    Questo porta ad un minore appesantimento del sistema nella comunicazione CoAP risolvendo le problematiche riscontrate in precedenza.</p><br>
+    Questo porta ad un minore appesantimento del sistema nella comunicazione Coap risolvendo le problematiche riscontrate in precedenza.</p><br>
 
     <div class="remark" style="background-color: #c3fbe8;">
         <h3>Test funzionamento progetto:</h3>
