@@ -152,17 +152,35 @@ observeResource pickupdropouthandler</pre></code>
 
         <h4>problematiche</h4>
         <p>È stato notato, testando il sistema, di come le informazioni Coap non sempre riuscissero ad essere correttamente visualizzate.<br>
-        Per fare fronte a questo problema è stato fatto, in maniera iterativa, una nuova analisi del problema per riuscire a risolvere questa problematica.</p>
+        Per fare fronte a questo problema è stato fatto, in maniera iterativa, una nuova analisi del problema per riuscire a risolvere questa problematica.<br>
+        Si è constatata la difficoltà del sistema nel mantenere le connessioni Coap attive, in particolare alcuni messagi erano vuoti e portavano al blocco della comunicazione.<br>
+        È stato quindi necessario riorganizzare la struttura degli attori del sistema.</p>
 </div>
 
 <h2>Problem analysis</h2>
 <div class="remark">
+        <p>Per far fronte alle problematiche riscontrate in precedenza è stato introdotto un nuovo attore, denominato <b>coapdispatcher</b>.<br>
+        Quest'ultimo avrà il compito di osservare gli attori transporttrolley,pickupdropouthandler,basicrobotwrapper,mover e, tramite un dispatcher, comunicare con il led ed trasporttrolleystate.<br>
+        Mediante questa tecnica gli attori led e trasporttrolleystate non osserveranno attori coap ma bensì riceveranno dei dispatch.<br>
+        In questo modo risulta soltanto un attore in osservazione e genera meno difficoltà nel sistema nella loro comunicazione.</p>
 
+        <div class="remark" style="background-color: #c3fbe8;">
+            <h3>Riassunto situazione attuale:</h3>
+            <h6>Architettura logica:</h6>
+            <img class="centerimg" style="max-width: 1200px;" src="ProblemQakSprint3v2/demosystemarchitecturearch.png"/>
+            <p style="width: 100%; text-align: right;"><a href="../docs_common/Legenda.html">Legenda</a></p>
+            <h6>QAK</h6>
+            <a href="ProblemQakSprint3v2/src/Prototype/SystemAchitecture.qak">Modello del sistema QAK</a> <br>
+            <h6><p>Testplan <small>(non ancora eseguibili)</small>:</p></h6>
+            <p><a href="ProblemQakSprint3v2/test/testSprint3/TestSprint3_transporttrolleystate.kt">TestSprint3_transporttrolleystate.kt</a> <br>
+        </div>
 </div>
 
 <h2>Project</h2>
 <div class="remark">
-    <p>È stato necessario implementare un ulteriore attore, chiamato <b>coapdispatcher</b> che ha il compito di </p><br>
+    <p>È stato necessario implementare un ulteriore attore, chiamato <b>coapdispatcher</b>, che ha il compito di osservare gli attori transporttrolley, basicrobotwrapper, pickupdropouthandler e mover.<br>
+    In questo modo si è potuto avere un solo attore in osservazione, che poi procede ad eseguire un dispatch delle informazioni ottenute a transporttrolleystate e ledalarmcontrol.<br>
+    Questo porta ad un minore appesantimento del sistema nella comunicazione Coap risolvendo le problematiche riscontrate in precedenza.</p><br>
 
     <div class="remark" style="background-color: #c3fbe8;">
         <h3>Test funzionamento progetto:</h3>
