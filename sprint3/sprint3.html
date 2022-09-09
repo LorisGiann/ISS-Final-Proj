@@ -144,16 +144,43 @@ observeResource pickupdropouthandler</pre></code>
         </p>
         <img class="centerimg" style="max-width: 1300px;" src="docs/_images/consolegui.png"/>
 
+        <h3>Riassunto situazione attuale:</h3>
+        <h6>Architettura logica:</h6>
+        <img class="centerimg" style="max-width: 1300px;" src="docs/_images/demo0arch.png"/>
+        <p style="width: 100%; text-align: right;"><a href="../docs_common/Legenda.html">Legenda</a></p>
+
+
         <h4>problematiche</h4>
         <p>È stato notato, testando il sistema, di come le informazioni Coap non sempre riuscissero ad essere correttamente visualizzate.<br>
         Per fare fronte a questo problema è stato fatto, in maniera iterativa, una nuova analisi del problema per riuscire a risolvere questa problematica.</p>
+</div>
+
+<h2>Problem analysis</h2>
+<div class="remark">
+
+</div>
+
+<h2>Project</h2>
+<div class="remark">
+    <p>È stato necessario implementare un ulteriore attore, chiamato <b>coapdispatcher</b> che ha il compito di </p><br>
+
+    <div class="remark" style="background-color: #c3fbe8;">
+        <h3>Test funzionamento progetto:</h3>
+        <video width="1080" class="centerimg" controls>
+            <source src="docs/_video/test_working.mp4" type="video/mp4">
+        </video>
+    </div>
 </div>
 
 <h2>Test plans</h2>
 <div class="remark">
     <h4><p>Test effettuati:</p></h4>
     <ul>
-
+        <h6>Classe di test TestSprint3_integration_transporttrolleystate.kt:</h6>
+        <p>Classe per testare il sistema, in particolare per verificare il funzionamento dell'attore transporttrolleystate</p>
+        <li><u>test_accepted()</u>: Il robot viene interrotto durante una move forward, durante una turn, durante una <b>Pickup</b> e una <b>Dropout</b>.
+            Si controlla che gli stati delle varie macchine assumano i valori che si si aspetti</li>
+      
     </ul>
 </div>
 
@@ -166,6 +193,7 @@ observeResource pickupdropouthandler</pre></code>
     <h6>QAK</h6>
     <a href="QakSprint2/src/Prototype/demo0.qak">Metamodello eseguibile QAK</a>
     <h6><p>Testplan:</p></h6>
+    <p><a href="QakSprint3/test/testSprint3/TestSprint3_integration_transporttrolleystate.kt">TestSprint3_integration_transporttrolleystate.kt</a> <br>
 </div>
  
 <!-- USEFUL
