@@ -24,7 +24,7 @@ class Transporttrolleystate ( name: String, scope: CoroutineScope  ) : ActorBasi
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t06",targetState="handleUpdate",cond=whenDispatch("coapUpdate"))
+					 transition(edgeName="t04",targetState="handleUpdate",cond=whenDispatch("coapUpdate"))
 				}	 
 				state("handleUpdate") { //this:State
 					action { //it:State
@@ -41,7 +41,7 @@ class Transporttrolleystate ( name: String, scope: CoroutineScope  ) : ActorBasi
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t07",targetState="handleUpdate",cond=whenDispatch("coapUpdate"))
+					 transition(edgeName="t05",targetState="handleUpdate",cond=whenDispatch("coapUpdate"))
 				}	 
 			}
 		}

@@ -60,8 +60,8 @@ class Sonarlorisdavide ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t076",targetState="handleSonarData",cond=whenEvent("alarmsonar"))
-					transition(edgeName="t077",targetState="deactivateTheSonar",cond=whenDispatch("sonardeactivate"))
+					 transition(edgeName="t074",targetState="handleSonarData",cond=whenEvent("alarmsonar"))
+					transition(edgeName="t075",targetState="deactivateTheSonar",cond=whenDispatch("sonardeactivate"))
 				}	 
 				state("deactivateTheSonar") { //this:State
 					action { //it:State
@@ -95,8 +95,8 @@ class Sonarlorisdavide ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t078",targetState="handleSonarData",cond=whenEvent("alarmsonar"))
-					transition(edgeName="t079",targetState="deactivateTheSonar",cond=whenDispatch("sonardeactivate"))
+					 transition(edgeName="t076",targetState="handleSonarData",cond=whenEvent("alarmsonar"))
+					transition(edgeName="t077",targetState="deactivateTheSonar",cond=whenDispatch("sonardeactivate"))
 				}	 
 				state("end") { //this:State
 					action { //it:State
@@ -108,7 +108,7 @@ class Sonarlorisdavide ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t080",targetState="activateTheSonar",cond=whenDispatch("sonaractivate"))
+					 transition(edgeName="t078",targetState="activateTheSonar",cond=whenDispatch("sonaractivate"))
 				}	 
 			}
 		}

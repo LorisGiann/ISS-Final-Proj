@@ -30,9 +30,9 @@ class Pickupdropouthandler ( name: String, scope: CoroutineScope  ) : ActorBasic
 				 	 			scope, context!!, "local_tout_pickupdropouthandler_handle_prio", 10.toLong() )
 				 	 		//}
 					}	 	 
-					 transition(edgeName="t030",targetState="wait",cond=whenTimeout("local_tout_pickupdropouthandler_handle_prio"))   
-					transition(edgeName="t031",targetState="alarm",cond=whenDispatch("alarm"))
-					transition(edgeName="t032",targetState="handle_prio",cond=whenDispatch("alarmceased"))
+					 transition(edgeName="t028",targetState="wait",cond=whenTimeout("local_tout_pickupdropouthandler_handle_prio"))   
+					transition(edgeName="t029",targetState="alarm",cond=whenDispatch("alarm"))
+					transition(edgeName="t030",targetState="handle_prio",cond=whenDispatch("alarmceased"))
 				}	 
 				state("alarm") { //this:State
 					action { //it:State
@@ -44,7 +44,7 @@ class Pickupdropouthandler ( name: String, scope: CoroutineScope  ) : ActorBasic
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t033",targetState="handle_prio",cond=whenDispatch("alarmceased"))
+					 transition(edgeName="t031",targetState="handle_prio",cond=whenDispatch("alarmceased"))
 				}	 
 				state("wait") { //this:State
 					action { //it:State
@@ -57,9 +57,9 @@ class Pickupdropouthandler ( name: String, scope: CoroutineScope  ) : ActorBasic
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t034",targetState="do_dropout",cond=whenRequest("dropout"))
-					transition(edgeName="t035",targetState="do_pickup",cond=whenRequest("pickup"))
-					transition(edgeName="t036",targetState="alarm",cond=whenDispatch("alarm"))
+					 transition(edgeName="t032",targetState="do_dropout",cond=whenRequest("dropout"))
+					transition(edgeName="t033",targetState="do_pickup",cond=whenRequest("pickup"))
+					transition(edgeName="t034",targetState="alarm",cond=whenDispatch("alarm"))
 				}	 
 				state("do_dropout") { //this:State
 					action { //it:State
@@ -75,8 +75,8 @@ class Pickupdropouthandler ( name: String, scope: CoroutineScope  ) : ActorBasic
 				 	 			scope, context!!, "local_tout_pickupdropouthandler_do_dropout", 1000.toLong() )
 				 	 		//}
 					}	 	 
-					 transition(edgeName="t037",targetState="done_dropout",cond=whenTimeout("local_tout_pickupdropouthandler_do_dropout"))   
-					transition(edgeName="t038",targetState="halt_dropout",cond=whenDispatch("alarm"))
+					 transition(edgeName="t035",targetState="done_dropout",cond=whenTimeout("local_tout_pickupdropouthandler_do_dropout"))   
+					transition(edgeName="t036",targetState="halt_dropout",cond=whenDispatch("alarm"))
 				}	 
 				state("halt_dropout") { //this:State
 					action { //it:State
@@ -88,7 +88,7 @@ class Pickupdropouthandler ( name: String, scope: CoroutineScope  ) : ActorBasic
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t039",targetState="resume_dropout",cond=whenDispatch("alarmceased"))
+					 transition(edgeName="t037",targetState="resume_dropout",cond=whenDispatch("alarmceased"))
 				}	 
 				state("resume_dropout") { //this:State
 					action { //it:State
@@ -104,7 +104,7 @@ class Pickupdropouthandler ( name: String, scope: CoroutineScope  ) : ActorBasic
 				 	 			scope, context!!, "local_tout_pickupdropouthandler_resume_dropout", 1000.toLong() )
 				 	 		//}
 					}	 	 
-					 transition(edgeName="t040",targetState="done_dropout",cond=whenTimeout("local_tout_pickupdropouthandler_resume_dropout"))   
+					 transition(edgeName="t038",targetState="done_dropout",cond=whenTimeout("local_tout_pickupdropouthandler_resume_dropout"))   
 				}	 
 				state("do_pickup") { //this:State
 					action { //it:State
@@ -120,8 +120,8 @@ class Pickupdropouthandler ( name: String, scope: CoroutineScope  ) : ActorBasic
 				 	 			scope, context!!, "local_tout_pickupdropouthandler_do_pickup", 1000.toLong() )
 				 	 		//}
 					}	 	 
-					 transition(edgeName="t041",targetState="done_pickup",cond=whenTimeout("local_tout_pickupdropouthandler_do_pickup"))   
-					transition(edgeName="t042",targetState="halt_pickup",cond=whenDispatch("alarm"))
+					 transition(edgeName="t039",targetState="done_pickup",cond=whenTimeout("local_tout_pickupdropouthandler_do_pickup"))   
+					transition(edgeName="t040",targetState="halt_pickup",cond=whenDispatch("alarm"))
 				}	 
 				state("halt_pickup") { //this:State
 					action { //it:State
@@ -133,7 +133,7 @@ class Pickupdropouthandler ( name: String, scope: CoroutineScope  ) : ActorBasic
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t043",targetState="resume_pickup",cond=whenDispatch("alarmceased"))
+					 transition(edgeName="t041",targetState="resume_pickup",cond=whenDispatch("alarmceased"))
 				}	 
 				state("resume_pickup") { //this:State
 					action { //it:State
@@ -149,7 +149,7 @@ class Pickupdropouthandler ( name: String, scope: CoroutineScope  ) : ActorBasic
 				 	 			scope, context!!, "local_tout_pickupdropouthandler_resume_pickup", 1000.toLong() )
 				 	 		//}
 					}	 	 
-					 transition(edgeName="t044",targetState="done_pickup",cond=whenTimeout("local_tout_pickupdropouthandler_resume_pickup"))   
+					 transition(edgeName="t042",targetState="done_pickup",cond=whenTimeout("local_tout_pickupdropouthandler_resume_pickup"))   
 				}	 
 				state("done_dropout") { //this:State
 					action { //it:State

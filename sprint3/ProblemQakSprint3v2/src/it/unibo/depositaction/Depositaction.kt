@@ -42,7 +42,7 @@ class Depositaction ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( na
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t014",targetState="req_move_indoor",cond=whenRequest("depositaction"))
+					 transition(edgeName="t012",targetState="req_move_indoor",cond=whenRequest("depositaction"))
 				}	 
 				state("req_move_indoor") { //this:State
 					action { //it:State
@@ -59,7 +59,7 @@ class Depositaction ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( na
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t015",targetState="chk_move_indoor",cond=whenReply("movetoanswer"))
+					 transition(edgeName="t013",targetState="chk_move_indoor",cond=whenReply("movetoanswer"))
 				}	 
 				state("chk_move_indoor") { //this:State
 					action { //it:State
@@ -91,7 +91,7 @@ class Depositaction ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( na
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t016",targetState="chk_pickup",cond=whenReply("pickupanswer"))
+					 transition(edgeName="t014",targetState="chk_pickup",cond=whenReply("pickupanswer"))
 				}	 
 				state("chk_pickup") { //this:State
 					action { //it:State
@@ -141,7 +141,7 @@ class Depositaction ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( na
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t017",targetState="chk_move_container",cond=whenReply("movetoanswer"))
+					 transition(edgeName="t015",targetState="chk_move_container",cond=whenReply("movetoanswer"))
 				}	 
 				state("chk_move_container") { //this:State
 					action { //it:State
@@ -172,7 +172,7 @@ class Depositaction ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( na
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t018",targetState="chk_dropout",cond=whenReply("dropoutanswer"))
+					 transition(edgeName="t016",targetState="chk_dropout",cond=whenReply("dropoutanswer"))
 				}	 
 				state("chk_dropout") { //this:State
 					action { //it:State
@@ -207,8 +207,8 @@ class Depositaction ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( na
 				 	 			scope, context!!, "local_tout_depositaction_next_move", 10.toLong() )
 				 	 		//}
 					}	 	 
-					 transition(edgeName="t019",targetState="move_home",cond=whenTimeout("local_tout_depositaction_next_move"))   
-					transition(edgeName="t020",targetState="req_move_indoor",cond=whenRequest("depositaction"))
+					 transition(edgeName="t017",targetState="move_home",cond=whenTimeout("local_tout_depositaction_next_move"))   
+					transition(edgeName="t018",targetState="req_move_indoor",cond=whenRequest("depositaction"))
 				}	 
 				state("move_home") { //this:State
 					action { //it:State
@@ -221,8 +221,8 @@ class Depositaction ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( na
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t021",targetState="req_move_indoor",cond=whenRequest("depositaction"))
-					transition(edgeName="t022",targetState="wait",cond=whenReply("movetoanswer"))
+					 transition(edgeName="t019",targetState="req_move_indoor",cond=whenRequest("depositaction"))
+					transition(edgeName="t020",targetState="wait",cond=whenReply("movetoanswer"))
 				}	 
 			}
 		}

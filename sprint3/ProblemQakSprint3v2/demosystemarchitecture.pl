@@ -5,7 +5,8 @@ context(ctxdriver, "localhost",  "TCP", "8094").
 context(ctxserver, "localhost",  "TCP", "8095").
 context(ctxrobot, "127.0.0.1",  "TCP", "8096").
 context(ctxalarm, "127.0.0.1",  "TCP", "8097").
- qactor( coapdispatch, ctxrobot, "it.unibo.coapdispatch.Coapdispatch").
+ qactor( ledalarmcontrol, ctxalarm, "it.unibo.ledalarmcontrol.Ledalarmcontrol").
+  qactor( coapdispatch, ctxrobot, "it.unibo.coapdispatch.Coapdispatch").
   qactor( transporttrolleystate, ctxrobot, "it.unibo.transporttrolleystate.Transporttrolleystate").
   qactor( guiserver, ctxrobot, "it.unibo.guiserver.Guiserver").
   qactor( smartdevice, ctxdriver, "it.unibo.smartdevice.Smartdevice").

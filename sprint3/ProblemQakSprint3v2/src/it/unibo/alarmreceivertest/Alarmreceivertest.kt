@@ -34,8 +34,8 @@ class Alarmreceivertest ( name: String, scope: CoroutineScope  ) : ActorBasicFsm
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t089",targetState="wait",cond=whenEvent("alarm"))
-					transition(edgeName="t090",targetState="wait",cond=whenEvent("alarmceased"))
+					 transition(edgeName="t087",targetState="wait",cond=whenEvent("alarm"))
+					transition(edgeName="t088",targetState="wait",cond=whenEvent("alarmceased"))
 				}	 
 			}
 		}

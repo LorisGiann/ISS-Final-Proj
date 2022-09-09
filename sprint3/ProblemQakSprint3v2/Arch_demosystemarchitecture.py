@@ -35,16 +35,17 @@ with Diagram('demosystemarchitectureArch', show=False, outformat='png', graph_at
           basicrobotlorisdavide=Custom('basicrobotlorisdavide','./qakicons/symActorSmall.png')
           alarmreceivertest=Custom('alarmreceivertest','./qakicons/symActorSmall.png')
      with Cluster('ctxalarm', graph_attr=nodeattr):
+          ledalarmcontrol=Custom('ledalarmcontrol','./qakicons/symActorSmall.png')
           sonarlorisdavide=Custom('sonarlorisdavide','./qakicons/symActorSmall.png')
           alarmemitter=Custom('alarmemitter','./qakicons/symActorSmall.png')
           led=Custom('led','./qakicons/symActorSmall.png')
+     ledalarmcontrol >> Edge( xlabel='update_led', **eventedgeattr, fontcolor='red') >> sys
      transporttrolley >> Edge(color='blue', style='solid', xlabel='coapUpdate', fontcolor='blue') >> coapdispatch
      basicrobotwrapper >> Edge(color='blue', style='solid', xlabel='coapUpdate', fontcolor='blue') >> coapdispatch
      pickupdropouthandler >> Edge(color='blue', style='solid', xlabel='coapUpdate', fontcolor='blue') >> coapdispatch
      mover >> Edge(color='blue', style='solid', xlabel='coapUpdate', fontcolor='blue') >> coapdispatch
-     sys >> Edge(color='red', style='dashed', xlabel='update_led', fontcolor='red') >> coapdispatch
      coapdispatch >> Edge(color='blue', style='solid', xlabel='coapUpdate', fontcolor='blue') >> transporttrolleystate
-     coapdispatch >> Edge(color='blue', style='solid', xlabel='update_led', fontcolor='blue') >> led
+     coapdispatch >> Edge(color='blue', style='solid', xlabel='coapUpdate', fontcolor='blue') >> ledalarmcontrol
      transporttrolleystate >> Edge(color='blue', style='solid', xlabel='coapUpdate', fontcolor='blue') >> guiserver
      wasteservice >> Edge(color='blue', style='solid', xlabel='coapUpdate', fontcolor='blue') >> guiserver
      mover >> Edge(color='blue', style='solid', xlabel='coapUpdate', fontcolor='blue') >> guiserver
@@ -77,6 +78,7 @@ with Diagram('demosystemarchitectureArch', show=False, outformat='png', graph_at
      alarmemitter >> Edge( xlabel='alarm', **eventedgeattr, fontcolor='red') >> sys
      alarmemitter >> Edge( xlabel='alarmceased', **eventedgeattr, fontcolor='red') >> sys
      sys >> Edge(color='red', style='dashed', xlabel='local_sonardata', fontcolor='red') >> alarmemitter
+     sys >> Edge(color='red', style='dashed', xlabel='update_led', fontcolor='red') >> led
      sys >> Edge(color='red', style='dashed', xlabel='alarm', fontcolor='red') >> alarmreceivertest
      sys >> Edge(color='red', style='dashed', xlabel='alarmceased', fontcolor='red') >> alarmreceivertest
 diag

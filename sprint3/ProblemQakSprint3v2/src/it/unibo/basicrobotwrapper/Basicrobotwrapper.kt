@@ -31,9 +31,9 @@ class Basicrobotwrapper ( name: String, scope: CoroutineScope  ) : ActorBasicFsm
 				 	 			scope, context!!, "local_tout_basicrobotwrapper_handle_prio", 10.toLong() )
 				 	 		//}
 					}	 	 
-					 transition(edgeName="t058",targetState="wait",cond=whenTimeout("local_tout_basicrobotwrapper_handle_prio"))   
-					transition(edgeName="t059",targetState="alarm",cond=whenDispatch("alarm"))
-					transition(edgeName="t060",targetState="handle_prio",cond=whenDispatch("alarmceased"))
+					 transition(edgeName="t056",targetState="wait",cond=whenTimeout("local_tout_basicrobotwrapper_handle_prio"))   
+					transition(edgeName="t057",targetState="alarm",cond=whenDispatch("alarm"))
+					transition(edgeName="t058",targetState="handle_prio",cond=whenDispatch("alarmceased"))
 				}	 
 				state("alarm") { //this:State
 					action { //it:State
@@ -45,7 +45,7 @@ class Basicrobotwrapper ( name: String, scope: CoroutineScope  ) : ActorBasicFsm
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t061",targetState="handle_prio",cond=whenDispatch("alarmceased"))
+					 transition(edgeName="t059",targetState="handle_prio",cond=whenDispatch("alarmceased"))
 				}	 
 				state("wait") { //this:State
 					action { //it:State
@@ -58,8 +58,8 @@ class Basicrobotwrapper ( name: String, scope: CoroutineScope  ) : ActorBasicFsm
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t062",targetState="handle",cond=whenRequest("cmdsync"))
-					transition(edgeName="t063",targetState="alarm",cond=whenDispatch("alarm"))
+					 transition(edgeName="t060",targetState="handle",cond=whenRequest("cmdsync"))
+					transition(edgeName="t061",targetState="alarm",cond=whenDispatch("alarm"))
 				}	 
 				state("handle") { //this:State
 					action { //it:State
@@ -110,9 +110,9 @@ class Basicrobotwrapper ( name: String, scope: CoroutineScope  ) : ActorBasicFsm
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t064",targetState="collision",cond=whenEvent("info"))
-					transition(edgeName="t065",targetState="handle",cond=whenRequest("cmdsync"))
-					transition(edgeName="t066",targetState="halt_forward",cond=whenDispatch("alarm"))
+					 transition(edgeName="t062",targetState="collision",cond=whenEvent("info"))
+					transition(edgeName="t063",targetState="handle",cond=whenRequest("cmdsync"))
+					transition(edgeName="t064",targetState="halt_forward",cond=whenDispatch("alarm"))
 				}	 
 				state("halt_forward") { //this:State
 					action { //it:State
@@ -125,8 +125,8 @@ class Basicrobotwrapper ( name: String, scope: CoroutineScope  ) : ActorBasicFsm
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t067",targetState="halt_collision",cond=whenEvent("info"))
-					transition(edgeName="t068",targetState="forward_cmd",cond=whenDispatch("alarmceased"))
+					 transition(edgeName="t065",targetState="halt_collision",cond=whenEvent("info"))
+					transition(edgeName="t066",targetState="forward_cmd",cond=whenDispatch("alarmceased"))
 				}	 
 				state("halt_collision") { //this:State
 					action { //it:State
@@ -138,7 +138,7 @@ class Basicrobotwrapper ( name: String, scope: CoroutineScope  ) : ActorBasicFsm
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t069",targetState="collision",cond=whenDispatch("alarmceased"))
+					 transition(edgeName="t067",targetState="collision",cond=whenDispatch("alarmceased"))
 				}	 
 				state("collision") { //this:State
 					action { //it:State

@@ -161,7 +161,7 @@ observeResource pickupdropouthandler</pre></code>
 <div class="remark">
         <p>Per far fronte alle problematiche riscontrate in precedenza è stato introdotto un nuovo attore, denominato <b>coapdispatcher</b>.<br>
         Quest'ultimo avrà il compito di osservare gli attori transporttrolley,pickupdropouthandler,basicrobotwrapper,mover e, tramite un dispatcher, comunicare con il led ed trasporttrolleystate.<br>
-        Mediante questa tecnica gli attori led e trasporttrolleystate non osserveranno attori coap ma bensì riceveranno dei dispatch.<br>
+        Mediante questa tecnica gli attori ledalarmcontrol e trasporttrolleystate non osserveranno attori coap ma bensì riceveranno dei dispatch.<br>
         In questo modo risulta soltanto un attore in osservazione e genera meno difficoltà nel sistema nella loro comunicazione.</p>
 
         <div class="remark" style="background-color: #c3fbe8;">

@@ -28,9 +28,9 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="toNewState23",targetState="req_pickup",cond=whenRequest("pickup"))
-					transition(edgeName="toNewState24",targetState="req_dropout",cond=whenRequest("dropout"))
-					transition(edgeName="toNewState25",targetState="req_move",cond=whenRequest("moveto"))
+					 transition(edgeName="toNewState21",targetState="req_pickup",cond=whenRequest("pickup"))
+					transition(edgeName="toNewState22",targetState="req_dropout",cond=whenRequest("dropout"))
+					transition(edgeName="toNewState23",targetState="req_move",cond=whenRequest("moveto"))
 				}	 
 				state("req_pickup") { //this:State
 					action { //it:State
@@ -43,7 +43,7 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="toNewState26",targetState="chk_pickup",cond=whenReply("pickupanswer"))
+					 transition(edgeName="toNewState24",targetState="chk_pickup",cond=whenReply("pickupanswer"))
 				}	 
 				state("chk_pickup") { //this:State
 					action { //it:State
@@ -78,7 +78,7 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="toNewState27",targetState="chk_dropout",cond=whenReply("dropoutanswer"))
+					 transition(edgeName="toNewState25",targetState="chk_dropout",cond=whenReply("dropoutanswer"))
 				}	 
 				state("chk_dropout") { //this:State
 					action { //it:State
@@ -118,8 +118,8 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="toNewState28",targetState="chk_move",cond=whenReply("movetoanswer"))
-					transition(edgeName="toNewState29",targetState="req_move",cond=whenRequest("moveto"))
+					 transition(edgeName="toNewState26",targetState="chk_move",cond=whenReply("movetoanswer"))
+					transition(edgeName="toNewState27",targetState="req_move",cond=whenRequest("moveto"))
 				}	 
 				state("chk_move") { //this:State
 					action { //it:State

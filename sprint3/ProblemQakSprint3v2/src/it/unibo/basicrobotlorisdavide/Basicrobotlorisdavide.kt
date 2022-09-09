@@ -47,10 +47,10 @@ class Basicrobotlorisdavide ( name: String, scope: CoroutineScope  ) : ActorBasi
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t170",targetState="execcmd",cond=whenDispatch("cmd"))
-					transition(edgeName="t171",targetState="doStep",cond=whenRequest("step"))
-					transition(edgeName="t172",targetState="handleObstacle",cond=whenDispatch("obstacle"))
-					transition(edgeName="t173",targetState="endwork",cond=whenDispatch("end"))
+					 transition(edgeName="t168",targetState="execcmd",cond=whenDispatch("cmd"))
+					transition(edgeName="t169",targetState="doStep",cond=whenRequest("step"))
+					transition(edgeName="t170",targetState="handleObstacle",cond=whenDispatch("obstacle"))
+					transition(edgeName="t171",targetState="endwork",cond=whenDispatch("end"))
 				}	 
 				state("execcmd") { //this:State
 					action { //it:State
@@ -110,8 +110,8 @@ class Basicrobotlorisdavide ( name: String, scope: CoroutineScope  ) : ActorBasi
 				 	 			scope, context!!, "local_tout_basicrobotlorisdavide_doStep", StepTime )
 				 	 		//}
 					}	 	 
-					 transition(edgeName="t074",targetState="stepDone",cond=whenTimeout("local_tout_basicrobotlorisdavide_doStep"))   
-					transition(edgeName="t075",targetState="stepFail",cond=whenDispatch("obstacle"))
+					 transition(edgeName="t072",targetState="stepDone",cond=whenTimeout("local_tout_basicrobotlorisdavide_doStep"))   
+					transition(edgeName="t073",targetState="stepFail",cond=whenDispatch("obstacle"))
 				}	 
 				state("stepDone") { //this:State
 					action { //it:State

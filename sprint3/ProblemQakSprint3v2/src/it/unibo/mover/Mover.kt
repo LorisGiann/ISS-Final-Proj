@@ -31,7 +31,7 @@ class Mover ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scop
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t045",targetState="handle",cond=whenRequest("moveto"))
+					 transition(edgeName="t043",targetState="handle",cond=whenRequest("moveto"))
 				}	 
 				state("handle") { //this:State
 					action { //it:State
@@ -96,7 +96,7 @@ class Mover ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scop
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t046",targetState="chk_pre_turn_aclk",cond=whenReply("cmdanswer"))
+					 transition(edgeName="t044",targetState="chk_pre_turn_aclk",cond=whenReply("cmdanswer"))
 				}	 
 				state("chk_pre_turn_aclk") { //this:State
 					action { //it:State
@@ -129,8 +129,8 @@ class Mover ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scop
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t047",targetState="chk_forward_aclk",cond=whenReply("cmdanswer"))
-					transition(edgeName="t048",targetState="set_new_dest_aclk",cond=whenRequest("moveto"))
+					 transition(edgeName="t045",targetState="chk_forward_aclk",cond=whenReply("cmdanswer"))
+					transition(edgeName="t046",targetState="set_new_dest_aclk",cond=whenRequest("moveto"))
 				}	 
 				state("chk_forward_aclk") { //this:State
 					action { //it:State
@@ -181,7 +181,7 @@ class Mover ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scop
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t049",targetState="chk_post_turn_aclk",cond=whenReply("cmdanswer"))
+					 transition(edgeName="t047",targetState="chk_post_turn_aclk",cond=whenReply("cmdanswer"))
 				}	 
 				state("chk_post_turn_aclk") { //this:State
 					action { //it:State
@@ -241,7 +241,7 @@ class Mover ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scop
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t050",targetState="chk_pre_turn_clk",cond=whenReply("cmdanswer"))
+					 transition(edgeName="t048",targetState="chk_pre_turn_clk",cond=whenReply("cmdanswer"))
 				}	 
 				state("chk_pre_turn_clk") { //this:State
 					action { //it:State
@@ -274,8 +274,8 @@ class Mover ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scop
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t051",targetState="chk_forward_clk",cond=whenReply("cmdanswer"))
-					transition(edgeName="t052",targetState="set_new_dest_clk",cond=whenRequest("moveto"))
+					 transition(edgeName="t049",targetState="chk_forward_clk",cond=whenReply("cmdanswer"))
+					transition(edgeName="t050",targetState="set_new_dest_clk",cond=whenRequest("moveto"))
 				}	 
 				state("chk_forward_clk") { //this:State
 					action { //it:State
@@ -326,7 +326,7 @@ class Mover ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scop
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t053",targetState="chk_post_turn_clk",cond=whenReply("cmdanswer"))
+					 transition(edgeName="t051",targetState="chk_post_turn_clk",cond=whenReply("cmdanswer"))
 				}	 
 				state("chk_post_turn_clk") { //this:State
 					action { //it:State
@@ -370,8 +370,8 @@ class Mover ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scop
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t054",targetState="chk_u_turn",cond=whenReply("moveruturnanswer"))
-					transition(edgeName="t055",targetState="req_u_turn",cond=whenReply("movetoanswer"))
+					 transition(edgeName="t052",targetState="chk_u_turn",cond=whenReply("moveruturnanswer"))
+					transition(edgeName="t053",targetState="req_u_turn",cond=whenReply("movetoanswer"))
 				}	 
 				state("chk_u_turn") { //this:State
 					action { //it:State
@@ -414,8 +414,8 @@ class Mover ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scop
 				 	 			scope, context!!, "local_tout_mover_reply", 10.toLong() )
 				 	 		//}
 					}	 	 
-					 transition(edgeName="t056",targetState="handle",cond=whenTimeout("local_tout_mover_reply"))   
-					transition(edgeName="t057",targetState="handle",cond=whenRequest("moveto"))
+					 transition(edgeName="t054",targetState="handle",cond=whenTimeout("local_tout_mover_reply"))   
+					transition(edgeName="t055",targetState="handle",cond=whenRequest("moveto"))
 				}	 
 				state("error") { //this:State
 					action { //it:State

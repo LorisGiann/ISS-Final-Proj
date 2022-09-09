@@ -27,8 +27,7 @@ class Coapdispatch ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t00",targetState="handleUpdate",cond=whenDispatch("coapUpdate"))
-					transition(edgeName="t01",targetState="handleLed",cond=whenEvent("update_led"))
+					 transition(edgeName="t02",targetState="handleUpdate",cond=whenDispatch("coapUpdate"))
 				}	 
 				state("handleUpdate") { //this:State
 					action { //it:State
@@ -37,30 +36,14 @@ class Coapdispatch ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								discardMessages = false
 								forward("coapUpdate", "coapUpdate(RESOURCE,VALUE)" ,"transporttrolleystate" ) 
+								forward("coapUpdate", "coapUpdate(RESOURCE,VALUE)" ,"ledalarmcontrol" ) 
 						}
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t02",targetState="handleUpdate",cond=whenDispatch("coapUpdate"))
-					transition(edgeName="t03",targetState="handleLed",cond=whenEvent("update_led"))
-				}	 
-				state("handleLed") { //this:State
-					action { //it:State
-						println("$name in ${currentState.stateName} | $currentMsg")
-						if( checkMsgContent( Term.createTerm("update_led(LEDSTATE)"), Term.createTerm("update_led(ARG)"), 
-						                        currentMsg.msgContent()) ) { //set msgArgList
-								discardMessages = false
-								forward("update_led", "update_led(ARG)" ,"led" ) 
-						}
-						//genTimer( actor, state )
-					}
-					//After Lenzi Aug2002
-					sysaction { //it:State
-					}	 	 
-					 transition(edgeName="t04",targetState="handleUpdate",cond=whenDispatch("coapUpdate"))
-					transition(edgeName="t05",targetState="handleLed",cond=whenEvent("update_led"))
+					 transition(edgeName="t03",targetState="handleUpdate",cond=whenDispatch("coapUpdate"))
 				}	 
 			}
 		}
