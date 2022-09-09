@@ -83,7 +83,7 @@ h6{
 
     <h3><b>GUI</b></h3>
 
-    <h4>Che tipologia di GUI risulta più appropiata per il sistema sviluppato?</h4>
+    <h4>Che informazioni necessita la GUI?</h4>
     <p>La <b>WasteServiceStatusGUI</b> deve avere, per il committente, la possibilità di visualizzare le seguenti informazioni:</p>
     <ul>
         <li>Lo stato corrente del <b>transporttrolley</b></li>
@@ -91,27 +91,27 @@ h6{
         <li>Lo stato corrente del <b>led</b></li>
         <li>Il peso corrente immagazzinato all'interno della <b>plasticbox</b> e della <b>glassbox</b></li>
     </ul>
+    <p>Analizzando il problema risulta necessario un attore in grado di poter ottenere queste informazioni e riuscirle poi a mostrare in una <b>gui</b>.<br>
+    Viene quindi definito un attore <b>servergui</b> che, mediante <b>coap</b>, estrapolerà le informazioni necessarie.<br>
+    La scelta dell'utilizzo di Coap risulta particolarmente comoda avendo gli attori che già dagli sprint precedenti riferiscono le informazioni richieste per la Gui.</p>
+    <code><pre>Dispatch coapUpdate: coapUpdate(RESOURCE, VALUE)</pre></code><br>
+    
+    <p>In particolare viene definito un attore <b>transporttrolleystate</b> che ha il compito di osservare gli attori transporttrolley,basicrobotwrapper e pickupdropouthandler per poi definire e aggiornare lo stato del transporttrolley</p>
+    <code><pre>observeResource transporttrolley
+observeResource basicrobotwrapper
+observeResource pickupdropouthandler</pre></code>
 
-    <p>Analizzando il problema, possiamo constatare che la GUI potrebbe esseere realizzata nei seguenti modi:</p>
-    <ul>
-        <li>Come <b>applicazione web</b></li>
-        <li>Come <b>applicazione desktop</b></li>
-    </ul>
-    È stato scelto di implementare l'applicazione web, rispetto che a quella desktop, per avere una maggiore flessibilità e facilità di accesso alla <b>WasteServiceStatusGUI</b> da parte del Service-manager senza dover installare nel dispositivo l'applicazione richiesta.
-    
-    <h4>In che modo vengono passate le informazioni alla GUI?</h4>
-    
-    <p>Analizzando il problema, avendo scelto in precedenza di implementare una applicazione web, la comunicazione può essere realizzata tramite l'utilizzato di Coap, già utilizzato in precendeza.<br>
-       In questo modo la web application si metterà in ascolto dei vari attori del sistema e aggiornerà di conseguenza la Gui.<br>
-       Questa scelta risulta particolarmente comoda avendo gli attori che già dagli sprint precedenti, tramite coap, riferiscono le informazioni necessarie per aggiornare la Gui.
-    </p>
 
 
     <div class="remark" style="background-color: #c3fbe8;">
         <h3>Riassunto situazione attuale:</h3>
         <h6>Architettura logica:</h6>
-        <img class="centerimg" style="max-width: 1200px;" src="ProblemQakSprint2/demosystemarchitecturearch.png"/>
+        <img class="centerimg" style="max-width: 1200px;" src="ProblemQakSprint3/demosystemarchitecturearch.png"/>
         <p style="width: 100%; text-align: right;"><a href="../docs_common/Legenda.html">Legenda</a></p>
+        <h6>QAK</h6>
+        <a href="ProblemQakSprint3/src/Prototype/SystemAchitecture.qak">Modello del sistema QAK</a> <br>
+        <h6><p>Testplan <small>(non ancora eseguibili)</small>:</p></h6>
+        <p><a href="ProblemQakSprint3/test/testSprint3/TestSprint3_transporttrolleystate.kt">TestSprint3_transporttrolleystate.kt</a> <br>
     </div>
 
 </div>
@@ -120,10 +120,33 @@ h6{
 
 <h2>Project</h2>
 <div class="remark">
-    <p>Procediamo con lo sviluppo vero e proprio dei componenti. Essi sono tutti presenti nel <a href="QakSprint2/src/Prototype/demo0.qak">file QAK di questo sprint</a>, ma vengono qui 
+    <p>Procediamo con lo sviluppo vero e proprio dei componenti. Essi sono tutti presenti nel <a href="QakSprint3/src/Prototype/demo0.qak">file QAK di questo sprint</a>, ma vengono qui 
         riportate e spiegate le macchine a stati che li implementano.</p>
 
-  
+        <p>Analizzando il problema, possiamo constatare che la GUI potrebbe esseere realizzata nei seguenti modi:</p>
+        <ul>
+            <li>Come <b>applicazione web</b></li>
+            <li>Come <b>applicazione desktop</b></li>
+        </ul>
+        Questo comporta quindi l'utilizzo di un <b>alieno</b><br>
+        È stato scelto di implementare l'applicazione web, rispetto che a quella desktop, per avere una maggiore flessibilità e facilità di accesso alla <b>WasteServiceStatusGUI</b> da parte del Service-manager senza dover installare nel dispositivo l'applicazione richiesta.
+        
+        <h4>In che modo vengono passate le informazioni alla GUI?</h4>
+        
+        <p>Analizzando il problema, avendo scelto in precedenza di implementare una applicazione web, la comunicazione può essere realizzata tramite l'utilizzato di Coap, già utilizzato in precendeza.<br>
+           In questo modo la web application osserverà i vari attori del sistema e aggiornerà di conseguenza la Gui.<br>
+        </p>
+
+        <h4>Web robot</h4>
+        <p>L'implementazione dell'alieno webRobot è stata effettuata mediante l'utilizzo di <b>SpringBoot</b>, essendo adatto all'implementazione rapida di applicazioni web.<br>
+           Il sistema riceve le informazioni mediante l'utilizzo di Coap per poi comunicare, dal back-end al front-end, mediante l'utilizzo di una <b>websocket</b>.</br>
+           Le informazioni osservate tramite Coap vengono utilizzate per aggiornare, tramite l'utilizzo di un bean, i dati visuallati nella console gui.
+        </p>
+        <img class="centerimg" style="max-width: 1300px;" src="docs/_images/consolegui.png"/>
+
+        <h4>problematiche</h4>
+        <p>È stato notato, testando il sistema, di come le informazioni Coap non sempre riuscissero ad essere correttamente visualizzate.<br>
+        Per fare fronte a questo problema è stato fatto, in maniera iterativa, una nuova analisi del problema per riuscire a risolvere questa problematica.</p>
 </div>
 
 <h2>Test plans</h2>
@@ -137,7 +160,7 @@ h6{
 <div class="remark" style="background-color: #c3fbe8;">
     <h3>Riassunto situazione attuale:</h3>
     <h6>Architettura logica:</h6>
-    <img class="centerimg" style="max-width: 1300px;" src="QakSprint2/demo0arch.png"/>
+    <img class="centerimg" style="max-width: 1300px;" src="QakSprint3/demo0arch.png"/>
     <p style="width: 100%; text-align: right;"><a href="../docs_common/Legenda.html">Legenda</a></p>
 
     <h6>QAK</h6>

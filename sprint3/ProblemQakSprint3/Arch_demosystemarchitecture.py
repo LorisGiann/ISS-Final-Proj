@@ -41,6 +41,9 @@ with Diagram('demosystemarchitectureArch', show=False, outformat='png', graph_at
      basicrobotwrapper >> Edge(color='blue', style='solid', xlabel='coapUpdate', fontcolor='blue') >> transporttrolleystate
      pickupdropouthandler >> Edge(color='blue', style='solid', xlabel='coapUpdate', fontcolor='blue') >> transporttrolleystate
      transporttrolleystate >> Edge(color='blue', style='solid', xlabel='coapUpdate', fontcolor='blue') >> guiserver
+     wasteservice >> Edge(color='blue', style='solid', xlabel='coapUpdate', fontcolor='blue') >> guiserver
+     mover >> Edge(color='blue', style='solid', xlabel='coapUpdate', fontcolor='blue') >> guiserver
+     led >> Edge(color='blue', style='solid', xlabel='coapUpdate', fontcolor='blue') >> guiserver
      smartdevice >> Edge(color='magenta', style='solid', xlabel='depositrequest', fontcolor='magenta') >> wasteservice
      wasteservice >> Edge(color='darkgreen', style='dashed', xlabel='loadrejected', fontcolor='darkgreen') >> smartdevice
      wasteservice >> Edge(color='magenta', style='solid', xlabel='depositaction', fontcolor='magenta') >> depositaction

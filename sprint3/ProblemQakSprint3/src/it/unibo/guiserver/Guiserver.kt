@@ -19,6 +19,9 @@ class Guiserver ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, 
 				state("s0") { //this:State
 					action { //it:State
 						CoapObserverSupport(myself, "127.0.0.1","8096","ctxrobot","transporttrolleystate")
+						CoapObserverSupport(myself, "localhost","8095","ctxserver","wasteservice")
+						CoapObserverSupport(myself, "127.0.0.1","8096","ctxrobot","mover")
+						CoapObserverSupport(myself, "127.0.0.1","8097","ctxalarm","led")
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
