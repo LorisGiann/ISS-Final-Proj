@@ -6,10 +6,6 @@ import org.eclipse.californium.core.CoapObserveRelation
 import unibo.comm22.interfaces.Interaction2021
 import unibo.comm22.utils.ColorsOut
 
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
 class CoapConnection(address: String, path: String) : Interaction2021 {
     private var client: CoapClient? = null
     private var url: String? = null

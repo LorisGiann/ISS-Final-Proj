@@ -92,7 +92,7 @@ h6{
 
     <h3><b>GUI</b></h3>
 
-    <h4>Webgui o gui standard</h4>
+    <h4>Webgui o gui standard?</h4>
     <ul>
         <li>
             <p><b>Webgui</b>, con un componente che fa da server web e che risiede su un server aziendale</p>
@@ -185,8 +185,10 @@ h6{
            Più nello specifico, le informazioni che giungono tramite le connessioni CoAP (e che vengono stabilite e gestite dagli oggetti 
            <a href="WebRobotKt/src/main/kotlin/unibo/WebRobotKt/ContainerObserver.kt"><i>ContainerObserver</i></a>, <a href="WebRobotKt/src/main/kotlin/unibo/WebRobotKt/PositionObserver.kt"><i>PositionObserver</i></a>, <a href="WebRobotKt/src/main/kotlin/unibo/WebRobotKt/TrasportTrolleyObserver.kt"><i>TrasportTrolleyObserver</i></a>, <a href="WebRobotKt/src/main/kotlin/unibo/WebRobotKt/LedObserver.kt"><i>LedObserver</i></a>) 
            aggiornano un oggetto bean (<a href="WebRobotKt/src/main/kotlin/unibo/WebRobotKt/UpdateGui.kt"><i>UpdateGui</i></a>), che viene poi trasformato in una stringa JSON poi inviata tramite WebSocket a tutti i client attualmente connessi.</p>
-        
-        <p>Pagina web:</p>
+        <p>Si è scelto di utilizzare come linguaggio di programmazione Kotlin essendo supportato da SpringBoot e essendo uno dei linguaggi utilizzati per l'implementazione del sistema.</p>
+        </p>
+
+        <h5>Pagina web:</h5>
         <img class="centerimg" style="max-width: 1300px;" src="docs/_images/consolegui.png"/>
 
         <h3>Riassunto situazione attuale:</h3>
@@ -204,11 +206,11 @@ h6{
 
 <h2>Problem analysis</h2>
 <div class="remark">
-        <p>Per far fronte alle problematiche riscontrate è stata, tra le altre cose, effettuata una modifica strutturale atta a diminuire il nuumero di osservatori CoAP.</p>
-        <p>Infatti inizialmente gli osservatori interni al sistema sono: <i>ledalarmcontrol</i> (che osservava - con successo - già dallo sprint precedente) e <i>transporttrolleystate</i> (che è invece stato introdotto in questo sprint). </p>
-        <p>Si è quindi ritenuto opportuno far tornare il numero di osservatori interni ad 1 (come nello sprint2) siccome questo sembra essere parte del problema, anche a costo di ridurre la flessibiltà del progetto.<br>
-        per questo motivo viene introdotto un nuovo attore, denominato <i>coapdispatcher</i>, che osserva i vari attori precedentemente osservati da <i>ledalarmcontrol</i> e <i>coapdispatcher</i> 
-        (che sono <i>trasporttrolley</i>, <i>pickupdropouthandler</i>, <i>mover</i> e <i>basicrobotwrapper</i>), e  reinvia ad essi eventuali aggiornamenti.<br></p>
+        <p>Per far fronte alle problematiche riscontrate è stata, tra le altre cose, effettuata una modifica strutturale atta a diminuire il numero di osservatori CoAP.</p>
+        <p>Infatti inizialmente gli osservatori interni al sistema erano: <i>ledalarmcontrol</i> (che osservava - con successo - già dallo sprint precedente) e <i>transporttrolleystate</i> (che è invece stato introdotto in questo sprint). </p>
+        <p>Si è quindi ritenuto opportuno far tornare il numero di osservatori interni ad 1 (come nello sprint2) siccome questo sembrava essere parte del problema, anche a costo di ridurre la flessibiltà del progetto.<br>
+        per questo motivo è stato introdotto un nuovo attore, denominato <i>coapdispatcher</i>, che osserva i vari attori precedentemente osservati da <i>ledalarmcontrol</i> e <i>coapdispatcher</i> 
+        (che sono <i>trasporttrolley</i>, <i>pickupdropouthandler</i>, <i>mover</i> e <i>basicrobotwrapper</i>), e reinvia ad essi eventuali aggiornamenti.<br></p>
 
         <div class="remark" style="background-color: #c3fbe8;">
             <h3>Riassunto situazione attuale:</h3>
@@ -216,7 +218,7 @@ h6{
             <img class="centerimg" style="max-width: 1200px;" src="ProblemQakSprint3v2/demosystemarchitecturearch.png"/>
             <p style="width: 100%; text-align: right;"><a href="../docs_common/Legenda.html">Legenda</a></p>
             <h6>Note</h6>
-            <small>In pratica quello che è cambiato è che le informazioni che giungono a <i>ledalarmcontrol</i> e <i>transporttrolleystate</i> seguono questo percorso:</small>
+            <small>In seguito alla analisi le informazioni che giungono a <i>ledalarmcontrol</i> e <i>transporttrolleystate</i> seguono questo percorso:</small>
             <img class="centerimg" style="max-width: 700px;" src="docs/_images/coapdispatcher.png"/>
             <h6>QAK</h6>
             <a href="ProblemQakSprint3v2/src/Prototype/SystemAchitecture.qak">Modello del sistema QAK</a> <br>
@@ -227,7 +229,7 @@ h6{
 
 <h2>Project</h2>
 <div class="remark">
-    <p>Oltre alla modifica struttutale illustrata nell'analisi del problema di cui sopra, è stato necessario adottare qualhe altro accorgimento per far funzionare in maniera relayable l'applicazione.<br>
+    <p>Oltre alla modifica struttutale illustrata nell'analisi del problema di cui sopra, è stato necessario adottare qualche altro accorgimento per far funzionare in maniera relayable l'applicazione.<br>
     In particolare si è potuto osservare che alcune volte (in maniera apparentemente non determinabile a priori), la connessione CoAP sembrava essere stata stabilita, ma quello che in realtà succedeva è che arrivava un aggiornamento con una stringa vuota (si veda <a href="log_empty_update.html">questo</a> estratto di un file di log) e poi nessun altro messaggio.</p>
     <p>In generale, quello che viene fatto quando si cerca di stabilire una connessione CoAP (sia da Web robot, che da <i>coapdispatcher</i>) è:</p>
     <ul>
