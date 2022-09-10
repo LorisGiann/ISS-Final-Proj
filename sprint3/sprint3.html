@@ -55,11 +55,11 @@ h6{
 <div class="remark">
     La <b>WasteServiceStatusGUI:</b> deve permette al <b>Service-manager</b> di monitorare:
     <ul>
-        <lI>La <b>Position</b> del <b>Transport trolley</b> (non serve la posizione precisa di un sistema di coordinate)</lI>
+        <lI>La <b>Position</b> del <b>Transport trolley</b> (non è necessaria la posizione precisa di un sistema di coordinate)</lI>
         <lI>Il <b>Transporttrolleystate</b>, ossia lo stato attuale del <b>Transport trolley</b>. Formalizzato con l'enumerativo <a href="./ProblemQakSprint3/resources/ws/Transporttrolleystate.kt">Transporttrolleystate.kt</a>:<br>
             <code><pre>enum class Transporttrolleystate { IDLE, MOVING, PICKINGUP, DROPPINGOUT, HALT }</pre></code></lI>
         <lI>Il peso corrente <b>contPB</b> e <b>contGB</b> del materiale contenuto in <b>PLASTICBOX</b> e in <b>GLASSBOX</b></lI>
-        <lI>Lo stato del <b>LED</b></lI>
+        <lI>Lo stato corrente del <b>LED</b></lI>
     </ul>
     
 </div>
@@ -70,7 +70,7 @@ h6{
     <h4>Scrum goal:</h4>
     <p>Obiettivo dello SPRINT3 è l'estensione della demo dello <a href="../sprint2/sprint2.html">SPRINT2</a> per realizzare il requisito riguardante la <b>WasteServiceStatusGUI</b> specificato 
         dal committente al punto 3.</p><br>
-    <p>Inoltre è necessario pensare ad un piano per la distribuzione, il committente apprezzerebbe che questo avvenisse con container Docker.</p>
+    <p>Inoltre è necessario pensare ad un piano per la distribuzione, il committente gradirebbe che questo avvenisse con container <a href="./docker_distribution.html">Docker</a>.</p>
     <h4>Piano di lavoro:</h4>
     <ul>
         <li>Analisi del problema riguardo la tipologia di GUI da implementare</li>
@@ -95,7 +95,7 @@ h6{
     <h4>Webgui o gui standard</h4>
     <ul>
         <li>
-            <p>Webgui, con un componente che fa da server web e che risiede sul server aziendale</p>
+            <p><b>Webgui</b>, con un componente che fa da server web e che risiede su un server aziendale</p>
             <ul>
                 <li>+ Gui visualizzabile su qualunqe dispositivo dotato di browser</li>
                 <li>+ Riutilizzo di codice disponibile (progetto <a href="../docs_prof/html/webRobot22.html">Webrobot</a>)</li>
@@ -103,8 +103,9 @@ h6{
             </ul>
         </li>
         <li>
-            <p>Gui standard "tradizionare", ossia con un componente da installare sulla workstation nella quale si desidera visualizzare le informazioni della GUI</p>
+            <p><b>Gui standard</b> "tradizionare", ossia con un componente da installare sulla workstation nella quale si desidera visualizzare le informazioni della GUI</p>
             <ul>
+                <li>+ Non necessita la presenza di un browser (ma oramai la quasi totalità dei dispositivi lo possiede)</li>
                 <li>- Necessario installare componenti su ogni dispositivo nel quale viene visualizzata la GUI</li>
             </ul>
             <p>A sua volta abbiamo 2 possibilità</p>
@@ -125,7 +126,7 @@ h6{
             </ul>
         </li>
     </ul>
-    <p>Alla luce di questi raginamenti risulterebbe più comveniente sviluppare una webgui (o meglio di adattare quella di <a href="../docs_prof/html/webRobot22.html">Webrobot</a>)</p>
+    <p>Alla luce di questi raginamenti risulterebbe più conveniente sviluppare una webgui (adattando quella di <a href="../docs_prof/html/webRobot22.html">Webrobot</a>)</p>
     <img class="centerimg" style="max-width: 600px;" src="docs/_images/system-webserver-browser.png"/>
 
     <h4>Interazione sistema / webserver</h4>
@@ -147,6 +148,7 @@ h6{
             <p>Dal webserver (quindi esternamente)</p>
             <ul>
                 <li>+ Il sistema ha un compito in meno</li>
+                <li>- Sistema meno flessibile in caso di future componenti</li>
             </ul>
             <p>Da un attore del sistema (quindi internamente)</p>
             <ul>
