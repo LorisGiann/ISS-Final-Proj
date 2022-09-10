@@ -44,13 +44,13 @@ class PositionObserver (private val webSocketList: ArrayList<WebSocketSession>, 
         reconnect()
     }
 
-    fun reconnect(){
+    private fun reconnect(){
         ColorsOut.outappl("PositionObserver | RECONNECTING to mover", ColorsOut.GREEN)
         futureClient.get()?.removeObserve()
         futureClient = CoapUtils.coapObsserve("mover",this)
     }
 
-    fun updatePosition(position : String){
+    private fun updatePosition(position : String){
         synchronized(updateGui) {
             updateGui.position = position;
             var json = updateGui.toString();

@@ -30,16 +30,7 @@ class LedObserver (private val webSocketList: ArrayList<WebSocketSession>, updat
                 val term = (Term.createTerm(content) as Struct)
                 ledState = term.getArg(1).toString()
                 //ColorsOut.outappl("LedObserver | content ${content}, ledstate ${ledState}", ColorsOut.GREEN)
-                synchronized(updateGui) {
-                    updateGui.stateled = ledState
-                }
-
-                var json = updateGui.toString();
-                for (webSocket in webSocketList) {
-                    synchronized(webSocket) {
-                        webSocket.sendMessage(TextMessage("${json}"))
-                    }
-                }
+                updateLed(ledState)
             } catch (e: Exception) {
                 System.err.println("ERRORE lettura coap led: ")
                 e.printStackTrace()
@@ -52,9 +43,19 @@ class LedObserver (private val webSocketList: ArrayList<WebSocketSession>, updat
         reconnect()
     }
 
-    fun reconnect(){
+    private fun reconnect(){
         ColorsOut.outappl("LedObserver | RECONNECTING to led", ColorsOut.GREEN)
         futureClient.get()?.removeObserve()
         futureClient = CoapUtils.coapObsserve("led",this)
+    }
+
+    private fun updateLed(ledstate : String){
+        synchronized(updateGui) {
+            updateGui.stateled = ledstate
+            var json = updateGui.toString();
+            for (webSocket in webSocketList) {
+                webSocket.sendMessage(TextMessage("${json}"))
+            }
+        }
     }
 }

@@ -32,17 +32,7 @@ class ContainerObserver (private val webSocketList: ArrayList<WebSocketSession>,
                 pb = term.getArg(1).toString()
                 gb = term.getArg(2).toString()
                 //ColorsOut.outappl("ContainerObserver | content ${content}, plasticbox ${pb}, glassbox ${gb}",ColorsOut.GREEN)
-                synchronized(updateGui) {
-                    updateGui.pb = pb
-                    updateGui.gb = gb
-                }
-
-                var json = updateGui.toString();
-                for (webSocket in webSocketList) {
-                    synchronized(webSocket) {
-                        webSocket.sendMessage(TextMessage("${json}"))
-                    }
-                }
+                updateContainer(pb,gb)
             } catch (e: Exception) {
                 System.err.println("ERRORE lettura coap container: ")
                 e.printStackTrace()
@@ -51,7 +41,7 @@ class ContainerObserver (private val webSocketList: ArrayList<WebSocketSession>,
         } else return
     }
 
-    fun reconnect(){
+    private fun reconnect(){
         ColorsOut.outappl("ContainerObserver | RECONNECTING to wasteservice", ColorsOut.GREEN)
         futureClient.get()?.removeObserve()
         futureClient = CoapUtils.coapObsserve("wasteservice",this)
@@ -59,5 +49,16 @@ class ContainerObserver (private val webSocketList: ArrayList<WebSocketSession>,
 
     override fun onError() {
         ColorsOut.outerr("error observe container")
+    }
+
+    private fun updateContainer(pb : String, gb : String){
+        synchronized(updateGui) {
+            updateGui.pb = pb
+            updateGui.gb = gb
+            var json = updateGui.toString();
+            for (webSocket in webSocketList) {
+                webSocket.sendMessage(TextMessage("${json}"))
+            }
+        }
     }
 }

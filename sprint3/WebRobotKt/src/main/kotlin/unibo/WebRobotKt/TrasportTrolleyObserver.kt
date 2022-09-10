@@ -31,16 +31,7 @@ class TrasportTrolleyObserver (private val webSocketList: ArrayList<WebSocketSes
                 statett = term.getArg(0).toString()
                 //ColorsOut.outappl("TrasportTrolleyObserver | content ${content}, state transporttrolley ${statett}",ColorsOut.GREEN)
                 //updateGui.statett = statett;
-                synchronized(updateGui) {
-                    updateGui.statett = statett
-                }
-
-                var json = updateGui.toString();
-                for (webSocket in webSocketList) {
-                    synchronized(webSocket) {
-                        webSocket.sendMessage(TextMessage("${json}"))
-                    }
-                }
+                updateTrasporttrolleystate(statett)
             } catch (e: Exception) {
                 System.err.println("ERRORE lettura coap transporttrolley: ")
                 e.printStackTrace()
@@ -53,15 +44,15 @@ class TrasportTrolleyObserver (private val webSocketList: ArrayList<WebSocketSes
         reconnect()
     }
 
-    fun reconnect(){
+    private fun reconnect(){
         ColorsOut.outappl("TrasportTrolleyObserver | RECONNECTING to transporttrolleystate", ColorsOut.GREEN)
         futureClient.get()?.removeObserve()
         futureClient = CoapUtils.coapObsserve("transporttrolleystate",this)
     }
 
-    fun updatePosition(position : String){
+    private fun updateTrasporttrolleystate(trasporttrolleystate : String){
         synchronized(updateGui) {
-            updateGui.position = position;
+            updateGui.statett = trasporttrolleystate
             var json = updateGui.toString();
             for (webSocket in webSocketList) {
                 webSocket.sendMessage(TextMessage("${json}"))
