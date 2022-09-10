@@ -55,8 +55,8 @@ h6{
 <div class="remark">
     La <b>WasteServiceStatusGUI:</b> deve permette al <b>Service-manager</b> di monitorare:
     <ul>
-        <lI>La <b>Position</b> del <b>Transport trolley</b> (non è necessaria la posizione precisa di un sistema di coordinate)</lI>
-        <lI>Il <b>Transporttrolleystate</b>, ossia lo stato attuale del <b>Transport trolley</b>. Formalizzato con l'enumerativo <a href="./ProblemQakSprint3/resources/ws/Transporttrolleystate.kt">Transporttrolleystate.kt</a>:<br>
+        <lI>La <b>Position</b> del <b>Transport trolley</b> (non è necessario per il committente avere la posizione precisa di un sistema di coordinate)</lI>
+        <lI>Il <b>Transporttrolleystate</b>, ossia lo stato attuale del <b>Transport trolley</b>.<br> Formalizzato con l'enumerativo <a href="./ProblemQakSprint3/resources/ws/Transporttrolleystate.kt">Transporttrolleystate.kt</a>:<br>
             <code><pre>enum class Transporttrolleystate { IDLE, MOVING, PICKINGUP, DROPPINGOUT, HALT }</pre></code></lI>
         <lI>Il peso corrente <b>contPB</b> e <b>contGB</b> del materiale contenuto in <b>PLASTICBOX</b> e in <b>GLASSBOX</b></lI>
         <lI>Lo stato corrente del <b>LED</b></lI>
@@ -75,7 +75,7 @@ h6{
     <ul>
         <li>Analisi del problema riguardo la tipologia di GUI da implementare</li>
         <li>Analisi del problema riguardo il passaggio di informazioni alla GUI</li>
-        <li>Sviluppo / adattametno dei componenti necessari</li>
+        <li>Sviluppo / adattamento dei componenti necessari</li>
         <li>Realizzazione di un modello eseguibile (a tal proposito verrà utilizzato il metamodello <a href="../docs_common/Qak.html">QAK</a>).</li>
         <li>Realizzazione di un (più completo) test-plan per il modello</li>
     </ul>
@@ -134,7 +134,7 @@ h6{
     <ul>
         <li>
             <p>Quella di un attore interno al sistema che osserva (tramite CoAP) tutti gli attori necessari, per poi inviare gli opportuni aggiornamenti al webserver per mezzo di eventi. Il webserver apre una connessione TCP verso i vari contesti per connettersi come "alieno".</p>
-            <p>Tuttavia questa modalità di interazione è stata recentemente deprecata dal supporto, dunque l'opzione non è più percorribile (in virtù della prossima modalità di interazione)</p>
+            <p>Tuttavia questa modalità di interazione è stata recentemente deprecata da QAK, dunque l'opzione non è più percorribile (in virtù della prossima modalità di interazione)</p>
         </li>
         <li>
             <p>Il webserver osserva gli attori come risorse CoAP, ricevendo aggiornamenti in merito al loro stato e mostrando di conseguenza le informazioni di interesse</p>
@@ -204,11 +204,11 @@ h6{
 
 <h2>Problem analysis</h2>
 <div class="remark">
-        <p>Per far fronte alle problematiche riscontrate viene, tra le altre cose, effettuata una modifica strutturale atta a diminuire il nuumero di osservatori CoAP.</p>
-        <p>Infatti al momento gli osservatori interni al sistema sono: <i>ledalarmcontrol</i> (che osservava - con successo - già dallo sprint precedente) e <i>transporttrolleystate</i> (che è invece stato introdotto in questo sprint). </p>
+        <p>Per far fronte alle problematiche riscontrate è stata, tra le altre cose, effettuata una modifica strutturale atta a diminuire il nuumero di osservatori CoAP.</p>
+        <p>Infatti inizialmente gli osservatori interni al sistema sono: <i>ledalarmcontrol</i> (che osservava - con successo - già dallo sprint precedente) e <i>transporttrolleystate</i> (che è invece stato introdotto in questo sprint). </p>
         <p>Si è quindi ritenuto opportuno far tornare il numero di osservatori interni ad 1 (come nello sprint2) siccome questo sembra essere parte del problema, anche a costo di ridurre la flessibiltà del progetto.<br>
         per questo motivo viene introdotto un nuovo attore, denominato <i>coapdispatcher</i>, che osserva i vari attori precedentemente osservati da <i>ledalarmcontrol</i> e <i>coapdispatcher</i> 
-        (che sono <i>trasporttrolley</i>, <i>pickupdropouthandler</i>, <i>mover</i> e <i>basicrobotwrapper</i>), e reinvia ad essi eventuali aggiornamenti.<br></p>
+        (che sono <i>trasporttrolley</i>, <i>pickupdropouthandler</i>, <i>mover</i> e <i>basicrobotwrapper</i>), e  reinvia ad essi eventuali aggiornamenti.<br></p>
 
         <div class="remark" style="background-color: #c3fbe8;">
             <h3>Riassunto situazione attuale:</h3>
@@ -228,10 +228,10 @@ h6{
 <h2>Project</h2>
 <div class="remark">
     <p>Oltre alla modifica struttutale illustrata nell'analisi del problema di cui sopra, è stato necessario adottare qualhe altro accorgimento per far funzionare in maniera relayable l'applicazione.<br>
-    In particolare si è osservato che alcune volte (in maniera apparentemente non determinabile a priori), la connessione CoAP sembra essere stata stabilita, ma quello che in realtà succede è che arriva un aggiornamento con una stringa vuota (si veda <a href="log_empty_update.html">questo</a> estratto di un file di log) e poi più nient'altro.</p>
+    In particolare si è potuto osservare che alcune volte (in maniera apparentemente non determinabile a priori), la connessione CoAP sembrava essere stata stabilita, ma quello che in realtà succedeva è che arrivava un aggiornamento con una stringa vuota (si veda <a href="log_empty_update.html">questo</a> estratto di un file di log) e poi nessun altro messaggio.</p>
     <p>In generale, quello che viene fatto quando si cerca di stabilire una connessione CoAP (sia da Web robot, che da <i>coapdispatcher</i>) è:</p>
     <ul>
-        <li>Verificare che la risorsa coap sia effettivamente disponibile prima di aggiungere un handler per gli update (facendo prima una normale query per richiedere lo stato attuale)</li>
+        <li>Verificare che la risorsa CoAP sia effettivamente disponibile prima di aggiungere un handler per gli update (facendo prima una normale query per richiedere lo stato attuale)</li>
         <li>Verificare se i messaggi di aggiornamento hanno del contenuto (non sono vuoti). In tal caso viene chiusa la connessione attuale e ne viene stabilita una nuova.</li>
     </ul>
 
