@@ -163,10 +163,8 @@ h6{
         <h6>Architettura logica:</h6>
         <img class="centerimg" style="max-width: 1200px;" src="ProblemQakSprint3/demosystemarchitecturearch.png"/>
         <p style="width: 100%; text-align: right;"><a href="../docs_common/Legenda.html">Legenda</a></p>
-
         <h6>Note</h6>
         <small>Il webserver esterno (o comunque il componente che si occupa di mostrare la gui) viene al momento rappresentato con l'attore <i>servergui</i>: esso dovrà comunque osservare gli attori <i>transporttrolleystate</i>, <i>wasteservice</i>, <i>mover</i> e <i>led</i>.</small>
-
         <h6>QAK</h6>
         <a href="ProblemQakSprint3/src/Prototype/SystemAchitecture.qak">Modello del sistema QAK</a> <br>
         <h6><p>Testplan <small>(non ancora eseguibili)</small>:</p></h6>
@@ -182,14 +180,12 @@ h6{
         <h4>Web robot</h4>
         <p>L'implementazione di <i>WebRobot</i> è stata effettuata mediante l'utilizzo di <a href="../docs_prof/html/WebApplications.html">SpringBoot</a>.<br>
            <i>WebRobot</i> riceve le informazioni mediante l'utilizzo di CoAP, che a sua volta invierà informazioni al front-end mediante l'utilizzo di una WebSocket.</br>
-           Più nello specifico, le informazioni che giungono tramite le connessioni CoAP (e che vengono elaborate dagli oggetti 
+           Più nello specifico, le informazioni che giungono tramite le connessioni CoAP (e che vengono stabilite e gestite dagli oggetti 
            <a href="WebRobotKt/src/main/kotlin/unibo/WebRobotKt/ContainerObserver.kt"><i>ContainerObserver</i></a>, <a href="WebRobotKt/src/main/kotlin/unibo/WebRobotKt/PositionObserver.kt"><i>PositionObserver</i></a>, <a href="WebRobotKt/src/main/kotlin/unibo/WebRobotKt/TrasportTrolleyObserver.kt"><i>TrasportTrolleyObserver</i></a>, <a href="WebRobotKt/src/main/kotlin/unibo/WebRobotKt/LedObserver.kt"><i>LedObserver</i></a>) 
            aggiornano un oggetto bean (<a href="WebRobotKt/src/main/kotlin/unibo/WebRobotKt/UpdateGui.kt"><i>UpdateGui</i></a>), che viene poi trasformato in una stringa JSON poi inviata tramite WebSocket a tutti i client attualmente connessi.</p>
         
         <p>Pagina web:</p>
         <img class="centerimg" style="max-width: 1300px;" src="docs/_images/consolegui.png"/>
-
-
 
         <h3>Riassunto situazione attuale:</h3>
         <h6>Architettura logica:</h6>
@@ -197,25 +193,29 @@ h6{
         <p style="width: 100%; text-align: right;"><a href="../docs_common/Legenda.html">Legenda</a></p>
 
 
-        <h4>problematiche</h4>
-        <p>È stato notato, testando il sistema, di come le informazioni CoAP non sempre riuscissero ad essere correttamente visualizzate.<br>
-        Per fare fronte a questo problema è stato fatto, in maniera iterativa, una nuova analisi del problema per riuscire a risolvere questa problematica.<br>
-        Si è constatata la difficoltà del sistema nel mantenere le connessioni CoAP attive, in particolare alcuni messagi erano vuoti e portavano al blocco della comunicazione.<br>
-        È stato quindi necessario riorganizzare la struttura degli attori del sistema.</p>
+        <h4>Problemi riscontrati</h4>
+        <p>Testando il sistema si è notato che le connessioni CoAP (sia quelle stabilite "esternamente" dal WebRobot verso gli attori del sistema, ma anche quelle "interne" da attori verso altri attori) avessero qualche problema nell'inviare aggiornamenti.
+            I problemi, che in locale capitano con frequenza non transcurabile, si verificano quasi sempre quando l'applicacome viene Dockerizzata.</p>
+        <p>Per fare fronte a questo problema si è deciso, mediante una nuova analisi del problema, di modificare l'architettura per diminuire il numero di osservatori CoAP, per cercare di riportare la situazione sotto controllo.</p>
+
 </div>
 
 <h2>Problem analysis</h2>
 <div class="remark">
-        <p>Per far fronte alle problematiche riscontrate in precedenza è stato introdotto un nuovo attore, denominato <b>coapdispatcher</b>.<br>
-        Quest'ultimo avrà il compito di osservare gli attori transporttrolley,pickupdropouthandler,basicrobotwrapper,mover e, tramite un dispatcher, comunicare con il led ed trasporttrolleystate.<br>
-        Mediante questa tecnica gli attori ledalarmcontrol e trasporttrolleystate non osserveranno attori CoAP ma bensì riceveranno dei dispatch.<br>
-        In questo modo risulta soltanto un attore in osservazione e genera meno difficoltà nel sistema nella loro comunicazione.</p>
+        <p>Per far fronte alle problematiche riscontrate viene, tra le altre cose, effettuata una modifica strutturale atta a diminuire il nuumero di osservatori CoAP.</p>
+        <p>Infatti al momento gli osservatori interni al sistema sono: <i>ledalarmcontrol</i> (che osservava - con successo - già dallo sprint precedente) e <i>transporttrolleystate</i> (che è invece stato introdotto in questo sprint). </p>
+        <p>Si è quindi ritenuto opportuno far tornare il numero di osservatori interni ad 1 (come nello sprint2) siccome questo sembra essere parte del problema, anche a costo di ridurre la flessibiltà del progetto.<br>
+        per questo motivo viene introdotto un nuovo attore, denominato <i>coapdispatcher</i>, che osserva i vari attori precedentemente osservati da <i>ledalarmcontrol</i> e <i>coapdispatcher</i> 
+        (che sono <i>trasporttrolley</i>, <i>pickupdropouthandler</i>, <i>mover</i> e <i>basicrobotwrapper</i>), e reinvia ad essi eventuali aggiornamenti.<br></p>
 
         <div class="remark" style="background-color: #c3fbe8;">
             <h3>Riassunto situazione attuale:</h3>
             <h6>Architettura logica:</h6>
             <img class="centerimg" style="max-width: 1200px;" src="ProblemQakSprint3v2/demosystemarchitecturearch.png"/>
             <p style="width: 100%; text-align: right;"><a href="../docs_common/Legenda.html">Legenda</a></p>
+            <h6>Note</h6>
+            <small>In pratica quello che è cambiato è che le informazioni che giungono a <i>ledalarmcontrol</i> e <i>transporttrolleystate</i> seguono questo percorso:</small>
+            <img class="centerimg" style="max-width: 700px;" src="docs/_images/coapdispatcher.png"/>
             <h6>QAK</h6>
             <a href="ProblemQakSprint3v2/src/Prototype/SystemAchitecture.qak">Modello del sistema QAK</a> <br>
             <h6><p>Testplan <small>(non ancora eseguibili)</small>:</p></h6>
@@ -225,9 +225,13 @@ h6{
 
 <h2>Project</h2>
 <div class="remark">
-    <p>È stato necessario implementare un ulteriore attore, chiamato <b>coapdispatcher</b>, che ha il compito di osservare gli attori transporttrolley, basicrobotwrapper, pickupdropouthandler e mover.<br>
-    In questo modo si è potuto avere un solo attore in osservazione, che poi procede ad eseguire un dispatch delle informazioni ottenute a transporttrolleystate e ledalarmcontrol.<br>
-    Questo porta ad un minore appesantimento del sistema nella comunicazione CoAP risolvendo le problematiche riscontrate in precedenza.</p><br>
+    <p>Oltre alla modifica struttutale illustrata nell'analisi del problema di cui sopra, è stato necessario adottare qualhe altro accorgimento per far funzionare in maniera relayable l'applicazione.<br>
+    In particolare si è osservato che alcune volte (in maniera apparentemente non determinabile a priori), la connessione CoAP sembra essere stata stabilita, ma quello che in realtà succede è che arriva un aggiornamento con una stringa vuota (si veda <a href="log_empty_update.html">questo</a> estratto di un file di log) e poi più nient'altro.</p>
+    <p>In generale, quello che viene fatto quando si cerca di stabilire una connessione CoAP (sia da Web robot, che da <i>coapdispatcher</i>) è:</p>
+    <ul>
+        <li>Verificare che la risorsa coap sia effettivamente disponibile prima di aggiungere un handler per gli update (facendo prima una normale query per richiedere lo stato attuale)</li>
+        <li>Verificare se i messaggi di aggiornamento hanno del contenuto (non sono vuoti). In tal caso viene chiusa la connessione attuale e ne viene stabilita una nuova.</li>
+    </ul>
 
     <div class="remark" style="background-color: #c3fbe8;">
         <h3>Test funzionamento progetto:</h3>
@@ -244,7 +248,7 @@ h6{
         <h6>Classe di test TestSprint3_integration_transporttrolleystate.kt:</h6>
         <p>Classe per testare il sistema, in particolare per verificare il funzionamento dell'attore transporttrolleystate</p>
         <li><u>test_accepted()</u>: Il robot viene interrotto durante una move forward, durante una turn, durante una <b>Pickup</b> e una <b>Dropout</b>.
-            Si controlla che gli stati delle varie macchine assumano i valori che si si aspetti</li>
+            Si controlla che lo stato del <b>Transport trolley</b> (calcolao da <i>transporttrolleystate</i>) assuma i valori che ci si aspetti</li>
       
     </ul>
 </div>

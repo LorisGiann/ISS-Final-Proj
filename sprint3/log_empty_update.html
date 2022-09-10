@@ -1,0 +1,132 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+    <!--
+<link rel="stylesheet" type="text/css" href="../css/issStyle1.css">
+<script type="text/javascript" src="../css/issStyle.js"></script>
+-->
+<link rel="stylesheet" type="text/css" href="../docs_common/defaultTemplateStyle.css">
+<style>
+code>pre { 
+    font-family: monospace;
+}
+dd{
+    margin-bottom: 7px;
+}
+.todo{
+    color: orange
+}
+.centerimg{
+    display: block;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 90%;
+    max-width: 800px;
+}
+p { margin: 4px 0px; }
+dd{ margin-bottom: 8px;}
+.newDictWord{ color : purple; }
+h6{
+    font-size: 1em;
+    margin: 18px 0px 9px 0px;
+}
+</style>
+<style type="text/css">
+    pre.code {
+        white-space: pre-wrap;
+    }
+    pre.code:before {
+        counter-reset: listing;
+    }
+    pre.code code {
+        counter-increment: listing;
+    }
+    pre.code code:before {
+        content: counter(listing) ". ";
+        width: 8em;         /* doesn't work */
+        padding-left: auto; /* doesn't work */
+        margin-left: auto;  /* doesn't work */
+        text-align: right;  /* doesn't work */
+    }
+</style>
+<head><title>Log empty update</title></head>
+    
+<body>
+    <p>Si osservi riga 42 e 48: il messaggio di aggiornamento di stato risulta vuoto, il che potrebbe essere causato dal fatto che la risorsa non è ancora stata del tutto inizializzata, il che probabilmente avviene a riga 50 siccome a riga 53 abbiamo il primo aggiornamento coap "corretto" per quella risorsa. Si noti tuttavia che prima di aggiungere l'handler si fa una query per vedere se la risorsa esiste o meno (es. riga 75 di <a href="QakSprint3/resources/Coapdispatcher/coapdispatcher.kt">coapdispatcher.kt</a>)</p>
+    <pre class="code">
+        <!-- to append the code tags to each line:      awk '{print "<code>" $0 "</code>"}' file.log     -->
+        <code>26:25,567 INFO  jar:78 -                %%% sysUtil | createTheContext ctxserver for DIFFERENT node (host=localhost) </code>
+        <code>2022-09-09 15:26:25,722 INFO  jar:78 -                %%% sysUtil | createTheContext ctxrobot for LOCAL node (host=127.0.0.1)  </code>
+        <code>2022-09-09 15:26:25,771 INFO  jar:78 -                %%% QakContext | createScope  ++++++++++++++++++++++++++++++++++  </code>
+        <code>2022-09-09 15:26:25,962 INFO  jar:78 -                %%% QakContextServer serverctxrobot | READY TO RECEIVE TCP CONNS on 8096 </code>
+        <code>2022-09-09 15:26:25,969 INFO  jar:78 - [34m%%% QakContextServer serverctxrobot | waitForConnection protocol=true[0m</code>
+        <code>2022-09-09 15:26:26,272 INFO  jar:78 -                %%% sysUtil | createTheContext ctxalarm for DIFFERENT node (host=127.0.0.1) </code>
+        <code>2022-09-09 15:26:26,486 INFO  jar:78 -                %%% NodeProxy proxyctxserver | WAIT/RETRY TO SET PROXY TO localhost:8095 </code>
+        <code>2022-09-09 15:26:26,990 INFO  jar:93 -                %%% NodeProxy proxyctxserver | WAIT/RETRY TO SET PROXY TO localhost:8095 </code>
+        <code>2022-09-09 15:26:27,493 INFO  jar:93 -                %%% NodeProxy proxyctxserver | WAIT/RETRY TO SET PROXY TO localhost:8095 </code>
+        <code>2022-09-09 15:26:27,994 INFO  jar:93 -                %%% NodeProxy proxyctxserver | WAIT/RETRY TO SET PROXY TO localhost:8095 </code>
+        <code>2022-09-09 15:26:28,494 INFO  jar:93 -                %%% NodeProxy proxyctxserver | WAIT/RETRY TO SET PROXY TO localhost:8095 </code>
+        <code>2022-09-09 15:26:28,995 INFO  jar:93 -                %%% NodeProxy proxyctxserver | WAIT/RETRY TO SET PROXY TO localhost:8095 </code>
+        <code>2022-09-09 15:26:29,622 INFO  jar:93 -                %%% NodeProxy proxyctxalarm | WAIT/RETRY TO SET PROXY TO 127.0.0.1:8097 </code>
+        <code>2022-09-09 15:26:30,123 INFO  jar:93 -                %%% NodeProxy proxyctxalarm | WAIT/RETRY TO SET PROXY TO 127.0.0.1:8097 </code>
+        <code>2022-09-09 15:26:30,625 INFO  jar:93 -                %%% NodeProxy proxyctxalarm | WAIT/RETRY TO SET PROXY TO 127.0.0.1:8097 </code>
+        <code>2022-09-09 15:26:31,126 INFO  jar:93 -                %%% NodeProxy proxyctxalarm | WAIT/RETRY TO SET PROXY TO 127.0.0.1:8097 </code>
+        <code>2022-09-09 15:26:31,628 INFO  jar:93 -                %%% NodeProxy proxyctxalarm | WAIT/RETRY TO SET PROXY TO 127.0.0.1:8097 </code>
+        <code>2022-09-09 15:26:32,351 INFO  jar:93 - [34msysUtil createActor distancefilter in ctxrobot[0m</code>
+        <code>2022-09-09 15:26:32,352 INFO  jar:93 -                %%% CoapResourceCtx ctxrobot | addActorResource distancefilter</code>
+        <code>2022-09-09 15:26:32,415 INFO  jar:93 - [34msysUtil createActor transporttrolleystate in ctxrobot[0m</code>
+        <code>2022-09-09 15:26:32,416 INFO  jar:93 -                %%% CoapResourceCtx ctxrobot | addActorResource transporttrolleystate</code>
+        <code>2022-09-09 15:26:32,435 INFO  jar:93 - [32m               %%%  transporttrolleystate | msg autoStartSysMsg : msg(autoStartSysMsg,dispatch,transporttrolleystate,transporttrolleystate,start,12)[0m</code>
+        <code>2022-09-09 15:26:32,486 INFO  jar:93 - [34msysUtil createActor coapdispatcher in ctxrobot[0m</code>
+        <code>2022-09-09 15:26:32,486 INFO  jar:93 -                %%% CoapResourceCtx ctxrobot | addActorResource coapdispatcher</code>
+        <code>2022-09-09 15:26:32,488 INFO  jar:93 - [32m               %%%  coapdispatcher | msg autoStartSysMsg : msg(autoStartSysMsg,dispatch,coapdispatcher,coapdispatcher,start,14)[0m</code>
+        <code>2022-09-09 15:26:32,592 INFO  jar:93 -                %%% CoapResourceCtx ctxrobot | addActorResource transporttrolley</code>
+        <code>2022-09-09 15:26:32,646 INFO  jar:93 -                %%% CoapResourceCtx ctxrobot | addActorResource alarmreceiverpickupdropdown</code>
+        <code>2022-09-09 15:26:32,787 INFO  jar:93 -                %%% CoapResourceCtx ctxrobot | addActorResource pickupdropouthandler</code>
+        <code>2022-09-09 15:26:33,013 INFO  jar:93 -                %%%  coapdispatcher | connecting</code>
+        <code>2022-09-09 15:26:33,025 INFO  jar:93 -                %%% CoapResourceCtx ctxrobot | addActorResource mover</code>
+        <code>2022-09-09 15:26:33,058 INFO  jar:93 - 		[43mCoapConn | STARTS client url=coap://127.0.0.1:8096/ctxrobot/transporttrolley[0m</code>
+        <code>2022-09-09 15:26:33,205 INFO  jar:93 -                %%% CoapResourceCtx ctxrobot | addActorResource moveruturn</code>
+        <code>2022-09-09 15:26:33,259 INFO  jar:93 - [36m               %%%  coapdispatcher | coap connected to transporttrolley[0m</code>
+        <code>2022-09-09 15:26:33,291 INFO  jar:93 - 		[43mCoapConn | STARTS client url=coap://127.0.0.1:8096/ctxrobot/basicrobotwrapper[0m</code>
+        <code>2022-09-09 15:26:33,333 INFO  jar:93 - [36m               %%%  coapdispatcher | coap connected to basicrobotwrapper[0m</code>
+        <code>2022-09-09 15:26:33,359 INFO  jar:93 -                %%% CoapResourceCtx ctxrobot | addActorResource alarmreceiverbasicrobot</code>
+        <code>2022-09-09 15:26:33,360 INFO  jar:93 - 		[43mCoapConn | STARTS client url=coap://127.0.0.1:8096/ctxrobot/pickupdropouthandler[0m</code>
+        <code>2022-09-09 15:26:33,387 INFO  jar:93 - [36m               %%%  coapdispatcher | coap connected to pickupdropouthandler[0m</code>
+        <code>2022-09-09 15:26:33,444 INFO  jar:93 - 		[43mCoapConn | STARTS client url=coap://127.0.0.1:8096/ctxrobot/mover[0m</code>
+        <code>2022-09-09 15:26:33,510 INFO  jar:93 - [36m               %%%  coapdispatcher | coap connected to mover[0m</code>
+        <code>2022-09-09 15:26:33,511 INFO  jar:93 - [32m               %%%  coapdispatcher | msg coapUpdate : msg(coapUpdate,dispatch,transporttrolley,coapdispatcher,'coapUpdate(transporttrolley,        ActorBasic(Resource) transporttrolley  | created  )',25)[0m</code>
+        <code><mark style="background-color: #ff9999;">2022-09-09 15:26:33,511 INFO  jar:93 - [32m               %%%  coapdispatcher | msg coapUpdate : msg(coapUpdate,dispatch,basicrobotwrapper,coapdispatcher,'coapUpdate(basicrobotwrapper, )',28)[0m</mark></code>
+        <code>2022-09-09 15:26:33,511 INFO  jar:93 - [36m               %%%  coapdispatcher | coap reconnecting basicrobotwrapper[0m</code>
+        <code>2022-09-09 15:26:33,551 INFO  jar:93 - 		[43mCoapConn | STARTS client url=coap://127.0.0.1:8096/ctxrobot/basicrobotwrapper[0m</code>
+        <code>2022-09-09 15:26:33,576 INFO  jar:93 - [36m               %%%  coapdispatcher | coap connected to basicrobotwrapper[0m</code>
+        <code>2022-09-09 15:26:33,584 INFO  jar:93 - [32m               %%%  coapdispatcher | msg coapUpdate : msg(coapUpdate,dispatch,pickupdropouthandler,coapdispatcher,'coapUpdate(pickupdropouthandler,        ActorBasic(Resource) pickupdropouthandler  | created  )',29)[0m</code>
+        <code>2022-09-09 15:26:33,584 INFO  jar:93 - [32m               %%%  coapdispatcher | msg coapUpdate : msg(coapUpdate,dispatch,mover,coapdispatcher,'coapUpdate(mover,        ActorBasic(Resource) mover  | created  )',32)[0m</code>
+        <code><mark style="background-color: #ff9999;">2022-09-09 15:26:33,584 INFO  jar:93 - [32m               %%%  coapdispatcher | msg coapUpdate : msg(coapUpdate,dispatch,basicrobotwrapper,coapdispatcher,'coapUpdate(basicrobotwrapper, )',33)[0m</mark></code>
+        <code>2022-09-09 15:26:33,585 INFO  jar:93 - [36m               %%%  coapdispatcher | coap reconnecting basicrobotwrapper[0m</code>
+        <code><mark style="background-color: #ffff99;">2022-09-09 15:26:33,590 INFO  jar:93 -                %%% CoapResourceCtx ctxrobot | addActorResource basicrobotwrapper</mark></code>
+        <code>2022-09-09 15:26:33,606 INFO  jar:93 - 		[43mCoapConn | STARTS client url=coap://127.0.0.1:8096/ctxrobot/basicrobotwrapper[0m</code>
+        <code>2022-09-09 15:26:33,618 INFO  jar:93 - [36m               %%%  coapdispatcher | coap connected to basicrobotwrapper[0m</code>
+        <code><mark style="background-color: #d3f8d3;">2022-09-09 15:26:33,634 INFO  jar:93 - [32m               %%%  coapdispatcher | msg coapUpdate : msg(coapUpdate,dispatch,basicrobotwrapper,coapdispatcher,'coapUpdate(basicrobotwrapper,        ActorBasic(Resource) basicrobotwrapper  | created  )',34)[0m</mark></code>
+        <code>2022-09-09 15:26:33,752 INFO  jar:93 -                %%% CoapResourceCtx ctxrobot | addActorResource basicrobotlorisdavide</code>
+        <code>2022-09-09 15:26:33,879 INFO  jar:93 -                %%% CoapResourceCtx ctxrobot | addActorResource commandissuerfortests</code>
+        <code>2022-09-09 15:26:33,973 INFO  jar:93 -                %%% CoapResourceCtx ctxrobot | addActorResource alarmreceivertest</code>
+        <code>2022-09-09 15:26:33,981 INFO  jar:93 - transporttrolley in wait | msg(autoStartSysMsg,dispatch,transporttrolley,transporttrolley,start,16)</code>
+        <code>2022-09-09 15:26:33,997 INFO  jar:93 - pickupdropouthandler in wait | msg(autoStartSysMsg,dispatch,pickupdropouthandler,pickupdropouthandler,start,20)</code>
+        <code>2022-09-09 15:26:34,003 INFO  jar:93 - [32m               %%%  coapdispatcher | msg coapUpdate : msg(coapUpdate,dispatch,transporttrolley,coapdispatcher,coapUpdate(transporttrolley,transporttrolley(wait)),41)[0m</code>
+        <code>2022-09-09 15:26:34,008 INFO  jar:93 - [32m               %%%  transporttrolleystate | msg coapUpdate : msg(coapUpdate,dispatch,coapdispatcher,transporttrolleystate,coapUpdate(transporttrolley,transporttrolley(wait)),42)[0m</code>
+        <code>2022-09-09 15:26:34,018 INFO  jar:93 - alarmreceiverpickupdropdown in wait | msg(autoStartSysMsg,dispatch,alarmreceiverpickupdropdown,alarmreceiverpickupdropdown,start,18)</code>
+        <code>2022-09-09 15:26:34,018 INFO  jar:93 - mover in wait | msg(autoStartSysMsg,dispatch,mover,mover,start,22)</code>
+        <code>2022-09-09 15:26:34,042 INFO  jar:93 - moveruturn in wait | msg(autoStartSysMsg,dispatch,moveruturn,moveruturn,start,24)</code>
+        <code>2022-09-09 15:26:34,043 INFO  jar:93 - alarmreceiverbasicrobot in wait | msg(autoStartSysMsg,dispatch,alarmreceiverbasicrobot,alarmreceiverbasicrobot,start,27)</code>
+        <code>2022-09-09 15:26:34,045 INFO  jar:93 - basicrobotwrapper in wait | msg(autoStartSysMsg,dispatch,basicrobotwrapper,basicrobotwrapper,start,31)</code>
+        <code>2022-09-09 15:26:34,055 INFO  jar:93 - basicrobot | START</code>
+        <code>2022-09-09 15:26:34,106 INFO  jar:93 - 		--- robotSupport | CREATED for virtual host=localhost port=8090 owner=it.unibo.basicrobotlorisdavide.Basicrobotlorisdavide@556d0826</code>
+        <code>2022-09-09 15:26:34,109 INFO  jar:93 - virtualrobotSupport2021 | init ... </code>
+        <code>2022-09-09 15:26:34,224 INFO  jar:93 - [32m               %%%  transporttrolleystate | msg update_led : msg(update_led,event,ledalarmcontrol,none,update_led(OFF),21)[0m</code>
+        <code>2022-09-09 15:26:34,229 INFO  jar:93 - [32m               %%%  coapdispatcher | msg coapUpdate : msg(coapUpdate,dispatch,pickupdropouthandler,coapdispatcher,coapUpdate(pickupdropouthandler,pickupdropouthandler(wait)),44)[0m</code>
+    </pre>
+    
+</body>
+</html>
