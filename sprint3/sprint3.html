@@ -5,6 +5,7 @@
 <script type="text/javascript" src="../css/issStyle.js"></script>
 -->
 <link rel="stylesheet" type="text/css" href="../docs_common/defaultTemplateStyle.css">
+<link rel="stylesheet" type="text/css" href="../docs_common/menuCss.css">
 <style>
 code>pre { 
     font-family: monospace;
@@ -37,7 +38,15 @@ h6{
 <body>
 <div id="top">
 <h1>ISS FINAL PROJECT </h1>
-</div>  
+</div>
+<nav>
+    <ul>
+        <li><a href="../sprint0/sprint0.html">sprint0</a></li>
+        <li><a href="../sprint1/sprint1.html">sprint1</a></li>
+        <li><a href="../sprint2/sprint2.html">sprint2</a></li>
+        <li><a href="../sprint3/sprint3.html">sprint3</a></li>
+    </ul>
+</nav>
 
 <div class="body"> 
 <h2>Introduction</h2>
@@ -70,7 +79,7 @@ h6{
     <h4>Scrum goal:</h4>
     <p>Obiettivo dello SPRINT3 è l'estensione della demo dello <a href="../sprint2/sprint2.html">SPRINT2</a> per realizzare il requisito riguardante la <b>WasteServiceStatusGUI</b> specificato 
         dal committente al punto 3.</p><br>
-    <p>Inoltre è necessario pensare ad un piano per la distribuzione, il committente gradirebbe che questo avvenisse con container <a href="./docker_distribution.html">Docker</a>.</p>
+    <p>Inoltre è necessario pensare ad un piano per la distribuzione, il committente gradirebbe che questo avvenisse con container Docker.</p>
     <h4>Piano di lavoro:</h4>
     <ul>
         <li>Analisi del problema riguardo la tipologia di GUI da implementare</li>
@@ -97,13 +106,13 @@ h6{
         <li>
             <p><b>Webgui</b>, con un componente che fa da server web e che risiede su un server aziendale</p>
             <ul>
-                <li>+ Gui visualizzabile su qualunqe dispositivo dotato di browser</li>
+                <li>+ Gui visualizzabile su qualunque dispositivo dotato di browser</li>
                 <li>+ Riutilizzo di codice disponibile (progetto <a href="../docs_prof/html/webRobot22.html">Webrobot</a>)</li>
                 <li>- Necessaria definire l'interazione tra server web e "sistema" (osservare attori tramite CoAP, oppure connettersi come un "<a href="../docs_prof/html/QakIntro.html?highlight=alien#message-delivery-rules">alieno</a>", oppure avviare il server come componente interno ad un attore)</li>
             </ul>
         </li>
         <li>
-            <p><b>Gui standard</b> "tradizionare", ossia con un componente da installare sulla workstation nella quale si desidera visualizzare le informazioni della GUI</p>
+            <p><b>Gui standard</b> "tradizionale", ossia con un componente da installare sulla workstation nella quale si desidera visualizzare le informazioni della GUI</p>
             <ul>
                 <li>+ Non necessita la presenza di un browser (ma oramai la quasi totalità dei dispositivi lo possiede)</li>
                 <li>- Necessario installare componenti su ogni dispositivo nel quale viene visualizzata la GUI</li>
@@ -111,7 +120,7 @@ h6{
             <p>A sua volta abbiamo 2 possibilità</p>
             <ul>
                 <li>
-                    <p>Si sviluppa un programma "esterno" al sistema, ossia un eseguibile che si connette tramite rete al sistema e avvia una gui sulla workstation</p>
+                    <p>Si sviluppa un programma "esterno" al sistema, ossia un eseguibile che vi si connette tramite rete e avvia una gui sulla workstation</p>
                     <ul>
                         <li>- Necessario definire l'interazione tra server web e "sistema" (osservare attori tramite CoAP, oppure connettersi come un "<a href="../docs_prof/html/QakIntro.html?highlight=alien#message-delivery-rules">alieno</a>")</li>
                     </ul>
@@ -121,6 +130,7 @@ h6{
                     <ul>
                         <li>- Viene di fatto aggiunto un nodo al sistema, si ha un nuovo contesto solo per la GUI</li>
                         <li>- Aumenta l'accoppiamento del sistema con la GUI, che è una "external interface", il sistema non dovrebbe dipendere da qualcosa di esterno (vedi <a href="../docs_prof/html/Architetture.html#la-clean-architecture">clean-architecture</a>)</li>
+                        <li>- Più complicato dockerizzare questa parte del sistema (GUI in un container)</li>
                     </ul>
                 </li>
             </ul>
@@ -133,7 +143,8 @@ h6{
     <p>Si è inizialmente ragionato su due possibilità:</p>
     <ul>
         <li>
-            <p>Quella di un attore interno al sistema che osserva (tramite CoAP) tutti gli attori necessari, per poi inviare gli opportuni aggiornamenti al webserver per mezzo di eventi. Il webserver apre una connessione TCP verso i vari contesti per connettersi come "alieno".</p>
+            <p>Quella di un attore interno al sistema che osserva (tramite CoAP) tutti gli attori necessari, per poi inviare gli opportuni aggiornamenti al webserver per mezzo di eventi. 
+                Il webserver apre una connessione TCP verso i vari contesti per connettersi come "alieno" al fine di ricevere gli eventi.</p>
             <p>Tuttavia questa modalità di interazione è stata recentemente deprecata da QAK, dunque l'opzione non è più percorribile (in virtù della prossima modalità di interazione)</p>
         </li>
         <li>
@@ -142,17 +153,17 @@ h6{
     </ul>
 
     <h4>Il <b>Transporttrolleystate</b> viene calcolato dalla GUI o dal sistema?</h4>
-    <p>Transporttrolleystate</b> può essere calcolato:</p>
+    <p><b>Transporttrolleystate</b> può essere calcolato:</p>
     <ul>
         <li>
             <p>Dal webserver (quindi esternamente)</p>
             <ul>
                 <li>+ Il sistema ha un compito in meno</li>
-                <li>- Sistema meno flessibile in caso di future componenti</li>
+                <li>- Meno flessibile in caso di future componenti</li>
             </ul>
             <p>Da un attore del sistema (quindi internamente)</p>
             <ul>
-                <li>+ Informazione potenzialmente utile per futuri componenti, che risulterà così reperibile anche da essi</li>
+                <li>+ Informazione potenzialmente utile per futuri componenti, che risulterà così facilmente reperibile anche da essi</li>
             </ul>
         </li>
     </ul>
@@ -166,7 +177,7 @@ h6{
         <img class="centerimg" style="max-width: 1200px;" src="ProblemQakSprint3/demosystemarchitecturearch.png"/>
         <p style="width: 100%; text-align: right;"><a href="../docs_common/Legenda.html">Legenda</a></p>
         <h6>Note</h6>
-        <small>Il webserver esterno (o comunque il componente che si occupa di mostrare la gui) viene al momento rappresentato con l'attore <i>servergui</i>: esso dovrà comunque osservare gli attori <i>transporttrolleystate</i>, <i>wasteservice</i>, <i>mover</i> e <i>led</i>.</small>
+        <small>Il webserver esterno (o comunque il componente che si occupa di mostrare la gui) viene al momento rappresentato con l'attore <i>guiserver</i>: esso dovrà comunque osservare gli attori <i>transporttrolleystate</i>, <i>wasteservice</i>, <i>mover</i> e <i>led</i>.</small>
         <h6>QAK</h6>
         <a href="ProblemQakSprint3/src/Prototype/SystemAchitecture.qak">Modello del sistema QAK</a> <br>
         <h6><p>Testplan <small>(non ancora eseguibili)</small>:</p></h6>
@@ -179,17 +190,26 @@ h6{
 
 <h2>Project</h2>
 <div class="remark">
+        <h4>transporttrolleystate</h4>
+        <p>Per calcolare lo stato del <b>Transport trolley</b> viene introdotto l'attore (coded) <a href="QakSprint3/resources/TransporttrolleyState/transporttrolleyState.kt"><i>transporttrolleystate</i></a>, come ipotizzato in analisi del problema. 
+            La struttura è del tutto simile a quella già utilizzata da <a href="QakSprint3/resources/alarmLed/ledAlarmControl.kt"><i>ledalarmcontrol</i></a> per calcolare lo stato del led.</p>
+        <p>In particolare lo stato del <b>Transport trolley</b> si può estrarre osservando lo stato attuale dell'attore <i>transporttrolley</i>, a meno dello stato di HALT (cioè capiamo che cosa sta facendo attualmente, se è in IDLE, MOVING, PICKINGUP, DROPPINGOUT. Ma non capiamo se è stato bloccato).</p>
+        <p>Dunque da <i>basicrobotwrapper</i> e <i>pickupdropouthandler</i> capiamo se il robot è attualmente in movimento o se è invece bloccato (come per <i>ledalarmcontrol</i>). Il robot è effettivamente bloccato solo quando 
+        sia <i>basicrobotwrapper</i>, sia <i>pickupdropouthandler</i> sono in uno stato di halt/alarm. Ad esempio, se il robot sta girando ed è appena arrivato un allarme, 
+        <i>pickupdropouthandler</i> sarà nello stato <i>alarm</i> (<b>Transporttrolleystate</b>=MOVING), mentre <i>basicrobotwrapper</i> entrerà in <i>alarm</i> solamente dopo aver completato il giro (ossia solo quando sarà 
+        effettivamente fermo): <b>Transporttrolleystate</b>=HALT. </p>
+        
+
         <h4>Web robot</h4>
         <p>L'implementazione di <i>WebRobot</i> è stata effettuata mediante l'utilizzo di <a href="../docs_prof/html/WebApplications.html">SpringBoot</a>.<br>
            <i>WebRobot</i> riceve le informazioni mediante l'utilizzo di CoAP, che a sua volta invierà informazioni al front-end mediante l'utilizzo di una WebSocket.</br>
            Più nello specifico, le informazioni che giungono tramite le connessioni CoAP (e che vengono stabilite e gestite dagli oggetti 
            <a href="WebRobotKt/src/main/kotlin/unibo/WebRobotKt/ContainerObserver.kt"><i>ContainerObserver</i></a>, <a href="WebRobotKt/src/main/kotlin/unibo/WebRobotKt/PositionObserver.kt"><i>PositionObserver</i></a>, <a href="WebRobotKt/src/main/kotlin/unibo/WebRobotKt/TrasportTrolleyObserver.kt"><i>TrasportTrolleyObserver</i></a>, <a href="WebRobotKt/src/main/kotlin/unibo/WebRobotKt/LedObserver.kt"><i>LedObserver</i></a>) 
            aggiornano un oggetto bean (<a href="WebRobotKt/src/main/kotlin/unibo/WebRobotKt/UpdateGui.kt"><i>UpdateGui</i></a>), che viene poi trasformato in una stringa JSON poi inviata tramite WebSocket a tutti i client attualmente connessi.</p>
-        <p>Si è scelto di utilizzare come linguaggio di programmazione Kotlin essendo supportato da SpringBoot e essendo uno dei linguaggi utilizzati per l'implementazione del sistema.</p>
         </p>
 
-        <h5>Pagina web:</h5>
-        <img class="centerimg" style="max-width: 1300px;" src="docs/_images/consolegui.png"/>
+        <small><b>Pagina web:</b></small>
+        <img class="centerimg" style="max-width: 1000px;" src="docs/_images/consolegui.png"/>
 
         <h3>Riassunto situazione attuale:</h3>
         <h6>Architettura logica:</h6>
@@ -198,19 +218,19 @@ h6{
 
 
         <h4>Problemi riscontrati</h4>
-        <p>Testando il sistema si è notato che le connessioni CoAP (sia quelle stabilite "esternamente" dal WebRobot verso gli attori del sistema, ma anche quelle "interne" da attori verso altri attori) avessero qualche problema nell'inviare aggiornamenti.
-            I problemi, che in locale capitano con frequenza non transcurabile, si verificano quasi sempre quando l'applicacome viene Dockerizzata.</p>
+        <p>Testando il sistema si è notato che le connessioni CoAP (sia quelle stabilite "esternamente" dal WebRobot verso gli attori del sistema, ma anche quelle "interne" da attori verso altri attori) hanno qualche problema nell'inviare aggiornamenti.
+            I problemi, che in locale capitano con frequenza non trascurabile, si verificano quasi sempre quando l'applicazione viene Dockerizzata.</p>
         <p>Per fare fronte a questo problema si è deciso, mediante una nuova analisi del problema, di modificare l'architettura per diminuire il numero di osservatori CoAP, per cercare di riportare la situazione sotto controllo.</p>
 
 </div>
 
-<h2>Problem analysis</h2>
+<h2>Problem analysis (2)</h2>
 <div class="remark">
-        <p>Per far fronte alle problematiche riscontrate è stata, tra le altre cose, effettuata una modifica strutturale atta a diminuire il numero di osservatori CoAP.</p>
+        <p>Per far fronte alle problematiche riscontrate è stata - tra le altre cose - effettuata una modifica strutturale atta a diminuire il numero di osservatori CoAP.</p>
         <p>Infatti inizialmente gli osservatori interni al sistema erano: <i>ledalarmcontrol</i> (che osservava - con successo - già dallo sprint precedente) e <i>transporttrolleystate</i> (che è invece stato introdotto in questo sprint). </p>
-        <p>Si è quindi ritenuto opportuno far tornare il numero di osservatori interni ad 1 (come nello sprint2) siccome questo sembrava essere parte del problema, anche a costo di ridurre la flessibiltà del progetto.<br>
-        per questo motivo è stato introdotto un nuovo attore, denominato <i>coapdispatcher</i>, che osserva i vari attori precedentemente osservati da <i>ledalarmcontrol</i> e <i>coapdispatcher</i> 
-        (che sono <i>trasporttrolley</i>, <i>pickupdropouthandler</i>, <i>mover</i> e <i>basicrobotwrapper</i>), e reinvia ad essi eventuali aggiornamenti.<br></p>
+        <p>Si è quindi ritenuto opportuno far tornare il numero di osservatori interni ad 1 (come nello sprint2) siccome questo sembra essere parte del problema, anche a costo di ridurre la flessibiltà del progetto.<br>
+        Per questo motivo è stato introdotto un nuovo attore, denominato <i>coapdispatcher</i>, che osserva i vari attori precedentemente osservati da <i>ledalarmcontrol</i> e <i>transporttrolleystate</i> 
+        (che sono <i>trasporttrolley</i>, <i>pickupdropouthandler</i>, <i>mover</i> e <i>basicrobotwrapper</i>) e rinvia ad entrambi eventuali aggiornamenti.<br></p>
 
         <div class="remark" style="background-color: #c3fbe8;">
             <h3>Riassunto situazione attuale:</h3>
@@ -218,7 +238,7 @@ h6{
             <img class="centerimg" style="max-width: 1200px;" src="ProblemQakSprint3v2/demosystemarchitecturearch.png"/>
             <p style="width: 100%; text-align: right;"><a href="../docs_common/Legenda.html">Legenda</a></p>
             <h6>Note</h6>
-            <small>In seguito alla analisi le informazioni che giungono a <i>ledalarmcontrol</i> e <i>transporttrolleystate</i> seguono questo percorso:</small>
+            <small>Le informazioni che giungono a <i>ledalarmcontrol</i> e <i>transporttrolleystate</i> seguono ora questo percorso:</small>
             <img class="centerimg" style="max-width: 700px;" src="docs/_images/coapdispatcher.png"/>
             <h6>QAK</h6>
             <a href="ProblemQakSprint3v2/src/Prototype/SystemAchitecture.qak">Modello del sistema QAK</a> <br>
@@ -227,22 +247,16 @@ h6{
         </div>
 </div>
 
-<h2>Project</h2>
+<h2>Project (2)</h2>
 <div class="remark">
-    <p>Oltre alla modifica struttutale illustrata nell'analisi del problema di cui sopra, è stato necessario adottare qualche altro accorgimento per far funzionare in maniera relayable l'applicazione.<br>
-    In particolare si è potuto osservare che alcune volte (in maniera apparentemente non determinabile a priori), la connessione CoAP sembrava essere stata stabilita, ma quello che in realtà succedeva è che arrivava un aggiornamento con una stringa vuota (si veda <a href="log_empty_update.html">questo</a> estratto di un file di log) e poi nessun altro messaggio.</p>
+    <p>Oltre alla modifica strutturale illustrata nell'analisi del problema di cui sopra, è stato necessario adottare qualche altro accorgimento per far funzionare in maniera reliable l'applicazione.<br>
+    In particolare si è potuto osservare che alcune volte (in maniera apparentemente non deterministica), la connessione CoAP sembrava essere stata stabilita, ma quello che in realtà succedeva è che 
+    arrivava un aggiornamento con una stringa vuota (si veda <a href="log_empty_update.html">questo</a> estratto di un file di log) e poi nessun altro messaggio.</p>
     <p>In generale, quello che viene fatto quando si cerca di stabilire una connessione CoAP (sia da Web robot, che da <i>coapdispatcher</i>) è:</p>
     <ul>
         <li>Verificare che la risorsa CoAP sia effettivamente disponibile prima di aggiungere un handler per gli update (facendo prima una normale query per richiedere lo stato attuale)</li>
         <li>Verificare se i messaggi di aggiornamento hanno del contenuto (non sono vuoti). In tal caso viene chiusa la connessione attuale e ne viene stabilita una nuova.</li>
     </ul>
-
-    <div class="remark" style="background-color: #c3fbe8;">
-        <h3>Test funzionamento progetto:</h3>
-        <video width="1080" class="centerimg" controls>
-            <source src="docs/_video/test_working.mp4" type="video/mp4">
-        </video>
-    </div>
 </div>
 
 <h2>Test plans</h2>
@@ -264,9 +278,25 @@ h6{
     <p style="width: 100%; text-align: right;"><a href="../docs_common/Legenda.html">Legenda</a></p>
 
     <h6>QAK</h6>
-    <a href="QakSprint2/src/Prototype/demo0.qak">Metamodello eseguibile QAK</a>
+    <a href="QakSprint3/src/Prototype/demo0.qak">Metamodello eseguibile QAK</a>
     <h6><p>Testplan:</p></h6>
     <p><a href="QakSprint3/test/testSprint3/TestSprint3_integration_transporttrolleystate.kt">TestSprint3_integration_transporttrolleystate.kt</a> <br>
+</div>
+
+<h2>Deployment</h2>
+<div class="remark">
+    Vedi <a href="./docker_distribution.html">Docker distribution</a>
+</div>
+
+<h2>Prove funzionamento demo</h2>
+<div class="remark" style="background-color: #c3fbe8;">
+    <h3>Test funzionamento progetto:</h3>
+    <video width="1080" class="centerimg" controls>
+        <source src="docs/_video/test_working.mp4" type="video/mp4">
+    </video>
+    <video width="1080" class="centerimg" controls>
+        <source src="docs/_video/with_smard_device.mp4" type="video/mp4">
+    </video>
 </div>
  
 <!-- USEFUL

@@ -47,7 +47,7 @@ h6{
 
 <h2>Deployment</h2>
 <div class="remark">
-    <p>Allo scopo di dimostrare il funzionamento dell'applicazione, l'applicazione sarà distribuita fra due nodi:</p>
+    <p>Allo scopo di dimostrarne il funzionamento, l'applicazione sarà distribuita fra due nodi:</p>
     <img src="./docs/_images/deploy/node-summary.png" class="centerimg" style="max-width: 900px;"/>
     <ul>
         <li>
@@ -81,10 +81,10 @@ h6{
             <p>Di <a href="https://docs.docker.com/build/buildx/">Docker buildx</a>, che permette di cosscompilare il container che girerà sulla Raspberry3 (ARM 64 bit). Necessario installare Qemu, e scaricare un container con Buildkit.</p>
         </li>
         <li>
-            <p>Di <a href="https://docs.docker.com/compose/">Docker compose</a>, che permette con un unico comando di avvaire e configurare più container contemporaneamente, utilizzando un file <code>docker-compose.yml</code>.</p>
+            <p>Di <a href="https://docs.docker.com/compose/">Docker compose</a>, che permette con un unico comando di avviare e configurare più container contemporaneamente, utilizzando un file <code>docker-compose.yml</code>.</p>
         </li>
         <li>
-            <p>Di <a href="https://docs.docker.com/engine/swarm/">Docker swarm</a>, un orchestratore di container (simile per certi aspetti a Kubernetes, ma più basilare) utile per automatizzare certe operazioni in un contesto distributo come questo.</p>
+            <p>Di <a href="https://docs.docker.com/engine/swarm/">Docker swarm</a>, un orchestratore di container (simile per certi aspetti a Kubernetes, ma più basilare) utile per automatizzare certe operazioni in un contesto distribuito come questo.</p>
             <p>Più in particolare:</p>
             <ul>
                 <li>
@@ -92,7 +92,8 @@ h6{
                     Questo, combinato con la risoluzione tramite DNS (che permette di scrivere direttamente il nome del container al posto dell'indirizzo IP del nodo su cui si trova) permette di ridurre drasticamente la configurazione necessaria nel caso in cui un nodo cambi indirizzo</p>
                 </li>
                 <li>
-                    <p>Possibilità di usare comandi di alto livello (<code>docker stack deploy</code>) per trasferire e avviare automaticametne i container sui nodi specificati nel <code>docker-compose.yml</code>. Purtroppo questa modalità non permette di eseguire container in modalità privilegiata, quindi non ha senso utilizare questo comando nella demo qui mostrata</p>
+                    <p>Possibilità di usare comandi di alto livello (<code>docker stack deploy</code>) per trasferire e avviare automaticamente i container sui nodi specificati nel <code>docker-compose.yml</code>. Purtroppo questa modalità non permette di eseguire container in modalità privilegiata (Necessario per l'utilizzo di 
+                        <a href="http://wiringpi.com/">WiringPi</a> sulla raspberry), quindi non ha senso utilizzare questo comando nella demo qui mostrata.</p>
                     <p>Possibilità di creare un repository locale nel quale caricare le immagini utilizzate dall'applicazione (similmente a <a href="https://hub.docker.com/">Dockerhub</a>), in modo che possano essere scaricate dagli altri nodi anche in assenza di una connessione internet.</p>
                 </li>
             </ul>
@@ -167,7 +168,8 @@ sudo systemctl restart docker.service</pre>
 <pre>docker swarm init --advertise-addr $IP  #do that on the pc
 docker swarm join-token manager         #copy the printed command on the pi</pre>
             </code>
-            <p>Copiare e eseguire il comando che viene restituito da <code>docker swarm join-token manager</code> sulla Raspberry: la raspberry dovrebbe essere ora visibile se si effettua un <code>docker node ls</code>. Il nodo è un manager e non un worker siccome non ci interessa avere lo stesso container replicato su più nodi (che si fa solo per backup e load balancing)</p>
+            <p>Copiare e eseguire il comando che viene restituito da <code>docker swarm join-token manager</code> sulla Raspberry: 
+                la raspberry dovrebbe essere ora visibile se si effettua un <code>docker node ls</code>. Il nodo è un manager e non un worker siccome non ci interessa avere lo stesso container replicato su più nodi (che si fa solo per fault tollerance e load balancing)</p>
         </li>
         <li>
             <p>creazione di un repository:</p>
@@ -202,7 +204,7 @@ docker run -i -t --rm --name alarmctx --privileged --device /dev/mem -v /proc:/p
     </ul>
 
     <h3>Esecuzione in locale:</h3>
-    <p>Se non si ha la Raspberry il sistema può anche eseguire in locale con un sonar e led mock (il led mock non ha tuttavia la gui essengo in un container)</p>
+    <p>Se non si ha la Raspberry il sistema può anche eseguire in locale con un sonar e led mock (il led mock non ha tuttavia la gui essendo in un container)</p>
     <p>Posizionarsi in <code>ISS-Final-Proj/sprint3/docker/lcoal</code></p>
     
     <h4>Cleanup:</h4>
