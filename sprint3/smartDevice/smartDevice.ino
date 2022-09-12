@@ -18,25 +18,24 @@
 #include <Fishino.h>
 #include <SPI.h>
 #include <Pushbutton.h>
+#include <LiquidCrystal.h>
 
 enum class MATERIAL {PLASTIC, GLASS};
 
 //pushbuttons definitions
-Pushbutton plastic(14); //select - increase plastic
-Pushbutton glass(15); //select - increase glass
-Pushbutton sendreq(16); //send
+Pushbutton dec(14); //decrease
+Pushbutton inc(15); //increase
+Pushbutton changeMat(16); //change material
+Pushbutton sendreq(17); //send
 
-#define PLASTIC_PIN_LED 9
-#define GLASS_PIN_LED 8
+
+LiquidCrystal lcd(18,19,5,4,3,2);
+
 #define OK_PIN_LED 7
 #define REJECTED_PIN_LED 6
 void initLedPins(){
-  pinMode(PLASTIC_PIN_LED, OUTPUT);
-  pinMode(GLASS_PIN_LED, OUTPUT);
   pinMode(OK_PIN_LED, OUTPUT);
   pinMode(REJECTED_PIN_LED, OUTPUT);
-  digitalWrite(PLASTIC_PIN_LED, HIGH);
-  digitalWrite(GLASS_PIN_LED, HIGH);
   digitalWrite(OK_PIN_LED, HIGH);
   digitalWrite(REJECTED_PIN_LED, HIGH);
 }
@@ -103,11 +102,13 @@ unsigned long lastConnectionTime = 0;
 const unsigned long postingInterval = 2L * 1000L;
 
 void error(){
-  pinMode(13, OUTPUT);
+  pinMode(12, OUTPUT);
+  lcd.clear();
+  lcd.print(F("error"));
   while(true){
-    digitalWrite(13, HIGH);   // turn the LED on (HIGH is the voltage level)
+    digitalWrite(12, HIGH);   // turn the LED on (HIGH is the voltage level)
     delay(1000);                       // wait for a second
-    digitalWrite(13, LOW);    // turn the LED off by making the voltage LOW
+    digitalWrite(12, LOW);    // turn the LED off by making the voltage LOW
     delay(1000);  
   }
 }
@@ -169,6 +170,9 @@ void printWifiStatus()
 void setup()
 {
   initLedPins();
+  lcd.begin(16, 2);
+
+  
 	// Initialize serial and wait for port to open
 	// Inizializza la porta seriale e ne attende l'apertura
 	Serial.begin(115200);
@@ -198,6 +202,7 @@ void setup()
 	// try forever to connect to AP
 	// tenta la connessione finchè non riesce
 	Serial << F("Connecting to AP...");
+  lcd << F("Connecting to AP...");
 	while(!Fishino.begin(MY_SSID, MY_PASS))
 	{
 		Serial << ".";
@@ -263,44 +268,54 @@ void setup()
 
   digitalWrite(OK_PIN_LED, LOW);
   digitalWrite(REJECTED_PIN_LED, LOW);
-  digitalWrite(PLASTIC_PIN_LED, LOW);
-  digitalWrite(GLASS_PIN_LED, LOW);
+  updateScreen();
 }
 
 
-unsigned int plasticVal = 0;
-unsigned int glassVal = 0;
+unsigned int val = 1;
+MATERIAL mat = MATERIAL::PLASTIC;
 String acc = "";
 int n;
+bool waitingRepl = false;
+bool lastAcpted = false;
+bool firstReq = true;
+
+void updateScreen(){
+  lcd.clear();
+  lcd.setCursor(0, 0);
+    lcd << val << F(" Kg of ") << ((mat==MATERIAL::PLASTIC) ? F("PLASTIC") : F("GLASS"));
+  if(!firstReq){
+    lcd.setCursor(0, 1);
+    if(waitingRepl)
+      lcd.print(F("Waiting reply..."));
+    else{
+      if(lastAcpted)
+        lcd.print(F("Accepted - GO!"));
+      else{
+        lcd.print(F("Rejected - GO!"));
+      }
+    }
+  }
+}
 
 void loop(){
-  if (plastic.getSingleDebouncedRelease()) {
-      glassVal = 0;
-      plasticVal++;
-      for(byte i=0; i<plasticVal; i++){
-        digitalWrite(PLASTIC_PIN_LED, HIGH);
-        delay(250);
-        digitalWrite(PLASTIC_PIN_LED, LOW);
-        delay(250);
-      }
-      delay(250);
+  if (inc.getSingleDebouncedRelease()) {
+      val++;
+      updateScreen();
   }
-  if (glass.getSingleDebouncedRelease()) {
-      plasticVal = 0;
-      glassVal++;
-      for(byte i=0; i<glassVal; i++){
-        digitalWrite(GLASS_PIN_LED, HIGH);
-        delay(250);
-        digitalWrite(GLASS_PIN_LED, LOW);
-        delay(250);
-      }
-      delay(250);
+  if (dec.getSingleDebouncedRelease()) {
+      if(val>1) val--;
+      updateScreen();
+  }
+  if (changeMat.getSingleDebouncedRelease()) {
+      mat = (mat==MATERIAL::PLASTIC) ? MATERIAL::GLASS : MATERIAL::PLASTIC;
+      updateScreen();
   }
   if (sendreq.getSingleDebouncedRelease()) {
-      makeRequest(
-        (plasticVal>0) ? MATERIAL::PLASTIC : MATERIAL::GLASS,
-        (plasticVal>0) ? plasticVal : glassVal
-      );
+      waitingRepl=true;
+      firstReq=false;
+      updateScreen();
+      makeRequest(mat,val);
       digitalWrite(OK_PIN_LED, LOW);
       digitalWrite(REJECTED_PIN_LED, LOW);
   }
@@ -315,15 +330,20 @@ void loop(){
       Serial.println(client.ref->_bufCount);
       Serial.print("RemAvail:");
       Serial.println(client.ref->remoteAvail());
+      waitingRepl=false;
+      firstReq=false;
       client.stop();
       if(acc.indexOf(F("loadaccept"))>=0){
         digitalWrite(OK_PIN_LED, HIGH);
         Serial.println(F("loadaccept found"));
+        lastAcpted=true;
       }
       else if(acc.indexOf(F("loadrejected"))>=0){
         digitalWrite(REJECTED_PIN_LED, HIGH);
         Serial.println(F("loadrejected found"));
+        lastAcpted=false;
       }
+      updateScreen();
       acc="";
       break;
     }
