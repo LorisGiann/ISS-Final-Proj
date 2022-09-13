@@ -18,4 +18,3 @@ context(ctxalarm, "127.0.0.1",  "TCP", "8097").
   qactor( sonarlorisdavide, ctxalarm, "it.unibo.sonarlorisdavide.Sonarlorisdavide").
   qactor( alarmemitter, ctxalarm, "it.unibo.alarmemitter.Alarmemitter").
   qactor( led, ctxalarm, "it.unibo.led.Led").
-  qactor( alarmreceivertest, ctxrobot, "it.unibo.alarmreceivertest.Alarmreceivertest").

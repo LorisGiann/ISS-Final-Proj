@@ -1367,7 +1367,7 @@ QActor commandissuerfortests context ctxrobot{
 	}
 	Goto wait
 }*/
-
+/*
 QActor alarmreceivertest context ctxrobot{
 	State wait initial {
 		printCurrentMessage
@@ -1381,3 +1381,4 @@ QActor alarmreceivertest context ctxrobot{
 	Transition t0 whenEvent alarm -> wait
 				  whenEvent alarmceased -> wait
 }
+*/

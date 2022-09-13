@@ -33,7 +33,6 @@ with Diagram('demosystemarchitectureArch', show=False, outformat='png', graph_at
           mover=Custom('mover','./qakicons/symActorSmall.png')
           basicrobotwrapper=Custom('basicrobotwrapper','./qakicons/symActorSmall.png')
           basicrobotlorisdavide=Custom('basicrobotlorisdavide','./qakicons/symActorSmall.png')
-          alarmreceivertest=Custom('alarmreceivertest','./qakicons/symActorSmall.png')
      with Cluster('ctxalarm', graph_attr=nodeattr):
           ledalarmcontrol=Custom('ledalarmcontrol','./qakicons/symActorSmall.png')
           sonarlorisdavide=Custom('sonarlorisdavide','./qakicons/symActorSmall.png')
@@ -79,6 +78,4 @@ with Diagram('demosystemarchitectureArch', show=False, outformat='png', graph_at
      alarmemitter >> Edge( xlabel='alarmceased', **eventedgeattr, fontcolor='red') >> sys
      sys >> Edge(color='red', style='dashed', xlabel='local_sonardata', fontcolor='red') >> alarmemitter
      sys >> Edge(color='red', style='dashed', xlabel='update_led', fontcolor='red') >> led
-     sys >> Edge(color='red', style='dashed', xlabel='alarm', fontcolor='red') >> alarmreceivertest
-     sys >> Edge(color='red', style='dashed', xlabel='alarmceased', fontcolor='red') >> alarmreceivertest
 diag
