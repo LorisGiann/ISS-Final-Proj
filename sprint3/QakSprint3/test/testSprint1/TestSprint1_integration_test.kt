@@ -52,6 +52,7 @@ internal class TestSprint1_integration_test {
             ColorsOut.outappl("Errore launch ", ColorsOut.RED)
             System.exit(1)
         }
+		//CommUtils.delay(1000)
 
         val to = TestObserver()
         to.establishCoapConn("wasteservice");

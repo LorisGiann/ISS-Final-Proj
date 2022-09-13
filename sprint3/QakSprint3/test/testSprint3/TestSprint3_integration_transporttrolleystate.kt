@@ -58,6 +58,7 @@ internal class TestSprint3_integration_transporttrolleystate {
             ColorsOut.outappl("Errore launch ", ColorsOut.RED)
             System.exit(1)
         }
+		//CommUtils.delay(1000)
 
         val to = TestObserver()
         to.establishCoapConn("wasteservice");

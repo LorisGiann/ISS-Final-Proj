@@ -2,7 +2,7 @@ package testCommon
 
 import org.eclipse.californium.core.CoapHandler
 import org.eclipse.californium.core.CoapResponse
-import unibo.comm22.coap.CoapConnection
+import test.testCommon.CoapConnection
 import unibo.comm22.utils.ColorsOut
 import unibo.comm22.utils.CommUtils
 import java.util.ArrayList
@@ -57,12 +57,13 @@ class TestObserver : CoapHandler {
     fun establishCoapConn(actorName : String) {
         val addrPath = getCoapConnAddrPath(actorName)
         val conn = CoapConnection(addrPath.address, addrPath.path)
-        conn.observeResource(this)
         ColorsOut.outappl("connecting via Coap to $actorName (conn: $conn)", ColorsOut.CYAN)
         while (conn.request("") == "0") {
             ColorsOut.outappl("waiting for Coap conn to $actorName (conn: $conn)", ColorsOut.CYAN)
             CommUtils.delay(100)
         }
+        ColorsOut.outappl("connected to $actorName (conn: $conn)", ColorsOut.CYAN)
+        conn.observeResource(this)
         establishedConnMap[actorName] = conn
     }
 

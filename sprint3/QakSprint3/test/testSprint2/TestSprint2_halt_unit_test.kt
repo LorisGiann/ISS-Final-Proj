@@ -50,8 +50,7 @@ internal class TestSprint2_halt_unit_test {
             ColorsOut.outappl("Errore launch ", ColorsOut.RED)
             System.exit(1)
         }
-
-
+        //CommUtils.delay(1000)
 
         val to = TestObserver()
         to.establishCoapConn("basicrobotwrapper")
