@@ -217,7 +217,7 @@ Event    update_led 	  : update_led(LEDSTATE) // LEDSTATE = ON | OFF | BLINK</pr
     <p>La macchina gestisce prioritariamente i messaggi di <i>alarm</i> e <i>alarmceased</i>. Se la macchina a stati si trova nello stato di <i>alarm</i>, allora non verrà effettuata alcuna 
         operazione fino a che l'allarme non sarà cessato. Se invece non vi è alcun allarme e arriva una richiesta, allora si passa da <i>wait</i> a <i>forward_cmd</i> o <i>other_cmd</i> a 
         seconda che il comando sia di move forward o meno. Se durante una move forward giunge un allarme, il robot viene fermato (<i>halt_forward</i>) e riprenderà ad andare in avanti solo a 
-        cessato allarme (<i>forward_cmd</i>). Quando viene incontrato l'ostacolo si risponde al chiamante (stato <i>collision</i>) e si attengono i prossimi comandi. <br>
+        cessato allarme (<i>forward_cmd</i>). Quando viene incontrato l'ostacolo si risponde al chiamante (stato <i>collision</i>) e si attendono i prossimi comandi. <br>
         Un caso particolare è se l'evento di <i>info</i> (che segnala la collisione) avviene mentre si è in <i>halt_forward</i> (magari perché l'allarme è giunto poco prima della collisione, e il 
         robot non ha fatto in tempo a fermarsi): in tal caso si attende in <i>halt_collision</i> il cessato allarme, per poi passare direttamente a <i>collision</i> (N.B: se si passasse 
         direttamente da <i>halt_forward</i> a <i>collision</i> durante un allarme, l'evento <i>alarm</i> verrebbe consumato e la macchina sarebbe pronta ad interpretare ed eseguire nuovi 
@@ -239,7 +239,7 @@ Event    update_led 	  : update_led(LEDSTATE) // LEDSTATE = ON | OFF | BLINK</pr
         sia <i>basicrobotwrapper</i>, sia <i>pickupdropouthandler</i> sono in uno stato di halt/alarm. Ad esempio, se il robot sta girando ed è appena arrivato un allarme, 
         <i>pickupdropouthandler</i> sarà nello stato <i>alarm</i>, mentre <i>basicrobotwrapper</i> entrerà in <i>alarm</i> solamente dopo aver completato il giro (ossia solo quando sarà 
         effettivamente fermo). <br>
-        Il <b>Led</b> quindi rimane acceso solo quando:
+        Il <b>Led</b> quindi rimane acceso solo quando si ha contemporaneamente che:
         <ul>
             <li><i>basicrobotwrapper</i> si trova in <i>alarm</i>, <i>halt_forward</i> o <i>halt_collision</i></li>
             <li><i>pickupdropouthandler</i> si trova in  <i>alarm</i>, <i>halt_pickup</i> o <i>halt_dropout</i></li>

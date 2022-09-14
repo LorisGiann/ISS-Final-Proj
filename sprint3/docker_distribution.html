@@ -147,12 +147,23 @@ docker rmi -f $(docker images | grep guiwebserver | awk  '{print $3}')</pre>
     <h4>One time operations:</h4>
     <ul>
         <li>
+            <p>Compilazione JAR/TAR:</p>
+            <code>
+<pre>cd ../../QakSprint3
+./testSprint3.sh #possibile interrompere prima che venga effettuato il test, serve solo a generare i jar
+cd ../WebRobotKt
+./gradlew disttar
+cd ../docker/rpi</pre>
+            </code>
+        </li>
+        <li>
             <p>Settaggio variabile IP PC:</p>
             <code>
 <pre>INTERFACE="enp0s3"
 IP=$(ip -f inet addr show $INTERFACE | sed -En -e 's/.*inet ([0-9.]+).*/\1/p')
 echo IP="$IP" > .env
-export IP</pre>
+export IP
+echo $IP</pre>
             </code>
         </li>
         <li>
@@ -205,12 +216,22 @@ docker run -i -t --rm --name alarmctx --privileged --device /dev/mem -v /proc:/p
 
     <h3>Esecuzione in locale:</h3>
     <p>Se non si ha la Raspberry il sistema può anche eseguire in locale con un sonar e led mock (il led mock non ha tuttavia la gui essendo in un container)</p>
-    <p>Posizionarsi in <code>ISS-Final-Proj/sprint3/docker/lcoal</code></p>
+    <p>Posizionarsi in <code>ISS-Final-Proj/sprint3/docker/local</code></p>
     
     <h4>Cleanup:</h4>
     <p>Vedi: <a href="#cleanup">cleanup</a></p>
     <h4>(eventuale build e) esecuzione containers:</h4>
     <ul>
+        <li>
+            <p>Compilazione JAR/TAR:</p>
+            <code>
+<pre>cd ../../QakSprint3
+./testSprint3.sh #possibile interrompere prima che venga effettuato il test, serve solo a generare i jar
+cd ../WebRobotKt
+./gradlew disttar
+cd ../docker/local</pre>
+            </code>
+        </li>
         <li>
             <p>Su PC:</p>
             <code>

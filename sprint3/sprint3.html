@@ -114,13 +114,13 @@ h6{
         <li>
             <p><b>Gui standard</b> "tradizionale", ossia con un componente da installare sulla workstation nella quale si desidera visualizzare le informazioni della GUI</p>
             <ul>
-                <li>+ Non necessita la presenza di un browser (ma oramai la quasi totalità dei dispositivi lo possiede)</li>
+                <li>+ Non necessaria la presenza di un browser (ma oramai la quasi totalità dei dispositivi lo possiede)</li>
                 <li>- Necessario installare componenti su ogni dispositivo nel quale viene visualizzata la GUI</li>
             </ul>
             <p>A sua volta abbiamo 2 possibilità</p>
             <ul>
                 <li>
-                    <p>Si sviluppa un programma "esterno" al sistema, ossia un eseguibile che vi si connette tramite rete e avvia una gui sulla workstation</p>
+                    <p>Si sviluppa un programma "esterno" al sistema, ossia un eseguibile che si connette al resto del sistema tramite rete e avvia una gui sulla workstation</p>
                     <ul>
                         <li>- Necessario definire l'interazione tra server web e "sistema" (osservare attori tramite CoAP, oppure connettersi come un "<a href="../docs_prof/html/QakIntro.html?highlight=alien#message-delivery-rules">alieno</a>")</li>
                     </ul>
@@ -136,7 +136,7 @@ h6{
             </ul>
         </li>
     </ul>
-    <p>Alla luce di questi raginamenti risulterebbe più conveniente sviluppare una webgui (adattando quella di <a href="../docs_prof/html/webRobot22.html">Webrobot</a>)</p>
+    <p>Alla luce di questi ragionamenti risulterebbe più conveniente sviluppare una webgui (adattando quella di <a href="../docs_prof/html/webRobot22.html">Webrobot</a>)</p>
     <img class="centerimg" style="max-width: 600px;" src="docs/_images/system-webserver-browser.png"/>
 
     <h4>Interazione sistema / webserver</h4>
@@ -159,7 +159,6 @@ h6{
             <p>Dal webserver (quindi esternamente)</p>
             <ul>
                 <li>+ Il sistema ha un compito in meno</li>
-                <li>- Meno flessibile in caso di future componenti</li>
             </ul>
             <p>Da un attore del sistema (quindi internamente)</p>
             <ul>
@@ -190,7 +189,7 @@ h6{
 
 <h2>Project</h2>
 <div class="remark">
-        <h4>transporttrolleystate</h4>
+        <h4><i>transporttrolleystate</i></h4>
         <p>Per calcolare lo stato del <b>Transport trolley</b> viene introdotto l'attore (coded) <a href="QakSprint3/resources/TransporttrolleyState/transporttrolleyState.kt"><i>transporttrolleystate</i></a>, come ipotizzato in analisi del problema. 
             La struttura è del tutto simile a quella già utilizzata da <a href="QakSprint3/resources/alarmLed/ledAlarmControl.kt"><i>ledalarmcontrol</i></a> per calcolare lo stato del led.</p>
         <p>In particolare lo stato del <b>Transport trolley</b> si può estrarre osservando lo stato attuale dell'attore <i>transporttrolley</i>, a meno dello stato di HALT (cioè capiamo che cosa sta facendo attualmente, se è in IDLE, MOVING, PICKINGUP, DROPPINGOUT. Ma non capiamo se è stato bloccato).</p>
